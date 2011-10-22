@@ -16,7 +16,7 @@ public:
     {
       for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it){
 	source.Reply("\2%-16s\2 %s [%s]", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-		     ModuleHandler::DecodePriority(it->second->priority).c_str());
+		     ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
 	++c;
       }
     }else
@@ -24,38 +24,37 @@ public:
       for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it){
 	if(priority.equals_ci("LAST") || priority == '1'){
 	  source.Reply("\2%-16s\2 %s [%s]", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-			ModuleHandler::DecodePriority(it->second->priority).c_str());
+			ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
 	  ++c;
 	}else if(priority.equals_ci("NORMAL") || priority == '2')
 	{
 	  source.Reply("\2%-16s\2 %s [%s]", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-		     ModuleHandler::DecodePriority(it->second->priority).c_str());
+		     ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
 	  ++c;
 	}else if(priority.equals_ci("FIRST") || priority == '3')
 	{
 	  source.Reply("\2%-16s\2 %s [%s]", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-		     ModuleHandler::DecodePriority(it->second->priority).c_str());
+		     ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
 	  ++c;
 	}
       }
     }
     source.Reply("Total of \2%i\2 Modules", c);
-    log(LOG_NORMAL, "%s used MODLIST to list all modules%s", source.u->nick.c_str(), 
-	priority.empty()?"":Flux::string(" with priority "+priority).c_str());
+    Log(source.u, this) << "to list all module" << (priority.empty()?"":" with priority "+priority);
   }
 };
 
 class CommandMLoad : public Command
 {
 public:
-  CommandMLoad():Command("MODLOAD", 1, 2)
+  CommandMLoad():Command("MODLOAD", 1, 1)
   {
     this->SetDesc("Load a module");
     this->SetSyntax("\37name\37");
   }
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
-    const Flux::string module = params.size() == 2?params[1]:"";
+    const Flux::string module = params[1];
     if(module.empty())
       this->SendSyntax(source);
     else if(!source.u->IsOwner())
@@ -65,10 +64,10 @@ public:
       if(e != MOD_ERR_OK)
       {
 	source.Reply("Failed to load module %s: %s", module.c_str(), DecodeModErr(e).c_str());
-	log(LOG_NORMAL, "%s used LOAD to load %s and failed: %s", source.u->nick.c_str(), module.c_str(), DecodeModErr(e).c_str());
+	Log(source.u, this) << "to load " << module << " and failed: " << DecodeModErr(e);
       }else{
 	source.Reply("Module \2%s\2 loaded sucessfuly", module.c_str());
-	log(LOG_NORMAL, "%s used LOAD to load %s", source.u->nick.c_str(), module.c_str());
+	Log(source.u, this) << "to load " << module;
       }
     }
   }
@@ -90,12 +89,11 @@ public:
       if(!ModuleHandler::Unload(FindModule(module)))
       {
 	source.Reply("Failed to unload module %s", module.c_str());
-	log(LOG_NORMAL, "%s used UNLOAD to load %s and failed", source.u->nick.c_str(), module.c_str());
+	Log(source.u, this) << "to unload " << module << " and failed";
       }else{
 	source.Reply("Module \2%s\2 unloaded sucessfuly", module.c_str());
-	log(LOG_NORMAL, "%s used UNLOAD to unload %s", source.u->nick.c_str(), module.c_str());
+	Log(source.u, this) << "to unload " << module;
       }
-      
     }
   }
 };
@@ -103,14 +101,14 @@ public:
 class CommandMInfo : public Command
 {
 public:
-  CommandMInfo():Command("MODINFO", 1, 2)
+  CommandMInfo():Command("MODINFO", 1, 1)
   {
    this->SetDesc("Provides info on a module");
    this->SetSyntax("\37name\37");
   }
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
-    const Flux::string modd = params.size() == 2?params[1]:"";
+    const Flux::string modd = params[1];
     if(modd.empty()){
       this->SendSyntax(source);
       return;
@@ -137,7 +135,7 @@ public:
       else
 	source.Reply("Adds commands: \2%s\2", cmds.c_str());
 	source.Reply("******** End Info ********");
-      log(LOG_NORMAL, "%s used MODINFO to show info on module %s", source.u->nick.c_str(), mo->name.c_str());
+      Log(source.u, this) << "to show info on module " << mo->name;
   }
 };
 
@@ -148,10 +146,11 @@ class M_Handler : public module
   CommandMUnload unload;
   CommandMInfo info;
 public:
-  M_Handler():module("ModuleHandler", PRIORITY_FIRST)
+  M_Handler(const Flux::string &Name):module(Name)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
+    this->SetPriority(PRIORITY_FIRST);
     this->AddCommand(&info);
     this->AddCommand(&list);
     this->AddCommand(&load);

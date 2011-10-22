@@ -10,7 +10,8 @@ public:
     Send->raw("PING :%i\n", time(NULL));
     if(!timeout)
       timeout = true;
-    if(timeout){
+    if(timeout)
+    {
       ++pings;
       if(pings >= 3)
 	restart("Ping-Timeout: 121 seconds");
@@ -21,22 +22,24 @@ class Ping_pong:public module
 {
   PingTimer pingtimer;
 public:
-  Ping_pong():module("Ping", PRIORITY_FIRST){
+  Ping_pong(const Flux::string &Name):module(Name)
+  {
     Implementation i[] = { I_OnNumeric, I_OnCommand };
     ModuleHandler::Attach(i, this, sizeof(i) / sizeof(Implementation));
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
+    this->SetPriority(PRIORITY_FIRST);
   }
-  void OnCommand(const Flux::string &command, const std::vector<Flux::string> &params){
+  void OnCommand(const Flux::string &command, const std::vector<Flux::string> &params)
+  {
     if(command == "PONG")
     {
      Flux::string ts = params[0];
-     int timestamp = atoi(ts.c_str());
-     int lag = time(NULL)-timestamp;
+     int lag = time(NULL)-(int)ts;
      timeout = false;
      pings = 0;
      if(protocoldebug)
-        printf("%i sec lag (%i - %i)\n", lag, timestamp, (int)time(NULL));
+        printf("%i sec lag (%i - %i)\n", lag, (int)ts, (int)time(NULL));
     }
     if(command == "PING")
     {
@@ -46,7 +49,7 @@ public:
   }
   void OnConnectionError(const Flux::string &buffer)
   {
-   throw CoreException(buffer.c_str()); 
+   throw CoreException(buffer.c_str());
   }
   void OnNumeric(int i)
   {

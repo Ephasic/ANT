@@ -24,13 +24,20 @@
 class commanddummy : public Command
 {
 public:
-  commanddummy() : Command("TEST") //The 0's are how many params the command gets, they're not required and can be removed.
+  commanddummy() : Command("TEST", 0,1) //The 0's are how many params the command gets, they're not required and can be removed.
   {
    this->SetDesc("Test for the modules");
    this->SetSyntax("\37TEST\37");
   }
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
+    User *u = finduser(params[1]);
+    if(!u){source.Reply("No User"); return; }
+    for(CList::iterator it = u->ChannelList.begin(), it_end = u->ChannelList.end(); it != it_end; ++it)
+    {
+     if(it != it_end)
+	 source.Reply("CHANNEL: %s", it->first->name.c_str());
+    }
     source.Reply("YAY!");
   }
   
@@ -39,11 +46,12 @@ class dummy : public module
 {
   commanddummy cmddmy; //Declare our command
 public:
-  dummy():module("Dummy", PRIORITY_LAST)
+  dummy(const Flux::string &Name):module(Name)
   { 
     this->AddCommand(&cmddmy); //Add our command to teh bot
     this->SetAuthor("Lordofsraam"); //Set the author
     this->SetVersion(VERSION);
+    this->SetPriority(PRIORITY_LAST);
     
     //Implementation i[] = {  }; //Add that we have a module hook, this can be done in 2 ways
     ModuleHandler::Attach(I_OnPrivmsg, this);
@@ -53,6 +61,12 @@ public:
   }
   void OnPrivmsg(User *u, Channel *c, const std::vector<Flux::string> &params)
   {
+    Flux::string s;
+    for(unsigned i=0; i < params.size(); ++i)
+      s = params[i]+' ';
+    s.trim();
+    if(s.search_ci("Blah Blah"))
+      u->SendMessage("Derp DERp");
    if(params[0].equals_ci("!userlist"))
    {
      Flux::string users;

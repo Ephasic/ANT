@@ -35,10 +35,9 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
-	TODO depcomp install-sh missing
+	TODO install-sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -60,19 +59,19 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /home/justasic/Desktop/Navn/ant/missing --run aclocal-1.11
+ACLOCAL = ${SHELL} /home/justasic/Desktop/Navn/navn/missing --run aclocal-1.11
 ALLOCA = 
-AMTAR = ${SHELL} /home/justasic/Desktop/Navn/ant/missing --run tar
-AUTOCONF = ${SHELL} /home/justasic/Desktop/Navn/ant/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/justasic/Desktop/Navn/ant/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/justasic/Desktop/Navn/ant/missing --run automake-1.11
+AMTAR = ${SHELL} /home/justasic/Desktop/Navn/navn/missing --run tar
+AUTOCONF = ${SHELL} /home/justasic/Desktop/Navn/navn/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/justasic/Desktop/Navn/navn/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/justasic/Desktop/Navn/navn/missing --run automake-1.11
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -Wall -ansi -pipe -Wshadow -fPIC -pedantic -g -Wl,--export-dynamic -ldl -lnsl -I$(srcdir)/include -I$(srcdir)
+CFLAGS = -Wall -ansi -pipe -Wshadow -fPIC -DPIC  -L. -fno-leading-underscore -pedantic -g -Wl,--export-dynamic $(INCLUDES)
 CPP = gcc -E
 CPPFLAGS = 
-CXX = c++
+CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -O2
@@ -90,11 +89,11 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LDFLAGS = 
+LDFLAGS =  -g -rdynamic
 LIBOBJS = 
-LIBS = -lpthread -ldl
+LIBS = -pthread -ldl -lnsl -lrt -lstdc++
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/justasic/Desktop/Navn/ant/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/justasic/Desktop/Navn/navn/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = navn
@@ -106,13 +105,13 @@ PACKAGE_URL =
 PACKAGE_VERSION = 2.0.1
 PATH_SEPARATOR = :
 SET_MAKE = 
-SHELL = /bin/bash
+SHELL = /bin/sh
 STRIP = 
 VERSION = 2.0.1
-abs_builddir = /home/justasic/Desktop/Navn/ant
-abs_srcdir = /home/justasic/Desktop/Navn/ant
-abs_top_builddir = /home/justasic/Desktop/Navn/ant
-abs_top_srcdir = /home/justasic/Desktop/Navn/ant
+abs_builddir = /home/justasic/Desktop/Navn/navn
+abs_srcdir = /home/justasic/Desktop/Navn/navn
+abs_top_builddir = /home/justasic/Desktop/Navn/navn
+abs_top_srcdir = /home/justasic/Desktop/Navn/navn
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 am__include = include
@@ -132,7 +131,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/justasic/Desktop/Navn/ant/install-sh
+install_sh = ${SHELL} /home/justasic/Desktop/Navn/navn/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -152,9 +151,11 @@ target_alias =
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
-EXECUTABLE = navn
+unamepath = /bin/uname
+AUTOMAKE_OPTIONS = foreign
 PERL = $(srcdir)/run-cc.pl
-MODFLAGS = -fPIC -g -lnsl $(LIBS) -shared -Wl,-soname,
+INCLUDES = -I$(srcdir)/include -I$(srcdir)
+MODFLAGS = -fPIC -g $(LIBS) -shared -Wl,-soname,
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -165,15 +166,15 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --gnu'; \
-	      $(am__cd) $(srcdir) && $(AUTOMAKE) --gnu \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign'; \
+	      $(am__cd) $(srcdir) && $(AUTOMAKE) --foreign \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu Makefile
+	  $(AUTOMAKE) --foreign Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -475,13 +476,15 @@ uninstall-am:
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
 	pdf-am ps ps-am uninstall uninstall-am
 
-all: 
+
+navn:
 	@echo "This bot was created in C++ by Lordofsraam and Justasic from Flux-Net"
-	@echo "Navn Version 2.0.1-with-netflix-and-chicken"
+	@echo "Navn Version $(VERSION)$()"
 	@echo " "
 	@$(PERL) $(CXX) $(CFLAGS) -c main.cpp
 	@$(PERL) $(CXX) $(CFLAGS) -c misc.cpp
 	@$(PERL) $(CXX) $(CFLAGS) -c module.cpp
+	@$(PERL) $(CXX) $(CFLAGS) -c signal.cpp
 	@$(PERL) $(CXX) $(CFLAGS) -c Socket.cpp
 	@$(PERL) $(CXX) $(CFLAGS) -c Sepstream.cpp
 	@$(PERL) $(CXX) $(CFLAGS) -c process.cpp
@@ -493,42 +496,73 @@ all:
 	@$(PERL) $(CXX) $(CFLAGS) -c command.cpp
 	@$(PERL) $(CXX) $(CFLAGS) -c channel.cpp
 	@$(PERL) $(CXX) $(CFLAGS) -c INIReader.cpp
-	@$(PERL) $(CXX) $(CFLAGS) $(LIBS) main.o misc.o module.o Socket.o Sepstream.o privmsg.o command.o channel.o thread.o timers.o user.o INIReader.o process.o -o $(EXECUTABLE) -rdynamic
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/testmod.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/testmod.so -o modules/testmod.so testmod.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/m_ping.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/m_ping.so -o modules/m_ping.so m_ping.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/m_join.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/m_join.so -o modules/m_join.so m_join.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/help.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/help.so -o modules/help.so help.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/modulehandler.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/modulehandler.so -o modules/modulehandler.so modulehandler.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/m_system.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/m_system.so -o modules/m_system.so m_system.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/searcher.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/searcher.so -o modules/searcher.so searcher.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/m_dns.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/m_dns.so -o modules/m_dns.so m_dns.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/about_me.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/about_me.so -o modules/about_me.so about_me.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/ctcp.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/ctcp.so -o modules/ctcp.so ctcp.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/encyclopedia.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/encyclopedia.so -o modules/encyclopedia.so encyclopedia.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/weather.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/weather.so -o modules/weather.so weather.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/world_clock.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/world_clock.so -o modules/world_clock.so world_clock.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/da_goat.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/da_goat.so -o modules/da_goat.so da_goat.o
-	@$(PERL) $(CXX) $(CFLAGS) -c modules/channel_logger.cpp
-	@$(PERL) $(CXX) $(MODFLAGS)modules/channel_logger.so -o modules/channel_logger.so channel_logger.o
-	@echo " "
-	@echo "Build complete. Run './$(EXECUTABLE)' to execute the binary."
+	@$(PERL) $(CXX) $(CFLAGS) -c log.cpp
+	@$(PERL) $(CXX) $(CFLAGS) -c clock.cpp
+	@$(PERL) $(CXX) $(CFLAGS) -L. main.o misc.o log.o signal.o module.o Socket.o Sepstream.o privmsg.o command.o channel.o thread.o timers.o user.o INIReader.o process.o clock.o -o $(PACKAGE) $(LIBS) -rdynamic
 
+about_me.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/about_me.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/about_me.cpp -o modules/about_me.so about_me.o
+channel_logger.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/channel_logger.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/channel_logger.cpp -o modules/channel_logger.so channel_logger.o
+ctcp.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/ctcp.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/ctcp.cpp -o modules/ctcp.so ctcp.o
+da_goat.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/da_goat.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/da_goat.cpp -o modules/da_goat.so da_goat.o
+encyclopedia.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/encyclopedia.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/encyclopedia.cpp -o modules/encyclopedia.so encyclopedia.o
+help.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/help.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/help.cpp -o modules/help.so help.o
+m_dns.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/m_dns.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/m_dns.cpp -o modules/m_dns.so m_dns.o
+m_join.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/m_join.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/m_join.cpp -o modules/m_join.so m_join.o
+modulehandler.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/modulehandler.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/modulehandler.cpp -o modules/modulehandler.so modulehandler.o
+m_ping.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/m_ping.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/m_ping.cpp -o modules/m_ping.so m_ping.o
+m_system.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/m_system.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/m_system.cpp -o modules/m_system.so m_system.o
+m_terminal_input.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/m_terminal_input.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/m_terminal_input.cpp -o modules/m_terminal_input.so m_terminal_input.o
+PvP.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/PvP.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/PvP.cpp -o modules/PvP.so PvP.o
+searcher.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/searcher.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/searcher.cpp -o modules/searcher.so searcher.o
+SimpleMod.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/SimpleMod.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/SimpleMod.cpp -o modules/SimpleMod.so SimpleMod.o
+testmod.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/testmod.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/testmod.cpp -o modules/testmod.so testmod.o
+weather.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/weather.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/weather.cpp -o modules/weather.so weather.o
+world_clock.so:
+	@$(PERL) $(CXX) $(CFLAGS) -c modules/world_clock.cpp
+	@$(PERL) $(CXX) $(LIBS) $(MODFLAGS)modules/world_clock.cpp -o modules/world_clock.so world_clock.o
+
+modules: about_me.so channel_logger.so ctcp.so da_goat.so encyclopedia.so help.so m_dns.so m_join.so modulehandler.so m_ping.so m_system.so m_terminal_input.so PvP.so searcher.so SimpleMod.so testmod.so weather.so world_clock.so
+
+all-am: navn about_me.so channel_logger.so ctcp.so da_goat.so encyclopedia.so help.so m_dns.so m_join.so modulehandler.so m_ping.so m_system.so m_terminal_input.so PvP.so searcher.so SimpleMod.so testmod.so weather.so world_clock.so
+	@echo " "
+	@echo "Build complete. Run './$(PACKAGE)' to execute the binary."
 clean:
-	rm -f *.o *.so $(EXECUTABLE) config.h
+	rm -f *.o *.so $(PACKAGE) config.h config.status
+	rm -f *.o *.so $(srcdir)/modules/*.so
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

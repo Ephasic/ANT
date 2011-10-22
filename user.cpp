@@ -3,6 +3,7 @@
 Flux::insensitive_map<User *> UserNickList;
 size_t usercnt = 0, maxusercnt = 0;
 User::User(const Flux::string &snick, const Flux::string &sident, const Flux::string &shost, const Flux::string &srealname, const Flux::string &sserver){
+ SET_SEGV_LOCATION();
  /* check to see if a empty string was passed into the constructor */
  if(snick.empty() || sident.empty() || shost.empty())
    throw CoreException("Bad args sent to User constructor");
@@ -15,16 +16,16 @@ User::User(const Flux::string &snick, const Flux::string &sident, const Flux::st
  this->fullhost = snick+"!"+sident+"@"+shost;
  UserNickList[snick] = this;
  if(protocoldebug)
-   printf("New user! %s!%s@%s%s\n", this->nick.c_str(), this->ident.c_str(), this->host.c_str(), this->realname.empty()?"":Flux::string(" :"+this->realname).c_str());
+   Log(LOG_TERMINAL) << "New user! " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
  ++usercnt;
  if(usercnt > maxusercnt){
   maxusercnt = usercnt;
-  printf("New maximum user count: %i\n", (int)maxusercnt);
+  Log(LOG_TERMINAL) << "New maximum user count: " << maxusercnt;
  }
 }
 User::~User(){
-  printf("Deleting user %s!%s@%s%s\n", this->nick.c_str(), this->ident.c_str(), this->host.c_str(), this->realname.empty()?"":Flux::string(" :"+this->realname).c_str());
-  log(LOG_NORMAL, "Deleting user %s!%s@%s%s\n", this->nick.c_str(), this->ident.c_str(), this->host.c_str(), this->realname.empty()?"":Flux::string(" :"+this->realname).c_str());
+  SET_SEGV_LOCATION();
+  Log() << "Deleting user " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
   UserNickList.erase(this->nick);
 }
 void User::kick(const Flux::string &channel, const Flux::string &reason){
@@ -71,6 +72,27 @@ void User::SetNewNick(const Flux::string &newnick)
   this->nick = newnick;
   UserNickList[this->nick] = this;
 }
+void User::AddChan(Channel *c)
+{
+  if(!c)
+    ChannelList[c] = this;
+}
+void User::DelChan(Channel *c)
+{
+  CList::iterator it = ChannelList.find(c);
+  if(it != ChannelList.end())
+    ChannelList.erase(it);
+}
+Channel *User::findchannel(const Flux::string &chan)
+{
+  Channel *c = findchannel(chan);
+  if(!c)
+    return NULL;
+  CList::iterator it = ChannelList.find(c);
+  if(it != ChannelList.end())
+    return it->first;
+  return NULL;
+}
 void User::SendMessage(const Flux::string &message){
   Send->notice(this->nick, message);
 }
@@ -87,8 +109,7 @@ void ListUsers(CommandSource &source){
   Flux::string users;
   for(Flux::map<User *>::iterator it = UserNickList.begin(), it_end = UserNickList.end(); it != it_end; ++it){
     User *u2 = it->second;
-    users += u2->nick;
-    users.AddSpace();
+    users += u2->nick+' ';
   }
   source.Reply("Users: %s\n", users.c_str());
 }

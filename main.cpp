@@ -27,6 +27,10 @@ bool SocketIO::Read(const Flux::string &buf) const
 
 int main (int argcx, char** argvx, char *envp[])
 {
+  SET_SEGV_LOCATION();
+  Config = NULL;
+  Send = NULL;
+  sock = NULL;
   my_av = argvx;
   my_envp = envp;
   try
@@ -39,7 +43,7 @@ int main (int argcx, char** argvx, char *envp[])
       //Make the socket used to connect to the server
       if(Config->Server.empty())
 	throw CoreException("No Server Specified.");
-      log(LOG_NORMAL, "Connecting to server '%s:%s'", Config->Server.c_str(), Config->Port.c_str());
+      Log() << "Connecting to server '" << Config->Server << ":" << Config->Port << "'";
       FOREACH_MOD(I_OnPreConnect, OnPreConnect(Config->Server, Config->Port));
       sock = new SocketIO(Config->Server, Config->Port);
       sock->Connect();
@@ -48,7 +52,7 @@ int main (int argcx, char** argvx, char *envp[])
 	throw CoreException(e.description().c_str());
       if(sock)
 	delete sock;
-      log(LOG_DEBUG, "Socket Exception Caught: %s", e.description().c_str());
+      Log(LOG_DEBUG) << "Socket Exception Caught: " << e.description();
       goto SocketStart;
     }
     if(!sock)
@@ -63,7 +67,7 @@ int main (int argcx, char** argvx, char *envp[])
     
     
     while(!quitting){
-      log(LOG_RAWIO, "Top of main loop");
+      Log(LOG_RAWIO) << "Top of main loop";
       
       /* Process the socket engine */
       sock->Process();
@@ -79,17 +83,17 @@ int main (int argcx, char** argvx, char *envp[])
     FOREACH_MOD(I_OnShutdown, OnShutdown());
     ModuleHandler::UnloadAll();
     ModuleHandler::SanitizeRuntime();
-    log(LOG_TERMINAL, "\033[22;37m");
+    Log(LOG_TERMINAL) << "\033[0m";
   }//try ends here
   catch(const CoreException& e){
-    if(!Config) //This is so we dont throw logging exceptions..
-        log(LOG_TERMINAL, "Core Exception Caught: %s", Flux::stringify(e.GetReason()).c_str());
+    /* we reset the terminal colors, this should be removed as it makes more issues than it is cool */
+    Log(LOG_TERMINAL) << "\033[0m";
+    if(!Config)
+      Log(LOG_TERMINAL) << "Core Exception Caught: " << e.GetReason();
     else
-      log(LOG_NORMAL, "Core Exception Caught: %s", Flux::stringify(e.GetReason()).c_str());
-    log(LOG_TERMINAL, "\033[22;37m\n"); /* we reset the terminal colors, this should be removed as it makes more issues than it is cool */
+      Log() << "Core Exception Caught: " << e.GetReason();
     return EXIT_FAILURE;
   }
-  printf("Exiting\n");
   return EXIT_SUCCESS;
 }
 

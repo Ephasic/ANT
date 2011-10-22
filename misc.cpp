@@ -1,5 +1,5 @@
 /* All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html) */
-#include "user.h"
+#include "module.h"
 #include "INIReader.h"
 
 //General misc functions
@@ -9,7 +9,8 @@
  * \param &buf String to be stripped
  * \return \a &buf without the '\r' and '\n'.
  */
-Flux::string strip(const Flux::string &buf){
+Flux::string strip(const Flux::string &buf)
+{
 	Flux::string newbuf = buf;
 	char c = newbuf[newbuf.size() - 1];
 	while (c == '\n' || c == '\r'){
@@ -22,12 +23,38 @@ Flux::string strip(const Flux::string &buf){
  * This will generate a random number x is start number, y is the stop number.
  * @param randint(int x, int y)
  */
-int randint(int x, int y){
+int randint(int x, int y)
+{
   srand(time(NULL));
   return rand()%(y-x+1)+x;
 }
 
-Flux::string Flux::Sanitize(const Flux::string &string){
+void Fork()
+{
+  if (!nofork && InTerm()){
+    int i = fork();
+    if(i > 0){
+	    Log(LOG_TERMINAL) << "Navn IRC Bot v" << VERSION << " Started";
+	    Log(LOG_TERMINAL) << "Forking to background. PID: " << i << "\033[22;37m";
+	    FOREACH_MOD(I_OnFork, OnFork(i));
+	    exit(0);
+    }
+    if(isatty(fileno(stdout)))
+      fclose(stdout);
+    if(isatty(fileno(stdin)))
+      fclose(stdin);
+    if(isatty(fileno(stderr)))
+      fclose(stderr);
+    if(setpgid(0, 0) < 0)
+	    throw CoreException("Unable to setpgid()");
+    else if(i == -1)
+      Log() << "Error, unable to fork: " << strerror(errno);
+  }else
+    Log() << Config->BotNick << " Started, PID: " << getpid() << "\033[22;36m";
+}
+
+Flux::string Flux::Sanitize(const Flux::string &string)
+{
  static struct special_chars{
    Flux::string character;
    Flux::string replace;
@@ -37,7 +64,6 @@ Flux::string Flux::Sanitize(const Flux::string &string){
   special_chars("  ", " "),
   special_chars("\n",""),
   special_chars("\002",""),
-  special_chars("\003",""),
   special_chars("\035",""),
   special_chars("\037",""),
   special_chars("\026",""),
@@ -45,12 +71,20 @@ Flux::string Flux::Sanitize(const Flux::string &string){
   special_chars("","")
  };
   Flux::string ret = string.c_str();
-  for(int i = 0; special[i].character.empty() == false; ++i){
-    ret = ret.replace_all_cs(special[i].character, special[i].replace);
+  while(ret.search('\003')){ //Strip color codes completely
+      size_t l = ret.find('\003');
+      if(isdigit(ret[l+1]))
+	ret = ret.erase(l, l+1);
+      else if(isdigit(ret[l+2]))
+	ret = ret.erase(l, l+2);
+      else if(isdigit(ret[l+3]))
+	ret = ret.erase(l, l+3);
   }
-  return ret.c_str(); 
+  for(int i = 0; special[i].character.empty() == false; ++i)
+    ret = ret.replace_all_cs(special[i].character, special[i].replace);
+  return ret.c_str();
 }
-/** 
+/**
  * \fn Flux::string make_pass()
  * \brief Makes a random password
  * This generates a 5 number random password for the bots
@@ -60,7 +94,7 @@ Flux::string Flux::Sanitize(const Flux::string &string){
 Flux::string make_pass(){
   int p1,p2,p3,p4,p5;
   srand(time(NULL));
-  p1 = rand()%10; 
+  p1 = rand()%10;
   p2 = rand()%10;
   p3 = rand()%10;
   p4 = rand()%10;
@@ -166,85 +200,45 @@ Flux::string isolate(char begin, char end, const Flux::string &msg){
   }
   return to_find;
 }
-/** 
- * \fn void log(LogType type = LOG_NORMAL, const char *fmt, ...)
- * This is what logs everything that goes on with the bot
- * \param LogType the kind of log you are making
- * \param char* the format and the string for the log
+
+/** Check if a file exists
+ * \param filename The file
+ * \return true if the file exists, false if it doens't
  */
-void log(LogType type, const char *fmt, ...){
-  std::fstream log;
-  Flux::string timestamp;
-  va_list args;
-  va_start(args, fmt);
-  
-  time_t t = time(NULL);
-  struct tm *tm = localtime(&t);
-  
-  char buf[512];
-  std::stringstream ss;
-  strftime(buf, sizeof(buf) - 1, "[%b %d %H:%M:%S %Y]", tm);
-  timestamp = buf;
-  vsnprintf(buf, sizeof(buf), fmt, args);
-  ss << Flux::Sanitize(buf) << std::endl;
-  if((type == LOG_TERMINAL)){
-   printf("%s", ss.str().c_str());
-   return;
-  }
-  try{
-  log.open(Config->LogFile.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
-  if(!log.is_open()){
-    std::stringstream lerr;
-    if(!Config->LogFile.empty())
-      lerr << "Failed to open log file "<< Config->LogFile <<": " << strerror(errno);
-    else
-      lerr << "Cannot find logfile.";
-     throw LogException(lerr.str().c_str());
-  }
-  }catch (LogException &e){
-   std::cerr << "Log Exception Caught: " << e.GetReason() << std::endl;
-  }
-  if((type == LOG_RAWIO || type == LOG_DEBUG) && protocoldebug){
-    printf("%s %s", timestamp.c_str(), ss.str().c_str());
-    log << timestamp << " " << ss.str();
-  }
-  else if((type == LOG_DEBUG) && dev){
-    if(nofork)
-      printf("%s %s", timestamp.c_str(), ss.str().c_str());
-    log << timestamp << " " << ss.str();
-  }else if((type == LOG_NORMAL)){
-    printf("%s %s", timestamp.c_str(), ss.str().c_str());
-    log << timestamp << " " << ss.str();
-  }
-  va_end(args);
-  va_end(args);
-  log.close();
+bool IsFile(const Flux::string &filename)
+{
+	struct stat fileinfo;
+	if (!stat(filename.c_str(), &fileinfo))
+		return true;
+
+	return false;
 }
-/** 
+/**
  * \fn Flux::string TempFile(const Flux::string &file)
  * \brief Creates a temporary file name for use in navn, can be quite useful.
  * \param Flux::string The Flux::string of the file location/name
  * NOTE: THIS _MUST_ HAVE 6 X's (XXXXXX) to work properly.
  */
 Flux::string TempFile(const Flux::string &file){
-char *tmp_output = strdup(file.c_str());
-int target_fd = mkstemp(tmp_output);
-if (target_fd == -1 || close(target_fd) == -1)
-{
-	free(tmp_output);
-	return "";
+  char *tmp_output = strdup(file.c_str());
+  int target_fd = mkstemp(tmp_output);
+  if (target_fd == -1 || close(target_fd) == -1)
+  {
+	  free(tmp_output);
+	  return "";
+  }
+  Flux::string filestring = tmp_output;
+  free(tmp_output);
+  return filestring;
 }
-Flux::string filestring = tmp_output;
-free(tmp_output);
-return filestring;
-}
-/** 
+/**
  * \fn std::vector<Flux::string> StringVector(const Flux::string &src, char delim)
  * \brief creates a vector that breaks down a string word-by-word using the delim as the seperater
  * \param src The source string for it to break down
  * \param delim The char used to seperate the words in the source string
  */
-std::vector<Flux::string> StringVector(const Flux::string &src, char delim){
+std::vector<Flux::string> StringVector(const Flux::string &src, char delim)
+{
  sepstream tok(src, delim);
  Flux::string token;
  std::vector<Flux::string> ret;
@@ -252,6 +246,11 @@ std::vector<Flux::string> StringVector(const Flux::string &src, char delim){
    ret.push_back(token);
  return ret;
 }
-
+/** Check if a file exists
+ * \fn bool InTerm()
+ * \brief returns if the 
+ * \return true if the file exists, false if it doens't
+ */
+bool InTerm() { return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr))); }
 /* butt-plug?
  * http://www.albinoblacksheep.com/flash/plugs */

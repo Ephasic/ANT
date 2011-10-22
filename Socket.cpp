@@ -9,11 +9,12 @@
 #include <fcntl.h>
 #include <iostream>
 #define NET_BUFSIZE 65535
-fd_set ReadFD, WriteFD, ExceptFD;
+fd_set ReadFD/*, WriteFD, ExceptFD*/;
 
 /* FIXME: please god, when will the hurting stop? This class is so
    f*cking broken it's not even funny */
 SocketIO::SocketIO(const Flux::string &cserver, const Flux::string &cport) : sockn(-1){
+  SET_SEGV_LOCATION();
   this->server = cserver.std_str();
   this->port = cport.std_str();
   
@@ -22,10 +23,7 @@ SocketIO::SocketIO(const Flux::string &cserver, const Flux::string &cport) : soc
   hints.ai_socktype = SOCK_STREAM;
   /****************************/ 
 }
-int SocketIO::GetFD() const
-{
- return sockn; 
-}
+int SocketIO::GetFD() const { return sockn; }
 bool SocketIO::SetNonBlocking()
 {
  int flags = fcntl(this->GetFD(), F_GETFL, 0);
@@ -37,24 +35,27 @@ bool SocketIO::SetBlocking()
   return !fcntl(this->GetFD(), F_SETFL, flags & ~O_NONBLOCK);
 }
 SocketIO::~SocketIO(){
+  SET_SEGV_LOCATION();
  if(is_valid()) 
    close(sockn);
  FD_CLR(this->GetFD(), &ReadFD);
- FD_CLR(this->GetFD(), &WriteFD);
+ //FD_CLR(this->GetFD(), &WriteFD);
 }
 void SocketIO::get_address()
 {
+  SET_SEGV_LOCATION();
   int rv = 1;
   rv = getaddrinfo(this->server.c_str(), this->port.c_str(), &hints, &servinfo);
   if (rv != 0)
   {
-    Flux::string info = "Could not resolve server: "+this->server+":"+this->port+" "+gai_strerror(rv);
-    throw SocketException(info.c_str());
+    throw SocketException(fsprintf("Could not resolve server: %s:%i %s",this->server.c_str(), 
+				   (int)this->port, gai_strerror(rv)).c_str());
   }
 }
 
 void *get_in_addr(struct sockaddr *sa)
 {
+  SET_SEGV_LOCATION();
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
     }
@@ -63,6 +64,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 bool SocketIO::Connect()
 {
+  SET_SEGV_LOCATION();
   struct addrinfo *p;
   int connected = 0;
   char s[INET6_ADDRSTRLEN];
@@ -84,16 +86,14 @@ bool SocketIO::Connect()
   }
   
   if (connected == -1)
-  {
     throw SocketException("Connection Failed.");
-    return false;
-  }
+    
   freeaddrinfo(servinfo); //Clear up used memory we dont need anymore
   
   inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
   this->SetNonBlocking();
   FD_SET(this->GetFD(), &ReadFD);
-  log(LOG_DEBUG, "Connected to %s:%s", this->server.c_str(), this->port.c_str());
+  Log(LOG_DEBUG) << "Connected to" << this->server << ":" << this->port;
   return true;
 }
 int SocketIO::Process()
@@ -101,19 +101,19 @@ int SocketIO::Process()
   timeval timeout;
   timeout.tv_sec = 5;
   timeout.tv_usec = 0; //this timeout keeps the bot from being a CPU hog for no reason :)
-  fd_set read = ReadFD, write = WriteFD, except = ExceptFD;
+  fd_set read = ReadFD/*, write = WriteFD, except = ExceptFD*/;
   FD_ZERO(&read);
   FD_SET(this->GetFD(), &read);
   int sres = select(this->GetFD() + 1, &read, NULL, NULL, &timeout);
   if(sres == -1 && errno != EINTR){
-    log(LOG_DEBUG, "Select() error: %s", strerror(errno));
+    Log(LOG_DEBUG) << "Select() error: " << strerror(errno);
     return errno;
   }
   if(FD_ISSET(this->GetFD(), &read) && sres)
   {
   if(this->recv() == -1 && !quitting)
       {
-	log(LOG_RAWIO, "Socket Error: %s", strerror(errno));
+	Log(LOG_RAWIO) << "Socket Error: " << strerror(errno);
 	return errno;
       }else
       {
@@ -140,9 +140,9 @@ const int SocketIO::recv() const
 }
 const int SocketIO::send(const Flux::string &buf) const
 {
- log(LOG_RAWIO, "Sent: %s\n", Flux::Sanitize(buf).c_str());
+ Log(LOG_RAWIO) << "Sent: " << Flux::Sanitize(buf);
  if(!protocoldebug)
-  log(LOG_DEBUG, "%s\n", Flux::Sanitize(buf).c_str());
+   Log(LOG_DEBUG) << Flux::Sanitize(buf);
  int i = write(this->GetFD(), buf.c_str(), buf.size());
  return i;
 }

@@ -39,7 +39,7 @@ public:
      }
    }
    source.Reply("Total of \2%i\2 commands", c);
-   log(LOG_NORMAL, "%s used help command", source.u->nick.c_str());
+   Log(source.u) << "used help command";
   }
 };
 
@@ -64,7 +64,7 @@ public:
    cmds.tolower();
    source.c->SendMessage("Local %s Commands:", source.c->name.c_str());
    source.c->SendMessage(cmds);
-   log(LOG_NORMAL, "%s used help command", source.u->nick.c_str());
+   Log(source.u) << "used help command";
   }
 };
 class help_m:public module
@@ -72,10 +72,11 @@ class help_m:public module
   CommandHelp help;
   CommandCHelp chelp;
 public:
-  help_m():module("Help", PRIORITY_DONTCARE){ 
+  help_m(const Flux::string &Name):module(Name){ 
     this->AddCommand(&help);
     this->AddChanCommand(&chelp);
     this->SetVersion(VERSION);
+    this->SetPriority(PRIORITY_FIRST);
     this->SetAuthor("Justasic");
   }
 };

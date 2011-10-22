@@ -7,14 +7,31 @@
 
 /* #define's */
 #define Delete unlink
+#define E extern
+#define S static
 #define CHANNEL_X_INVALID "Channel \2%s\2 is not a valad channel"
 #define welcome_msg "%s has joined. Type '/msg %s help' to see a list of commands."
 #define isvalidnick(c) (isalnum(c) || ((c) >= '\x5B' && (c) <= '\x60') || ((c) >= '\x7B' && (c) <= '\x7D') || (c) == '-')
 #define ACCESS_DENIED "Access is Denied."
 #define GetCurrentDir getcwd
+#define SET_SEGV_LOCATION() snprintf(segv_location, sizeof(segv_location), "%s %d %s", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+#define CLEAR_SEGV_LOCATION() segv_location[0]='\0';
+
+#ifdef HAVE_SETJMP_H
+#include <setjmp.h>
+E jmp_buf sigbuf;
+# define TestRun(x) \
+    if(setjmp(sigbuf) == 0){ \
+      x; \
+    }else \
+      Log() << "Failed to execute an internal function, restoring Stack prior to crash.";
+#else
+# define TestRun(x) x;
+#endif
 
 /* Classes */
 class Channel;
+class Log;
 class User;
 class SocketIO;
 class Commands;
@@ -26,6 +43,7 @@ class SendMessage;
 class ModuleHandler;
 class INIReader;
 class BotConfig;
+class Clock;
 struct CommandSource;
 
 /* Enumorations */
@@ -34,9 +52,11 @@ enum LogType
   LOG_DEBUG,
   LOG_NORMAL,
   LOG_RAWIO,
-  LOG_TERMINAL
+  LOG_TERMINAL,
+  LOG_SILENT
 };
-enum ModErr{
+enum ModErr
+{
 MOD_ERR_OK,
 MOD_ERR_MEMORY,
 MOD_ERR_PARAMS,
@@ -59,43 +79,53 @@ Command *FindCommand(const Flux::string &name);
 Command *FindChanCommand(const Flux::string &name);
 
 /* extern's */
-extern SocketIO *sock;
-extern SendMessage *Send;
-extern BotConfig *Config;
-extern CommandMap Commandsmap;
-extern CommandMap ChanCommandMap;
-extern time_t starttime;
-extern Flux::string binary_path, bot_bin, binary_dir, server_name;
-extern Flux::string strip(const Flux::string &buf);
-extern Flux::string getprogdir(const Flux::string&);
-extern Flux::string TempFile(const Flux::string&);
-extern Flux::string DecodeModErr(ModErr err);
-extern Flux::string isolate(char begin, char end, const Flux::string &msg);
-extern Flux::string make_pass();
-extern Flux::string do_strftime(const time_t &t, bool short_output = false);
-extern Flux::string duration(const time_t &t);
-extern Flux::string sprintf(const char*, ...);
-extern int randint(int x, int y);
-extern bool IsValidChannel(const Flux::string&);
-extern bool protocoldebug, IsOper, dev, nofork, quitting, started;
-extern std::vector<Flux::string> StringVector(const Flux::string&, char);
-extern Flux::insensitive_map<module*> Modules;
-extern Flux::insensitive_map<User *> UserNickList;
-extern Flux::insensitive_map<Channel*> ChanMap;
-extern char **my_av, **my_envp;
+E SocketIO *sock;
+E SendMessage *Send;
+E BotConfig *Config;
+E CommandMap Commandsmap;
+E CommandMap ChanCommandMap;
+E time_t starttime;
+E Flux::string binary_path, bot_bin, binary_dir, server_name, quitmsg;
+E const Flux::string VERSION_LONG;
+E Flux::string strip(const Flux::string &buf);
+E Flux::string getprogdir(const Flux::string&);
+E Flux::string TempFile(const Flux::string&);
+E Flux::string DecodeModErr(ModErr err);
+E Flux::string isolate(char begin, char end, const Flux::string &msg);
+E Flux::string make_pass();
+E Flux::string do_strftime(const time_t &t, bool short_output = false);
+E Flux::string duration(const time_t &t);
+E Flux::string fsprintf(const char*, ...);
+E int randint(int x, int y);
+E bool IsValidChannel(const Flux::string&);
+E bool IsFile(const Flux::string&);
+E bool InTerm();
+E bool protocoldebug, IsOper, dev, nofork, quitting, started, nocolor;
+E std::vector<Flux::string> StringVector(const Flux::string&, char);
+E Flux::insensitive_map<module*> Modules;
+E Flux::insensitive_map<User *> UserNickList;
+E Flux::insensitive_map<Channel*> ChanMap;
+E char **my_av, **my_envp;
 
 /* void's */
-void ListChans(CommandSource &source);
-void ListUsers(CommandSource &source);
-void send_cmd(const char *fmt, ...);
-void log(LogType, const char *fmt, ...);
-void process(const Flux::string&);
-void ProcessJoin(CommandSource&, const Flux::string&);
-void ProcessCommands(CommandSource&, std::vector<Flux::string>&);
-void ReadConfig();
+E void Rehash();
+E void Fork();
+E void sigact(int);
+E void HandleSegfault(module*);
+E void restart(const Flux::string&);
+E void ListChans(CommandSource &source);
+E void ListUsers(CommandSource &source);
+E void send_cmd(const char *fmt, ...);
+E void process(const Flux::string&);
+E void ProcessJoin(CommandSource&, const Flux::string&);
+E void ProcessCommands(CommandSource&, std::vector<Flux::string>&);
+E void ReadConfig();
 
-/************************************************************/
-/* 	This is the only #define allowed in this file	    */
+/* Char's */
+extern char segv_location[255];
+
+/**************************************************************/
+/* This is the only #define allowed at the bottom of the file */
 #define FOREACH_MOD(y, x) \
 if(true) \
 { \
@@ -110,7 +140,7 @@ if(true) \
        } \
        catch (const ModuleException &modexcept) \
        { \
-          log(LOG_NORMAL, "Exception caught: %s", modexcept.GetReason()); \
+	  Log() << "Exception caught: " << modexcept.GetReason(); \
        } \
         _i = safei; \
     } \

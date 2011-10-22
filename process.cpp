@@ -8,6 +8,7 @@
  * \param chan The channel we're processing
  */
 void ProcessJoin(CommandSource &source, const Flux::string &chan){
+    SET_SEGV_LOCATION();
     std::vector<Flux::string> &params = source.params;
     if(params.size() < 7)
       return;
@@ -29,17 +30,21 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan){
      if(!channel.empty())
        c = new Channel(channel);
     }
+    if(u)
+      u->AddChan(c);
 }
 /*********************************************************************************/
 void ProcessCommand(CommandSource &Source, std::vector<Flux::string> &params2,
 		    const Flux::string &receiver, const Flux::string &command)
 {
+  SET_SEGV_LOCATION();
   User *u = Source.u;
   Channel *c = Source.c;
+  if(!command.is_pos_number_only()) { FOREACH_MOD(I_OnCommand, OnCommand(command, params2)); }
  if(!FindCommand(params2[0]) && command == "PRIVMSG")
   {
     if(!protocoldebug)
-      log(LOG_TERMINAL, "<%s-%s> %s\n", u->nick.c_str(), receiver.c_str(), Source.params[1].c_str());
+      Log(LOG_TERMINAL) << '<' << u->nick << '-' << receiver << "> " << Source.params[1];
     if(!IsValidChannel(receiver)){
       Source.Reply("Unknown command \2%s\2", Flux::Sanitize(params2[0]).c_str());
       FOREACH_MOD(I_OnPrivmsg, OnPrivmsg(u, params2));
@@ -54,7 +59,15 @@ void ProcessCommand(CommandSource &Source, std::vector<Flux::string> &params2,
 	 params2.erase(params2.begin() + ccom->MaxParams);
 	}
 	if(params2.size() < ccom->MinParams) { ccom->OnSyntaxError(Source, !params2.empty() ? params2[params2.size() - 1] : ""); return; }
+/*#ifdef HAVE_SETJMP_H
+	if(setjmp(sigbuf) == 0){
+#endif
 	ccom->Run(Source, params2);
+#ifdef HAVE_SETJMP_H
+	}else
+	  Log() << "Command " << ccom->name << " Failed to run.";
+#endif*/
+      TestRun(ccom->Run(Source, params2));
       }else{
 	FOREACH_MOD(I_OnPrivmsg, OnPrivmsg(u, c, params2)); //This will one day be a actual function for channel only messages..
       }
@@ -68,17 +81,24 @@ void ProcessCommand(CommandSource &Source, std::vector<Flux::string> &params2,
       while(com->MaxParams > 0 && params2.size() > com->MaxParams){
 	 params2[com->MaxParams - 1] += " " + params2[com->MaxParams];
 	 params2.erase(params2.begin() + com->MaxParams);
-	}
-	if(params2.size() < com->MinParams) { com->OnSyntaxError(Source, !params2.empty() ? params2[params2.size() - 1] : ""); return; }
-      com->Run(Source, params2);
+      }
+      if(params2.size() < com->MinParams) { com->OnSyntaxError(Source, !params2.empty() ? params2[params2.size() - 1] : ""); return; }
+/*#ifdef HAVE_SETJMP_H
+	if(setjmp(sigbuf) == 0){
+#endif
+	com->Run(Source, params2);
+#ifdef HAVE_SETJMP_H
+	}else
+	  Log() << "Command " << ccom->name << " Failed to run.";
+#endif*/
+    TestRun(com->Run(Source, params2));
     }else{
-      if(!command.is_pos_number_only())
-	FOREACH_MOD(I_OnCommand, OnCommand(command, params2));
-      else if(!protocoldebug)
-	log(LOG_DEBUG, "%s\n", Flux::Sanitize(Source.raw).c_str()); //This receives ALL server commands sent to the bot..
+      if(!protocoldebug)
+	Log(LOG_DEBUG) << Flux::Sanitize(Source.raw); //This receives ALL server commands sent to the bot..
     }
   } 
 }
+
 /*********************************************************************************/
 
 /** 
@@ -87,6 +107,7 @@ void ProcessCommand(CommandSource &Source, std::vector<Flux::string> &params2,
  * \param buffer The raw socket buffer
  */
 void process(const Flux::string &buffer){
+  SET_SEGV_LOCATION();
   Flux::string buf = buffer;
   buf = buf.replace_all_cs("  ", " ");
   if(buf.empty())
@@ -120,16 +141,16 @@ void process(const Flux::string &buffer){
     else
       params.push_back(bufferseparator_token);
   }
-  log(LOG_RAWIO, "Received: %s\n", Flux::Sanitize(buffer).c_str());
+  Log(LOG_RAWIO) << "Received: " << Flux::Sanitize(buffer);
   if(protocoldebug)
   {
-   log(LOG_TERMINAL, "Source: %s\n", source.empty() ? "No Source" : source.c_str());
-   log(LOG_TERMINAL, "%s: %s\n", command.is_number_only() ? "Numeric" : "Command", command.c_str());
+    Log(LOG_TERMINAL) << "Source: " << (source.empty()?"No Source":source);
+    Log(LOG_TERMINAL) << (command.is_number_only()?"Numeric":"Command") << ": " << command;
    if(params.empty())
-     log(LOG_TERMINAL, "No Params\n");
+     Log(LOG_TERMINAL) << "No Params";
    else
      for(unsigned i =0; i < params.size(); ++i)
-       log(LOG_TERMINAL, "Params %i: %s\n", i, Flux::Sanitize(params[i]).c_str());
+       Log(LOG_TERMINAL) << "Params " << i << ": " << Flux::Sanitize(params[i]);
   }
   /***********************************************/
   /* make local variables instead of global ones */
@@ -144,14 +165,14 @@ void process(const Flux::string &buffer){
   Channel *c = findchannel(receiver);
   std::vector<Flux::string> params2 = StringVector(message, ' ');
   /***********************************************/
-  if(command == "004" && source.find('.')) { server_name = source; }
+  if(command == "004" && source.search('.')) { server_name = source; }
   if(message[0] == '\1' && message[message.length() -1] == '\1'){
     FOREACH_MOD(I_OnCTCP, OnCTCP(nickname, StringVector(message, ' ')));
     return; //Dont allow the rest of the system to process ctcp's as it will be caught by the command handler.
   }
   if(command.equals_cs("NICK") && u) { FOREACH_MOD(I_OnNickChange, OnNickChange(u, params[0])); u->SetNewNick(params[0]); }
   if(!u && !finduser(nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty())){
-    if(nickname.find('.') == Flux::string::npos)
+    if(!nickname.search('.'))
       u = new User(nickname, uident, uhost);
   }
   if(command == "QUIT" && u){
@@ -162,12 +183,18 @@ void process(const Flux::string &buffer){
     FOREACH_MOD(I_OnPart, OnPart(u, c, params[0]));
     if(IsValidChannel(receiver) && c && u && u->nick == Config->BotNick)
      delete c;
-    else
-     delete u;
+    else{
+     if(!u->findchannel(c->name))
+       delete u;
+     else
+       static_cast<void>(0);
+       //u->DelChan(c);
+    }
   }
-  if(command.is_pos_number_only()) { FOREACH_MOD(I_OnNumeric, OnNumeric(atoi(command.c_str()))); }
+  if(command.is_pos_number_only()) { FOREACH_MOD(I_OnNumeric, OnNumeric((int)command)); }
   if(command.equals_cs("KICK")){ FOREACH_MOD(I_OnKick, OnKick(u, finduser(params[1]), findchannel(params[0]), params[2])); }
   if(command.equals_ci("ERROR")) { FOREACH_MOD(I_OnConnectionError, OnConnectionError(buffer)); }
+  if(command.equals_cs("INVITE")) { FOREACH_MOD(I_OnInvite, OnInvite(u, params[1])); }
   if(command.equals_cs("NOTICE") && !source.find('.')){
     if(!IsValidChannel(receiver)) { FOREACH_MOD(I_OnNotice, OnNotice(u, params2)); } 
     else { FOREACH_MOD(I_OnNotice, OnNotice(u, c, params2)); }

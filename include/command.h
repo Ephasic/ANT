@@ -1,11 +1,24 @@
 /* All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html) */
 #ifndef command_h
 #define command_h
+/**
+ * \include includes.h
+ */
 #include "includes.h"
+/**
+ * \include user.h
+ */
 #include "user.h"
 /**
  *\file  command.h
- *\brief Contains the command class header.
+ *\brief Contains the classes Commands, Command, and Oper.
+ */
+/**
+ * \class Commands
+ * \brief A wrapper class for IRC Commands.
+ * Contains functions used to send IRC protocol commands to the server.
+ * \note The Commands class (which sends IRC Commands to the server), should
+ * not be confused with the Command class (which is used to trigger module responses).
  */
 class Commands
 {
@@ -30,7 +43,13 @@ public:
   void join(const Flux::string&);
   void whois(const Flux::string&);
   void names(const Flux::string&);
+  void away(const Flux::string&);
 };
+/**
+ * \class Oper
+ * \brief A wrapper class for IRC Oper commands.
+ * Contains IRC operator commands.
+ */
 class Oper
 {
 public:
@@ -58,6 +77,12 @@ public:
   void kline(const Flux::string&, const Flux::string&, const Flux::string&);
   void gline(const Flux::string&, const Flux::string&, const Flux::string&);
 };
+/**
+ * \class Command
+ * \brief A wrapper clas for Module commands
+ * Contains methods and properties for handling/getting information from module commands.
+ * \note Not to be confused with the Commands class.
+ */
 class Command
 {
   Flux::string desc;

@@ -105,6 +105,9 @@ void Commands::topic(const Flux::string &chan, const Flux::string &msg){
 void Commands::nick(const Flux::string &bnick){
   this->raw("NICK %s\n", bnick.c_str());
 }
+void Commands::away(const Flux::string &message){
+ send_cmd("AWAY :%s", message.c_str()); 
+}
 /**
  * \fn void command::oper(Flux::string oper, Flux::string password)
  * \brief Sends IRC command /oper
@@ -296,10 +299,15 @@ void CommandSource::Reply(const Flux::string &msg){
 /* why is this in here with the rest of the commands that send to the server? i dont fucking know lol */
 Command::Command(const Flux::string &sname, size_t min_params, size_t max_params): MaxParams(max_params), MinParams(min_params), name(sname)
 {
+  SET_SEGV_LOCATION();
+  for(unsigned i=0; i < sname.size(); ++i) //commands with spaces can screw up the command handler
+    if(isspace(sname[i]))
+      throw ModuleException("Commands cannot contain spaces!");
   this->mod = NULL;
 }
 Command::~Command()
 {
+  SET_SEGV_LOCATION();
   if(this->mod){
     CommandMap::iterator it = ChanCommandMap.find(this->name);
    if(it->second != NULL)

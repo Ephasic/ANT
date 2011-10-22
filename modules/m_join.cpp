@@ -17,13 +17,13 @@ public:
     Flux::string chan = params[1];
     if(!u->IsOwner()){
       source.Reply(ACCESS_DENIED);
-      log(LOG_NORMAL, "%s attempted to make bot join %s", u->nick.c_str(), chan.c_str());
+      Log(u) << "attempted to make the bot join " << chan;
       return;
     }
-    if(!IsValidChannel(chan)){
+    if(!IsValidChannel(chan))
       source.Reply(CHANNEL_X_INVALID, chan.c_str());
-    }else{
-      log(LOG_NORMAL, "%s made the bot join %s", u->nick.c_str(), chan.c_str());
+    else{
+      Log(u) << "made the bot join " << chan;
       Channel *c = findchannel(chan);
       if(c){
 	c->SendJoin();
@@ -50,19 +50,18 @@ public:
     User *u = source.u;
     if(!u->IsOwner()){
      source.Reply(ACCESS_DENIED);
-     log(LOG_NORMAL, "%s attempted to make bot part %s", u->nick.c_str(), chan.c_str());
+     Log(u) << "attempted to make bot part " << chan;
      return;
     }
     if(!IsValidChannel(chan))
-    {
      source.Reply(CHANNEL_X_INVALID, chan.c_str());
-    }else{
+    else{
       Channel *c = findchannel(chan);
       if(c)
 	c->SendPart();
       else
 	source.Reply("I am not in channel \2%s\2", chan.c_str());
-      log(LOG_NORMAL, "%s made the bot part %s", u->nick.c_str(), chan.c_str());
+      Log(u) << "made the bot part " << chan;
     }
   }
 };
@@ -71,7 +70,7 @@ class Join : public module
   CommandJoin cmdjoin;
   CommandPart cmdpart;
 public:
-  Join():module("JOIN", PRIORITY_DONTCARE)
+  Join(const Flux::string &Name):module(Name)
   { 
     this->AddCommand(&cmdjoin);
     this->AddCommand(&cmdpart);

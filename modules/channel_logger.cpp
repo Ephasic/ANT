@@ -27,14 +27,13 @@
  */
 
 void CLog(const char *fmt, ...){
-  const Flux::string chanlogfile = Config->LogChannel+".log";
   std::fstream clog;
   try{
-  clog.open(chanlogfile.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
-  if(!clog.is_open())
-     throw LogException("Failed to open log file.");
+    clog.open(Flux::string(Config->LogChannel+".log").c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
+    if(!clog.is_open())
+      throw LogException("Failed to open log file.");
   }catch (LogException &e){
-   log(LOG_NORMAL, "Log Exception Caught: %s", e.GetReason());
+    Log() << "Channel Logger Exception: " << e.GetReason();
   }
   va_list args;
   va_start(args, fmt);
@@ -53,9 +52,10 @@ void CLog(const char *fmt, ...){
 }
 class Chanlog:public module{
 public:
-  Chanlog():module("ChannelLogger", PRIORITY_LAST){ 
+  Chanlog(const Flux::string &Name):module(Name){ 
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
+    this->SetPriority(PRIORITY_LAST);
     Implementation i[] = { I_OnPart, I_OnPrivmsg, I_OnNotice, I_OnJoin, I_OnQuit, I_OnJoin, I_OnChannelMode, I_OnChannelOp };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
   }
@@ -64,10 +64,9 @@ public:
     if(c->name != Config->LogChannel)
       return;
     Flux::string msg;
-    for(unsigned i=0; i < params.size(); ++i){
-      msg += params[i];
-      msg.AddSpace();
-    }
+    for(unsigned i=0; i < params.size(); ++i)
+      msg += params[i]+' ';
+    
     msg.trim();
     if(nolog != "#nl" && u){
       if(nolog == "\001ACTION"){
@@ -82,10 +81,9 @@ public:
     if(c->name != Config->LogChannel)
       return;
     Flux::string msg;
-    for(unsigned i=0; i < params.size(); ++i){
-      msg += params[i];
-      msg.AddSpace();
-    }
+    for(unsigned i=0; i < params.size(); ++i)
+      msg += params[i]+' ';
+      
     msg.trim();
     Flux::string nolog = params.size() == 2?params[1]:"";
     if(nolog != "#nl" && u){
@@ -115,7 +113,6 @@ public:
 	return;
     CLog("*** %s sets mode %s %s %s", u->nick.c_str(), c->name.c_str(), mode.c_str(), nick.c_str());
   }
-
 };
 MODULE_HOOK(Chanlog)
 /**

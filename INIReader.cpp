@@ -5,34 +5,74 @@
 #include <iostream>
 #include <fstream>
 #include "INIReader.h"
+#include "log.h"
+bool in_comment = false;
 int INIReader::Parse(const Flux::string &filename)
 {
- std::ifstream file(filename.c_str());
+  SET_SEGV_LOCATION();
+  std::ifstream file(filename.c_str());
   int linenum, error =0;
   Flux::string line, section, name, value;
   if(file.is_open())
   {
    while(file.good())
-   { 
+   {
+    bool contin = false;
     std::getline(file, line.std_str());
     linenum++;
     line.trim();
+    //printf("UNPARSED: %s\n", line.c_str());
     
-    if(line[0] == ';' || line[0] == '#' || line.empty()){ continue; } // Do nothing if any of this is true
-    else if(line[0] == '[' && line[line.size() -1] == ']')
+    if(line[0] == ';' || line[0] == '#' || line.empty())
+      continue;  // Do nothing if any of this is true
+    /********************************************/
+    unsigned c=0, len = line.length();
+    for(; c < len; ++c)
+    {
+      char ch = line[c];
+      if(in_comment){
+	if(ch == '*' && c+1 < len && line[c+1] == '/')
+	{
+	  in_comment = false;
+	  line = line.erase(c, c+2);
+	  line.trim();
+	  if((line[0] == '[' && line[line.size() -1] == ']') || (!line.empty() && line.find_first_of('=')))
+	    continue;
+	  else
+	    contin = true;
+	  ++c;
+	}
+	continue;
+      }
+      else if(ch == '/' && c+1 < len && line[c+1] == '*')
+      {
+	in_comment = true;
+	++c;
+	continue;
+      }
+    }
+    if(line.search("/*") && line.search("*/")){
+      in_comment = contin = false;
+      line = line.erase(line.find("/*"), line.find("*/"));
+      line.trim();
+    }
+    if(in_comment || contin)
+      continue;
+    /********************************************/
+    //printf("PARSING: %s\n", line.c_str());
+    if(line[0] == '[' && line[line.size() -1] == ']')
     {
       line = line.erase(0,1);
       section = line.erase(line.size()-1,line.size());
       section.trim(); 
     }
     else if((line[0] == '[' && line[line.size()-1] != ']') || (line[0] != '[' && line[line.size() -1] == ']'))
-      error = linenum; 
+      error = linenum;
     else if(!line.empty() && line.find_first_of('=')){
       name = line;
       int d = line.find_first_of('=');
-      if(line.find_first_of(';') < (unsigned)d){
+      if(line.find_first_of(';') < (unsigned)d)
 	error = linenum;
-      }
       else if(d > 0){
 	name = name.erase(d, name.size()-d);
 	name.trim();
@@ -44,21 +84,23 @@ int INIReader::Parse(const Flux::string &filename)
       if(value.find_first_of(';')){ //We only erase ';' (semi-colons) if we find them, we cannot erase # signs for
 	int i = value.find_first_of(';'); // channels would look like comments.. maybe we can fix this one day..
 	if(i > 0){
-	  value = value.erase(i, value.size()-i);
+	  value = value.erase(i, Flux::string::npos);
 	}
       }
       value.trim();
       /************************************/
-      
+      //printf("PARSED: %s | %s | %s | %s | %i\n", line.c_str(), value.c_str(), name.c_str(), section.c_str(), error);
       if(error != 0)
 	break;
-      else if(value.empty() || section.empty() || name.empty() || value.find(';') != (unsigned)-1)
+      else if(value.empty() || section.empty() || name.empty() || value.search(';'))
 	error = linenum;
       else
       _values[this->MakeKey(section, name)] = value;
     }else
       error = linenum;
    }
+   if(in_comment)
+      error = linenum;
    file.close();
   }else
     return -1;
@@ -101,13 +143,29 @@ Flux::string INIReader::MakeKey(const Flux::string &section, const Flux::string 
 /**************************************************************************************/
 BotConfig::BotConfig()
 {
+ SET_SEGV_LOCATION();
  Flux::string conffile = binary_dir + "/bot.conf";
- this->Parser = new INIReader(conffile);
- this->Binary_Dir = binary_dir;
- this->Read();
+ try
+ {
+  this->Parser = new INIReader(conffile);
+  this->Binary_Dir = binary_dir;
+  this->Read();
+  if(this->Parser->ParseError() == -1)
+    throw ConfigException("Cannot open '"+conffile+"'");
+  if(this->Parser->ParseError() != 0)
+    throw ConfigException(fsprintf("Error on line %i", this->Parser->ParseError()));
+ }catch(const ConfigException &e){
+   if (starttime == time(NULL))
+     throw CoreException(fsprintf("Config: %s", e.GetReason()));
+   else
+      Log(LOG_TERMINAL) << "Config Exception: " << e.GetReason();
+   return;
+   //delete this; //This makes segfault :D
+ }
 }
 BotConfig::~BotConfig() { if(Parser) delete Parser; }
 void BotConfig::Read(){
+  SET_SEGV_LOCATION();
   this->LogFile = this->Parser->Get("Log","Log_File","navn.log");
   this->ServicesAccount = this->Parser->Get("Bot","NickServ_Account","");
   this->ServicesPass = this->Parser->Get("Bot","NickServ_Password","");
@@ -125,6 +183,6 @@ void BotConfig::Read(){
   this->OperatorPass = this->Parser->Get("Oper","Oper_Password","");
   this->ModuleDir = Parser->Get("Modules", "ModuleDir", "");
   this->Modules = Parser->Get("Modules", "Modules", "");
-  log(LOG_TERMINAL, "\033[22;31mReading Config File\033[22;30m...\033[22;36m");
+  Log(LOG_TERMINAL) << "\033[22;31mReading Config File\033[22;30m...\033[0m";
 }
 

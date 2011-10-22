@@ -169,7 +169,7 @@ DEPRECATED(bool said(Flux::string findee)){
   *  very useful to have outside of an \a irc_string object.
   * \return True if \a findee was found, false otherwise.
   */
-static bool said(Flux::string source, Flux::string findee){
+DEPRECATED(static bool said(Flux::string source, Flux::string findee)){
   unsigned i = source.find(findee);
   if (i != Flux::string::npos){
     return true;
@@ -183,7 +183,8 @@ static bool said(Flux::string source, Flux::string findee){
  * \brief Wrapper for an irc host
  * This was written by Justasic to break up the parts of a messages host for easier use.
  */
-class IsoHost:Flux::string{
+class IsoHost:Flux::string
+{
 public:
     Flux::string raw;
     Flux::string nick;
@@ -224,38 +225,45 @@ Flux::string removeCommand(Flux::string command, Flux::string s){
  * \return A Flux::string without any special characters other than %
  */
 Flux::string urlify(const Flux::string &received){
-  Flux::string string = received;
-  string = string.replace_all_cs("%","%25"); //% is first so we dont replace something we just replaced
-  string = string.replace_all_cs(" ","%20");
-  string = string.replace_all_cs("+","%2B");
-  string = string.replace_all_cs("$","%24");
-  string = string.replace_all_cs("&","%26");
-  string = string.replace_all_cs(",","%2C");
-  string = string.replace_all_cs("/","%2F");
-  string = string.replace_all_cs(":","%3A");
-  string = string.replace_all_cs(";","%3B");
-  string = string.replace_all_cs("=","%3D");
-  string = string.replace_all_cs("?","%3F");
-  string = string.replace_all_cs("@","%40");
-  string = string.replace_all_cs("#","%23");
-  string = string.replace_all_cs(">","%3E");
-  string = string.replace_all_cs("<","%3C");
-  string = string.replace_all_cs("{","%7B");
-  string = string.replace_all_cs("}","%7D");
-  string = string.replace_all_cs("|","%7C");
-  string = string.replace_all_cs("\\","%5C");
-  string = string.replace_all_cs("^","%5E");
-  string = string.replace_all_cs("~","%7E");
-  string = string.replace_all_cs("[","%5B");
-  string = string.replace_all_cs("]","%5D");
-  string = string.replace_all_cs("`","%60");
-  string = string.replace_all_cs("*","%2A");
-  string = string.replace_all_cs("(","%28");
-  string = string.replace_all_cs(")","%29");
-  string = string.replace_all_cs("'","%27");
-  string = string.replace_all_cs("\"","%22");
-  string = string.replace_all_cs(".","%2E");
-  string = string.replace_all_cs("-","%2D");
+  Flux::string string;
+  for(unsigned i=0; i < received.size(); ++i){
+    switch(received[i]){
+      case '%': string = string+"%25"; break;
+      case ' ': string = string+"%20"; break;
+      case '+': string = string+"%2B"; break;
+      case '$': string = string+"%24"; break;
+      case '&': string = string+"%26"; break;
+      case ',': string = string+"%2C"; break;
+      case '/': string = string+"%2F"; break;
+      case ':': string = string+"%3A"; break;
+      case ';': string = string+"%3B"; break;
+      case '=': string = string+"%3D"; break;
+      case '?': string = string+"%3F"; break;
+      case '@': string = string+"%40"; break;
+      case '#': string = string+"%23"; break;
+      case '>': string = string+"%3E"; break;
+      case '<': string = string+"%3C"; break;
+      case '{': string = string+"%7B"; break;
+      case '}': string = string+"%7D"; break;
+      case '|': string = string+"%7C"; break;
+      case '\\':string = string+"%5C"; break;
+      case '^': string = string+"%5E"; break;
+      case '~': string = string+"%7E"; break;
+      case '[': string = string+"%5B"; break;
+      case ']': string = string+"%5D"; break;
+      case '`': string = string+"%60"; break;
+      case '*': string = string+"%2A"; break;
+      case '(': string = string+"%28"; break;
+      case ')': string = string+"%29"; break;
+      case '\'':string = string+"%27"; break;
+      case '"': string = string+"%22"; break;
+      case '.': string = string+"%2E"; break;
+      case '-': string = string+"%2D"; break;
+      default:
+	string = string+received[i];
+    }
+    //string = string.erase(0, received.size());
+  }
   return string;
 }
 /** 
@@ -265,12 +273,12 @@ Flux::string urlify(const Flux::string &received){
  * \return A Flux::string containing the response from the OS.
  */
 Flux::string execute(const char *cmd) {
-/* 
- * Roses are red,
- * Violets are blue,
- * I read StackOverflow
- * And so do you!
- */
+   /* 
+    * Roses are red,
+    * Violets are blue,
+    * I read StackOverflow
+    * And so do you!
+    */
     #ifdef _WIN32
     FILE* pipe = _popen
     #else
@@ -290,37 +298,28 @@ Flux::string execute(const char *cmd) {
     #endif
     return result;
 }
-
-/** 
- * \fn static void remove_pidfile()
- * \brief Removes the PID file on exit
- */
-static void remove_pidfile()
-{
- Delete(Config->PidFile.c_str());
-}
 /** 
  * \fn static void restart(Flux::string reason)
  * \brief Restart the bot process
  * \param reason The reason for the restart
  */
-void restart(Flux::string reason){
+void restart(const Flux::string &reason){
   char CurrentPath[FILENAME_MAX];
   GetCurrentDir(CurrentPath, sizeof(CurrentPath));
+  FOREACH_MOD(I_OnRestart, OnRestart(reason));
   if(reason.empty()){
-    reason = "No Reason";
+    Log() << "Restarting: No Reason";
+    Send->command->quit("Restarting: No Reason");
   }else{
-    FOREACH_MOD(I_OnRestart, OnRestart(reason));
-    log(LOG_NORMAL, "Restarting: %s", reason.c_str());
+    Log() << "Restarting: " << reason;
     Send->command->quit("Restarting: %s", reason.c_str());
-    chdir(CurrentPath);
-    int execvpret = execvp(my_av[0], my_av);
-    if(execvpret > 0){
-      throw CoreException("Restart Failed, Exiting");
-    }
-    remove_pidfile();
-    exit(1);
   }
+  chdir(CurrentPath);
+  int execvpret = execvp(my_av[0], my_av);
+  if(execvpret > 0)
+    throw CoreException("Restart Failed, Exiting");
+  Delete(Config->PidFile.c_str());
+  exit(1);
 }
 
 /** 
@@ -328,111 +327,27 @@ void restart(Flux::string reason){
  * \brief Reload the bot config file
  * \param boolean this boolean tells rehash if we are starting from start or not
  */
-static void Rehash(bool onstart = false){
-  if(!onstart)
-    log(LOG_NORMAL, "Rehashing Config File: bot.conf");
+void Rehash(){
+  Log() << "Rehashing Configuration File";
   try{
       BotConfig *configtmp = Config;
       Config = new BotConfig();
       delete configtmp;
-    if(Config->Parser->ParseError() == -1)
-      throw ConfigException("Cannot open file bot.conf");
-    if (Config->Parser->ParseError() != 0) {
-      Flux::string error = "Error on line ";
-      error += Flux::stringify(Config->Parser->ParseError());
-	throw ConfigException(error);
-    }
-    FOREACH_MOD(I_OnReload, OnReload(onstart));
+      if(!Config)
+	throw ConfigException("Could not read config.");
+    FOREACH_MOD(I_OnReload, OnReload());
     ReadConfig();
   }catch(const ConfigException &ex){
-    if(onstart){
-      Flux::string cfgerr = "Config: ";
-      cfgerr += ex.GetReason();
-      throw CoreException(cfgerr.c_str());
-    }
-    log(LOG_NORMAL, "Config Exception Caught: %s", ex.GetReason());
-    if(!onstart)
-      Send->notice(Config->Owner, "Config Exception Caught: %s", ex.GetReason());
-  } 
-}
-/**Random Quit message selector
- * This is where it will set the quit message if there was a terminal quit or signal interrupt (ctrl+c)
- * @param siginit(integer)
- */
-Flux::string siginit(int sigstring){
-  Flux::string message;
-  switch(sigstring){
-    case 1: message = "Read on an empty pipe (ENOTOBACCO)"; break;
-    case 2: message = "Invalid syntax (EBEFOREI)"; break;
-    case 3: message = "Core dumped (ECHERNOBYL)"; break;
-    case 4: message = "Program exited before being run (ECRAY)"; break;
-    case 5: message = "The daemon is dead (EDINGDONG)"; break;
-    case 6: message = "System needs tuning (EFLAT)"; break;
-    case 7: message = "Program written by inept Frat member (EGEEK)"; break;
-    case 8: message = "Here-a-bug, there-a-bug, .... (EIEIO)"; break;
-    case 9: message = "Missing period (EIUD)"; break;
-    case 10: message = "Your code could stand to be cleaned up (ELECTROLUX)"; break;
-    case 11: message = "Wrong fork (EMILYPOST)"; break;
-    case 12: message = "Silo overflow (END.ARMS.CONTROL)"; break;
-    case 13: message = "Mount failed (ENOHORSE)"; break;
-    case 14: message = "C program not derived from main() { printf(\"Hello, world\"); } (ENONSEQUETOR)"; break;
-    case 15: message = "Extended tape gap (EWATERGATE)"; break;
-    case 16: message = "Aliens sighted (EWOK)"; break;
-    case 17: message = "Your code appears to have been stir-fried (EWOK)"; break;
-    case 18: message = "The feature you want has not been implemented yet (EWOULDBNICE)"; break;
-    case 19: message = "Nuclear event occurred (SIGNUKE)"; break;
-    case 20: message = "Someone pressed CTRL + C.."; break;
-  }
-  return message;
-}
-/** Terminal Signal Handler
- * Come here for weird signals
- * @param sigact(integer)
- */
-void sigact(int sig)
-{
-  Flux::string sigstr;
-  switch (sig){
-    case SIGHUP:
-      signal(sig, SIG_IGN);
-      Rehash(false);
-      break;
-    case SIGINT:
-    case SIGKILL:
-    case SIGTERM:
-      signal(sig, SIG_IGN);
-      signal(SIGHUP, SIG_IGN);
-      sigstr = siginit(randint(1,20));
-      quitmsg = "Recieved Signal: "+sigstr;
-      if(Send)
-        Send->command->quit(quitmsg);
-      quitting = true;
-      break;
-    default:
-      log(LOG_NORMAL, "Recieved weird signal from terminal. Sig Number: %i\n",sig);
+    Log() << "Configuration Exception Caught: " << ex.GetReason();
+    Send->notice(Config->Owner, "Config Exception Caught: %s", ex.GetReason());
   }
 }
-/** \class InputThread
- * This thread allows for user input to be possible, this is activated when the nofork option is specified.
+
+/** 
+ * \fn static void remove_pidfile()
+ * \brief Removes the PID file on exit
  */
-class InputThread : public Thread
-{
-public:
-  InputThread():Thread() {}
-  ~InputThread() { log(LOG_TERMINAL, "Thread Ran Successfuly"); }
-  void ToRun()
-  {
-    std::string buf;
-    while(true)
-    {
-      std::getline(std::cin, buf);
-      if(Flux::string(buf).find_first_of_ci("QUIT") != Flux::string::npos)
-	quitting = true;
-      send_cmd("%s\n", buf.c_str());
-    }
-    SetExitState();
-  }
-};
+static void remove_pidfile() { Delete(Config->PidFile.c_str()); }
 /** 
  * \fn static void WritePID()
  * \brief Write the bots PID file
@@ -459,99 +374,79 @@ static void WritePID(){
  * @param startup(int, char)
  */
 void startup(int argc, char** argv) {
+  SET_SEGV_LOCATION();
   starttime = time(NULL); //for bot uptime
   binary_dir = getprogdir(argv[0]);
   if(binary_dir[binary_dir.length() - 1] == '.')
     binary_dir = binary_dir.substr(0, binary_dir.length() - 2);
   Config = new BotConfig();
-  if(Config->Parser->ParseError() == -1)
-      throw CoreException("Cannot open file bot.conf");
-  if (Config->Parser->ParseError() != 0) {
-    Flux::string error = "Error on line ";
-    error += Flux::stringify(Config->Parser->ParseError());
-      throw CoreException(error);
-  }
-  ModuleHandler::SanitizeRuntime();
-  ReadConfig();
+  if(!Config)
+    throw CoreException("Config Error.");
   signal(SIGTERM, sigact);
   signal(SIGINT, sigact);
   signal(SIGHUP, sigact);
+  signal(SIGSEGV, sigact);
   Flux::string dir = argv[0];
   Flux::string::size_type n = dir.rfind('/');
   dir = "." + dir.substr(n);
   //gets the command line paramitors if any.
-  int Terminal = isatty(0) && isatty(1) && isatty(2);
-  if (argc < 1 || argv[1] == NULL){
-  }else{
-    Flux::string arg = argv[1];
-    for(int Arg=0; Arg < argc; ++Arg){
-       if(arg == "--developer" || arg == "--dev" || arg == "-d")
+  if (!(argc < 1) || argv[1] != NULL){
+    for(int Arg=1; Arg < argc; ++Arg){
+      Flux::string arg = argv[Arg];
+       if((arg.equals_ci("--developer")) ^ (arg.equals_ci("--dev")) ^ (arg == "-d"))
        {
          dev = nofork = true;
-	 log(LOG_DEBUG, "%s is started in Developer mode. (%s)", Config->BotNick.c_str(), arg.c_str());
+	 Log(LOG_DEBUG) << Config->BotNick << " is started in Developer mode. (" << arg << ")";
        }
-       else if (arg == "--nofork" || arg == "-f"){
+       else if ((arg.equals_ci("--nofork")) ^ (arg == "-n")){
          nofork = true;
-         log(LOG_DEBUG, "%s is started With No Forking enabled. (%s)", Config->BotNick.c_str(), arg.c_str());
+	 Log(LOG_DEBUG) << Config->BotNick << " is started With No Forking enabled. (" << arg << ")";
        }
-       else if (arg == "--help" || arg == "-h"){
-	  log(LOG_TERMINAL, "\033[22;37mNavn Internet Relay Chat Bot v%s\n", VERSION);
-	  log(LOG_TERMINAL, "Usage: %s [options]\n", dir.c_str());
-	  log(LOG_TERMINAL, "-h, --help\n");
-	  log(LOG_TERMINAL, "-d, --developer\n");
-	  log(LOG_TERMINAL, "-f, --nofork\n");
-	  log(LOG_TERMINAL, "This bot does have Epic Powers.\n");
-	  exit(0);
+       else if ((arg.equals_ci("--help")) ^ (arg == "-h")){
+	 Log(LOG_TERMINAL) << "Navn Internet Relay Chat Bot v" << VERSION;
+	 Log(LOG_TERMINAL) << "Usage: " << dir << " [options]";
+	 Log(LOG_TERMINAL) << "-h, --help";
+	 Log(LOG_TERMINAL) << "-d, --developer";
+	 Log(LOG_TERMINAL) << "-f, --nofork";
+	 Log(LOG_TERMINAL) << "-p, --protocoldebug";
+	 Log(LOG_TERMINAL) << "-c, --nocolor";
+	 Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
+	 exit(0);
        }
-       else if (arg == "--version" || arg == "-v"){
-         log(LOG_TERMINAL, "\033[22;37mNavn IRC C++ Bot Version %s",VERSION_LONG.c_str());
-         log(LOG_TERMINAL, "This bot was programmed from scratch by Justasic and Lordofsraam.");
-         log(LOG_TERMINAL, "\n");
-         log(LOG_TERMINAL, "IRC: IRC.Flux-Net.net #Computers");
-         log(LOG_TERMINAL, "WWW: http://www.Flux-Net.net");
-         log(LOG_TERMINAL, "Email: Staff@Flux-Net.net");
-         log(LOG_TERMINAL, "Git: git://gitorious.org:navn/navn.git");
-         log(LOG_TERMINAL, "\n");
-         log(LOG_TERMINAL, "This bot does have Epic Powers.");
-         log(LOG_TERMINAL, "Type %s --help for help on how to use navn, or read the readme.", dir.c_str());
+       else if ((arg.equals_ci("--version")) ^ (arg == "-v")){
+	 Log(LOG_TERMINAL) << "Navn IRC C++ Bot Version " << VERSION_LONG;
+	 Log(LOG_TERMINAL) << "This bot was programmed from scratch by Justasic and Lordofsraam.";
+	 Log(LOG_TERMINAL) << "";
+	 Log(LOG_TERMINAL) << "IRC: IRC.Flux-Net.net #Computers";
+	 Log(LOG_TERMINAL) << "WWW: http://www.Flux-Net.net";
+	 Log(LOG_TERMINAL) << "Email: Staff@Flux-Net.net";
+	 Log(LOG_TERMINAL) << "Git: git://gitorious.org:navn/navn.git";
+	 Log(LOG_TERMINAL) << "";
+	 Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
+	 Log(LOG_TERMINAL) << "Type " << dir << " --help for help on how to use navn, or read the readme.";
          exit(0);
        }
-       else if(arg == "--protocoldebug" || "-p"){
+       else if((arg.equals_ci("--protocoldebug")) ^ (arg == "-p")){
 	 protocoldebug = true;
-	 nofork = true;
-	 log(LOG_RAWIO, "%s is started in Protocol Debug mode. (%s)", Config->BotNick.c_str(), arg.c_str());
+	 Log(LOG_RAWIO) << Config->BotNick << " is started in Protocol Debug mode. (" << arg << ")";
+       }
+       else if((arg.equals_ci("--nocolor")) ^ (arg == "-c")){
+	 nocolor = true;
+	 Log() << Config->BotNick << " is started in No Colors mode. (" << arg << ")\033[0m"; //reset terminal colors
        }
        else
        {
-	log(LOG_TERMINAL, "Unknown option %s", arg.c_str());
+	Log(LOG_TERMINAL) << "Unknown option " << arg;
 	exit(0);
        }
+    }
   }
-  }
-   WritePID();
-   log(LOG_NORMAL, "%s Started. PID: %d", Config->BotNick.c_str(), getpid());
-   FOREACH_MOD(I_OnStart, OnStart(argc, argv));
-   if (!nofork){
-	int i;
-	if((i = fork()) < 0)
-		throw CoreException("Unable to fork");
-	else if (i != 0){
-		log(LOG_TERMINAL, "Navn IRC Bot v%s Started.", VERSION);
-		log(LOG_TERMINAL, "Forking to background. PID: %i\033[22;37m", i);
-		exit(0);
-	}
-	if(Terminal){
-		close(0);
-		close(1);
-		close(2);
-	}
-	if(setpgid(0, 0) < 0)
-		throw CoreException("Unable to setpgid()");
-  }else
-  {
-    Thread *t = new InputThread();
-    t->Start();
-  }
+  if(!nocolor) Log(LOG_TERMINAL) << "\033[22;36m";
+  ModuleHandler::SanitizeRuntime();
+  ReadConfig();
+  WritePID();
+  FOREACH_MOD(I_OnStart, OnStart(argc, argv));
+  Fork();
 }
 /** 
  * \fn Flux::string xmlToString(Flux::string fileName)
@@ -560,12 +455,12 @@ void startup(int argc, char** argv) {
  */
 
 Flux::string xmlToString(const Flux::string &fileName){
-  std::string buf, line;
+  Flux::string buf, line;
   std::ifstream in(fileName.c_str());
-  while(std::getline(in,line)){
+  while(std::getline(in,line.std_str())){
     buf += line;
   }
-  return buf.c_str();
+  return buf;
 }
 /** 
  * \fn Flux::string findInXML(Flux::string node, Flux::string info, Flux::string fileString)
@@ -599,50 +494,7 @@ Flux::string findInXML(const Flux::string &node, const Flux::string &info, const
   }
   return output;
 }
-/*******************************************************************/
-namespace ThreadHandler
-{
-  class Thread
-  {
-  public:
-    virtual void ToRun(){};
-  };
-  Thread * porker;
-  void *nullpointer;
-  static inline pthread_attr_t *GetAttr()
-  {
-   static pthread_attr_t attr;
-   if(pthread_attr_init(&attr))
-     throw CoreException("Error calling pthread_attr_init for Threads");
-   if(pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE))
-     throw CoreException("Unable to make threads joinable");
-   return &attr;
-  }
-  void *bnyeh(void*)
-  {
-    porker->ToRun();
-    return nullpointer;
-  }
-  
-  void RunThread(Thread piggy)
-  {    
-    porker = &piggy;
-    pthread_t t1;
-    pthread_create(&t1,NULL,&bnyeh,NULL);
-  }
-}
 
 /***************************************************************************/
-
-//const Flux::string &modname,
-#define MODULE_HOOK(x) \
-extern "C" module *ModInit() \
-        { \
-                return new x(); \
-        } \
-        extern "C" void Moduninit(x *m) \
-        { \
-                delete m; \
-        }
         
 #endif

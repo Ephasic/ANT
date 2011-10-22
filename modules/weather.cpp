@@ -40,40 +40,34 @@ public:
     Channel *c = source.c;
     Flux::string area = params[params.size() - 1], tmpfile = TempFile(Config->Binary_Dir+"/runtime/navn_xml.tmp.XXXXXX"), wget;
     if(tmpfile.empty()){
-      log(LOG_NORMAL, "Failed to get a temp file.");
+      Log() << "Failed to get temp file";
       return;
     }
     area.trim();
-    
-    if(area.is_number_only())
-      wget = "wget -q -O "+tmpfile+" - http://www.google.com/ig/api?weather="+area;
-    else
-      wget = "wget -q -O "+tmpfile+" - http://www.google.com/ig/api?weather="+urlify(removeCommand(ci::string(this->name.ci_str()),source.message));
+    wget = "wget -q -O "+tmpfile+" - http://www.google.com/ig/api?weather="+(area.is_number_only()?area:urlify(removeCommand(ci::string(this->name.ci_str()),source.message)));
     system(wget.c_str());
     
-    if(!irc_string::said(xmlToString(tmpfile),"problem_cause")){
+    if(!xmlToString(tmpfile).search("problem_cause")){
       Flux::string ff = xmlToString(tmpfile);
       ff.trim();
       if(ff.empty()){
 	c->SendMessage("Could not download/read %s", tmpfile.c_str());
-	log(LOG_NORMAL, "%s attempted to use !weather but downloading/reading the file '%s' failed.", tmpfile.c_str());
+	Log(u) << "failed to use " << this->name << " because of failure to download/read file '" << tmpfile << '\'';
 	return;
       }
-      Flux::string loc = findInXML("city","data",ff);
-      Flux::string cond = findInXML("condition","data",ff);
-      Flux::string tempf = findInXML("temp_f","data",ff);
-      Flux::string tempc = findInXML("temp_c","data",ff);
+      Flux::string loc = findInXML("city","data",ff), cond = findInXML("condition","data",ff), tempf = findInXML("temp_f","data",ff),
+      tempc = findInXML("temp_c","data",ff);
       Delete(tmpfile.c_str());
       loc.trim();
       c->SendMessage("The current condition in %s is %s with a temperature of %s °F %s °C", loc.c_str(), cond.c_str(), tempf.c_str(), tempc.c_str());
-      log(LOG_NORMAL, "%s used !weather to get weather for area '%s'", u->nick.c_str(), area.c_str());
+      Log(u, this) << "to get weather for area '" << area << "'";
     }
   }
 };
 class weather:public module{
   CommandCWeather rainy;
 public:
-  weather():module("Weather", PRIORITY_DONTCARE){ 
+  weather(const Flux::string &Name):module(Name){ 
     this->SetAuthor("Lordofsraam");
     this->SetVersion(VERSION);
     this->AddChanCommand(&rainy);

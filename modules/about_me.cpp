@@ -48,9 +48,10 @@ class about_me : public module
 {
   CommandDecodeHost host;
 public:
-  about_me():module("About_Me", PRIORITY_LAST){ 
+  about_me(const Flux::string &Name):module(Name){ 
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
+    this->SetPriority(PRIORITY_LAST);
     this->AddChanCommand(&host);
     ModuleHandler::Attach(I_OnPrivmsg, this);
   }
@@ -58,10 +59,9 @@ public:
   void OnPrivmsg(User *u, Channel *c, const std::vector<Flux::string> &params)
   {
     Flux::string msg;
-    for(unsigned i=0; i < params.size(); ++i){
-      msg += params[i];
-      msg.AddSpace();
-    }
+    for(unsigned i=0; i < params.size(); ++i)
+      msg += params[i]+' ';
+    
     msg.trim();
     if(msg.equals_ci("about me")){
 	  //u->SendMessage("Raw: %s", source.raw.c_str()); This is broke till Justasic can find a fix.
@@ -71,7 +71,7 @@ public:
 	  u->SendMessage("Host: %s", u->host.c_str());
 	  u->SendMessage("Channel: %s", c->name.c_str());
 	  u->SendMessage("Fullhost: %s", u->fullhost.c_str());
-	  log(LOG_NORMAL, "%s requested information about themself.", u->nick.c_str());
+	  Log() << u->nick << " requested information about themself";
     }
  }
 };
