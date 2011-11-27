@@ -3,7 +3,7 @@
 #include "command.h"
 #include "user.h"
 
-class Log
+class CoreExport Log
 {
 protected:
   std::fstream log;
@@ -12,6 +12,7 @@ public:
   User *u;
   Command *c;
   std::stringstream buffer;
+  static Flux::string TimeStamp();
   Log(LogType type = LOG_NORMAL);
   Log(LogType, User*);
   Log(User*);
@@ -25,5 +26,4 @@ public:
    return *this;
   }
 };
-
 #endif

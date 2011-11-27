@@ -9,7 +9,6 @@
  * Justasic was having earlier. if you can fix it an easier 
  * way then do so.
  */
-
 #include "Socket.h"
 #include "timers.h"
 #include "SocketException.h"
@@ -20,7 +19,6 @@
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include <dirent.h>
-#include <pthread.h>
 #include <csignal>
 #include <unistd.h>
 #include <cstdlib>

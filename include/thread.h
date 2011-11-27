@@ -2,8 +2,9 @@
 #ifndef THREAD_H
 #define THREAD_H
 #include "includes.h"
+#include <pthread.h>
 
-class Thread
+class CoreExport Thread : public Base
 {
   pthread_t Handle;
   bool exit;

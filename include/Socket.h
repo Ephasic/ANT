@@ -20,15 +20,15 @@
 #include <ostream>
 #include <queue>
 #include <arpa/inet.h>
+
 #include "extern.h"
 #include "log.h"
 const int MAXHOSTNAME = 200;
 const int MAXCONNECTIONS = 5;
-class SocketIO
+class CoreExport SocketIO
 {
 private:
   Flux::string server, port;
-  Flux::string lastbuf;
   int sockn;
   size_t recvlen;
   struct addrinfo hints, *servinfo;
@@ -39,11 +39,12 @@ public:
   int GetFD() const;
   bool SetNonBlocking();
   bool SetBlocking();
-  const int recv() const;
-  const int send(const Flux::string &buf) const;
+  int recv() const;
+  int send(const Flux::string buf) const;
   bool Connect();
   bool is_valid() const { return this->GetFD() != -1; }
   int Process();
   bool Read(const Flux::string&) const;
+  void ThrowException(const Flux::string&);
 };
 #endif

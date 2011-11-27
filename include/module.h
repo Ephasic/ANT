@@ -2,11 +2,13 @@
 #ifndef MODULE_H
 #define MODULE_H
 #include "user.h"
-#include "includes.h"
-#ifdef HAVE_FCNTL_H
-# include <dlfcn.h>
-#else
-# error dlfcn.h is required by navn to compile modules!
+#include "command.h"
+#ifndef _WIN32
+# ifdef HAVE_FCNTL_H
+#  include <dlfcn.h>
+# else
+#  error dlfcn.h is required by navn to compile modules!
+# endif
 #endif
 enum Implementation{
   I_BEGIN,
@@ -16,18 +18,16 @@ enum Implementation{
 	I_OnCTCP, I_OnQuit, I_OnJoin, I_OnKick, I_OnConnectionError,
 	I_OnNotice, I_OnNickChange, I_OnChannelMode, I_OnUserMode,
 	I_OnChannelOp, I_OnPart, I_OnInvite, I_OnArgument, I_OnFork,
+	I_OnSocketError, I_OnPing, I_OnPong,
   I_END
-};
-enum ModuleReturn{
-  MOD_RUN,
-  MOD_STOP
 };
 enum ModulePriority{
   PRIORITY_FIRST,
   PRIORITY_DONTCARE,
   PRIORITY_LAST
 };
-class module{
+class CoreExport module : public Base
+{
   Flux::string author, version;
   time_t loadtime;
   ModulePriority Priority;
@@ -54,9 +54,12 @@ public:
   virtual void OnNotice(User*, const std::vector<Flux::string>&) {}
   virtual void OnNotice(User*, Channel*, const std::vector<Flux::string>&) {}
   virtual void OnCTCP(const Flux::string&, const std::vector<Flux::string>&) {}
+  virtual void OnPing(const std::vector<Flux::string>&) {}
+  virtual void OnPong(const std::vector<Flux::string>&) {}
   virtual void OnArgument(int, const Flux::string&) {}
   virtual void OnModuleLoad(module*) {}
   virtual void OnFork(int) {}
+  virtual void OnSocketError(const Flux::string&) {}
   virtual void OnModuleUnload(module*){}
   virtual void OnRestart(const Flux::string&) {}
   virtual void OnShutdown() {}
@@ -76,8 +79,10 @@ public:
   virtual void OnPostConnect(SocketIO*) {}
   virtual void OnConnectionError(const Flux::string&) {}
   virtual void OnInvite(User *u, const Flux::string&) {}
+  virtual void OnLoad() {} // This is NOT to be called by FOREACH_MOD!
 };
-class ModuleHandler
+
+class CoreExport ModuleHandler
 {
 public:
   static std::vector<module*> EventHandlers[I_END];
@@ -94,7 +99,4 @@ public:
 private:
   static bool DeleteModule(module*);
 };
-#define MODULE_HOOK(x) \
-extern "C" module *ModInit(const Flux::string &name) { return new x(name); } \
-extern "C" void ModunInit(x *m) { if(m) delete m; }
 #endif

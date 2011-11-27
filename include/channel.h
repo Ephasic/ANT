@@ -2,9 +2,9 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 /**
- * \include privmsg.h
+ * \include ircproto.h
  */
-#include "privmsg.h"
+#include "ircproto.h"
 /**
  * \file channel.h
  * \brief Contains the Channel class as well as all of it's contents as prototype declarations.
@@ -36,20 +36,22 @@
  * \brief Time the IRC Channel was last created.
  */
 typedef std::map<User*, Channel*> UList;
-class Channel
+class CoreExport Channel : public Base
 {
 public:
   Channel(const Flux::string&, time_t ts = time(NULL));
   ~Channel();
   UList UserList;
   User *finduser(const Flux::string&);
-  //some day we will hhave a mode manager here :P
+  //some day we will have a mode manager here :P
   //some day we will also have a user finder for a channel ;P
   Flux::string name;
   Flux::string topic;
   Flux::string topic_setter;
   time_t topic_time;
   time_t creation_time;
+  void AddUser(User*);
+  void DelUser(User*);
   void SendJoin();
   void SendPart();
   void SendPart(const Flux::string&);

@@ -20,12 +20,11 @@
 jmp_buf sigbuf;
 #endif
 char **my_av, **my_envp;
-bool nofork, dev, protocoldebug, IsOper, quitting, started, nocolor = false;
-Flux::string binary_path, bot_bin, binary_dir, quitmsg, server_name;
+bool nofork, dev, protocoldebug, IsOper, quitting, started, nocolor, istempnick = false;
+Flux::string binary_path, bot_bin, binary_dir, quitmsg, server_name, LastBuf;
 const Flux::string password = make_pass();
 char segv_location[255];
 time_t starttime = 0;
 /**********************Version Variables*************************/
-const Flux::string VERSION_LONG = Flux::stringify(VERSION)+"-"+Flux::stringify(VERSION_GIT)+Flux::stringify(VERSION_EXTRA);
 #endif
 
