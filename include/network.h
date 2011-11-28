@@ -11,4 +11,7 @@ struct CommitMessage
   Network *network;
 }
 
+class CoreExport Network
+{};
+
 #endif

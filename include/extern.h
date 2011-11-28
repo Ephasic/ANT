@@ -45,6 +45,9 @@ class Socket;
 class ClientSocket;
 class ListenSocket;
 class ConnectionSocket;
+class Bot;
+class Network;
+struct CommitMessage;
 struct CommandSource;
 
 /* Enumorations */
