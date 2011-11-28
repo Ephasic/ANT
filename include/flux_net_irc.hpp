@@ -28,155 +28,6 @@ Flux::string getprogdir(const Flux::string &dir){
   }
   return "/";
 }
-class irc_string:Flux::string{
-  /** \class irc_string
-   * NOTE this MUST be included in the main file.
-   * This class wraps around a Flux::string (usually revieved from the irc server)
-   * and attempts to decode all the info recieved from the server
-   * so as to make it easier to read different kinds of information
-   * (ei. who said something, their host, username, etc.)
-   * \param toks Private vector that will contain the words in \a message.
-   * \param raw_Flux::string Will hold the exact Flux::string that was recieved from the server.
-   * \param usernick Will hold the usernick of the person who sent the message.
-   * \param host Will hold the host of the person who sent the message.
-   * \param user Will hold the user of the person who sent the message.
-   * \param channel Will hold the channel of where the message was said.
-   * \param message Will hold the message (stripped of irc protocol stuff)
-   */
-  private:
-    std::vector<Flux::string> toks;
-  public:
-  Flux::string raw_string;
-  Flux::string usernick;
-  Flux::string host;
-  Flux::string user;
-  Flux::string channel;
-  Flux::string message;
-  /**
-   * \fn irc_string(Flux::string reply)
-   * \deprecated
-   *Constructor for \a irc_string class
-   * This is where the magic happens. The constructor takes the Flux::string
-   * and breaks it down into its component parts to find the
-   * \a usernick \a host \a user \a channel and \a message
-   */
-  DEPRECATED(irc_string(Flux::string reply)){
-    raw_string = reply;
-    usernick = isolate(':','!',reply);
-    host = isolate('@',' ',reply);
-    user = isolate('!','@',reply);
-    channel = '#'+isolate('#',' ',reply);
-    Flux::string space = " ";
-    size_t pos = reply.find(" :");
-    pos += 2;
-    for (unsigned i = pos; i < reply.size(); i++){
-      if (reply.at(i) == ' '){
-	message.append(space);
-      }else{message = message+reply.at(i);}
-    }
-    if(message.size()>2){
-      message.resize(message.size()-2);
-    }
-
-    Flux::string fmessage = message;
-    char * cmessage = (char *)fmessage.c_str();
-    char * pch;
-    pch = strtok(cmessage," ");
-    while (pch != NULL)
-    {
-      toks.push_back(pch);
-      pch = strtok(NULL, " ");
-    }
-  }
-  /**
-   * \fn Flux::string params(int i)
-   * \brief Returns individual words from the message of a reply
-   * \deprecated
-   * Because \a toks is private, this is its "get" function.
-   * We made this so someone writing a module doesn't try to go out
-   * of bounds while accessing an array.
-   * \param i An integer value.
-   * \return A Flux::string with the single specified word.
-   */
-  DEPRECATED(Flux::string params(unsigned i)){
-    if (i >= toks.size()){
-      return "";
-    }else{return toks[i];}
-  }
-  /**
-   * \overload Flux::string params(int b, int e)
-   * \brief Overload of params. Returns a range of words.
-   * \deprecated
-   * We overloaded \a params() so that you could get a range of words from the message
-   *  as requeseted by Justasic.
-   * \param b An integer value describing the place of the first word wanted.
-   * \param e An integer value describing the place of the last word wanted.
-   * \return A Flux::string withing the range of words specified by \a b and \a e
-   */
-  DEPRECATED(Flux::string params(unsigned b, unsigned e)){
-    Flux::string buf = "";
-    if (b >= toks.size()){
-      b = toks.size();
-    }
-    if (e >= toks.size()){
-      e = toks.size() - 1;
-    }
-    for (unsigned i = b; i <= (e); i++){
-      buf += toks[i];
-      buf.append(" ");
-    }
-    return buf;
-  }
-  /**
-   * \fn static Flux::string isolate(char begin, char end, Flux::string msg)
-   * \brief Isolates a Flux::string between two characters
-   * Finds the first character, then begins to add every consecutive character from there to a Flux::string
-   *  until it reaches the end character.
-   * \param begin The character saying where the cut should begin.
-   * \param end The character saying where the cut should end.
-   * \param msg The Flux::string you are wanting to isolate from.
-   */
-  DEPRECATED(static Flux::string cisolate(char begin, char end, Flux::string msg)){
-    Flux::string to_find;
-    size_t pos = msg.find(begin);
-    pos += 1;
-    for (unsigned i = pos; i < msg.length(); i++){
-      if (msg[i] == end)
-	break;
-      else
-	to_find = to_find+msg[i];
-    }
-    return to_find;
-  }
-  /**
-   * \fn bool said(Flux::string findee)
-   * \brief Check if something was said.
-   * \deprecated
-   * \param findee The Flux::string you want to check if was said.
-   * \return True if \a findee was found, false otherwise.
-   */
-  DEPRECATED(bool said(Flux::string findee)){
-    unsigned i = raw_string.find(findee);
-    if (i != Flux::string::npos){
-      return true;
-    }else{return false;}
-  }
-  /**
-   * \overload static bool said(Flux::string source, Flux::string findee)
-   * \brief Static overload of said() function.
-   * \param source A Flux::string that is to be searched through.
-   * \param findee The Flux::string that is to be found.
-   * We overloaded the said function and made it static because we thought it would be
-   *  very useful to have outside of an \a irc_string object.
-   * \return True if \a findee was found, false otherwise.
-   */
-  DEPRECATED(static bool said(Flux::string source, Flux::string findee)){
-    unsigned i = source.find(findee);
-    if (i != Flux::string::npos){
-      return true;
-    }else{return false;}
-  }
-};
 /**
  * \fn Flux::string removeCommand(Flux::string command, Flux::string s)
  * \brief Removes a command from a Flux::string.
@@ -253,11 +104,7 @@ Flux::string execute(const char *cmd) {
    * I read StackOverflow
    * And so do you!
    */
-  #ifdef _WIN32
-  FILE* pipe = _popen
-  #else
   FILE* pipe = popen(cmd, "r");
-  #endif
   if (!pipe) return "";
 		     char buffer[128];
   Flux::string result = "";
@@ -265,9 +112,6 @@ Flux::string execute(const char *cmd) {
     if(fgets(buffer, 128, pipe) != NULL)
       result += buffer;
   }
-  #ifdef _WIN32
-  _pclose(pipe);
-  #else
   pclose(pipe);
   #endif
   return result;
