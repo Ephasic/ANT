@@ -41,6 +41,10 @@ class IsoHost;
 class Clock;
 class TextFile;
 class XMLFile;
+class Socket;
+class ClientSocket;
+class ListenSocket;
+class ConnectionSocket;
 struct CommandSource;
 
 /* Enumorations */
