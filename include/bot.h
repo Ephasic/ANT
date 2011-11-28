@@ -17,6 +17,7 @@ public:
   Flux::string ident;
   /* Bot's current realname */
   Flux::string realname;
+  /* Announce a commit that has been made */
   void AnnounceCommit(CommitMessage&);
   
 };
