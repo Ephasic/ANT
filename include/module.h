@@ -19,7 +19,7 @@ enum Implementation{
 	I_OnCTCP, I_OnQuit, I_OnJoin, I_OnKick, I_OnConnectionError,
 	I_OnNotice, I_OnNickChange, I_OnChannelMode, I_OnUserMode,
 	I_OnChannelOp, I_OnPart, I_OnInvite, I_OnArgument, I_OnFork,
-	I_OnSocketError, I_OnPing, I_OnPong, I_OnCommit,
+	I_OnSocketError, I_OnPing, I_OnPong, I_OnCommit, I_OnDatabasesWrite,
   I_END
 };
 enum ModulePriority{
@@ -53,6 +53,7 @@ public:
   virtual void OnPrivmsg(User*, const std::vector<Flux::string>&) {}
   virtual void OnCommit(CommitMessage&) {}
   virtual void OnPrivmsg(User*, Channel*, const std::vector<Flux::string>&) {}
+  virtual void OnDatabasesWrite(void (*)(*const Flux::string&)) {}
   virtual void OnNotice(User*, const std::vector<Flux::string>&) {}
   virtual void OnNotice(User*, Channel*, const std::vector<Flux::string>&) {}
   virtual void OnCTCP(const Flux::string&, const std::vector<Flux::string>&) {}
