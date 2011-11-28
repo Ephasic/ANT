@@ -7,6 +7,7 @@ class Network;
 struct CommitMessage
 {
   std::vector<Flux::string> MessageMeta;
+  std::vector<Channel*> Channels;
   std::vector<Bot*> Bots;
   Network *network;
 }

@@ -4,10 +4,12 @@
 #include "module.h"
 #include "defs.h"
 #include "xmlfile.h"
+#include "network.h" //We'll solve includes later
+#include "bot.h"
 IRCProto *ircproto;
 SocketIO *sock;
 BotConfig *Config;
-module *LastRunModule;
+module *LastRunModule; // For crashes
 /**Runtime directory finder
  * This will get the bots runtime directory
  * @param getprogdir(const Flux::string dir)
