@@ -41,10 +41,6 @@ Flux::string siginit(int sigstring)
 void HandleSegfault(module *m)
 {
 #ifdef HAVE_BACKTRACE
-bool havecxx11 = false; //Check if we compiled with C++11
-#ifdef _CXX11
-havecxx11 = true;
-#endif
  void *array[10];
  char **strings;
  char tbuf[256];
@@ -71,7 +67,7 @@ havecxx11 = true;
    slog << "Navn version: " << VERSION_FULL << std::endl;
    slog << "System info: " << uts.sysname << " " << uts.nodename << " " <<  uts.release << " " << uts.machine << std::endl;
    slog << "System version: " << uts.version << std::endl;
-   slog << "C++ Version: " << __VERSION__ " C++11 support: " << (havecxx11?"true":"false") << std::endl;
+   slog << "C++ Version: " << __VERSION__ << std::endl;
    slog << "Socket Buffer: " << LastBuf << std::endl;
    slog << "Location: " << segv_location << std::endl;
    if(m){

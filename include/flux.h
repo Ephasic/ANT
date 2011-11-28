@@ -33,11 +33,7 @@
 #endif
 typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > base_string;
 extern CoreExport bool protocoldebug;
-#ifdef _CXX11
 template<typename T, typename V> inline auto value_cast(const V &y)
-#else
-template<typename T, typename V> inline T value_cast(const V &y)
-#endif
 {
   std::stringstream stream;
   T x;
@@ -48,9 +44,7 @@ template<typename T, typename V> inline T value_cast(const V &y)
       printf("Failed to convert %s to %s\n", typeid(V).name(), typeid(T).name());
   return x;
 }
-#ifdef _CXX11
 template<typename... param> void printf(const Flux::string &format, param... params) { printf(format.c_str(), params...); }
-#endif
 namespace Flux{
  class string;
 }

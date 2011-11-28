@@ -48,7 +48,7 @@ ModulePriority module::GetPriority() { return this->Priority; }
 int module::AddCommand(Command *c){
  if(!c)
    return 1;
- std::pair<CommandMap::iterator, bool> it = Commandsmap.insert(std::make_pair(c->name, c));
+ auto it = Commandsmap.insert(std::make_pair(c->name, c));
  if(it.second != true){
    Log() << "Command " << c->name << " already loaded!";
    return 2;
@@ -78,7 +78,7 @@ int module::DelCommand(Command *c){
 int module::AddChanCommand(Command *c){
  if(!c)
    return 1;
- std::pair<CommandMap::iterator, bool> it = ChanCommandMap.insert(std::make_pair(c->name, c));
+ auto it = ChanCommandMap.insert(std::make_pair(c->name, c));
  if(it.second != true){
    Log() << "Command " << c->name << " already loaded!";
    return 2;
@@ -108,7 +108,7 @@ int module::DelChanCommand(Command *c){
  * \param name A string containing the module name you're looking for
  */
 module *FindModule(const Flux::string &name){
-  Flux::insensitive_map<module*>::iterator it = Modules.find(name);
+  auto it = Modules.find(name);
   if(it != Modules.end())
     return it->second;
  return NULL;
@@ -157,7 +157,7 @@ Flux::string DecodeModErr(ModErr err){
  }
 }
 /*  This code was found online at http://www.linuxjournal.com/article/3687#comment-26593 */
-template<class TYPE> TYPE class_cast(void *symbol)
+template<class TYPE> auto class_cast(void *symbol)
 {
     union
     {
@@ -174,7 +174,7 @@ template<class TYPE> TYPE class_cast(void *symbol)
  * \param Module the module the Implementation is on
  */
 bool ModuleHandler::Detach(Implementation i, module *mod){
-  std::vector<module*>::iterator x = std::find(EventHandlers[i].begin(), EventHandlers[i].end(), mod);
+  auto x = std::find(EventHandlers[i].begin(), EventHandlers[i].end(), mod);
   if(x == EventHandlers[i].end())
     return false;
   EventHandlers[i].erase(x);
@@ -208,7 +208,7 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
   
   dlerror();
   
-  void *handle = dlopen(output.c_str(), RTLD_LAZY);
+  auto *handle = dlopen(output.c_str(), RTLD_LAZY); //We use auto here so windows code is easier to work with
   const char *err = dlerror();
   if(!handle && err && *err)
   {
@@ -239,7 +239,7 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
   }
   m->filepath = output;
   m->filename = (modname.search(".so")?modname:modname+".so");
-  m->handle = handle;
+  m->handle = reinterpret_cast<void*>(handle); //we'll convert to auto later, for now reinterpret_cast.
   m->OnLoad();
   FOREACH_MOD(I_OnModuleLoad, OnModuleLoad(m));
   return MOD_ERR_OK;
@@ -250,7 +250,7 @@ bool ModuleHandler::DeleteModule(module *m)
   if (!m || !m->handle)
 	  return false;
   
-  void *handle = m->handle;
+  auto *handle = m->handle;
   Flux::string filepath = m->filepath;
   
   dlerror();
@@ -278,13 +278,8 @@ bool ModuleHandler::Unload(module *m){
   return DeleteModule(m);
 }
 void ModuleHandler::UnloadAll(){
-#ifdef _CXX11
   for(auto var : Modules)
     Unload(var.second);
-#else
-  for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it)
-    Unload(it->second);
-#endif
 }
 Flux::string ModuleHandler::DecodePriority(ModulePriority p)
 {

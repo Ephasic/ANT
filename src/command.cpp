@@ -125,13 +125,13 @@ Command *FindCommand(const Flux::string &name, CommandType type){
     return NULL;
   if((type == COMMAND_PRIVATE))
   {
-    CommandMap::iterator it = Commandsmap.find(name);
+    auto it = Commandsmap.find(name);
       if(it != Commandsmap.end())
 	return it->second;
   }
   else if((type == COMMAND_CHANNEL))
   {
-    CommandMap::iterator it = ChanCommandMap.find(name);
+    auto it = ChanCommandMap.find(name);
     if(it != ChanCommandMap.end())
       return it->second;
   }
@@ -156,7 +156,7 @@ Command::Command(const Flux::string &sname, size_t min_params, size_t max_params
 Command::~Command()
 {
   if(this->mod){
-    CommandMap::iterator it = ChanCommandMap.find(this->name);
+    auto it = ChanCommandMap.find(this->name);
    if(it->second != NULL)
      this->mod->DelChanCommand(this);
    else
@@ -221,7 +221,7 @@ void Command::Run(CommandSource&, const std::vector<Flux::string>&) { }
 void Command::OnSyntaxError(CommandSource &source, const Flux::string &subcommand)
 {
  this->SendSyntax(source);
- CommandMap::iterator it = ChanCommandMap.find(this->name);
+ auto it = ChanCommandMap.find(this->name);
  if((it->second != NULL)){}else
     source.Reply("\002/msg %s HELP %s\002 for more information.", Config->BotNick.c_str(), source.command.c_str());
 }
