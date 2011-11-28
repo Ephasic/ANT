@@ -25,17 +25,10 @@ Load_Cache () {
 Run_Build_System () {
 	WITH_INST=""
 	RUN_CC_PL=""
-	WITH_CXX11=""
 	GEN_TYPE=""
 
 	if [ "$INSTDIR" != "" ] ; then
 		WITH_INST="-DINSTDIR:STRING=$INSTDIR"
-	fi
-
-	if [ "$USE_CXX_11" = "yes" ] ; then
-		WITH_CXX11="-DUSE_CXX_11:BOOLEAN=ON"
-	else
-		WITH_CXX11="-DUSE_CXX_11:BOOLEAN=OFF"
 	fi
 
 	if [ "$USE_RUN_CC_PL" = "yes" ] ; then
@@ -59,9 +52,9 @@ Run_Build_System () {
 		REAL_SOURCE_DIR="$SOURCE_DIR"
 	fi
 
-	echo "cmake $GEN_TYPE $WITH_INST $RUN_CC_PL $WITH_CXX11 $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR"
+	echo "cmake $GEN_TYPE $WITH_INST $RUN_CC_PL $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR"
 
-	cmake $GEN_TYPE $WITH_INST $RUN_CC_PL $WITH_CXX11 $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR
+	cmake $GEN_TYPE $WITH_INST $RUN_CC_PL $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR
 
 	echo ""
 	echo "Now cd build and run make to build Navn."
@@ -86,7 +79,6 @@ export ECHO2 ECHO2SUF
 
 INSTDIR=$HOME/navn
 USE_RUN_CC_PL="no"
-USE_CXX_11="no"
 EXTRA_CONFIG_ARGS=
 CAN_QUICK="no"
 SOURCE_DIR=`dirname $0`
@@ -193,29 +185,6 @@ echo ""
 
 ####
 
-TEMP_NY="n"
-if [ "$USE_CXX_11" = "yes" ] ; then
-	TEMP_NY="y"
-fi
-echo "You can optionally build using C++ 11, this is very experimental"
-echo "at this point and should only be enabled for advanced users."
-echo "Some compilers may not fully support C++ 11 but will accept"
-echo "the code, this may cause compiles to fail. There will be no"
-echo "support for build related errors if this option is enabled!"
-echo "Do you want to compile with C++ 11?"
-echo2 "[$TEMP_NY] "
-read YN
-if [ "$YN" ] ; then
-	if [ "$YN" = "y" ] ; then
-		USE_CXX_11="yes"
-	else
-		USE_CXX_11="no"
-	fi
-fi
-echo ""
-
-####
-
 echo "Are there any extra arguments you wish to pass to cmake?"
 echo "You may only need to do this if cmake is unable to locate"
 echo "missing dependencies without hints."
@@ -238,7 +207,6 @@ echo2 "Saving configuration results in config.cache... "
 cat <<EOT >$SOURCE_DIR/config.cache
 INSTDIR="$INSTDIR"
 USE_RUN_CC_PL="$USE_RUN_CC_PL"
-USE_CXX_11="$USE_CXX_11"
 EXTRA_CONFIG_ARGS="$EXTRA_CONFIG_ARGS"
 EOT
 echo "done."

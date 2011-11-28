@@ -82,11 +82,11 @@
 	extern "C" void ModunInit(x *m) { if(m) delete m; }
 #else // *nix
 	//If we're compiling with C++ 11
-	#if defined(__GXX_EXPERIMENTAL_CXX0X__) && defined(HAVE_CXX_11)
-	# define _CXX11
-	# include <atomic>
-	# include <thread>
+	#ifndef __GXX_EXPERIMENTAL_CXX0X__
+	# error Your compiler MUST support C++11 (C++0x) at least gnu C++ version 4.5!
 	#endif
+	#include <atomic>
+	#include <thread>
 	
 	#define GetCurrentDir getcwd
 	#define Delete unlink

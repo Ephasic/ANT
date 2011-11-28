@@ -136,9 +136,6 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 # Add an optional variable for using run-cc.pl for building, Perl will be checked later regardless of this setting
 option(USE_RUN_CC_PL "Use run-cc.pl for building" OFF)
 
-# Add an option for using C++ 11 during compile
-option(USE_CXX_11 "Use C++ 11 during compile" OFF)
-
 INCLUDE_DIRECTORIES(${ant_SOURCE_DIR}/src ${ant_SOURCE_DIR}/include)
 
 set(ENV{LC_ALL} C)
@@ -213,9 +210,11 @@ if(NOT MSVC)
     check_cxx_accepts_flag(-std=gnu++0x HAVE_CXX_11)
   endif(CMAKE244_OR_BETTER)
   # If the flag was accepted, add it to the list of flags
-  if(HAVE_CXX_11 AND USE_CXX_11)
+  if(HAVE_CXX_11)
     set(CXXFLAGS "${CXXFLAGS} -std=gnu++0x")
-  endif(HAVE_CXX_11 AND USE_CXX_11)
+  else(HAVE_CXX_11)
+    message(FATAL_ERROR "Your compiler MUST support C++11 (at least gnu C++ version 4.5)")
+  endif(HAVE_CXX_11)
   if(HAVE_PIPE_FLAG)
     set(CXXFLAGS "${CXXFLAGS} -pipe")
   endif(HAVE_PIPE_FLAG)
