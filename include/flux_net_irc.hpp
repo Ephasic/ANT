@@ -225,18 +225,20 @@ void startup(int argc, char** argv, char *envp[]) {
 	Log(LOG_DEBUG) << Config->BotNick << " is started With No Forking enabled. (" << arg << ")";
       }
       else if ((arg.equals_ci("--help")) ^ (arg == "-h")){
-	Log(LOG_TERMINAL) << "Navn Internet Relay Chat Bot v" << VERSION;
+	Log(LOG_TERMINAL) << "ANT Internet Relay Chat Commit Bot v" << VERSION;
 	Log(LOG_TERMINAL) << "Usage: " << dir << " [options]";
 	Log(LOG_TERMINAL) << "-h, --help";
 	Log(LOG_TERMINAL) << "-d, --developer";
 	Log(LOG_TERMINAL) << "-n, --nofork";
 	Log(LOG_TERMINAL) << "-p, --protocoldebug";
 	Log(LOG_TERMINAL) << "-c, --nocolor";
+	Log(LOG_TERMINAL) << "-v, --version";
+	Log(LOG_TERMINAL) << "See --version for full version information";
 	Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
 	exit(0);
       }
       else if ((arg.equals_ci("--version")) ^ (arg == "-v")){
-	Log(LOG_TERMINAL) << "Navn IRC C++ Bot Version " << VERSION_FULL;
+	Log(LOG_TERMINAL) << "Arbitrary Navn Tool IRC Commit System C++ Bot Version " << VERSION_FULL;
 	Log(LOG_TERMINAL) << "This bot was programmed from scratch by Justasic and Lordofsraam.";
 	Log(LOG_TERMINAL) << "";
 	Log(LOG_TERMINAL) << "IRC: IRC.Flux-Net.net #Computers";
