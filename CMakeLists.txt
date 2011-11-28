@@ -305,7 +305,7 @@ endif(INSTDIR)
 ADD_SUBDIRECTORY(modules)
 ADD_SUBDIRECTORY(src)
 
-set(CONFIG_INSTALL bot.example.conf ftp.sh brain.py README)
+set(CONFIG_INSTALL bot.example.conf README)
 install(FILES ${CONFIG_INSTALL}
   DESTINATION bin
 )

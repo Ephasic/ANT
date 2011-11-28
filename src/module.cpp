@@ -157,7 +157,7 @@ Flux::string DecodeModErr(ModErr err){
  }
 }
 /*  This code was found online at http://www.linuxjournal.com/article/3687#comment-26593 */
-template<class TYPE> auto class_cast(void *symbol)
+template<class TYPE> TYPE class_cast(void *symbol)
 {
     union
     {

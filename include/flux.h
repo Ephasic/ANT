@@ -32,8 +32,11 @@
 # define DllExport
 #endif
 typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > base_string;
+namespace Flux{
+  class string;
+}
 extern CoreExport bool protocoldebug;
-template<typename T, typename V> inline auto value_cast(const V &y)
+template<typename T, typename V> inline T value_cast(const V &y)
 {
   std::stringstream stream;
   T x;
@@ -43,10 +46,6 @@ template<typename T, typename V> inline auto value_cast(const V &y)
     if(protocoldebug)
       printf("Failed to convert %s to %s\n", typeid(V).name(), typeid(T).name());
   return x;
-}
-template<typename... param> void printf(const Flux::string &format, param... params) { printf(format.c_str(), params...); }
-namespace Flux{
- class string;
 }
 /** Case insensitive map, ASCII rules.
  * That is;
@@ -583,6 +582,9 @@ namespace Flux{
 
 }//end of namespace
 
+// Redefine the printf function so we can add our string to it
+template<typename... param> void printf(const Flux::string &format, param... params) { printf(format.c_str(), params...); }
+template<typename... param> void printf(const char *format, param... params) { printf(format, params...); }
 class CoreExport sepstream
 {
  private:

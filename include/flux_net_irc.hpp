@@ -113,7 +113,6 @@ Flux::string execute(const char *cmd) {
       result += buffer;
   }
   pclose(pipe);
-  #endif
   return result;
 }
 /**
