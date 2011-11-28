@@ -3,6 +3,7 @@
 #define MODULE_H
 #include "user.h"
 #include "command.h"
+#include "network.h"
 #ifndef _WIN32
 # ifdef HAVE_FCNTL_H
 #  include <dlfcn.h>
@@ -50,7 +51,7 @@ public:
   
   virtual ~module();
   virtual void OnPrivmsg(User*, const std::vector<Flux::string>&) {}
-  virtual void OnCommit(const std::vector<Flux::string> &messagedata) {}
+  virtual void OnCommit(CommitMessage&) {}
   virtual void OnPrivmsg(User*, Channel*, const std::vector<Flux::string>&) {}
   virtual void OnNotice(User*, const std::vector<Flux::string>&) {}
   virtual void OnNotice(User*, Channel*, const std::vector<Flux::string>&) {}
