@@ -567,6 +567,17 @@ ClientSocket::ClientSocket(ListenSocket *ls, int fd, const sockaddrs &addr) : Bu
 {
   this->Type = SOCKTYPE_CLIENT;
 }
+/********************************************************************************/
+#ifdef _AIX
+# undef FD_ZERO
+# define FD_ZERO(p) memset((p), 0, sizeof(*(p)))
+#endif
+
+static unsigned FDCount;
+static fd_set ReadFDs;
+static fd_set WriteFDs;
+
+void SocketEngine
 
 /*********************************************************************************/
 // bool throwex;
