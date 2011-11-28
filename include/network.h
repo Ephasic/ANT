@@ -12,6 +12,20 @@ struct CommitMessage
 }
 
 class CoreExport Network
-{};
+{
+public:
+  Network(const Flux::string &host, const Flux::string &p, const Flux::string &n = ""):hostname(host), port(p), name(n)
+  {
+    Log(LOG_DEBUG) << "New network created: " << n << " " << host << ':' << p;
+  }
+  Socket *s;
+  Flux::map<Bot*> bots;
+  Flux::string name;
+  Flux::string hostname;
+  Flux::string port;
+  Flux::string servername;
+  bool Disconnect();
+  bool Connect();
+};
 
 #endif
