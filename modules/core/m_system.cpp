@@ -146,30 +146,6 @@ public:
   }
 };
 
-class CommandChown : public Command
-{
-public:
-  CommandChown():Command("CHOWN", 1, 1)
-  {
-    this->SetDesc("Change ownership over the bot");
-    this->SetSyntax("\37owner\37");
-  }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
-  {
-    source.Reply("This command is broken!");
-  }
-  bool OnHelp(CommandSource &source, const Flux::string &nill)
-  {
-    this->SendSyntax(source);
-    source.Reply(" ");
-    source.Reply("This command changes the bots ownership to\n"
-		 "the one specified\n"
-		 "Note: You must know the user set password in\n"
-		 "the bots configuration");
-    return true;
-  }
-};
-
 class CommandQuit : public Command
 {
 public:
@@ -202,59 +178,6 @@ public:
 		 "the bot and the randomly generated password\n"
 		 "Note: You must be the bots owner or know the\n"
 		 "configuration set password to use this command");
-    return true;
-  }
-};
-
-class CommandTopic: public Command
-{
-public:
-  CommandTopic():Command("TOPIC", 2, 2)
-  {
-    this->SetDesc("Set the topic on a channel");
-    this->SetSyntax("\37channel\37 [\37topic\37]");
-  }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
-  {
-    User *u = source.u;
-    if(!u->IsOwner()){
-      source.Reply(ACCESS_DENIED);
-      return;
-    }
-    Flux::string tchan = params[1];
-    if(!IsValidChannel(tchan)){
-      source.Reply(CHANNEL_X_INVALID, tchan.c_str());
-      return;
-    }
-    Channel *ch = findchannel(tchan);
-    if(!ch){
-      source.Reply("I am not in channel \2%s\2", tchan.c_str());
-      return;
-    }
-    Flux::string msg = source.message;
-    msg = msg.erase(0,6);
-    msg = msg.erase(msg.find_first_of(tchan), tchan.size());
-    msg.trim();
-    ch->ChangeTopic(msg);
-    std::fstream topic;
-    topic.open("topic.tmp", std::fstream::in | std::fstream::out | std::fstream::app);
-    if(!topic.is_open()){
-	    source.Reply("Unable to write topic temp file");
-	    Log(u, this) << " in an attempt to change the topic in " << tchan << " and failed to write to temp file 'topic.tmp'";
-    }else{
-	    topic << "<?xml version=\"1.0\" ?><rss version=\"2.0\"><channel><topic> " << tchan << " Topic: " << msg.strip() << " </topic></channel></rss>" << std::endl;
-	    system("sh ftp.sh");
-    }
-    Log(u, this) << "to change " << tchan << "'s topic to \"" << msg << "\"";
-  }
-  bool OnHelp(CommandSource &source, const Flux::string &nill)
-  {
-    this->SendSyntax(source);
-    source.Reply(" ");
-    source.Reply("This command changes the channels topic\n"
-		 "and sends it to a web server for the changed\n"
-		 "topic in IRC. This uses the ftp.sh file"
-		 "Note: You must be a bot owner to use this command");
     return true;
   }
 };
@@ -318,98 +241,23 @@ public:
   }
 };
 
-class CommandStats: public Command
-{
-public:
-  CommandStats():Command("STATS", 0, 0)
-  {
-    this->SetDesc("Shows system stats");
-  }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
-  {
-    int days, hours, mins;
-#ifndef _WIN32
-    if(sysinfo(&sys_info) != 0){//now here Justasic got pissed because c strings suck ass
-      Flux::string fuckingshit = Flux::string("sys_info Error: ") + Flux::string(strerror(errno));
-      throw ModuleException(fuckingshit.c_str());
-    }
-    struct utsname uts;
-    if(uname(&uts) < 0){
-      Flux::string fuckingshit = Flux::string("uname() Error: ") + Flux::string(strerror(errno));
-      throw ModuleException(fuckingshit.c_str());
-    }
-
-    // Uptime
-    days = sys_info.uptime / 86400;
-    hours = (sys_info.uptime / 3600) - (days * 24);
-    mins = (sys_info.uptime / 60) - (days * 1440) - (hours * 60);
-
-    source.Reply("System Uptime: %d days, %d hours, %d minutes, %ld seconds",
-	  days, hours, mins, sys_info.uptime % 60);
-    source.Reply("Bot Uptime: %s", duration(time(NULL) - starttime).c_str());
-    
-    // Load Averages for 1,5 and 15 minutes
-    source.Reply("Load Avgs: 1min(%ld) 5min(%ld) 15min(%ld)",
-		    sys_info.loads[0], sys_info.loads[1], sys_info.loads[2]);
-
-    // Total and free ram.
-    source.Reply("Total Ram: %ldk\tFree: %ldk", sys_info.totalram / 1024,
-			    sys_info.freeram / 1024);
-
-    // Shared and buffered ram.
-    source.Reply("Shared Ram: %ldk", sys_info.sharedram / 1024);
-    source.Reply("Buffered Ram: %ldk", sys_info.bufferram / 1024);
-
-    // Swap space
-    source.Reply("Total Swap: %ldk\tFree: %ldk", sys_info.totalswap / 1024,
-				sys_info.freeswap / 1024);
-
-    // Number of processes currently running.
-    source.Reply("Number of processes: %d", sys_info.procs);
-    source.Reply(" ");
-    source.Reply("System Name: %s\tRelease: %s %s\tMachine: %s", uts.nodename, uts.sysname, uts.release, uts.machine);
-    source.Reply("System Version: %s", uts.version);
-
-    source.Reply(execute("grep 'model name' /proc/cpuinfo").strip());
-#else
-    source.Reply("This is currently not avalable on windows syetems, sorry.");
-#endif
-    Log(source.u, this) << "command";
-  }
-  bool OnHelp(CommandSource &source, const Flux::string &nill)
-  {
-    this->SendSyntax(source);
-    source.Reply(" ");
-    source.Reply("This command shows the system statistics that\n"
-		 "the bot is running on. This can be useful to\n"
-		 "quickly see how much stress the system is under\n"
-		 "that may affect the bot or to see system information");
-    return true;
-  }
-};
 class m_system : public module
 {
-  CommandChown cmdchown;
   CommandKick cmdkick;
   CommandRehash cmdrehash;
   CommandQuit cmdquit;
   CommandRestart cmdrestart;
-  CommandTopic topic;
-  CommandStats stats;
   CommandNick nick;
   CommandPID pid;
   CommandPass pass;
 public:
   m_system(const Flux::string &Name):module(Name)
   {
-    this->AddCommand(&cmdrehash);//So many commands! .-.
+    this->AddCommand(&cmdrehash);
     this->AddCommand(&cmdkick);
-    this->AddCommand(&cmdchown);
     this->AddCommand(&cmdquit);
     this->AddCommand(&cmdrestart);
     this->AddCommand(&nick);
-    this->AddCommand(&stats);
-    this->AddCommand(&topic);
     this->AddCommand(&pid);
     this->AddCommand(&pass);
     Implementation i[] = { I_OnNumeric, I_OnJoin, I_OnKick, I_OnNotice, I_OnChannelOp };
@@ -420,7 +268,7 @@ public:
   void OnNumeric(int i)
   {
     if((i == 4)){
-      ircproto->mode(Config->BotNick, "+B");
+      //ircproto->mode(Config->BotNick, "+B"); get bot mode?
       sepstream cs(Config->Channel, ',');
       Flux::string tok;
       while(cs.GetToken(tok))
@@ -456,12 +304,6 @@ public:
 	Log() << "Identified to " << Config->ServicesService << " with account \"" << Config->ServicesAccount << "\"";
       }
     }
-  }
-  void OnJoin(User *u, Channel *c)
-  {
-    u->SendMessage("Welcome %s to %s. Type !time for time or \"/msg %s help\" for help on more commands.", u->nick.c_str(),
-		   c->name.c_str(), Config->BotNick.c_str());
-    Log(u) << "joined " << c->name;
   }
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
   {
