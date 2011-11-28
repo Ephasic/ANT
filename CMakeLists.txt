@@ -9,47 +9,47 @@ endif(COMMAND cmake_policy)
 
 # If the Source dir and the Binary dir are the same, we are building in-source, which we will disallow due to Autotools being there (but only on non-Windows)
 if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR} AND NOT WIN32)
-  message(FATAL_ERROR "You can not use CMake to build Navn from the root of it's source tree! Remove the CMakeCache.txt file from this directory, then create a separate directory (either below this directory or elsewhere), and then re-run CMake from there.")
+  message(FATAL_ERROR "You can not use CMake to build ANT from the root of it's source tree! Remove the CMakeCache.txt file from this directory, then create a separate directory (either below this directory or elsewhere), and then re-run CMake from there.")
 endif(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR} AND NOT WIN32)
 
 #
 # Project name
 #
-PROJECT(navn CXX)
+PROJECT(ant CXX)
 enable_language(C)
 
 # Include our navn.cmake here
-SET(CMAKE_MODULE_PATH ${navn_SOURCE_DIR}/cmake)
+SET(CMAKE_MODULE_PATH ${ant_SOURCE_DIR}/cmake)
 include(navn)
 
 # Project version
-SET(${PROJECT_NAME}_MAJOR_VERSION 2)
+SET(${PROJECT_NAME}_MAJOR_VERSION 1)
 SET(${PROJECT_NAME}_MINOR_VERSION 0)
-SET(${PROJECT_NAME}_PATCH_LEVEL 1)
-SET(${PROJECT_NAME}_VERSION_EXTRA -with-netflix-and-chicken)
+SET(${PROJECT_NAME}_PATCH_LEVEL 0)
+SET(${PROJECT_NAME}_VERSION_EXTRA -put-something-here)
 
 # Get the git revision location for the branch we're on
-if(EXISTS "${navn_SOURCE_DIR}/.git/HEAD")
-  read_from_file(${navn_SOURCE_DIR}/.git/HEAD ".*" GIT_HEAD_LOC)
+if(EXISTS "${ant_SOURCE_DIR}/.git/HEAD")
+  read_from_file(${ant_SOURCE_DIR}/.git/HEAD ".*" GIT_HEAD_LOC)
   string(LENGTH ${GIT_HEAD_LOC} HEAD_LEN)
   math(EXPR LEN "${HEAD_LEN} - 5")
   string(SUBSTRING ${GIT_HEAD_LOC} 5 ${LEN} GIT_HEAD)
-endif(EXISTS "${navn_SOURCE_DIR}/.git/HEAD")
+endif(EXISTS "${ant_SOURCE_DIR}/.git/HEAD")
 
 # Get the git revision we're on for the version string
-if(EXISTS "${navn_SOURCE_DIR}/.git/${GIT_HEAD}")
-  read_from_file(${navn_SOURCE_DIR}/.git/${GIT_HEAD} ".*" VERSION_STR)
+if(EXISTS "${ant_SOURCE_DIR}/.git/${GIT_HEAD}")
+  read_from_file(${ant_SOURCE_DIR}/.git/${GIT_HEAD} ".*" VERSION_STR)
   # Get the length of the string
   string(LENGTH ${VERSION_STR} VERSION_LEN)
   # Subtract 7 from the string's length
   math(EXPR VERSION_NUM_LEN "${VERSION_LEN} - ${VERSION_LEN} + 7")
   # Extract the value from the string
   string(SUBSTRING ${VERSION_STR} 0 ${VERSION_NUM_LEN} VERSION_GIT)
-endif(EXISTS "${navn_SOURCE_DIR}/.git/${GIT_HEAD}")
+endif(EXISTS "${ant_SOURCE_DIR}/.git/${GIT_HEAD}")
 
 # Set our version strings
 SET(VERSION_SIMPLE "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_LEVEL}")
-SET(VERSION_FULL "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${navn_PATCH_LEVEL}-${VERSION_GIT}${${PROJECT_NAME}_VERSION_EXTRA}")
+SET(VERSION_FULL "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${ant_PATCH_LEVEL}-${VERSION_GIT}${${PROJECT_NAME}_VERSION_EXTRA}")
 
 # because some of this is copypasta we set this var here
 SET(PROGRAM_NAME ${PROJECT_NAME})
@@ -139,15 +139,10 @@ option(USE_RUN_CC_PL "Use run-cc.pl for building" OFF)
 # Add an option for using C++ 11 during compile
 option(USE_CXX_11 "Use C++ 11 during compile" OFF)
 
-INCLUDE_DIRECTORIES(${navn_SOURCE_DIR}/src ${navn_SOURCE_DIR}/include)
-# msvc++
-## IF(MSVC_IDE)
-##  SET(CMAKE_CXX_FLAGS "/DWIN32 /D_CONSOLE /DZLIB_WINAPI /fp:fast /EHsc")
-##  SET(CMAKE_CXX_FLAGS_DEBUG "/DDEBUG /D_DEBUG /MTd /Zi")
-## ENDIF(MSVC_IDE)
+INCLUDE_DIRECTORIES(${ant_SOURCE_DIR}/src ${ant_SOURCE_DIR}/include)
 
 set(ENV{LC_ALL} C)
-SOURCE_GROUP(${PROJECT_NAME} FILES ${navn_source})
+SOURCE_GROUP(${PROJECT_NAME} FILES ${ant_source})
 
 include(CheckFunctionExists)
 include(CheckIncludeFile)
@@ -242,7 +237,7 @@ if(NOT MSVC)
     if(HAVE_PTHREAD)
       set(LDFLAGS "${LDFLAGS} -pthread")
     else(HAVE_PTHREAD)
-      message(FATAL_ERROR "The pthread library is required to build Navn")
+      message(FATAL_ERROR "The pthread library is required to build ANT")
     endif(HAVE_PTHREAD)
   endif(NOT WIN32)
 endif(NOT MSVC)
@@ -296,16 +291,16 @@ if(LDFLAGS)
 endif(LDFLAGS)
 
 if(PERL AND USE_RUN_CC_PL)
-  set(CMAKE_CXX_COMPILE_OBJECT "${PERL} ${navn_SOURCE_DIR}/run-cc.pl -q ${CMAKE_CXX_COMPILE_OBJECT}")
-  set(CMAKE_CXX_LINK_EXECUTABLE "${PERL} ${navn_SOURCE_DIR}/run-cc.pl -q ${CMAKE_CXX_LINK_EXECUTABLE}")
-  set(CMAKE_CXX_CREATE_SHARED_MODULE "${PERL} ${navn_SOURCE_DIR}/run-cc.pl -q ${CMAKE_CXX_CREATE_SHARED_MODULE}")
+  set(CMAKE_CXX_COMPILE_OBJECT "${PERL} ${ant_SOURCE_DIR}/run-cc.pl -q ${CMAKE_CXX_COMPILE_OBJECT}")
+  set(CMAKE_CXX_LINK_EXECUTABLE "${PERL} ${ant_SOURCE_DIR}/run-cc.pl -q ${CMAKE_CXX_LINK_EXECUTABLE}")
+  set(CMAKE_CXX_CREATE_SHARED_MODULE "${PERL} ${ant_SOURCE_DIR}/run-cc.pl -q ${CMAKE_CXX_CREATE_SHARED_MODULE}")
 endif(PERL AND USE_RUN_CC_PL)
 
 # If a INSTDIR was passed in to CMake, use it as the install prefix, otherwise set the default install prefix to the bots directory under the user's home directory
 if(INSTDIR)
   set(CMAKE_INSTALL_PREFIX "${INSTDIR}")
 else(INSTDIR)
-  set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/navn")
+  set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/ANT")
 endif(INSTDIR)
 
 ADD_SUBDIRECTORY(modules)
