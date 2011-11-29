@@ -184,6 +184,8 @@ class CoreExport Socket
 protected:
   /* Socket FD */
   int Sock;
+  /* Is this socket dead? */
+  bool isdead;
   /* Is this an IPv6 socket? */
   bool IPv6;
   
@@ -213,7 +215,11 @@ public:
    * @return the fd
    */
   int GetFD() const;
-  
+
+  /** Set the socket as being dead
+   * @param bool boolean if the socket is dead
+   */
+  void SetDead(bool);
   /** Check if this socket is IPv6
    * @return true or false
    */
@@ -479,6 +485,47 @@ public:
   /** Should be overloaded to do something useful
    */
   virtual void OnNotify();
+};
+
+/**********************************************************************/
+
+class CoreExport SocketEngine
+{
+public:
+  /* Map of sockets */
+  static std::map<int, Socket *> Sockets;
+  
+  /** Called to initialize the socket engine
+   */
+  static void Init();
+  
+  /** Called to shutdown the socket engine
+   */
+  static void Shutdown();
+  
+  /** Add a socket to the internal list
+   * @param s The socket
+   */
+  static void AddSocket(Socket *s);
+  
+  /** Delete a socket from the internal list
+   * @param s The socket
+   */
+  static void DelSocket(Socket *s);
+  
+  /** Mark a socket as writeable
+   * @param s The socket
+   */
+  static void MarkWritable(Socket *s);
+  
+  /** Unmark a socket as writeable
+   * @param s The socket
+   */
+  static void ClearWritable(Socket *s);
+  
+  /** Read from sockets and do things
+   */
+  static void Process();
 };
 
 // class CoreExport SocketIO2

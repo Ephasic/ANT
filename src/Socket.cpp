@@ -384,7 +384,7 @@ SocketFlag SocketIO::FinishConnect(ConnectionSocket *s)
 
 /** Empty constructor, should not be called.
  */
-Socket::Socket() : Flags<SocketFlag>(SocketFlagStrings)
+Socket::Socket()
 {
   throw CoreException("Socket::Socket() ?");
 }
@@ -394,7 +394,7 @@ Socket::Socket() : Flags<SocketFlag>(SocketFlagStrings)
  * @param ipv6 IPv6?
  * @param type The socket type, defaults to SOCK_STREAM
  */
-Socket::Socket(int sock, bool ipv6, int type) : Flags<SocketFlag>(SocketFlagStrings)
+Socket::Socket(int sock, bool ipv6, int type)
 {
   this->IO = &normalSocketIO;
   this->IPv6 = ipv6;
@@ -429,6 +429,22 @@ int Socket::GetFD() const
 bool Socket::IsIPv6() const
 {
   return IPv6;
+}
+
+/** Set the socket as being dead
+ * @param bool boolean if the socket is dead
+ */
+void SetDead(bool dead)
+{
+  isdead = dead;
+}
+
+/** Get socket status if it is dead or not
+ * @return bool boolean if the socket is dead
+ */
+bool IsDead()
+{
+  return isdead;
 }
 
 /** Mark a socket as blockig
@@ -713,7 +729,7 @@ bool ConnectionSocket::Process()
     else if (this->HasFlag(SF_CONNECTING))
       this->SetFlag(this->IO->FinishConnect(this));
     else
-      this->SetFlag(SF_DEAD);
+      this->SetDead(true);
   }
   catch (const SocketException &ex)
   {
@@ -752,7 +768,7 @@ bool ClientSocket::Process()
     else if (this->HasFlag(SF_ACCEPTING))
       this->SetFlag(this->IO->FinishAccept(this));
     else
-      this->SetFlag(SF_DEAD);
+      this->SetDead(true);
   }
   catch (const SocketException &ex)
   {
@@ -776,6 +792,132 @@ void ClientSocket::OnAccept()
 
 void ClientSocket::OnError(const Flux::string &error)
 {
+}
+
+/*********************************************************************************/
+
+static int MaxFD;
+static unsigned FDCount;
+static fd_set ReadFDs;
+static fd_set WriteFDs;
+
+void SocketEngine::Init()
+{
+  MaxFD = 0;
+  FDCount = 0;
+  FD_ZERO(&ReadFDs);
+  FD_ZERO(&WriteFDs);
+}
+
+void SocketEngine::Shutdown()
+{
+  Process();
+  
+  for (std::map<int, Socket *>::const_iterator it = Sockets.begin(), it_end = Sockets.end(); it != it_end;)
+  {
+    Socket *s = it->second;
+    ++it;
+    delete s;
+  }
+  Sockets.clear();
+}
+
+void SocketEngine::AddSocket(Socket *s)
+{
+  if (s->GetFD() > MaxFD)
+    MaxFD = s->GetFD();
+  FD_SET(s->GetFD(), &ReadFDs);
+  Sockets.insert(std::make_pair(s->GetFD(), s));
+  ++FDCount;
+}
+
+void SocketEngine::DelSocket(Socket *s)
+{
+  if (s->GetFD() == MaxFD)
+    --MaxFD;
+  FD_CLR(s->GetFD(), &ReadFDs);
+  FD_CLR(s->GetFD(), &WriteFDs);
+  Sockets.erase(s->GetFD());
+  --FDCount;
+}
+
+void SocketEngine::MarkWritable(Socket *s)
+{
+  if (s->HasFlag(SF_WRITABLE))
+    return;
+  FD_SET(s->GetFD(), &WriteFDs);
+  s->SetFlag(SF_WRITABLE);
+}
+
+void SocketEngine::ClearWritable(Socket *s)
+{
+  if (!s->HasFlag(SF_WRITABLE))
+    return;
+  FD_CLR(s->GetFD(), &WriteFDs);
+  s->UnsetFlag(SF_WRITABLE);
+}
+
+void SocketEngine::Process()
+{
+  fd_set rfdset = ReadFDs, wfdset = WriteFDs, efdset = ReadFDs;
+  timeval tval;
+  tval.tv_sec = Config->ReadTimeout;
+  tval.tv_usec = 0;
+  
+  #ifdef _WIN32
+  /* We can use the socket engine to "sleep" services for a period of
+   * time between connections to the uplink, which allows modules,
+   * timers, etc to function properly. Windows, being as useful as it is,
+   * does not allow to select() on 0 sockets and will immediately return error.
+   * Thus:
+   */
+  if (FDCount == 0)
+  {
+    sleep(tval.tv_sec);
+    return;
+  }
+  #endif
+  
+  int sresult = select(MaxFD + 1, &rfdset, &wfdset, &efdset, &tval);
+  Anope::CurTime = time(NULL);
+  
+  if (sresult == -1)
+  {
+    Log() << "SockEngine::Process(): error: " << Anope::LastError();
+  }
+  else if (sresult)
+  {
+    int processed = 0;
+    for (std::map<int, Socket *>::const_iterator it = Sockets.begin(), it_end = Sockets.end(); it != it_end && processed != sresult;)
+    {
+      Socket *s = it->second;
+      ++it;
+      
+      bool has_read = FD_ISSET(s->GetFD(), &rfdset), has_write = FD_ISSET(s->GetFD(), &wfdset), has_error = FD_ISSET(s->GetFD(), &efdset);
+      if (has_read || has_write || has_error)
+	++processed;
+      
+      if (has_error)
+      {
+	s->ProcessError();
+	s->SetDead(true);
+	delete s;
+	continue;
+      }
+      
+      if (!s->Process())
+	continue;
+      
+      if (has_read && !s->ProcessRead())
+	s->SetDead(true);
+      
+      if (has_write && !s->ProcessWrite())
+	s->SetDead(true);
+      
+      if (s->IsDead())
+	delete s;
+    }
+  }
 }
 
 /*********************************************************************************/
