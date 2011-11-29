@@ -167,5 +167,36 @@ std::vector<Flux::string> StringVector(const Flux::string &src, char delim)
  * \return true if the file exists, false if it doens't
  */
 bool InTerm() { return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr))); }
+
+/* Database Functions */
+std::fstream db;
+void WriteDB(const Flux::string &buf)
+{
+  db << buf << std::endl;
+}
+static void ReadDB(); // We'll write this later!
+void SaveDatabases()
+{
+  Log() << "Saving Databases.";
+  db.clear();
+  db.open("ANT.db", std::ios_base::out | std::ios_base::trunc);
+  if(!db.is_open())
+  {
+    Log() << "Cannot save database! ANT.db";
+  }
+  db << "VER 1" << std::endl;
+  FOREACH_MOD(I_OnDatabasesWrite, WriteDB(WriteDB))
+  db.close();
+}
+class DBSave : public Timer
+{
+public:
+  DBSave(time_t):Timer(60, time(NULL), true) {}
+  void Tick(time_t)
+  {
+    SaveDatabases();
+  }
+};
+
 /* butt-plug?
  * http://www.albinoblacksheep.com/flash/plugs */

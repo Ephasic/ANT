@@ -201,7 +201,7 @@ cidr::cidr(const Flux::string &ip)
       throw SocketException("Invalid CIDR range");
     
     this->cidr_ip = real_ip;
-    this->cidr_len = convertTo<unsigned int>(cidr_range);
+    this->cidr_len = value_cast<unsigned int>(cidr_range);
     this->addr.pton(ipv6 ? AF_INET6 : AF_INET, real_ip);
   }
 }
