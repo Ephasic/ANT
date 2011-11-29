@@ -1,7 +1,7 @@
 #ifndef _NETWORK_H_
 #define _NETWORK_H_
 #include "module.h"
-#include "bots.h"
+#include "bot.h"
 
 class Network;
 struct CommitMessage
@@ -10,15 +10,12 @@ struct CommitMessage
   std::vector<Channel*> Channels;
   std::vector<Bot*> Bots;
   Network *network;
-}
+};
 
 class CoreExport Network
 {
 public:
-  Network(const Flux::string &host, const Flux::string &p, const Flux::string &n = ""):hostname(host), port(p), name(n)
-  {
-    Log(LOG_DEBUG) << "New network created: " << n << " " << host << ':' << p;
-  }
+  Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
   Socket *s;
   Flux::map<Bot*> bots;
   Flux::string name;

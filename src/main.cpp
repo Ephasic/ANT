@@ -79,6 +79,8 @@ int main (int argcx, char** argvx, char *envp[])
     ircproto->user(Config->Ident, Config->Realname);
     ircproto->nick(Config->BotNick);
     FOREACH_MOD(I_OnPostConnect, OnPostConnect(sock));
+
+    DBSave dbsave; //Start the Database Save timer.
     
     while(!quitting){
       Log(LOG_RAWIO) << "Top of main loop";

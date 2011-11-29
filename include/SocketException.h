@@ -11,16 +11,16 @@
  * Throws Socket Exception
  * @param throw SocketException(message)
  */
-class SocketException
-{
- public:
-  SocketException(Flux::string s):m_s(s) {};
-  ~SocketException(){};
-
-  Flux::string description() { return m_s; }
- private:
-  Flux::string m_s;
-};
+// class SocketException
+// {
+//  public:
+//   SocketException(Flux::string s):m_s(s) {};
+//   ~SocketException(){};
+// 
+//   Flux::string description() { return m_s; }
+//  private:
+//   Flux::string m_s;
+// };
 
 /**CoreExceptions are to be thrown with everything else
  * Throws Core Exception

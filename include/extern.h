@@ -118,6 +118,7 @@ E void Rehash();
 E void QuitUser(User*);
 E void Fork();
 E void sigact(int);
+E void SaveDatabases();
 E void InitSignals();
 E void HandleSegfault(module*);
 E void restart(const Flux::string&);

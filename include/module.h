@@ -53,7 +53,7 @@ public:
   virtual void OnPrivmsg(User*, const std::vector<Flux::string>&) {}
   virtual void OnCommit(CommitMessage&) {}
   virtual void OnPrivmsg(User*, Channel*, const std::vector<Flux::string>&) {}
-  virtual void OnDatabasesWrite(void (*)(*const Flux::string&)) {}
+  virtual void OnDatabasesWrite(void (*WriteDB)(const Flux::string&)) {}
   virtual void OnNotice(User*, const std::vector<Flux::string>&) {}
   virtual void OnNotice(User*, Channel*, const std::vector<Flux::string>&) {}
   virtual void OnCTCP(const Flux::string&, const std::vector<Flux::string>&) {}

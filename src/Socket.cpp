@@ -9,30 +9,26 @@
 #include <fcntl.h>
 #include <iostream>
 
-SocketEngineBase *SocketEngine = NULL;
-int32 TotalRead = 0;
-int32 TotalWritten = 0;
+std::map<int, Socket *> SocketEngine::Sockets;
+
+int32_t TotalRead = 0;
+int32_t TotalWritten = 0;
 
 SocketIO normalSocketIO;
 
-/** Trims all the \r and \ns from the begining and end of a string
- * @param buffer The buffer to trim
- */
-static void TrimBuf(std::string &buffer)
-{
-  while (!buffer.empty() && (buffer[0] == '\r' || buffer[0] == '\n'))
-    buffer.erase(buffer.begin());
-  while (!buffer.empty() && (buffer[buffer.length() - 1] == '\r' || buffer[buffer.length() - 1] == '\n'))
-    buffer.erase(buffer.length() - 1);
-}
-
 /** Construct the object, sets everything to 0
  */
-sockaddrs::sockaddrs() { this->clear(); }
+sockaddrs::sockaddrs()
+{
+  this->clear();
+}
 
 /** Memset the object to 0
  */
-void sockaddrs::clear() { memset(this, 0, sizeof(*this)); }
+void sockaddrs::clear()
+{
+  memset(this, 0, sizeof(*this));
+}
 
 /** Get the size of the sockaddr we represent
  * @return The size
@@ -117,6 +113,7 @@ bool sockaddrs::operator==(const sockaddrs &other) const
     default:
       return !memcmp(this, &other, sizeof(*this));
   }
+  
   return false;
 }
 
@@ -131,20 +128,31 @@ void sockaddrs::pton(int type, const Flux::string &address, int pport)
   switch (type)
   {
     case AF_INET:
-      if (inet_pton(type, address.c_str(), &sa4.sin_addr) < 1)
-	throw SocketException(Flux::string("Invalid host: "+ strerror(errno)));
+    {
+      int i = inet_pton(type, address.c_str(), &sa4.sin_addr);
+      if (i == 0)
+	throw SocketException("Invalid host");
+      else if (i <= -1)
+	throw SocketException("Invalid host: "  + strerror(errno));
       sa4.sin_family = type;
       sa4.sin_port = htons(pport);
       return;
+    }
     case AF_INET6:
-      if (inet_pton(type, address.c_str(), &sa6.sin6_addr) < 1)
-	throw SocketException(Flux::string("Invalid host: "+ strerror(errno)));
+    {
+      int i = inet_pton(type, address.c_str(), &sa6.sin6_addr);
+      if (i == 0)
+	throw SocketException("Invalid host");
+      else if (i <= -1)
+	throw SocketException("Invalid host: " + strerror(errno));
       sa6.sin6_family = type;
       sa6.sin6_port = htons(pport);
       return;
+    }
     default:
       break;
   }
+  
   throw CoreException("Invalid socket type");
 }
 
@@ -158,39 +166,92 @@ void sockaddrs::ntop(int type, const void *src)
   switch (type)
   {
     case AF_INET:
-      sa4.sin_addr = *reinterpret_cast<const in_addr*>(src);
+      sa4.sin_addr = *reinterpret_cast<const in_addr *>(src);
       sa4.sin_family = type;
       return;
     case AF_INET6:
-      sa6.sin6_addr = *reinterpret_cast<const in6_addr*>(src);
+      sa6.sin6_addr = *reinterpret_cast<const in6_addr *>(src);
       sa6.sin6_family = type;
       return;
     default:
       break;
   }
+  
   throw CoreException("Invalid socket type");
 }
 
-/** Default constructor
- */
-SocketEngineBase::SocketEngineBase()
+cidr::cidr(const Flux::string &ip)
 {
-  #ifdef _WIN32
-  if (WSAStartup(MAKEWORD(2, 0), &wsa))
-    throw FatalException("Failed to initialize WinSock library");
-  #endif
+  if (ip.find_first_not_of("01234567890:./") != Flux::string::npos)
+    throw SocketException("Invalid IP");
+  
+  bool ipv6 = ip.find(':') != Flux::string::npos;
+  size_t sl = ip.find_last_of('/');
+  if (sl == Flux::string::npos)
+  {
+    this->cidr_ip = ip;
+    this->cidr_len = ipv6 ? 128 : 32;
+    this->addr.pton(ipv6 ? AF_INET6 : AF_INET, ip);
+  }
+  else
+  {
+    Flux::string real_ip = ip.substr(0, sl);
+    Flux::string cidr_range = ip.substr(sl + 1);
+    if (!cidr_range.is_pos_number_only())
+      throw SocketException("Invalid CIDR range");
+    
+    this->cidr_ip = real_ip;
+    this->cidr_len = convertTo<unsigned int>(cidr_range);
+    this->addr.pton(ipv6 ? AF_INET6 : AF_INET, real_ip);
+  }
 }
 
-/** Default destructor
- */
-SocketEngineBase::~SocketEngineBase()
+cidr::cidr(const Flux::string &ip, unsigned char len)
 {
-  for (auto it : Sockets)
-    delete it->second;
-  this->Sockets.clear();
-  #ifdef _WIN32
-  WSACleanup();
-  #endif
+  bool ipv6 = ip.find(':') != Flux::string::npos;
+  this->addr.pton(ipv6 ? AF_INET6 : AF_INET, ip);
+  this->cidr_ip = ip;
+  this->cidr_len = len;
+}
+
+Flux::string cidr::mask() const
+{
+  return this->cidr_ip + "/" + this->cidr_len;
+}
+
+bool cidr::match(sockaddrs &other)
+{
+  if (this->addr.sa.sa_family != other.sa.sa_family)
+    return false;
+  
+  unsigned char *ip, *their_ip, byte;
+  
+  switch (this->addr.sa.sa_family)
+  {
+    case AF_INET:
+      ip = reinterpret_cast<unsigned char *>(&this->addr.sa4.sin_addr);
+      byte = this->cidr_len / 8;
+      their_ip = reinterpret_cast<unsigned char *>(&other.sa4.sin_addr);
+      break;
+    case AF_INET6:
+      ip = reinterpret_cast<unsigned char *>(&this->addr.sa6.sin6_addr);
+      byte = this->cidr_len / 8;
+      their_ip = reinterpret_cast<unsigned char *>(&other.sa6.sin6_addr);
+      break;
+    default:
+      throw SocketException("Invalid address type");
+  }
+  
+  if (memcmp(ip, their_ip, byte))
+    return false;
+  
+  ip += byte;
+  their_ip += byte;
+  byte = this->cidr_len % 8;
+  if ((*ip & byte) != (*their_ip & byte))
+    return false;
+  
+  return true;
 }
 
 /** Receive something from the buffer
@@ -199,7 +260,7 @@ SocketEngineBase::~SocketEngineBase()
  * @param sz How much to read
  * @return Number of bytes received
  */
-int SocketIO::Recv(Socket *s, char *buf, size_t sz) const
+int SocketIO::Recv(Socket *s, char *buf, size_t sz)
 {
   size_t i = recv(s->GetFD(), buf, sz, 0);
   TotalRead += i;
@@ -208,65 +269,124 @@ int SocketIO::Recv(Socket *s, char *buf, size_t sz) const
 
 /** Write something to the socket
  * @param s The socket
- * @param buf What to write
- * @return Number of bytes written
+ * @param buf The data to write
+ * @param size The length of the data
  */
-int SocketIO::Send(Socket *s, const Flux::string &buf) const
+int SocketIO::Send(Socket *s, const char *buf, size_t sz)
 {
-  size_t i = send(s->GetFD(), buf.c_str(), buf.length(), 0);
+  size_t i = send(s->GetFD(), buf, sz, 0);
   TotalWritten += i;
   return i;
+}
+int SocketIO::Send(Socket *s, const Flux::string &buf)
+{
+  return this->Send(s, buf.c_str(), buf.length());
 }
 
 /** Accept a connection from a socket
  * @param s The socket
+ * @return The new client socket
  */
-void SocketIO::Accept(ListenSocket *s)
+ClientSocket *SocketIO::Accept(ListenSocket *s)
 {
   sockaddrs conaddr;
   
   socklen_t size = sizeof(conaddr);
   int newsock = accept(s->GetFD(), &conaddr.sa, &size);
   
-  #ifndef INVALID_SOCKET
-  # define INVALID_SOCKET 0
-  #endif
-  
-  if (newsock > 0 && newsock != INVALID_SOCKET)
-    s->OnAccept(newsock, conaddr);
+  if (newsock >= 0)
+  {
+    ClientSocket *ns = s->OnAccept(newsock, conaddr);
+    ns->SetFlag(SF_ACCEPTED);
+    ns->OnAccept();
+    return ns;
+  }
   else
     throw SocketException("Unable to accept connection: " + strerror(errno));
+}
+
+/** Finished accepting a connection from a socket
+ * @param s The socket
+ * @return SF_ACCEPTED if accepted, SF_ACCEPTING if still in process, SF_DEAD on error
+ */
+SocketFlag SocketIO::FinishAccept(ClientSocket *cs)
+{
+  return SF_ACCEPTED;
+}
+
+/** Bind a socket
+ * @param s The socket
+ * @param ip The IP to bind to
+ * @param port The optional port to bind to
+ */
+void SocketIO::Bind(Socket *s, const Flux::string &ip, int port)
+{
+  s->bindaddr.pton(s->IsIPv6() ? AF_INET6 : AF_INET, ip, port);
+  if (bind(s->GetFD(), &s->bindaddr.sa, s->bindaddr.size()) == -1)
+    throw SocketException("Unable to bind to address: " + strerror(errno));
 }
 
 /** Connect the socket
  * @param s THe socket
  * @param target IP to connect to
  * @param port to connect to
- * @param bindip IP to bind to, if any
  */
-void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port, const Flux::string &bindip)
+void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port)
 {
-  s->bindaddr.clear();
-  s->conaddr.clear();
-  
-  if (!bindip.empty())
-  {
-    s->bindaddr.pton(s->IsIPv6() ? AF_INET6 : AF_INET, bindip, 0);
-    if (bind(s->GetFD(), &s->bindaddr.sa, s->bindaddr.size()) == -1)
-      throw SocketException(Flux::string("Unable to bind to address: "+strerror(errno)));
-  }
-  
+  s->UnsetFlag(SF_CONNECTING);
+  s->UnsetFlag(SF_CONNECTED);
   s->conaddr.pton(s->IsIPv6() ? AF_INET6 : AF_INET, target, port);
-  if (connect(s->GetFD(), &s->conaddr.sa, s->conaddr.size()) == -1 && errno != EINPROGRESS)
-    throw SocketException(Flux::string("Error connecting to server: "+strerror(errno)));
+  int c = connect(s->GetFD(), &s->conaddr.sa, s->conaddr.size());
+  if (c == -1)
+  {
+    if (errno != EINPROGRESS)
+      s->OnError(strerror(errno));
+    else
+    {
+      SocketEngine::MarkWritable(s);
+      s->SetFlag(SF_CONNECTING);
+    }
+  }
+  else
+  {
+    s->SetFlag(SF_CONNECTED);
+    s->OnConnect();
+  }
 }
 
-/** Empty constructor, used for things such as the pipe socket
+/** Called to potentially finish a pending connection
+ * @param s The socket
+ * @return SF_CONNECTED on success, SF_CONNECTING if still pending, and SF_DEAD on error.
  */
-Socket::Socket()
+SocketFlag SocketIO::FinishConnect(ConnectionSocket *s)
 {
-  this->Type = SOCKTYPE_BASE;
-  this->IO = &normalSocketIO;
+  if (s->HasFlag(SF_CONNECTED))
+    return SF_CONNECTED;
+  else if (!s->HasFlag(SF_CONNECTING))
+    throw SocketException("SocketIO::FinishConnect called for a socket not connected nor connecting?");
+  
+  int optval = 0;
+  socklen_t optlen = sizeof(optval);
+  if (!getsockopt(s->GetFD(), SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&optval), &optlen) && !optval)
+  {
+    s->SetFlag(SF_CONNECTED);
+    s->UnsetFlag(SF_CONNECTING);
+    s->OnConnect();
+    return SF_CONNECTED;
+  }
+  else
+  {
+    errno = optval;
+    s->OnError(optval ? strerror(errno) : "");
+    return SF_DEAD;
+  }
+}
+
+/** Empty constructor, should not be called.
+ */
+Socket::Socket() : Flags<SocketFlag>(SocketFlagStrings)
+{
+  throw CoreException("Socket::Socket() ?");
 }
 
 /** Constructor
@@ -274,48 +394,50 @@ Socket::Socket()
  * @param ipv6 IPv6?
  * @param type The socket type, defaults to SOCK_STREAM
  */
-Socket::Socket(int sock, bool ipv6, int type)
+Socket::Socket(int sock, bool ipv6, int type) : Flags<SocketFlag>(SocketFlagStrings)
 {
-  this->Type = SOCKTYPE_BASE;
   this->IO = &normalSocketIO;
   this->IPv6 = ipv6;
-  if (sock == 0)
+  if (sock == -1)
     this->Sock = socket(this->IPv6 ? AF_INET6 : AF_INET, type, 0);
   else
     this->Sock = sock;
-  SocketEngine->AddSocket(this);
+  this->SetNonBlocking();
+  SocketEngine::AddSocket(this);
 }
 
 /** Default destructor
  */
 Socket::~Socket()
 {
-  if (SocketEngine)
-    SocketEngine->DelSocket(this);
-  Close(this->Sock);
+  SocketEngine::DelSocket(this);
+  close(this->Sock);
   this->IO->Destroy();
 }
 
 /** Get the socket FD for this socket
  * @return the fd
  */
-int Socket::GetFD() const { return Sock; }
+int Socket::GetFD() const
+{
+  return Sock;
+}
+
 /** Check if this socket is IPv6
  * @return true or false
  */
-bool Socket::IsIPv6() const { return IPv6; }
+bool Socket::IsIPv6() const
+{
+  return IPv6;
+}
+
 /** Mark a socket as blockig
  * @return true if the socket is now blocking
  */
 bool Socket::SetBlocking()
 {
-  #ifdef _WIN32
-  unsigned long opt = 0;
-  return !ioctlsocket(this->GetFD(), FIONBIO, &opt);
-  #else
   int flags = fcntl(this->GetFD(), F_GETFL, 0);
   return !fcntl(this->GetFD(), F_SETFL, flags & ~O_NONBLOCK);
-  #endif
 }
 
 /** Mark a socket as non-blocking
@@ -323,162 +445,48 @@ bool Socket::SetBlocking()
  */
 bool Socket::SetNonBlocking()
 {
-  #ifdef _WIN32
-  unsigned long opt = 1;
-  return !ioctlsocket(this->GetFD(), FIONBIO, &opt);
-  #else
   int flags = fcntl(this->GetFD(), F_GETFL, 0);
   return !fcntl(this->GetFD(), F_SETFL, flags | O_NONBLOCK);
-  #endif
+}
+
+/** Bind the socket to an ip and port
+ * @param ip The ip
+ * @param port The port
+ */
+void Socket::Bind(const Flux::string &ip, int port)
+{
+  this->IO->Bind(this, ip, port);
+}
+
+/** Called when there either is a read or write event.
+ * @return true to continue to call ProcessRead/ProcessWrite, false to not continue
+ */
+bool Socket::Process()
+{
+  return true;
 }
 
 /** Called when there is something to be received for this socket
  * @return true on success, false to drop this socket
  */
-bool Socket::ProcessRead(){ return true; }
+bool Socket::ProcessRead()
+{
+  return true;
+}
+
 /** Called when the socket is ready to be written to
  * @return true on success, false to drop this socket
  */
-bool Socket::ProcessWrite(){ return true; }
+bool Socket::ProcessWrite()
+{
+  return true;
+}
+
 /** Called when there is an error for this socket
  * @return true on success, false to drop this socket
  */
-void Socket::ProcessError(){}
-/** Constructor for pipe socket
- */
-BufferedSocket::BufferedSocket() : Socket()
+void Socket::ProcessError()
 {
-  this->Type = SOCKTYPE_BUFFERED;
-}
-
-/** Constructor
- * @param fd FD to use
- * @param ipv6 true for ipv6
- * @param type socket type, defaults to SOCK_STREAM
- */
-BufferedSocket::BufferedSocket(int fd, bool ipv6, int type) : Socket(fd, ipv6, type)
-{
-  this->Type = SOCKTYPE_BUFFERED;
-}
-
-/** Default destructor
- */
-BufferedSocket::~BufferedSocket()
-{
-}
-
-/** Called when there is something to be received for this socket
- * @return true on success, false to drop this socket
- */
-bool BufferedSocket::ProcessRead()
-{
-  char tbuffer[NET_BUFSIZE] = "";
-  
-  RecvLen = this->IO->Recv(this, tbuffer, sizeof(tbuffer) - 1);
-  if (RecvLen <= 0)
-    return false;
-  
-  std::string sbuffer = extrabuf;
-  sbuffer.append(tbuffer);
-  extrabuf.clear();
-  size_t lastnewline = sbuffer.rfind('\n');
-  if (lastnewline == std::string::npos)
-  {
-    extrabuf = sbuffer;
-    return true;
-  }
-  if (lastnewline < sbuffer.size() - 1)
-  {
-    extrabuf = sbuffer.substr(lastnewline);
-    TrimBuf(extrabuf);
-    sbuffer = sbuffer.substr(0, lastnewline);
-  }
-  
-  sepstream stream(sbuffer, '\n');
-  
-  Flux::string tbuf;
-  while (stream.GetToken(tbuf))
-  {
-    std::string tmp_tbuf = tbuf.str();
-    TrimBuf(tmp_tbuf);
-    tbuf = tmp_tbuf;
-    
-    if (!tbuf.empty())
-      if (!Read(tbuf))
-	return false;
-  }
-  
-  return true;
-}
-
-/** Called when the socket is ready to be written to
- * @return true on success, false to drop this socket
- */
-bool BufferedSocket::ProcessWrite()
-{
-  if (this->WriteBuffer.empty())
-    return true;
-  int count = this->IO->Send(this, this->WriteBuffer);
-  if (count == -1)
-    return false;
-  this->WriteBuffer = this->WriteBuffer.substr(count);
-  if (this->WriteBuffer.empty())
-    SocketEngine->ClearWritable(this);
-  
-  return true;
-}
-
-/** Called with a line received from the socket
- * @param buf The line
- * @return true to continue reading, false to drop the socket
- */
-bool BufferedSocket::Read(const Flux::string &buf)
-{
-  return false;
-}
-
-/** Write to the socket
- * @param message The message
- */
-void BufferedSocket::Write(const char *message, ...)
-{
-  va_list vi;
-  char tbuffer[BUFSIZE];
-  
-  if (!message)
-    return;
-  
-  va_start(vi, message);
-  vsnprintf(tbuffer, sizeof(tbuffer), message, vi);
-  va_end(vi);
-  
-  Flux::string sbuf = tbuffer;
-  Write(sbuf);
-}
-
-/** Write to the socket
- * @param message The message
- */
-void BufferedSocket::Write(const Flux::string &message)
-{
-  WriteBuffer.append(message.str() + "\r\n");
-  SocketEngine->MarkWritable(this);
-}
-
-/** Get the length of the read buffer
- * @return The length of the read buffer
- */
-size_t BufferedSocket::ReadBufferLen() const
-{
-  return RecvLen;
-}
-
-/** Get the length of the write buffer
- * @return The length of the write buffer
- */
-size_t BufferedSocket::WriteBufferLen() const
-{
-  return WriteBuffer.length();
 }
 
 /** Constructor
@@ -486,18 +494,18 @@ size_t BufferedSocket::WriteBufferLen() const
  * @param port The port to listen on
  * @param ipv6 true for ipv6
  */
-ListenSocket::ListenSocket(const Flux::string &bindip, int port, bool ipv6) : Socket(0, ipv6)
+ListenSocket::ListenSocket(const Flux::string &bindip, int port, bool ipv6) : Socket(-1, ipv6)
 {
-  this->Type = SOCKTYPE_LISTEN;
   this->SetNonBlocking();
   
-  this->listenaddrs.pton(IPv6 ? AF_INET6 : AF_INET, bindip, port);
+  const char op = 1;
+  setsockopt(this->GetFD(), SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op));
   
-  if (bind(Sock, &this->listenaddrs.sa, this->listenaddrs.size()) == -1)
-    throw SocketException(Flux::string("Unable to bind to address: "+ strerror(errno)));
+  this->bindaddr.pton(IPv6 ? AF_INET6 : AF_INET, bindip, port);
+  this->IO->Bind(this, bindip, port);
   
-  if (listen(Sock, 5) == -1)
-    throw SocketException(Flux::string("Unable to listen: "+ strerror(errno)));
+  if (listen(Sock, SOMAXCONN) == -1)
+    throw SocketException("Unable to listen: " + strerror(errno));
 }
 
 /** Destructor
@@ -521,63 +529,254 @@ bool ListenSocket::ProcessRead()
   return true;
 }
 
-/** Called when a connection is accepted
- * @param fd The FD for the new connection
- * @param addr The sockaddr for where the connection came from
- * @return The new socket
- */
-ClientSocket *ListenSocket::OnAccept(int fd, const sockaddrs &addr)
+BufferedSocket::BufferedSocket()
 {
-  return new ClientSocket(this, fd, addr);
 }
 
-/** Constructor
- * @param ipv6 true to use IPv6
- * @param type The socket type, defaults to SOCK_STREAM
- */
-ConnectionSocket::ConnectionSocket(bool ipv6, int type) : BufferedSocket(0, ipv6, type)
+BufferedSocket::~BufferedSocket()
 {
-  this->Type = SOCKTYPE_CONNECTION;
 }
 
-/** Connect the socket
- * @param TargetHost The target host to connect to
- * @param Port The target port to connect to
- * @param BindHost The host to bind to for connecting
- */
-void ConnectionSocket::Connect(const Flux::string &TargetHost, int Port, const Flux::string &BindHost)
+bool BufferedSocket::ProcessRead()
+{
+  char tbuffer[NET_BUFSIZE];
+  
+  this->RecvLen = 0;
+  
+  int len = this->IO->Recv(this, tbuffer, sizeof(tbuffer) - 1);
+  if (len <= 0)
+    return false;
+  
+  tbuffer[len] = 0;
+  this->RecvLen = len;
+  
+  Flux::string sbuffer = this->extrabuf;
+  sbuffer += tbuffer;
+  this->extrabuf.clear();
+  size_t lastnewline = sbuffer.rfind('\n');
+  if (lastnewline == Flux::string::npos)
+  {
+    this->extrabuf = sbuffer;
+    return true;
+  }
+  if (lastnewline < sbuffer.length() - 1)
+  {
+    this->extrabuf = sbuffer.substr(lastnewline);
+    this->extrabuf.trim();
+    sbuffer = sbuffer.substr(0, lastnewline);
+  }
+  
+  sepstream stream(sbuffer, '\n');
+  
+  Flux::string tbuf;
+  while (stream.GetToken(tbuf))
+  {
+    tbuf.trim();
+    if (!tbuf.empty() && !Read(tbuf))
+      return false;
+  }
+  
+  return true;
+}
+
+bool BufferedSocket::ProcessWrite()
+{
+  int count = this->IO->Send(this, this->WriteBuffer);
+  if (count <= -1)
+    return false;
+  this->WriteBuffer = this->WriteBuffer.substr(count);
+  if (this->WriteBuffer.empty())
+    SocketEngine::ClearWritable(this);
+  
+  return true;
+}
+
+bool BufferedSocket::Read(const Flux::string &buf)
+{
+  return false;
+}
+
+void BufferedSocket::Write(const char *message, ...)
+{
+  va_list vi;
+  char tbuffer[BUFSIZE];
+  
+  if (!message)
+    return;
+  
+  va_start(vi, message);
+  vsnprintf(tbuffer, sizeof(tbuffer), message, vi);
+  va_end(vi);
+  
+  Flux::string sbuf = tbuffer;
+  Write(sbuf);
+}
+
+void BufferedSocket::Write(const Flux::string &message)
+{
+  this->WriteBuffer += message + "\r\n";
+  SocketEngine::MarkWritable(this);
+}
+
+int BufferedSocket::ReadBufferLen() const
+{
+  return RecvLen;
+}
+
+int BufferedSocket::WriteBufferLen() const
+{
+  return this->WriteBuffer.length();
+}
+
+
+BinarySocket::DataBlock::DataBlock(const char *b, size_t l)
+{
+  this->buf = new char[l];
+  memcpy(this->buf, b, l);
+  this->len = l;
+}
+
+BinarySocket::DataBlock::~DataBlock()
+{
+  delete [] this->buf;
+}
+
+BinarySocket::BinarySocket(){}
+
+BinarySocket::~BinarySocket(){}
+
+bool BinarySocket::ProcessRead()
+{
+  char tbuffer[NET_BUFSIZE];
+  
+  int len = this->IO->Recv(this, tbuffer, sizeof(tbuffer));
+  if (len <= 0)
+    return false;
+  
+  return this->Read(tbuffer, len);
+}
+
+bool BinarySocket::ProcessWrite()
+{
+  if (this->WriteBuffer.empty())
+  {
+    SocketEngine::ClearWritable(this);
+    return true;
+  }
+  
+  DataBlock *d = this->WriteBuffer.front();
+  
+  int len = this->IO->Send(this, d->buf, d->len);
+  if (len <= -1)
+    return false;
+  else if (static_cast<size_t>(len) == d->len)
+  {
+    delete d;
+    this->WriteBuffer.pop_front();
+  }
+  else
+  {
+    d->buf += len;
+    d->len -= len;
+  }
+  
+  if (this->WriteBuffer.empty())
+    SocketEngine::ClearWritable(this);
+  
+  return true;
+}
+
+void BinarySocket::Write(const char *buffer, size_t l)
+{
+  this->WriteBuffer.push_back(new DataBlock(buffer, l));
+  SocketEngine::MarkWritable(this);
+}
+
+bool BinarySocket::Read(const char *buffer, size_t l)
+{
+  return true;
+}
+
+ConnectionSocket::ConnectionSocket() : Socket(){}
+
+void ConnectionSocket::Connect(const Flux::string &TargetHost, int Port)
+{
+  this->IO->Connect(this, TargetHost, Port);
+}
+
+bool ConnectionSocket::Process()
 {
   try
   {
-    this->IO->Connect(this, TargetHost, Port, BindHost);
+    if (this->HasFlag(SF_CONNECTED))
+      return true;
+    else if (this->HasFlag(SF_CONNECTING))
+      this->SetFlag(this->IO->FinishConnect(this));
+    else
+      this->SetFlag(SF_DEAD);
   }
-  catch (const SocketException &)
+  catch (const SocketException &ex)
   {
-    delete this;
-    throw;
+    Log() << ex.GetReason();
   }
+  return false;
 }
 
-/** Constructor
- * @param ls Listen socket this connection is from
- * @param fd New FD for this socket
- * @param addr Address the connection came from
- */
-ClientSocket::ClientSocket(ListenSocket *ls, int fd, const sockaddrs &addr) : BufferedSocket(fd, ls->IsIPv6()), LS(ls), clientaddr(addr)
+void ConnectionSocket::ProcessError()
 {
-  this->Type = SOCKTYPE_CLIENT;
+  int optval = 0;
+  socklen_t optlen = sizeof(optval);
+  getsockopt(this->GetFD(), SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&optval), &optlen);
+  errno = optval;
+  this->OnError(optval ? strerror(error) : "");
 }
-/********************************************************************************/
-#ifdef _AIX
-# undef FD_ZERO
-# define FD_ZERO(p) memset((p), 0, sizeof(*(p)))
-#endif
 
-static unsigned FDCount;
-static fd_set ReadFDs;
-static fd_set WriteFDs;
+void ConnectionSocket::OnConnect()
+{
+}
 
-void SocketEngine
+void ConnectionSocket::OnError(const Flux::string &)
+{
+}
+
+ClientSocket::ClientSocket(ListenSocket *ls, const sockaddrs &addr) : Socket(), LS(ls), clientaddr(addr)
+{
+}
+
+bool ClientSocket::Process()
+{
+  try
+  {
+    if (this->HasFlag(SF_ACCEPTED))
+      return true;
+    else if (this->HasFlag(SF_ACCEPTING))
+      this->SetFlag(this->IO->FinishAccept(this));
+    else
+      this->SetFlag(SF_DEAD);
+  }
+  catch (const SocketException &ex)
+  {
+    Log() << ex.GetReason();
+  }
+  return false;
+}
+
+void ClientSocket::ProcessError()
+{
+  int optval = 0;
+  socklen_t optlen = sizeof(optval);
+  getsockopt(this->GetFD(), SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&optval), &optlen);
+  errno = optval;
+  this->OnError(optval ? strerror(errno) : "");
+}
+
+void ClientSocket::OnAccept()
+{
+}
+
+void ClientSocket::OnError(const Flux::string &error)
+{
+}
 
 /*********************************************************************************/
 // bool throwex;

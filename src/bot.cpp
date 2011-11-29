@@ -11,7 +11,7 @@ void Bot::AnnounceCommit(CommitMessage &msg)
   {
     for(auto it : this->channels)
     {
-      Channel *c = it->second;
+      Channel *c = it.second;
       if(c != NULL)
       {
 	printf("I would process the channel for commiting.. this needs work!\n");
