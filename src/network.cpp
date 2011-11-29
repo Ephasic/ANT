@@ -4,3 +4,6 @@ Network::Network(const Flux::string &host, const Flux::string &p, const Flux::st
 {
   Log(LOG_DEBUG) << "New network created: " << n << " " << host << ':' << p;
 }
+
+bool Network::Disconnect() { return false; }
+bool Network::Connect() { return false; }
