@@ -133,7 +133,7 @@ void sockaddrs::pton(int type, const Flux::string &address, int pport)
       if (i == 0)
 	throw SocketException("Invalid host");
       else if (i <= -1)
-	throw SocketException("Invalid host: "  + strerror(errno));
+	throw SocketException(fsprintf("Invalid host: %s", strerror(errno)));
       sa4.sin_family = type;
       sa4.sin_port = htons(pport);
       return;
@@ -144,7 +144,7 @@ void sockaddrs::pton(int type, const Flux::string &address, int pport)
       if (i == 0)
 	throw SocketException("Invalid host");
       else if (i <= -1)
-	throw SocketException("Invalid host: " + strerror(errno));
+	throw SocketException(fsprintf("Invalid host: %s", strerror(errno)));
       sa6.sin6_family = type;
       sa6.sin6_port = htons(pport);
       return;
@@ -302,7 +302,7 @@ ClientSocket *SocketIO::Accept(ListenSocket *s)
     return ns;
   }
   else
-    throw SocketException("Unable to accept connection: " + strerror(errno));
+    throw SocketException(fsprintf("Unable to accept connection: %s", strerror(errno)));
 }
 
 /** Finished accepting a connection from a socket
@@ -323,7 +323,7 @@ void SocketIO::Bind(Socket *s, const Flux::string &ip, int port)
 {
   s->bindaddr.pton(s->IsIPv6() ? AF_INET6 : AF_INET, ip, port);
   if (bind(s->GetFD(), &s->bindaddr.sa, s->bindaddr.size()) == -1)
-    throw SocketException("Unable to bind to address: " + strerror(errno));
+    throw SocketException(fsprintf("Unable to bind to address: %s", strerror(errno)));
 }
 
 /** Connect the socket
@@ -469,7 +469,7 @@ bool Socket::IsConnected()
 
 void Socket::SetAccepting(bool s)
 {
-  isaccepting = s
+  isaccepting = s;
 }
 
 bool Socket::IsAccepting()
@@ -479,7 +479,7 @@ bool Socket::IsAccepting()
 
 void Socket::SetAccepted(bool s)
 {
-  isaccepted = s
+  isaccepted = s;
 }
 
 bool Socket::IsAccepted()
@@ -496,6 +496,7 @@ bool Socket::IsWritable()
 {
   return iswritable;
 }
+
 void Socket::SetStatus(SocketFlag s)
 {
   switch(s)
@@ -517,6 +518,7 @@ void Socket::SetStatus(SocketFlag s)
       break;
   }
 }
+
 /** Mark a socket as blockig
  * @return true if the socket is now blocking
  */
@@ -591,7 +593,7 @@ ListenSocket::ListenSocket(const Flux::string &bindip, int port, bool ipv6) : So
   this->IO->Bind(this, bindip, port);
   
   if (listen(Sock, SOMAXCONN) == -1)
-    throw SocketException("Unable to listen: " + strerror(errno));
+    throw SocketException(fsprintf("Unable to listen: %s", strerror(errno)));
 }
 
 /** Destructor
@@ -815,7 +817,7 @@ void ConnectionSocket::ProcessError()
   socklen_t optlen = sizeof(optval);
   getsockopt(this->GetFD(), SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&optval), &optlen);
   errno = optval;
-  this->OnError(optval ? strerror(error) : "");
+  this->OnError(optval ? strerror(errno) : "");
 }
 
 void ConnectionSocket::OnConnect()
@@ -933,7 +935,7 @@ void SocketEngine::Process()
 {
   fd_set rfdset = ReadFDs, wfdset = WriteFDs, efdset = ReadFDs;
   timeval tval;
-  tval.tv_sec = Config->ReadTimeout;
+  tval.tv_sec = Config->SockWait;
   tval.tv_usec = 0;
   
   #ifdef _WIN32
@@ -1146,12 +1148,12 @@ void SocketEngine::Process()
  * \param char* a string of what to send to the server including printf style format
  * \param va_list all the variables to be replaced with the printf style variables
  */
-void send_cmd(const char *fmt, ...)
-{
-  char buffer[BUFSIZE] = "";
-  va_list args;
-  va_start(args, fmt);
-  vsnprintf(buffer, sizeof(buffer), fmt, args);
-  sock->send(buffer);
-  va_end(args);
-}
+// void send_cmd(const char *fmt, ...)
+// {
+//   char buffer[BUFSIZE] = "";
+//   va_list args;
+//   va_start(args, fmt);
+//   vsnprintf(buffer, sizeof(buffer), fmt, args);
+//   sock->send(buffer);
+//   va_end(args);
+// }
