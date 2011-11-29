@@ -297,7 +297,7 @@ ClientSocket *SocketIO::Accept(ListenSocket *s)
   if (newsock >= 0)
   {
     ClientSocket *ns = s->OnAccept(newsock, conaddr);
-    ns->SetFlag(SF_ACCEPTED);
+    ns->SetAccepted(true);
     ns->OnAccept();
     return ns;
   }
@@ -333,8 +333,8 @@ void SocketIO::Bind(Socket *s, const Flux::string &ip, int port)
  */
 void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port)
 {
-  s->UnsetFlag(SF_CONNECTING);
-  s->UnsetFlag(SF_CONNECTED);
+  s->SetConnected(false);
+  s->SetConnecting(false);
   s->conaddr.pton(s->IsIPv6() ? AF_INET6 : AF_INET, target, port);
   int c = connect(s->GetFD(), &s->conaddr.sa, s->conaddr.size());
   if (c == -1)
@@ -344,12 +344,12 @@ void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port
     else
     {
       SocketEngine::MarkWritable(s);
-      s->SetFlag(SF_CONNECTING);
+      s->SetConnecting(true);
     }
   }
   else
   {
-    s->SetFlag(SF_CONNECTED);
+    s->SetConnected(true);
     s->OnConnect();
   }
 }
@@ -360,17 +360,17 @@ void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port
  */
 SocketFlag SocketIO::FinishConnect(ConnectionSocket *s)
 {
-  if (s->HasFlag(SF_CONNECTED))
+  if (s->IsConnected())
     return SF_CONNECTED;
-  else if (!s->HasFlag(SF_CONNECTING))
+  else if (!s->IsConnecting())
     throw SocketException("SocketIO::FinishConnect called for a socket not connected nor connecting?");
   
   int optval = 0;
   socklen_t optlen = sizeof(optval);
   if (!getsockopt(s->GetFD(), SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&optval), &optlen) && !optval)
   {
-    s->SetFlag(SF_CONNECTED);
-    s->UnsetFlag(SF_CONNECTING);
+    s->SetConnected(true);
+    s->SetConnecting(false);
     s->OnConnect();
     return SF_CONNECTED;
   }
@@ -434,7 +434,7 @@ bool Socket::IsIPv6() const
 /** Set the socket as being dead
  * @param bool boolean if the socket is dead
  */
-void SetDead(bool dead)
+void Socket::SetDead(bool dead)
 {
   isdead = dead;
 }
@@ -442,11 +442,81 @@ void SetDead(bool dead)
 /** Get socket status if it is dead or not
  * @return bool boolean if the socket is dead
  */
-bool IsDead()
+bool Socket::IsDead()
 {
   return isdead;
 }
 
+void Socket::SetConnecting(bool s)
+{
+  isconnecting = s;
+}
+
+bool Socket::IsConnecting()
+{
+  return isconnecting;
+}
+
+void Socket::SetConnected(bool s)
+{
+  isconnected = s;
+}
+
+bool Socket::IsConnected()
+{
+  return isconnected;
+}
+
+void Socket::SetAccepting(bool s)
+{
+  isaccepting = s
+}
+
+bool Socket::IsAccepting()
+{
+  return isaccepting;
+}
+
+void Socket::SetAccepted(bool s)
+{
+  isaccepted = s
+}
+
+bool Socket::IsAccepted()
+{
+  return isaccepted;
+}
+
+void Socket::SetWritable(bool s)
+{
+  iswritable = s;
+}
+
+bool Socket::IsWritable()
+{
+  return iswritable;
+}
+void Socket::SetStatus(SocketFlag s)
+{
+  switch(s)
+  {
+    case SF_ACCEPTED:
+      this->SetAccepted(true);
+      break;
+    case SF_ACCEPTING:
+      this->SetAccepting(true);
+      break;
+    case SF_CONNECTED:
+      this->SetConnected(true);
+      break;
+    case SF_CONNECTING:
+      this->SetConnecting(true);
+      break;
+    case SF_DEAD:
+      this->SetDead(true);
+      break;
+  }
+}
 /** Mark a socket as blockig
  * @return true if the socket is now blocking
  */
@@ -724,10 +794,11 @@ bool ConnectionSocket::Process()
 {
   try
   {
-    if (this->HasFlag(SF_CONNECTED))
+    if (this->IsConnected())
       return true;
-    else if (this->HasFlag(SF_CONNECTING))
-      this->SetFlag(this->IO->FinishConnect(this));
+    else if (this->IsConnecting())
+      //this->SetFlag(this->IO->FinishConnect(this));
+      this->SetStatus(this->IO->FinishConnect(this));
     else
       this->SetDead(true);
   }
@@ -763,10 +834,11 @@ bool ClientSocket::Process()
 {
   try
   {
-    if (this->HasFlag(SF_ACCEPTED))
+    if (this->IsAccepted())
       return true;
-    else if (this->HasFlag(SF_ACCEPTING))
-      this->SetFlag(this->IO->FinishAccept(this));
+    else if (this->IsAccepting())
+//       this->SetFlag(this->IO->FinishAccept(this));
+	this->SetStatus(this->IO->FinishAccept(this));
     else
       this->SetDead(true);
   }
@@ -843,18 +915,18 @@ void SocketEngine::DelSocket(Socket *s)
 
 void SocketEngine::MarkWritable(Socket *s)
 {
-  if (s->HasFlag(SF_WRITABLE))
+  if (s->IsWritable())
     return;
   FD_SET(s->GetFD(), &WriteFDs);
-  s->SetFlag(SF_WRITABLE);
+  s->SetWritable(true);
 }
 
 void SocketEngine::ClearWritable(Socket *s)
 {
-  if (!s->HasFlag(SF_WRITABLE))
+  if (!s->IsWritable())
     return;
   FD_CLR(s->GetFD(), &WriteFDs);
-  s->UnsetFlag(SF_WRITABLE);
+  s->SetWritable(false);
 }
 
 void SocketEngine::Process()
@@ -879,11 +951,10 @@ void SocketEngine::Process()
   #endif
   
   int sresult = select(MaxFD + 1, &rfdset, &wfdset, &efdset, &tval);
-  Anope::CurTime = time(NULL);
   
   if (sresult == -1)
   {
-    Log() << "SockEngine::Process(): error: " << Anope::LastError();
+    Log() << "SockEngine::Process(): error: " << strerror(errno);
   }
   else if (sresult)
   {

@@ -188,6 +188,8 @@ protected:
   bool isdead;
   /* Is this an IPv6 socket? */
   bool IPv6;
+  /* Other Booleans */
+  bool isconnecting, isconnected, isaccepting, isaccepted, iswritable;
   
 public:
   /* Sockaddrs for bind() (if it's bound) */
@@ -220,6 +222,20 @@ public:
    * @param bool boolean if the socket is dead
    */
   void SetDead(bool);
+  bool IsDead();
+
+  void SetStatus(SocketFlag);
+  void SetConnecting(bool);
+  bool IsConnecting();
+  void SetConnected(bool);
+  bool IsConnected();
+  void SetAccepting(bool);
+  bool IsAccepting();
+  void SetAccepted(bool);
+  bool IsAccepted();
+  void SetWritable(bool);
+  bool IsWritable();
+  
   /** Check if this socket is IPv6
    * @return true or false
    */
