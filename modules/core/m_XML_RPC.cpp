@@ -1,6 +1,13 @@
 /*
  * This is the module file for the XML_RPC commits, this will handle 98% of the commits the bot will process!
  */
+ 
+class xmlrpcsock : public ListenSocket
+{
+  xmlrpcsock(const Flux::string &ip, int port, bool ipv6):ListenSocket(ip, port, ipv6){}
+  virtual ~xmlrpcsock() {}
+  virtual ClientSocket *OnAccept(int fd, const sockaddrs &addr) = 0;
+};
 class xmlrpcmod : public module
 {
 public:
