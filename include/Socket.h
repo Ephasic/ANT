@@ -4,8 +4,8 @@
  *\file  Socket.h 
  *\brief Socket header for Socket.cpp
  */
-#ifndef SOCKET
-#define SOCKET
+#ifndef _SOCKET
+#define _SOCKET
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -542,6 +542,17 @@ public:
   /** Read from sockets and do things
    */
   static void Process();
+};
+
+
+class FluxSocket : public ConnectionSocket, public BufferedSocket
+{
+public:
+  FluxSocket();
+  ~FluxSocket();
+  bool Read(const Flux::string&);
+  void OnConnect();
+  void OnError(const Flux::string&);
 };
 
 // class CoreExport SocketIO2

@@ -2,6 +2,8 @@
 #define _NETWORK_H_
 #include "module.h"
 #include "bot.h"
+#include "includes.h"
+#include "Socket.h"
 
 class Network;
 struct CommitMessage

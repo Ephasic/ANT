@@ -7,7 +7,6 @@
 #include "network.h" //We'll solve includes later
 #include "bot.h"
 IRCProto *ircproto;
-SocketIO *sock;
 BotConfig *Config;
 module *LastRunModule; // For crashes
 /**Runtime directory finder
@@ -30,6 +29,7 @@ Flux::string getprogdir(const Flux::string &dir){
   }
   return "/";
 }
+
 /**
  * \fn Flux::string removeCommand(Flux::string command, Flux::string s)
  * \brief Removes a command from a Flux::string.
@@ -199,7 +199,6 @@ void startup(int argc, char** argv, char *envp[]) {
   InitSignals();
   Config = NULL;
   ircproto = NULL;
-  sock = NULL;
   my_av = argv;
   my_envp = envp;
   starttime = time(NULL); //for bot uptime

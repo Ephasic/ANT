@@ -28,6 +28,7 @@ class Channel;
 class Log;
 class User;
 class SocketIO;
+class FluxSocket;
 class Commands;
 class Command;
 class Oper;
@@ -87,7 +88,7 @@ E module *FindModule(const Flux::string &name);
 E Command *FindCommand(const Flux::string &name, CommandType);
 
 /* extern's */
-E SocketIO *sock;
+E FluxSocket *Fluxsocket;
 E IRCProto *ircproto;
 E BotConfig *Config;
 E module *LastRunModule;

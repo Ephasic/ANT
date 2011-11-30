@@ -501,6 +501,9 @@ void Socket::SetStatus(SocketFlag s)
 {
   switch(s)
   {
+    case SF_WRITABLE:
+      this->SetWritable(true);
+      break;
     case SF_ACCEPTED:
       this->SetAccepted(true);
       break;
@@ -1148,12 +1151,12 @@ void SocketEngine::Process()
  * \param char* a string of what to send to the server including printf style format
  * \param va_list all the variables to be replaced with the printf style variables
  */
-// void send_cmd(const char *fmt, ...)
-// {
-//   char buffer[BUFSIZE] = "";
-//   va_list args;
-//   va_start(args, fmt);
-//   vsnprintf(buffer, sizeof(buffer), fmt, args);
-//   sock->send(buffer);
-//   va_end(args);
-// }
+void send_cmd(const char *fmt, ...)
+{
+  char buffer[BUFSIZE] = "";
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(buffer, sizeof(buffer), fmt, args);
+  Fluxsocket->Write(buffer);
+  va_end(args);
+}

@@ -18,42 +18,77 @@
  * See the examples tab for an example module.
  */
 #include "flux_net_irc.hpp"
-
-bool SocketIO::Read(const Flux::string &buf) const
+FluxSocket *Fluxsocket = NULL;
+FluxSocket::FluxSocket() : Socket(-1), ConnectionSocket(), BufferedSocket()
 {
-  if(buf.search_ci("ERROR :Closing link:")){
+  Fluxsocket = this;
+}
+FluxSocket::~FluxSocket()
+{
+  ircproto->quit("Closing Socket");
+  this->ProcessWrite();
+  Fluxsocket = NULL;
+}
+bool FluxSocket::Read(const Flux::string &buf)
+{
+  if(buf.search_ci("ERROR"))
+  {
     FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
-    throw SocketException(buf.c_str());
+    return false; //Socket is dead so we'll let the socket engine handle it
   }
-  process(buf); /* Process the buffer for navn */
+  process(buf);
   return true;
 }
 
+void FluxSocket::OnConnect()
+{
+  Log(LOG_TERMINAL) << "Soccessfuly connected to " << Config->Server << ':' << Config->Port;
+  FOREACH_MOD(I_OnPostConnect, OnPostConnect(this));
+}
+void FluxSocket::OnError(const Flux::string &buf)
+{
+  Log(LOG_TERMINAL) << "Unable to connect to " << Config->Server << ':' << Config->Port << (!buf.empty()?(": " + buf):"");
+}
+// bool SocketIO::Read(const Flux::string &buf) const
+// {
+//   if(buf.search_ci("ERROR :Closing link:")){
+//     FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
+//     throw SocketException(buf.c_str());
+//   }
+//   process(buf); /* Process the buffer for navn */
+//   return true;
+// }
+
 int startcount, loopcount;
-void Connect()
+static void Connect()
 {
   if(quitting)
     return;
   ++startcount;
   Log() << "Connecting to server '" << Config->Server << ":" << Config->Port << "'";
-  FOREACH_MOD(I_OnPreConnect, OnPreConnect(Config->Server, Config->Port));
   if(Config->Server.empty())
     throw SocketException("No Server Specified.");
   if(Config->Port.empty())
     throw SocketException("No Port Specified.");
-  if(sock){
-    SocketIO *s = sock;
-    delete s;
-  }
+  new FluxSocket();
   FOREACH_MOD(I_OnPreConnect, OnPreConnect(Config->Server, Config->Port));
-  sock = new SocketIO(Config->Server, Config->Port);
-  sock->Connect();
+  Fluxsocket->Bind("localhost");
+  Fluxsocket->Connect(Config->Server, Config->Port);
   if(ircproto){
     ircproto->user(Config->Ident, Config->Realname);
     ircproto->nick(Config->BotNick);
   }
-  FOREACH_MOD(I_OnPostConnect, OnPostConnect(sock));
 }
+
+class DBSave : public Timer
+{
+public:
+  DBSave():Timer(60, time(NULL), true) {}
+  void Tick(time_t)
+  {
+    SaveDatabases();
+  }
+};
 
 int main (int argcx, char** argvx, char *envp[])
 {
@@ -66,38 +101,39 @@ int main (int argcx, char** argvx, char *envp[])
     try { Connect(); }
     catch(SocketException &e){
       if(startcount >= 3)
-	throw CoreException(e.description().c_str());
-      Log(LOG_DEBUG) << "Socket Exception Caught: " << e.description();
+	throw CoreException(e.GetReason());
+      Log(LOG_DEBUG) << "Socket Exception Caught: " << e.GetReason();
       goto SocketStart;
     }
-    if(!sock)
+    if(!Fluxsocket)
       goto SocketStart;
     ircproto = new IRCProto();
     time_t last_check = time(NULL);
+
+    DBSave db; //Start the Database Save timer.
     
     //Set the username and nick
     ircproto->user(Config->Ident, Config->Realname);
     ircproto->nick(Config->BotNick);
-    FOREACH_MOD(I_OnPostConnect, OnPostConnect(sock));
-    class DBSave;
-    DBSave dbsave; //Start the Database Save timer.
     
-    while(!quitting){
+    while(!quitting)
+    {
       Log(LOG_RAWIO) << "Top of main loop";
       if(++loopcount >= 5000)
 	raise(SIGSEGV); //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
       
       /* Process the socket engine */
-      try { sock->Process(); }
-      catch(SocketException &exc)
-      {
-	Log() << "Socket Exception: " << exc.description();
-	try { Connect(); }
-	catch(SocketException &ex){
-	  Log() << "Socket Exception: " << ex.description();
-	  throw CoreException(ex.description());
-	}
-      }
+//       try { sock->Process(); }
+//       catch(SocketException &exc)
+//       {
+// 	Log() << "Socket Exception: " << exc.description();
+// 	try { Connect(); }
+// 	catch(SocketException &ex){
+// 	  Log() << "Socket Exception: " << ex.description();
+// 	  throw CoreException(ex.description());
+// 	}
+	SocketEngine::Process();
+      //}
       /* Process Timers */
       /***********************************/
       if(time(NULL) - last_check >= 3)

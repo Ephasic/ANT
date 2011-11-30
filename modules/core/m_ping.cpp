@@ -8,7 +8,7 @@ public:
   void Tick(time_t){
     send_cmd("PING :%i\n", time(NULL));
     if(++pings >= 3)
-      sock->ThrowException("Ping timeout: 120 seconds");
+      Fluxsocket->SetDead(true);
   }
 };
 class Ping_pong:public module

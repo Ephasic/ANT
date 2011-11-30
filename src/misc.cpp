@@ -185,18 +185,9 @@ void SaveDatabases()
     Log() << "Cannot save database! ANT.db";
   }
   db << "VER 1" << std::endl;
-  FOREACH_MOD(I_OnDatabasesWrite, WriteDB(WriteDB))
+  FOREACH_MOD(I_OnDatabasesWrite, OnDatabasesWrite(WriteDB));
   db.close();
 }
-class DBSave : public Timer
-{
-public:
-  DBSave(time_t):Timer(60, time(NULL), true) {}
-  void Tick(time_t)
-  {
-    SaveDatabases();
-  }
-};
 
 /* butt-plug?
  * http://www.albinoblacksheep.com/flash/plugs */
