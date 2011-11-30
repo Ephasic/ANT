@@ -271,6 +271,7 @@ void startup(int argc, char** argv, char *envp[]) {
   WritePID(); //Write the pid file
   FOREACH_MOD(I_OnStart, OnStart(argc, argv)); //announce we are starting the bot
   Fork(); //Fork to background
+  SocketEngine::Init(); //Initialize the socket engine
 }
 
 /***************************************************************************/

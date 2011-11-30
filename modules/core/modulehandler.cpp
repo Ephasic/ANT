@@ -242,7 +242,7 @@ public:
     CurrentModuleList = StringVector(Config->Modules, ',');
     for(unsigned i=0; i < CurrentModuleList.size(); ++i){
       CurrentModuleList[i].trim();
-      printf("[%i] '%s'\n", i, CurrentModuleList[i].c_str());
+//       printf("[%i] '%s'\n", i, CurrentModuleList[i].c_str());
     }
   }
   void OnReload()
@@ -254,11 +254,11 @@ public:
       for(std::vector<Flux::string>::iterator it2; it2 != CurrentModuleList.end(); ++it2)
       {
 	if((*it) != (*it2)){
-	  Log(LOG_TERMINAL) << "(*it) != (*it2)";
+// 	  Log(LOG_TERMINAL) << "(*it) != (*it2)";
 	  ModuleHandler::Unload(FindModule(*it2));
 	  CurrentModuleList.erase(it2);
 	}else if((*it2) != (*it)){
-	  Log(LOG_TERMINAL) << "(*it2) != (*it)";
+// 	  Log(LOG_TERMINAL) << "(*it2) != (*it)";
 	  ModuleHandler::LoadModule(*it);
 	  CurrentModuleList.push_back(*it);
 	}

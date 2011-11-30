@@ -31,7 +31,8 @@ FluxSocket::~FluxSocket()
 }
 bool FluxSocket::Read(const Flux::string &buf)
 {
-  if(buf.search_ci("ERROR"))
+  Flux::vector params = StringVector(buf, ' '); 
+  if(!params.empty() && params[0].equals_ci("ERROR"))
   {
     FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
     return false; //Socket is dead so we'll let the socket engine handle it
@@ -120,7 +121,7 @@ int main (int argcx, char** argvx, char *envp[])
     while(!quitting)
     {
       Log(LOG_RAWIO) << "Top of main loop";
-      if(++loopcount >= 5000)
+      if(++loopcount >= 500)
 	raise(SIGSEGV); //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
       
       /* Process the socket engine */
@@ -134,6 +135,14 @@ int main (int argcx, char** argvx, char *envp[])
 // 	  throw CoreException(ex.description());
 // 	}
 	SocketEngine::Process();
+	if(!Fluxsocket)
+	{
+	  Log(LOG_TERMINAL) << "Main count: " << loopcount;
+	  try { Connect(); }
+	  catch(SocketException &e){
+	    Log(LOG_DEBUG) << "Socket Exception Caught: " << e.GetReason();
+	  }
+	}
       //}
       /* Process Timers */
       /***********************************/

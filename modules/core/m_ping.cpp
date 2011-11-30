@@ -7,7 +7,7 @@ public:
   PingTimer():Timer(30, time(NULL), true), pings(0) { }
   void Tick(time_t){
     send_cmd("PING :%i\n", time(NULL));
-    if(++pings >= 3)
+    if(++pings >= 3 && Fluxsocket)
       Fluxsocket->SetDead(true);
   }
 };
@@ -17,11 +17,15 @@ class Ping_pong:public module
 public:
   Ping_pong(const Flux::string &Name):module(Name)
   {
-    Implementation i[] = { I_OnNumeric, I_OnPong, I_OnPing };
+    Implementation i[] = { I_OnNumeric, I_OnPong, I_OnPing, I_OnPostConnect };
     ModuleHandler::Attach(i, this, sizeof(i) / sizeof(Implementation));
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);
+  }
+  void OnPostConnect(Socket*)
+  {
+    pingtimer.pings = 0;
   }
   void OnPong(const std::vector<Flux::string> &params)
   {
