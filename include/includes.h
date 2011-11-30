@@ -11,7 +11,6 @@
  */
 #include "Socket.h"
 #include "timers.h"
-#include "SocketException.h"
 #include "thread.h"
 #include "INIReader.h"
 #include <utility>

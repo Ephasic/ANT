@@ -3,12 +3,11 @@
 #include "module.h"
 #include "bot.h"
 #include "includes.h"
-#include "Socket.h"
 
 class Network;
 struct CommitMessage
 {
-  Flux::Vector MessageMeta;
+  Flux::vector MessageMeta;
   std::vector<Channel*> Channels;
   std::vector<Bot*> Bots;
   Network *network;
@@ -19,7 +18,7 @@ class NetworkSocket : public ConnectionSocket, public BufferedSocket
 {
   Network *net;
 public:
-  NetworkSocket();
+  NetworkSocket(Network*);
   ~NetworkSocket();
   bool Read(const Flux::string&);
   void OnConnect();

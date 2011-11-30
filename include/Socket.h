@@ -123,6 +123,11 @@ enum SocketFlag
   SF_ACCEPTED
 };
 
+class Socket;
+class ClientSocket;
+class ListenSocket;
+class ConnectionSocket;
+
 class CoreExport SocketIO
 {
 public:

@@ -8,33 +8,33 @@ public:
     this->SetDesc("Lists all loaded modules");
     this->SetSyntax("\37priority\37");
   }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
+  void Run(CommandSource &source, const Flux::vector &params)
   {
-    const Flux::string priority = params.size() == 2?params[1]:"";
+    const Flux::string priority = params[1];
     int c=0;
     if(priority.empty())
     {
-      for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it){
-	source.Reply("\2%-16s\2 %s [%s]", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-		     ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
+      for(auto it : Modules){
+	source.Reply("\2%-16s\2 %s [%s]", it.second->name.c_str(), it.second->GetAuthor().c_str(),
+		     ModuleHandler::DecodePriority(it.second->GetPriority()).c_str());
 	++c;
       }
     }else
     { // There is probably a WAY easier way of doing this but whatever
-      for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it){
+    for(auto it : Modules){
 	if(priority.equals_ci("LAST") || priority == '1'){
-	  source.Reply("\2%-16s\2 %s [%s]", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-			ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
+	  source.Reply("\2%-16s\2 %s [%s]", it.second->name.c_str(), it.second->GetAuthor().c_str(),
+			ModuleHandler::DecodePriority(it.second->GetPriority()).c_str());
 	  ++c;
 	}else if(priority.equals_ci("NORMAL") || priority == '2')
 	{
-	  source.Reply("\2%-16s\2 %s [%s]", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-		     ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
+	  source.Reply("\2%-16s\2 %s [%s]", it.second->name.c_str(), it.second->GetAuthor().c_str(),
+		     ModuleHandler::DecodePriority(it.second->GetPriority()).c_str());
 	  ++c;
 	}else if(priority.equals_ci("FIRST") || priority == '3')
 	{
-	  source.Reply("\2%-16s\2 %s [%s]", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-		     ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
+	  source.Reply("\2%-16s\2 %s [%s]", it.second->name.c_str(), it.second->GetAuthor().c_str(),
+		     ModuleHandler::DecodePriority(it.second->GetPriority()).c_str());
 	  ++c;
 	}
       }
@@ -61,7 +61,7 @@ public:
     this->SetDesc("Load a module");
     this->SetSyntax("\37name\37");
   }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
+  void Run(CommandSource &source, const Flux::vector &params)
   {
     const Flux::string module = params[1];
     if(module.empty())
@@ -100,7 +100,7 @@ public:
     this->SetDesc("Unloads a module");
     this->SetSyntax("\37name\37");
   }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
+  void Run(CommandSource &source, const Flux::vector &params)
   {
     const Flux::string module = params[1];
     if(!source.u->IsOwner())
@@ -134,7 +134,7 @@ public:
     this->SetDesc("Reloads a module");
     this->SetSyntax("\37name\37");
   }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
+  void Run(CommandSource &source, const Flux::vector &params)
   {
     const Flux::string module = params[1];
     if(!source.u->IsOwner())
@@ -171,7 +171,7 @@ public:
    this->SetDesc("Provides info on a module");
    this->SetSyntax("\37name\37");
   }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
+  void Run(CommandSource &source, const Flux::vector &params)
   {
     const Flux::string modd = params[1];
     if(modd.empty()){
@@ -186,14 +186,14 @@ public:
       source.Reply("******** \2%s\2 Info ********", mo->name.c_str());
       source.Reply("Module: \2%s\2 Version: \2%s\2 Author: \2%s\2\nLoaded: \2%s\2", mo->filename.c_str(), mo->GetVersion().c_str(), mo->GetAuthor().c_str(), do_strftime(mo->GetLoadTime()).c_str());
       Flux::string cmds;
-      for(CommandMap::iterator it = Commandsmap.begin(); it != Commandsmap.end(); ++it)
-	if((it->second->mod == mo)){ //For /msg commands
-	  cmds += it->second->name+" ";
+      for(auto it : Commandsmap)
+	if((it.second->mod == mo)){ //For /msg commands
+	  cmds += it.second->name+" ";
 	}
 	cmds.trim();
-      for(CommandMap::iterator it = ChanCommandMap.begin(); it != ChanCommandMap.end(); ++it)
-	if((it->second->mod == mo)){ //For Channel Commands
-	  cmds += it->second->name+" ";
+      for(auto it : ChanCommandMap)
+	if((it.second->mod == mo)){ //For Channel Commands
+	  cmds += it.second->name+" ";
 	}
       cmds.trim();
       if(cmds.empty())
@@ -222,7 +222,7 @@ class M_Handler : public module
   CommandMUnload unload;
   CommandMInfo info;
   CommandMReload reload;
-  std::vector<Flux::string> CurrentModuleList;
+  Flux::vector CurrentModuleList;
 public:
   M_Handler(const Flux::string &Name):module(Name)
   {
@@ -247,20 +247,22 @@ public:
   }
   void OnReload()
   {
-    std::vector<Flux::string> updatedmodlist = StringVector(Config->Modules, ',');
-    for(std::vector<Flux::string>::iterator it; it != updatedmodlist.end(); ++it)
+    Flux::vector updatedmodlist = StringVector(Config->Modules, ',');
+    for(auto it : updatedmodlist)
     {
-      (*it).trim();
-      for(std::vector<Flux::string>::iterator it2; it2 != CurrentModuleList.end(); ++it2)
+      it.trim();
+      int pos = 0;
+      for(auto it2 : CurrentModuleList)
       {
-	if((*it) != (*it2)){
+	++pos;
+	if(it != it2){
 // 	  Log(LOG_TERMINAL) << "(*it) != (*it2)";
-	  ModuleHandler::Unload(FindModule(*it2));
-	  CurrentModuleList.erase(it2);
-	}else if((*it2) != (*it)){
+	  ModuleHandler::Unload(FindModule(it2));
+	  CurrentModuleList.erase(CurrentModuleList.begin()+pos);
+	}else if(it2 != it){
 // 	  Log(LOG_TERMINAL) << "(*it2) != (*it)";
-	  ModuleHandler::LoadModule(*it);
-	  CurrentModuleList.push_back(*it);
+	  ModuleHandler::LoadModule(it);
+	  CurrentModuleList.push_back(it);
 	}
       }
     }
