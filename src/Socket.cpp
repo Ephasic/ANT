@@ -972,7 +972,7 @@ void SocketEngine::Process()
       bool has_read = FD_ISSET(s->GetFD(), &rfdset), has_write = FD_ISSET(s->GetFD(), &wfdset), has_error = FD_ISSET(s->GetFD(), &efdset);
       if (has_read || has_write || has_error)
 	++processed;
-      
+      Log(LOG_TERMINAL) << "Processed " << s->GetFD();
       if (has_error)
       {
 	s->ProcessError();
@@ -990,8 +990,10 @@ void SocketEngine::Process()
       if (has_write && !s->ProcessWrite())
 	s->SetDead(true);
       
-      if (s->IsDead())
+      if (s->IsDead()){
+	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " died!";
 	delete s;
+      }
     }
   }
 }
@@ -1157,6 +1159,10 @@ void send_cmd(const char *fmt, ...)
   va_list args;
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
-  Fluxsocket->Write(buffer);
+  if(Fluxsocket){
+    Log(LOG_DEBUG) << buffer;
+    Fluxsocket->Write(buffer);
+  }else
+    Log(LOG_DEBUG) << "Attempted to send \"" << buffer << "\"";
   va_end(args);
 }

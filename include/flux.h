@@ -582,9 +582,6 @@ namespace Flux{
 
 }//end of namespace
 
-// Redefine the printf function so we can add our string to it
-template<typename... param> void printf(const Flux::string &format, param... params) { printf(format.c_str(), params...); }
-template<typename... param> void printf(const char *format, param... params) { printf(format, params...); }
 class CoreExport sepstream
 {
  private:

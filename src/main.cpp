@@ -42,8 +42,10 @@ bool FluxSocket::Read(const Flux::string &buf)
 
 void FluxSocket::OnConnect()
 {
-  Log(LOG_TERMINAL) << "Soccessfuly connected to " << Config->Server << ':' << Config->Port;
+  Log(LOG_TERMINAL) << "Successfuly connected to " << Config->Server << ':' << Config->Port;
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this));
+  this->Write("derpy!");
+  this->ProcessWrite();
 }
 void FluxSocket::OnError(const Flux::string &buf)
 {
@@ -72,7 +74,6 @@ static void Connect()
     throw SocketException("No Port Specified.");
   new FluxSocket();
   FOREACH_MOD(I_OnPreConnect, OnPreConnect(Config->Server, Config->Port));
-  Fluxsocket->Bind("localhost");
   Fluxsocket->Connect(Config->Server, Config->Port);
   if(ircproto){
     ircproto->user(Config->Ident, Config->Realname);
@@ -145,6 +146,7 @@ int main (int argcx, char** argvx, char *envp[])
       /***********************************/
     }//while loop ends here
     FOREACH_MOD(I_OnShutdown, OnShutdown());
+    delete Fluxsocket;
     ModuleHandler::UnloadAll();
     ModuleHandler::SanitizeRuntime();
     Log(LOG_TERMINAL) << "\033[0m";
