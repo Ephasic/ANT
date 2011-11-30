@@ -1,10 +1,22 @@
 #include "network.h"
 
-Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): name(n), hostname(host), port(p)
+Flux::insensitive_map<Network*> Networks;
+Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n)
 {
+  if(host.empty() || p.empty(), || n.empty())
+    throw CoreException("Network class created with incorrect parameters given");
+  
+  this->hostname = host;
+  this->name = n;
+  this->port = p;
+  Networks[n] = this;
   Log(LOG_DEBUG) << "New network created: " << n << " " << host << ':' << p;
 }
-
+Network::~Network()
+{
+  Log(LOG_DEBUG) << "Deleting network " << this->name << " (" << this->hostname << ':' << this->port << ')';
+  Networks.erase(this->name);
+}
 bool Network::Disconnect()
 {
   Socket *tmp = this->s;
@@ -29,6 +41,13 @@ bool Network::Connect()
   return true;
 }
 
+Network *FindNetwork(const Flux::string &name)
+{
+  auto it = Networks.find(name);
+  if(it != Networks.end())
+    return it->second;
+  return NULL;
+}
 /**********************************************************/
 NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket()
 {

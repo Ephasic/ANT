@@ -38,6 +38,7 @@ struct CoreExport CommandSource
 {
   User *u;
   Channel *c; /* Channel name, this will be replaced with channel class */
+  Network *n;
   Flux::string command;
   Flux::string message;
   Flux::string raw;

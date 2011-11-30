@@ -12,10 +12,11 @@ typedef std::map<Channel*, User*> CList;
 class CoreExport User : public Base
 {
 public:
-  User(const Flux::string&, const Flux::string&, const Flux::string&, const Flux::string &realname = "", const Flux::string &server ="");
+  User(Network*, const Flux::string&, const Flux::string&, const Flux::string&, const Flux::string &realname = "", const Flux::string &server ="");
   virtual ~User();
   CList ChannelList;
-  Flux::string nick,host,realname,ident,fullhost,server;
+  Flux::string nick, host, realname, ident, fullhost, server;
+  Network *n;
   void kick(const Flux::string&, const Flux::string&);
   void kick(Channel*, const Flux::string&);
   void kill(const Flux::string&);

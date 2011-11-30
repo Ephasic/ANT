@@ -40,5 +40,4 @@ public:
   bool Disconnect(const Flux::string&);
   bool Connect();
 };
-
 #endif

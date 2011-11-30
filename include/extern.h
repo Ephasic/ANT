@@ -78,9 +78,10 @@ typedef std::map<Flux::string, Command*, ci::less> CommandMap;
 
 /*  Class pointer finder definitions */
 E Channel *findchannel(const Flux::string&);
-E User *finduser(const Flux::string &nick);
-E module *FindModule(const Flux::string &name);
-E Command *FindCommand(const Flux::string &name, CommandType);
+E User *finduser(const Flux::string&);
+E module *FindModule(const Flux::string&);
+E Command *FindCommand(const Flux::string&, CommandType);
+E Network *FindNetwork(const Flux::string&);
 
 /* extern's */
 E FluxSocket *Fluxsocket;
@@ -108,6 +109,7 @@ E std::vector<Flux::string> StringVector(const Flux::string&, char);
 E Flux::insensitive_map<module*> Modules;
 E Flux::insensitive_map<User*> UserNickList;
 E Flux::insensitive_map<Channel*> ChanMap;
+E Flux::insensitive_map<Network*> Networks;
 
 /* void's */
 E void Rehash();

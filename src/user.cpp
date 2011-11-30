@@ -2,12 +2,13 @@
 #include <user.h>
 Flux::insensitive_map<User *> UserNickList;
 uint32_t usercnt = 0, maxusercnt = 0;
-User::User(const Flux::string &snick, const Flux::string &sident, const Flux::string &shost, const Flux::string &srealname, const Flux::string &sserver){
+User::User(Network *net, const Flux::string &snick, const Flux::string &sident, const Flux::string &shost, const Flux::string &srealname, const Flux::string &sserver){
  /* check to see if a empty string was passed into the constructor */
  if(snick.empty() || sident.empty() || shost.empty())
    throw CoreException("Bad args sent to User constructor");
  
  this->nick = snick;
+ this->n = net;
  this->ident = sident;
  this->host = shost;
  this->realname = srealname;
@@ -25,16 +26,17 @@ User::~User(){
   Log() << "Deleting user " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
   UserNickList.erase(this->nick);
 }
-void User::kick(const Flux::string &channel, const Flux::string &reason){ ircproto->kick(channel, this->nick, reason); }
+
+void User::kick(const Flux::string &channel, const Flux::string &reason)
+{
+  this->n->ircproto->kick(channel, this->nick, reason);
+}
 void User::kick(Channel *ch, const Flux::string &reason){
-  ircproto->kick(ch->name, this->nick, reason);
+  this->n->ircproto->kick(ch->name, this->nick, reason);
 }
-void User::SendWho(){ ircproto->who(this->nick); }
-void User::kill(const Flux::string &reason){
-  if(ircproto->o)
-   ircproto->o->kill(this->nick, reason);
- //send_cmd("KILL %s :%s", this->nick.c_str(), reason.c_str());
-}
+
+void User::SendWho(){ this->n->ircproto->who(this->nick); }
+
 void User::SendMessage(const char *fmt, ...){
   char buffer[BUFSIZE] = "";
   va_list args;
@@ -43,6 +45,7 @@ void User::SendMessage(const char *fmt, ...){
   this->SendMessage(Flux::string(buffer));
   va_end(args);
 }
+
 void User::SendPrivmsg(const char *fmt, ...){
  char buffer[BUFSIZE] = "";
   va_list args;
@@ -51,11 +54,13 @@ void User::SendPrivmsg(const char *fmt, ...){
   this->SendPrivmsg(Flux::string(buffer));
   va_end(args); 
 }
+
 bool User::IsOwner(){
  if(this->nick.equals_ci(Config->Owner))
    return true;
  return false;
 }
+
 void User::SetNewNick(const Flux::string &newnick)
 {
   if(newnick.empty())
@@ -65,6 +70,7 @@ void User::SetNewNick(const Flux::string &newnick)
   this->nick = newnick;
   UserNickList[this->nick] = this;
 }
+
 void User::AddChan(Channel *c){ if(c) ChannelList[c] = this; }
 void User::DelChan(Channel *c)
 {
@@ -72,6 +78,7 @@ void User::DelChan(Channel *c)
   if(it != ChannelList.end())
     ChannelList.erase(it);
 }
+
 Channel *User::findchannel(const Flux::string &name)
 {
   auto it1 = ChanMap.find(name);
@@ -83,14 +90,17 @@ Channel *User::findchannel(const Flux::string &name)
     return it->first;
   return NULL;
 }
-void User::SendMessage(const Flux::string &message){ ircproto->notice(this->nick, message); }
-void User::SendPrivmsg(const Flux::string &message){ ircproto->privmsg(this->nick, message); }
+
+void User::SendMessage(const Flux::string &message){ this->n->ircproto->notice(this->nick, message); }
+void User::SendPrivmsg(const Flux::string &message){ this->n->ircproto->privmsg(this->nick, message); }
+
 User *finduser(const Flux::string &fnick){
   auto it = UserNickList.find(fnick);
   if(it != UserNickList.end())
     return it->second;
   return NULL;
 }
+
 void ListUsers(CommandSource &source){
   Flux::string users;
   for(auto var : UserNickList)
