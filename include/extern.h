@@ -121,7 +121,7 @@ E void HandleSegfault(module*);
 E void restart(const Flux::string&);
 E void ListChans(CommandSource &source);
 E void ListUsers(CommandSource &source);
-E void send_cmd(const char *fmt, ...);
+E void send_cmd(Socket*, const char *fmt, ...);
 E void process(const Flux::string&);
 E void ProcessJoin(CommandSource&, const Flux::string&);
 E void ProcessCommands(CommandSource&, std::vector<Flux::string>&);

@@ -109,7 +109,7 @@ int main (int argcx, char** argvx, char *envp[])
     }
     if(!Fluxsocket)
       goto SocketStart;
-    ircproto = new IRCProto();
+    ircproto = new IRCProto(Fluxsocket);
     time_t last_check = time(NULL);
 
     DBSave db; //Start the Database Save timer.

@@ -1028,15 +1028,15 @@ void ClientSocket::OnError(const Flux::string &error)
  * \param char* a string of what to send to the server including printf style format
  * \param va_list all the variables to be replaced with the printf style variables
  */
-void send_cmd(const char *fmt, ...)
+void send_cmd(Socket *s, const char *fmt, ...)
 {
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
-  if(Fluxsocket){
+  if(s){
     Log(LOG_DEBUG) << buffer;
-    Fluxsocket->Write(buffer);
+    s->Write(buffer);
   }else
     Log(LOG_DEBUG) << "Attempted to send \"" << buffer << "\"";
   va_end(args);
