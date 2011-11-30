@@ -79,6 +79,8 @@ public:
   virtual void OnPart(User*, Channel*, const Flux::string&) {}
   virtual void OnUserMode(User*, const Flux::string&, const Flux::string&) {}
   virtual void OnPreConnect(const Flux::string&, const Flux::string&) {}
+  virtual void OnPreConnect(Network*) {}
+  virtual void OnPostConnect(Socket*, Network*) {}
   virtual void OnPostConnect(Socket*) {}
   virtual void OnConnectionError(const Flux::string&) {}
   virtual void OnInvite(User *u, const Flux::string&) {}

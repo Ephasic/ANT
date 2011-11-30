@@ -8,10 +8,22 @@
 class Network;
 struct CommitMessage
 {
-  std::vector<Flux::string> MessageMeta;
+  Flux::Vector MessageMeta;
   std::vector<Channel*> Channels;
   std::vector<Bot*> Bots;
   Network *network;
+};
+
+/* Base socket class for ALL network connections for the Network class */
+class NetworkSocket : public ConnectionSocket, public BufferedSocket
+{
+  Network *net;
+public:
+  NetworkSocket();
+  ~NetworkSocket();
+  bool Read(const Flux::string&);
+  void OnConnect();
+  void OnError(const Flux::string&);
 };
 
 class CoreExport Network
@@ -25,6 +37,7 @@ public:
   Flux::string port;
   Flux::string servername;
   bool Disconnect();
+  bool Disconnect(const Flux::string&);
   bool Connect();
 };
 
