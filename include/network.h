@@ -30,6 +30,7 @@ class CoreExport Network
 public:
   Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
   Socket *s;
+  IRCProto *ircproto;
   Flux::map<Bot*> bots;
   Flux::string name;
   Flux::string hostname;

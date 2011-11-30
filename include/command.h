@@ -11,40 +11,8 @@
 #include "user.h"
 /**
  *\file  command.h
- *\brief Contains the classes Command, and Oper.
+ *\brief Contains the class Command
  */
-
-/**
- * \class Oper
- * \brief A wrapper class for IRC Oper commands.
- * Contains IRC operator commands.
- */
-class CoreExport Oper
-{
-public:
-  Oper();
-  void samode(const Flux::string&, const Flux::string&);
-  void samode(const Flux::string&, const Flux::string&, const Flux::string&);
-  void sajoin(const Flux::string&, const Flux::string&);
-  void sapart(const Flux::string&, const Flux::string&);
-  void sanick(const Flux::string&, const Flux::string&);
-  void sakick(const Flux::string&, const Flux::string&, const Flux::string&);
-  void satopic(const Flux::string&, const Flux::string&);
-  void satopic(const Flux::string&, const char *fmt, ...);
-  void sahost(const Flux::string&, const Flux::string&);
-  void saident(const Flux::string&, const Flux::string&);
-  void kill(const Flux::string&, const Flux::string&);
-  void saname(const Flux::string&, const Flux::string&);
-  void saname(const Flux::string&, const char *fmt, ...);
-  void wallops(const Flux::string&);
-  void wallops(const char *fmt, ...);
-  void globops(const char *fmt, ...);
-  void globops(const Flux::string&);
-  void zline(const Flux::string&, const Flux::string&, const Flux::string&);
-  void qline(const Flux::string&, const Flux::string&, const Flux::string&);
-  void kline(const Flux::string&, const Flux::string&, const Flux::string&);
-  void gline(const Flux::string&, const Flux::string&, const Flux::string&);
-};
 
 /**
  * \class IsoHost

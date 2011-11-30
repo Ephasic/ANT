@@ -8,8 +8,18 @@ Network::Network(const Flux::string &host, const Flux::string &p, const Flux::st
 bool Network::Disconnect()
 {
   Socket *tmp = this->s;
+  IRCProto ptmp = this->ircproto;
   this->s = NULL;
+  this->ircproto = NULL;
+  delete ircproto;
   delete tmp;
+  return true;
+}
+bool Network::Disconnect(const Flux::string &buf)
+{
+  if(!buf.empty() && this->s)
+    this->ircproto->quit(buf);
+  this->Disconnect();
   return true;
 }
 bool Network::Connect()
