@@ -13,15 +13,25 @@ ANT 1.0.0
   [+] Multi-bot handling
   [+] Network class for handling network information
 
-[ ] Add Mode Handler
-  [ ] Parse 005 Numeric for modes and server support stuff, take action on it
-  [ ] Add u->IsOp()
-
 [+] Add Database/User accounts type system for metadata
   [ ] Add E-Mail handling
   [ ] Add lists of networks, channels, etc.
   [+] Add Commit processing system
   [+] Add Commit metadata processing
+
+[ ] Add Web Front end
+  [ ] Add event notifications (ie, kick, nick changes, etc)
+  [ ] Add accounts that should sync with MySQL
+  [ ] Add blog like CIA.vc
+  [ ] Add Documentation
+  [ ] Seperate C++ script/binary to handle Web Front end
+  [ ] Web Search
+  [ ] Add better front page than CIA.vc (should have: Critical Announcements, themes, user themes, commit averages, last commit, etc.)
+  [ ] Site Navigation that is understandable
+  [ ] Buttons and designs for 'master' page should look like ubuntu-tweak.com in a way.
+
+[ ] Add Network Oper handling similar to SearchIRC's Oper handling
+  [ ] Add Channel Op's?
 
 [ ] Add more event handlers (FOREACH_MOD)
 [ ] Fix parts of the core that are designed for 1 network only (like events)
@@ -35,3 +45,9 @@ ANT 1.0.0
 Future
 ------
 [+] Add Windows support (Fearure request: http://flux-net.net/bugs/view.php?id=9)
+
+Optional
+--------
+[ ] Add Mode Handler
+  [ ] Parse 005 Numeric for modes and server support stuff, take action on it
+  [ ] Add u->IsOp()
