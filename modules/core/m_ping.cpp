@@ -6,9 +6,12 @@ public:
   int pings;
   PingTimer():Timer(30, time(NULL), true), pings(0) { }
   void Tick(time_t){
-    send_cmd("PING :%i\n", time(NULL));
-    if(++pings >= 3 && Fluxsocket)
-      Fluxsocket->SetDead(true);
+    for(auto it : Networks)
+    {
+      send_cmd(it.second->s, "PING :%i\n", time(NULL));
+//       if(++pings >= 3) //FIXME: This needs fixing
+// 	Fluxsocket->SetDead(true);
+    }
   }
 };
 class Ping_pong:public module
@@ -27,7 +30,7 @@ public:
   {
     pingtimer.pings = 0;
   }
-  void OnPong(const std::vector<Flux::string> &params)
+  void OnPong(const std::vector<Flux::string> &params, Network*)
   {
      Flux::string ts = params[1];
      int lag = time(NULL)-(int)ts;
@@ -35,20 +38,20 @@ public:
      if(protocoldebug)
         Log(LOG_RAWIO) << lag << " sec lag (" << ts << " - " << time(NULL) << ')';
   }
-  void OnPing(const std::vector<Flux::string> &params)
+  void OnPing(const std::vector<Flux::string> &params, Network *n)
   {
     pingtimer.pings = 0;
-    send_cmd("PONG :%s\n", params[0].c_str());
+    send_cmd(n->s, "PONG :%s\n", params[0].c_str());
   }
   void OnConnectionError(const Flux::string &buffer)
   {
    throw CoreException(buffer.c_str());
   }
-  void OnNumeric(int i)
+  void OnNumeric(int i, Network *n)
   {
    if((i == 451)){
-     ircproto->user(Config->Ident, Config->Realname);
-     ircproto->nick(Config->BotNick);
+     n->ircproto->user(Config->Ident, Config->Realname);
+     n->ircproto->nick(Config->BotNick);
    }
   }
 };

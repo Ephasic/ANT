@@ -137,8 +137,8 @@ void sigact(int sig)
       signal(SIGHUP, SIG_IGN);
       sigstr = siginit(randint(1,20));
       quitmsg = "Recieved Signal: "+sigstr;
-      if(ircproto)
-	ircproto->quit(quitmsg);
+      if(FluxNet && FluxNet->ircproto)
+	FluxNet->ircproto->quit(quitmsg);
       quitting = true;
       break;
     default:

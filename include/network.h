@@ -4,7 +4,7 @@
 #include "bot.h"
 #include "includes.h"
 
-class Network;
+class NetworkSocket;
 struct CommitMessage
 {
   Flux::vector MessageMeta;
@@ -13,23 +13,12 @@ struct CommitMessage
   Network *network;
 };
 
-/* Base socket class for ALL network connections for the Network class */
-class NetworkSocket : public ConnectionSocket, public BufferedSocket
-{
-  Network *net;
-public:
-  NetworkSocket(Network*);
-  ~NetworkSocket();
-  bool Read(const Flux::string&);
-  void OnConnect();
-  void OnError(const Flux::string&);
-};
-
 class CoreExport Network
 {
 public:
   Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
-  Socket *s;
+  ~Network();
+  NetworkSocket *s;
   IRCProto *ircproto;
   Flux::map<Bot*> bots;
   Flux::string name;

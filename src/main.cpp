@@ -18,40 +18,41 @@
  * See the examples tab for an example module.
  */
 #include "flux_net_irc.hpp"
-FluxSocket *Fluxsocket = NULL;
-FluxSocket::FluxSocket() : Socket(-1), ConnectionSocket(), BufferedSocket()
-{
-  Fluxsocket = this;
-}
-FluxSocket::~FluxSocket()
-{
-  ircproto->quit("Closing Socket");
-  this->ProcessWrite();
-  Fluxsocket = NULL;
-}
-bool FluxSocket::Read(const Flux::string &buf)
-{
-  Flux::vector params = StringVector(buf, ' '); 
-  if(!params.empty() && params[0].equals_ci("ERROR"))
-  {
-    FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
-    return false; //Socket is dead so we'll let the socket engine handle it
-  }
-  process(buf);
-  return true;
-}
-
-void FluxSocket::OnConnect()
-{
-  Log(LOG_TERMINAL) << "Successfuly connected to " << Config->Server << ':' << Config->Port;
-  FOREACH_MOD(I_OnPostConnect, OnPostConnect(this));
-  this->Write("derpy!");
-  this->ProcessWrite();
-}
-void FluxSocket::OnError(const Flux::string &buf)
-{
-  Log(LOG_TERMINAL) << "Unable to connect to " << Config->Server << ':' << Config->Port << (!buf.empty()?(": " + buf):"");
-}
+// FluxSocket *Fluxsocket = NULL;
+// FluxSocket::FluxSocket() : Socket(-1), ConnectionSocket(), BufferedSocket()
+// {
+//   Fluxsocket = this;
+// }
+// FluxSocket::~FluxSocket()
+// {
+//   ircproto->quit("Closing Socket");
+//   this->ProcessWrite();
+//   Fluxsocket = NULL;
+// }
+// bool FluxSocket::Read(const Flux::string &buf)
+// {
+//   Flux::vector params = StringVector(buf, ' '); 
+//   if(!params.empty() && params[0].equals_ci("ERROR"))
+//   {
+//     FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
+//     return false; //Socket is dead so we'll let the socket engine handle it
+//   }
+// //   process(buf);
+//    Log(LOG_TERMINAL) << "Received '" << buf << "' in FluxSocket!";
+//   return true;
+// }
+// 
+// void FluxSocket::OnConnect()
+// {
+//   Log(LOG_TERMINAL) << "Successfuly connected to " << Config->Server << ':' << Config->Port;
+//   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this));
+//   this->Write("derpy!");
+//   this->ProcessWrite();
+// }
+// void FluxSocket::OnError(const Flux::string &buf)
+// {
+//   Log(LOG_TERMINAL) << "Unable to connect to " << Config->Server << ':' << Config->Port << (!buf.empty()?(": " + buf):"");
+// }
 // bool SocketIO::Read(const Flux::string &buf) const
 // {
 //   if(buf.search_ci("ERROR :Closing link:")){
@@ -73,13 +74,16 @@ static void Connect()
     throw SocketException("No Server Specified.");
   if(Config->Port.empty())
     throw SocketException("No Port Specified.");
-  new FluxSocket();
-  FOREACH_MOD(I_OnPreConnect, OnPreConnect(Config->Server, Config->Port));
-  Fluxsocket->Connect(Config->Server, Config->Port);
-  if(ircproto){
-    ircproto->user(Config->Ident, Config->Realname);
-    ircproto->nick(Config->BotNick);
-  }
+//   new FluxSocket();
+//   FOREACH_MOD(I_OnPreConnect, OnPreConnect(Config->Server, Config->Port));
+//   Fluxsocket->Connect(Config->Server, Config->Port);
+//   if(ircproto){
+//     ircproto->user(Config->Ident, Config->Realname);
+//     ircproto->nick(Config->BotNick);
+//   }
+    if(!FluxNet)
+      FluxNet = new Network(Config->Server, Config->Port, "Flux-Net");
+    FluxNet->Connect();
 }
 
 class DBSave : public Timer
@@ -107,16 +111,16 @@ int main (int argcx, char** argvx, char *envp[])
       Log(LOG_DEBUG) << "Socket Exception Caught: " << e.GetReason();
       goto SocketStart;
     }
-    if(!Fluxsocket)
+    if(!FluxNet->s)
       goto SocketStart;
-    ircproto = new IRCProto(Fluxsocket);
+//     ircproto = new IRCProto(Fluxsocket);
     time_t last_check = time(NULL);
 
     DBSave db; //Start the Database Save timer.
     
     //Set the username and nick
-    ircproto->user(Config->Ident, Config->Realname);
-    ircproto->nick(Config->BotNick);
+    FluxNet->ircproto->user(Config->Ident, Config->Realname);
+    FluxNet->ircproto->nick(Config->BotNick);
     
     while(!quitting)
     {
@@ -135,7 +139,7 @@ int main (int argcx, char** argvx, char *envp[])
 // 	  throw CoreException(ex.description());
 // 	}
 	SocketEngine::Process();
-	if(!Fluxsocket)
+	if(!FluxNet || !FluxNet->s)
 	{
 	  Log(LOG_TERMINAL) << "Main count: " << loopcount;
 	  try { Connect(); }
@@ -155,7 +159,7 @@ int main (int argcx, char** argvx, char *envp[])
       /***********************************/
     }//while loop ends here
     FOREACH_MOD(I_OnShutdown, OnShutdown());
-    delete Fluxsocket;
+//     delete Fluxsocket;
     ModuleHandler::UnloadAll();
     ModuleHandler::SanitizeRuntime();
     Log(LOG_TERMINAL) << "\033[0m";

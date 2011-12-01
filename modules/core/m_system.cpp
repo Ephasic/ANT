@@ -57,7 +57,7 @@ public:
 	source.Reply("\2%s\2 is an invalid nickname.");
 	Config->BotNick = newnick;
       }
-      ircproto->nick(newnick);
+      source.n->ircproto->nick(newnick);
     Log(u, this) << "to change the bots nickname to " << newnick;
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
@@ -83,7 +83,6 @@ public:
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
     if(source.u->IsOwner()){
-      ircproto->quit("Restarting..");
       restart("Restarting..");
       Log(source.u, this) << " to restart the bot.";
     }else
@@ -162,7 +161,7 @@ public:
     if(pass == password || pass == Config->UserPass){
       source.Reply("Quitting..");
       Log(u) << "quit the bot with password: \"" << password << "\"";
-      ircproto->quit("Requested From \2%s\17. Pass: \00320%s\017", u->nick.c_str(), password.c_str());
+      source.n->ircproto->quit("Requested From \2%s\17. Pass: \00320%s\017", u->nick.c_str(), password.c_str());
       quitting = true;
     }else{
       source.Reply(ACCESS_DENIED);
@@ -265,7 +264,7 @@ public:
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
   }
-  void OnNumeric(int i)
+  void OnNumeric(int i, Network *n)
   {
     if((i == 4)){
       //ircproto->mode(Config->BotNick, "+B"); get bot mode?
@@ -274,33 +273,27 @@ public:
       while(cs.GetToken(tok))
       {
 	tok.trim();
-	Channel *c = new Channel(tok);
+	Channel *c = new Channel(FluxNet, tok);
 	c->SendJoin();
 	c->SendMessage(welcome_msg, Config->BotNick.c_str(), Config->BotNick.c_str());
       }
-      if(!Config->OperatorAccount.empty() || !Config->OperatorPass.empty()){
-	ircproto->oper(Config->OperatorAccount, Config->OperatorPass);
-	IsOper = true;
-	ircproto->o = new Oper();
-      }
-      Log() << "Successfully connected to the server \"" << Config->Server+":"+Config->Port << "\" Master Channel(s): " << Config->Channel;
     }
     if((i == 433)){
       Config->BotNick.push_back(Flux::RandomNickString(5));
-      ircproto->nick(Config->BotNick);
+      n->ircproto->nick(Config->BotNick);
       istempnick = true;
     }
     if((i == 376))
     {
       Log(LOG_TERMINAL) << "\033[22;31mStarted with PID \033[22;32m" << getpid() << "\033[22;36m";
       Log(LOG_TERMINAL) << "\033[22;34mSession Password: \033[01;32m" << password << "\033[22;36m";
-      ircproto->notice(Config->Owner, "The randomly generated password is: %s", password.c_str());
+      n->ircproto->notice(Config->Owner, "The randomly generated password is: %s", password.c_str());
       started = true;
       /* Identify to the networks services */
       if((!Config->ServicesAccount.empty() || !Config->ServicesPass.empty()) && Config->IdentOnConn){
 	Flux::string Sendns = Config->ServicesSendString.replace_all_ci("%a", Config->ServicesAccount);
 	Sendns = Sendns.replace_all_ci("%p", Config->ServicesPass);
-	ircproto->privmsg(Config->ServicesService, Sendns);
+	n->ircproto->privmsg(Config->ServicesService, Sendns);
 	Log() << "Identified to " << Config->ServicesService << " with account \"" << Config->ServicesAccount << "\"";
       }
     }

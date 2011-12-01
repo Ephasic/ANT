@@ -6,8 +6,9 @@
 #include "xmlfile.h"
 #include "network.h" //We'll solve includes later
 #include "bot.h"
-IRCProto *ircproto;
+// IRCProto *ircproto;
 BotConfig *Config;
+Network *FluxNet;
 module *LastRunModule; // For crashes
 /**Runtime directory finder
  * This will get the bots runtime directory
@@ -126,14 +127,18 @@ void restart(const Flux::string &reason){
   char CurrentPath[FILENAME_MAX];
   GetCurrentDir(CurrentPath, sizeof(CurrentPath));
   FOREACH_MOD(I_OnRestart, OnRestart(reason));
-  if(reason.empty()){
-    Log() << "Restarting: No Reason";
-    if(ircproto)
-      ircproto->quit("Restarting: No Reason");
-  }else{
-    Log() << "Restarting: " << reason;
-    if(ircproto)
-      ircproto->quit("Restarting: %s", reason.c_str());
+  for(auto it : Networks)
+  {
+    Network *n = it.second;
+    if(reason.empty()){
+      Log() << "Restarting: No Reason";
+      if(n->ircproto)
+	n->ircproto->quit("Restarting: No Reason");
+    }else{
+      Log() << "Restarting: " << reason;
+      if(n->ircproto)
+	n->ircproto->quit("Restarting: %s", reason.c_str());
+    }
   }
   chdir(CurrentPath);
   int execvpret = execvp(my_av[0], my_av);
@@ -161,7 +166,7 @@ void Rehash(){
     ReadConfig();
   }catch(const ConfigException &ex){
     Log() << "Configuration Exception Caught: " << ex.GetReason();
-    ircproto->notice(Config->Owner, "Config Exception Caught: %s", ex.GetReason());
+    FluxNet->ircproto->notice(Config->Owner, "Config Exception Caught: %s", ex.GetReason());
   }
 }
 
@@ -198,7 +203,7 @@ void startup(int argc, char** argv, char *envp[]) {
   SET_SEGV_LOCATION();
   InitSignals();
   Config = NULL;
-  ircproto = NULL;
+//   ircproto = NULL;
   my_av = argv;
   my_envp = envp;
   starttime = time(NULL); //for bot uptime

@@ -10,7 +10,7 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   if(!n)
     throw CoreException("Channel created with no network!");
 
-  this->n = net
+  this->n = net;
   this->name = nname;
   this->creation_time = ts;
   this->topic_time = 0;

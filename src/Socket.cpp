@@ -1028,7 +1028,7 @@ void ClientSocket::OnError(const Flux::string &error)
  * \param char* a string of what to send to the server including printf style format
  * \param va_list all the variables to be replaced with the printf style variables
  */
-void send_cmd(Socket *s, const char *fmt, ...)
+void send_cmd(BufferedSocket *s, const char *fmt, ...)
 {
   char buffer[BUFSIZE] = "";
   va_list args;

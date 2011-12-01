@@ -21,13 +21,13 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan){
     /*******************************************************/
     User *u = finduser(Nickname);
     if(!u){
-      if(!Host.empty() || !Nickname.empty() || !Ident.empty())
-	u = new User(Nickname, Ident, Host, realname, Server);
+      if((!Host.empty() || !Nickname.empty() || !Ident.empty()) && source.n)
+	u = new User(source.n, Nickname, Ident, Host, realname, Server);
     }
     Channel *c = findchannel(channel);
     if(!c){
-     if(!channel.empty())
-       c = new Channel(channel);
+      if(!channel.empty() && source.n)
+       c = new Channel(source.n, channel);
     }
     if(u)
       u->AddChan(c);
@@ -127,7 +127,7 @@ void ProcessCommand(CommandSource &Source, std::vector<Flux::string> &params2,
  * \brief Main Processing function
  * \param buffer The raw socket buffer
  */
-void process(const Flux::string &buffer){
+void process(NetworkSocket *s, const Flux::string &buffer){
   SET_SEGV_LOCATION();
   Flux::string buf = buffer;
   buf = buf.replace_all_cs("  ", " ");
@@ -183,15 +183,22 @@ void process(const Flux::string &buffer){
   Channel *c = findchannel(receiver);
   std::vector<Flux::string> params2 = StringVector(message, ' ');
   /***********************************************/
+  Network *n = s->net != NULL?s->net:FindNetworkByHost(source);
+  if(!n)
+  {
+    Log(LOG_TERMINAL) << "Socket with no source network??";
+    return;
+  }
+  
   if(command == "004" && source.search('.')) { server_name = source; }
   if(message[0] == '\1' && message[message.length() -1] == '\1' && !params2[0].equals_cs("\001ACTION")){
-    FOREACH_MOD(I_OnCTCP, OnCTCP(nickname, params2));
+    FOREACH_MOD(I_OnCTCP, OnCTCP(nickname, params2, n));
     return; //Dont allow the rest of the system to process ctcp's as it will be caught by the command handler.
   }
   if(command.equals_cs("NICK") && u) { FOREACH_MOD(I_OnNickChange, OnNickChange(u, params[0])); u->SetNewNick(params[0]); }
   if(!u && !finduser(nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty())){
-    if(!nickname.search('.'))
-      u = new User(nickname, uident, uhost);
+    if(!nickname.search('.') && n)
+      u = new User(n, nickname, uident, uhost);
   }
   if(command == "QUIT"){
     FOREACH_MOD(I_OnQuit, OnQuit(u, params[0]));
@@ -212,9 +219,9 @@ void process(const Flux::string &buffer){
       }
     }
   }
-  if(command.is_pos_number_only()) { FOREACH_MOD(I_OnNumeric, OnNumeric((int)command)); }
-  if(command.equals_cs("PING")){ FOREACH_MOD(I_OnPing, OnPing(params)); }
-  if(command.equals_cs("PONG")){ FOREACH_MOD(I_OnPong, OnPong(params)); }
+  if(command.is_pos_number_only()) { FOREACH_MOD(I_OnNumeric, OnNumeric((int)command, n)); }
+  if(command.equals_cs("PING")){ FOREACH_MOD(I_OnPing, OnPing(params, n)); }
+  if(command.equals_cs("PONG")){ FOREACH_MOD(I_OnPong, OnPong(params, n)); }
   if(command.equals_cs("KICK")){ FOREACH_MOD(I_OnKick, OnKick(u, finduser(params[1]), findchannel(params[0]), params[2])); }
   if(command.equals_ci("ERROR")) { FOREACH_MOD(I_OnConnectionError, OnConnectionError(buffer)); }
   if(command.equals_cs("INVITE")) { FOREACH_MOD(I_OnInvite, OnInvite(u, params[1])); }
@@ -228,10 +235,10 @@ void process(const Flux::string &buffer){
     else if(params[0] == Config->BotNick) { FOREACH_MOD(I_OnUserMode, OnUserMode(u, params[0], params[1])); }
   }
   if(command == "JOIN"){
-    if(!u && (!nickname.empty() || !uident.empty() || !uhost.empty()))
-      u = new User(nickname, uident, uhost);
-    else if(!c && IsValidChannel(receiver))
-      c = new Channel(receiver);
+    if(!u && n && (!nickname.empty() || !uident.empty() || !uhost.empty()))
+      u = new User(n, nickname, uident, uhost);
+    else if(!c && n && IsValidChannel(receiver))
+      c = new Channel(n, receiver);
     else if(!u->findchannel(c->name))
       u->AddChan(c);
     else if(!c->finduser(u->nick))
@@ -244,6 +251,7 @@ void process(const Flux::string &buffer){
   CommandSource Source;
   Source.u = u; //User class
   Source.c = c; //Channel class
+  Source.n = n; //Network class
   Source.message = message;
   Source.params = params;
   Source.raw = buffer;

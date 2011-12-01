@@ -10,6 +10,7 @@
  * way then do so.
  */
 #include "Socket.h"
+#include "network.h"
 #include "timers.h"
 #include "thread.h"
 #include "INIReader.h"

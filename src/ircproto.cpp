@@ -4,7 +4,7 @@
  *\file  ircproto.cpp
  *\brief Contains the IRCProto class.
  */
-IRCProto::IRCProto(Socket *sock) { this->s = sock; } //Because we have multiple networks, we need this to be dynamic with the sockets
+IRCProto::IRCProto(BufferedSocket *sock) { this->s = sock; } //Because we have multiple networks, we need this to be dynamic with the sockets
 /**
  * \brief Sends a IRC private message to the user or channel
  * \param Destination Where the message will go

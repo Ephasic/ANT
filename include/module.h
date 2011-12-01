@@ -56,9 +56,9 @@ public:
   virtual void OnDatabasesWrite(void (*WriteDB)(const Flux::string&)) {}
   virtual void OnNotice(User*, const std::vector<Flux::string>&) {}
   virtual void OnNotice(User*, Channel*, const std::vector<Flux::string>&) {}
-  virtual void OnCTCP(const Flux::string&, const std::vector<Flux::string>&) {}
-  virtual void OnPing(const std::vector<Flux::string>&) {}
-  virtual void OnPong(const std::vector<Flux::string>&) {}
+  virtual void OnCTCP(const Flux::string&, const std::vector<Flux::string>&, Network*) {}
+  virtual void OnPing(const std::vector<Flux::string>&, Network*) {}
+  virtual void OnPong(const std::vector<Flux::string>&, Network*) {}
   virtual void OnArgument(int, const Flux::string&) {}
   virtual void OnModuleLoad(module*) {}
   virtual void OnFork(int) {}
@@ -70,7 +70,7 @@ public:
   virtual void OnQuit(User*, const Flux::string&) {}
   virtual void OnJoin(User*, Channel*) {}
   virtual void OnKick(User*, User*, Channel*, const Flux::string&) {}
-  virtual void OnNumeric(int) {}
+  virtual void OnNumeric(int, Network*) {}
   virtual void OnReload() {}
   virtual void OnCommand(const Flux::string&, const std::vector<Flux::string>&) {}
   virtual void OnStart(int, char**) {}

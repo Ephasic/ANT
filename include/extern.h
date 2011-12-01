@@ -27,7 +27,10 @@ E jmp_buf sigbuf;
 class Channel;
 class Log;
 class User;
-class FluxSocket;
+// class FluxSocket;
+class NetworkSocket;
+class BufferedSocket;
+class Socket;
 class Commands;
 class Command;
 class Oper;
@@ -82,10 +85,12 @@ E User *finduser(const Flux::string&);
 E module *FindModule(const Flux::string&);
 E Command *FindCommand(const Flux::string&, CommandType);
 E Network *FindNetwork(const Flux::string&);
+E Network *FindNetworkByHost(const Flux::string&);
 
 /* extern's */
-E FluxSocket *Fluxsocket;
-E IRCProto *ircproto;
+// E FluxSocket *Fluxsocket;
+// E IRCProto *ircproto;
+E Network *FluxNet;
 E BotConfig *Config;
 E module *LastRunModule;
 E CommandMap Commandsmap;
@@ -110,6 +115,7 @@ E Flux::insensitive_map<module*> Modules;
 E Flux::insensitive_map<User*> UserNickList;
 E Flux::insensitive_map<Channel*> ChanMap;
 E Flux::insensitive_map<Network*> Networks;
+E Flux::map<Network*> NetworkHosts;
 
 /* void's */
 E void Rehash();
@@ -123,8 +129,8 @@ E void HandleSegfault(module*);
 E void restart(const Flux::string&);
 E void ListChans(CommandSource &source);
 E void ListUsers(CommandSource &source);
-E void send_cmd(Socket*, const char *fmt, ...);
-E void process(const Flux::string&);
+E void send_cmd(BufferedSocket*, const char *fmt, ...);
+E void process(NetworkSocket*, const Flux::string&);
 E void ProcessJoin(CommandSource&, const Flux::string&);
 E void ProcessCommands(CommandSource&, std::vector<Flux::string>&);
 E void ReadConfig();

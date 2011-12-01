@@ -29,8 +29,8 @@ public:
 	c->SendJoin();
 	c->SendMessage(welcome_msg, Config->BotNick.c_str(), Config->BotNick.c_str());
       }else{
-	ircproto->join(chan);
-	ircproto->privmsg(chan, welcome_msg, Config->BotNick.c_str(), Config->BotNick.c_str());
+	source.n->ircproto->join(chan);
+	source.n->ircproto->privmsg(chan, welcome_msg, Config->BotNick.c_str(), Config->BotNick.c_str());
       }
     }
   }

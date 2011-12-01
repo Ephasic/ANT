@@ -11,7 +11,7 @@
 class xmlrpcmod : public module
 {
 public:
-  xmlrpcmod(const Flux::string &name):module(name)
+  xmlrpcmod(const Flux::string &Name):module(Name)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
