@@ -8,22 +8,23 @@ Legend:
 ANT 1.0.0
 ----------
 [ ] Fix Glibc crash
-[ ] Multisocket the socket engine
-  [ ] Multi-Network handling
-  [ ] Multi-bot handling
-  [ ] Network class for handling network information
+[X] Multisocket the socket engine
+  [+] Multi-Network handling
+  [+] Multi-bot handling
+  [+] Network class for handling network information
 
 [ ] Add Mode Handler
   [ ] Parse 005 Numeric for modes and server support stuff, take action on it
   [ ] Add u->IsOp()
 
-[ ] Add Database/User accounts type system for metadata
+[+] Add Database/User accounts type system for metadata
   [ ] Add E-Mail handling
   [ ] Add lists of networks, channels, etc.
-  [ ] Add Commit processing system
-  [ ] Add Commit metadata processing
+  [+] Add Commit processing system
+  [+] Add Commit metadata processing
 
 [ ] Add more event handlers (FOREACH_MOD)
+[ ] Fix parts of the core that are designed for 1 network only (like events)
 [ ] Wtf is this Priority system? fix that
 [ ] Add buffer limiter (so freenode does not kill the bot)
 [ ] Better config format
