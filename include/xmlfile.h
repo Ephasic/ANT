@@ -20,15 +20,15 @@ private:
     Tag(Flux::string,Flux::string);
     Flux::string Name;
     Flux::string Content;
-    Flux::map<Attribute> Attributes;
-    Flux::map<Tag> Tags;
+    Flux::insensitive_map<Attribute> Attributes;
+    Flux::insensitive_map<Tag> Tags;
   };
 public:
   XMLFile(Flux::string);
   /* The int here is just used to say that it is to use a different constructor */
   XMLFile(const Flux::string&, int);
   void Parse();
-  Flux::map<Tag> Tags;
+  Flux::insensitive_map<Tag> Tags;
 };
 
 #endif

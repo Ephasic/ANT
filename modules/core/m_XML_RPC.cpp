@@ -15,18 +15,13 @@ class xmlrpcclient;
 class xmlrpclistensocket;
 std::vector<xmlrpclistensocket*> listen_sockets;
 
-CommitMessage ProcessCommit(const Flux::string &str)
-{
-  
-}
-
 class xmlrpcclient : public ClientSocket, public BufferedSocket
 {
   Flux::string RawCommitXML;
-  
+  bool in_query;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6())ClientSocket(ls, addr), BufferedSocket() {}
-  bool Read(const Flux::string&)
+  bool Read(const Flux::string &message)
   {
     if(message.search_ci("USER")) // If the user tries to connect via IRC protocol
       this->Write("ERROR: This is not an IRC connection");
@@ -41,8 +36,12 @@ public:
       this->Write("");
       this->Write(page);
       return true;
-    }else if(message.search_ci("xml version")){ //This is a commit
-      static_cast<void>(0); //Do nothing for now...
+    }else if(message.search_ci("<message>") || this->in_query){ //This is a commit
+      Log(LOG_DEBUG) << "XML-RPC: " << message;
+      this->RawCommitXML += message.strip();
+    }else if(message.search_ci("</message>")){
+      Log(LOG_DEBUG) << "XML-RPC: Processing Message";
+      this->HandleMessage();
     }
     return true;
   }
@@ -55,7 +54,7 @@ class xmlrpclistensocket : public ListenSocket
 public:
   xmlrpclistensocket(const Flux::string &bindip, int port, bool ipv6) : ListenSocket(bindip, port, ipv6)
   {
-    log(LOG_DEBUG) << "New Listen socket created " << bindip << ':' << port << (ipv6?"(IPv6)":"(IPv4)");
+    log(LOG_DEBUG) << "XML-RPC: New Listen socket created " << bindip << ':' << port << (ipv6?"(IPv6)":"(IPv4)");
     listen_sockets.push_back(this);
   }
   ~xmlrpclistensocket()
@@ -109,6 +108,62 @@ public:
   
   void OnCommit(CommitMessage &msg)
   {
-    Log(LOG_TERMINAL) << "Fun stuff!";
+    Log(LOG_TERMINAL) << "XML-RPC: Fun stuff!";
   }
 };
+
+/* This is down here so we don't make a huge mess in the middle of the file */
+void xmlrpcclient::HandleMessage()
+{
+  if(this->RawCommitXML.empty())
+    return;
+  
+  XMLFile xf(this->RawCommitXML, 1);
+  
+  /* This code was based off the commit in this script: http://cia.vc/clients/git/ciabot.bash */
+  /* Script Info (if available) */
+  Flux::string ScriptName = xf.Tags["message"].Tags["generator"].Attributes["name"].Value;
+  Flux::string ScriptVersion = xf.Tags["message"].Tags["generator"].Attributes["version"].Value;
+  Flux::string ScriptURL = xf.Tags["message"].Tags["generator"].Attributes["url"].Value;
+  
+  /* Commit Body */
+  Flux::string timestamp = xf.Tags["message"].Attributes["timestamp"].Value;
+  Flux::string author = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["author"].Value;
+  Flux::string revision = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["revision"].Value;
+  Flux::string log = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["log"].Value;
+  Flux::string url = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["url"].Value;
+  Flux::vector Files = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["files"].Value;
+  
+  /* Source info */
+  Flux::string project = xf.Tags["message"].Tags["source"].Attributes["project"].Value;
+  Flux::string branch = xf.Tags["message"].Tags["source"].Attributes["branch"].Value;
+  Flux::string module = xf.Tags["message"].Tags["source"].Attributes["module"].Value;
+  
+  /* This is seperated now to keep
+   * the differences in how stuff is
+   * processed apart so we can possibly
+   * the data in more ways than one
+   */
+  
+  CommitMessage msg;
+  /* Script info */
+  msg.ScriptName = ScriptName;
+  msg.ScriptVersion = ScriptVersion;
+  msg.ScriptURL = ScriptURL;
+  
+  /* commit body */
+  msg.timestamp = timestamp;
+  msg.author = author;
+  msg.revision = revision;
+  msg.log = log;
+  msg.url = url;
+  msg.Files = Files;
+  
+  /* Source info */
+  msg.project = project;
+  msg.branch = branch;
+  msg.module = module;
+  
+  /* Announce to other modules for commit announcement */
+  FOREACH_MOD(I_OnCommit, OnCommit(msg));
+}
