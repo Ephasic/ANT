@@ -7,7 +7,16 @@
 class NetworkSocket;
 struct CommitMessage
 {
-  Flux::vector MessageMeta;
+  Flux::string project;
+  Flux::string branch;
+  Flux::string name;
+  Flux::string srcipturl;
+  Flux::string timestamp;
+  Flux::string author;
+  Flux::string revision;
+  Flux::string log;
+  Flux::string url;
+  Flux::vector Files;
   std::vector<Channel*> Channels;
   std::vector<Bot*> Bots;
   Network *network;
