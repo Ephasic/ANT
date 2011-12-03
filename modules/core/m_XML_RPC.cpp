@@ -85,6 +85,7 @@ public:
     Implementation i[] = { I_OnCommit };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
   }
+  
   ~xmlrpcmod()
   {
     for(auto it : SocketEngine::Sockets)
@@ -105,6 +106,7 @@ public:
     for(auto it : listen_sockets)
       delete (*it);
   }
+  
   void OnCommit(CommitMessage &msg)
   {
     Log(LOG_TERMINAL) << "Fun stuff!";

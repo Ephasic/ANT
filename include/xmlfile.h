@@ -20,12 +20,15 @@ private:
     Tag(Flux::string,Flux::string);
     Flux::string Name;
     Flux::string Content;
-    std::map<Flux::string,Attribute> Attributes;
-    std::map<Flux::string,Tag> Tags;
+    Flux::map<Attribute> Attributes;
+    Flux::map<Tag> Tags;
   };
 public:
   XMLFile(Flux::string);
-  std::map<Flux::string,Tag> Tags;
+  /* The int here is just used to say that it is to use a different constructor */
+  XMLFile(const Flux::string&, int);
+  void Parse();
+  Flux::map<Tag> Tags;
 };
 
 #endif

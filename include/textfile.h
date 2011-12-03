@@ -19,14 +19,14 @@ class CoreExport TextFile
 private:
   Flux::string line, filename;
   FileIOErrors lasterror;
-  std::vector<Flux::string> lines;
+  Flux::vector lines;
 protected:
   Flux::string SingleLineBuffer;
 public:
   std::vector<Flux::string> Contents;
   ~TextFile();
   TextFile(const Flux::string&);
-  TextFile(std::vector<Flux::string>);
+  TextFile(Flux::vector);
   FileIOErrors Copy(const Flux::string&);
   FileIOErrors GetLastError();
   static Flux::string TempFile(const Flux::string&);

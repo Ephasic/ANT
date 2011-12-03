@@ -1,6 +1,6 @@
 #include "xmlfile.h"
 
-XMLFile::XMLFile(const Flux::string fn):TextFile(fn)
+void XMLFile::Parse()
 {
   for (unsigned i = 0; i < SingleLineBuffer.size(); i++)
   {
@@ -55,6 +55,16 @@ XMLFile::XMLFile(const Flux::string fn):TextFile(fn)
   }
 }
 
+XMLFile::XMLFile(const Flux::string fn):TextFile(fn)
+{
+  this->Parse();
+}
+
+XMLFile::XMLFile(const Flux::string &SLB, int)
+{
+  SingleLineBuffer = SLB;
+  this->Parse();
+}
 XMLFile::Tag::Attribute::Attribute() {}
 
 XMLFile::Tag::Tag() {}
