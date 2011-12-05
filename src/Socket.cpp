@@ -838,13 +838,10 @@ void send_cmd(BufferedSocket *s, const char *fmt, ...)
   va_list args;
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
-  if(s)
-    if(!s->IsDead()){
+  if(s){
       Log(LOG_DEBUG) << buffer;
       s->Write(buffer);
-    }else
-    Log(LOG_DEBUG) << "Attempted to send \"" << buffer << "\"";
-  else
+  }else
     Log(LOG_DEBUG) << "Attempted to send \"" << buffer << "\"";
   va_end(args);
 }
