@@ -27,6 +27,7 @@ public:
   ~TextFile();
   TextFile(const Flux::string&);
   TextFile(Flux::vector);
+  TextFile();
   FileIOErrors Copy(const Flux::string&);
   FileIOErrors GetLastError();
   static Flux::string TempFile(const Flux::string&);

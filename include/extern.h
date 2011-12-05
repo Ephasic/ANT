@@ -78,6 +78,7 @@ enum ModErr
 
 /* Typedef's */
 typedef std::map<Flux::string, Command*, ci::less> CommandMap;
+typedef std::vector<module*> EventsVector;
 
 /*  Class pointer finder definitions */
 E Channel *findchannel(const Flux::string&);
@@ -106,6 +107,7 @@ E Flux::string make_pass();
 E Flux::string do_strftime(const time_t &t, bool short_output = false);
 E Flux::string duration(const time_t &t);
 E Flux::string fsprintf(const char*, ...);
+E Flux::string fsprintf(const Flux::string&, ...);
 E int randint(int x, int y);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
@@ -144,8 +146,8 @@ E char **my_av, **my_envp;
 #define FOREACH_MOD(y, x) \
 if(true) \
 { \
-    std::vector<module*>::iterator safei; \
-    for (std::vector<module*>::iterator _i = ModuleHandler::EventHandlers[y].begin(); _i != ModuleHandler::EventHandlers[y].end(); ) \
+    EventsVector::iterator safei; \
+    for (auto _i = ModuleHandler::EventHandlers[y].begin(); _i != ModuleHandler::EventHandlers[y].end(); ) \
     { \
        safei = _i; \
        ++safei; \

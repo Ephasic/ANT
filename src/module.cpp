@@ -3,7 +3,7 @@
 //This code sucks, you know it and I know it. 
 //Move on and call me an idiot later.
 Flux::insensitive_map<module*> Modules;
-std::vector<module *> ModuleHandler::EventHandlers[I_END];
+EventsVector ModuleHandler::EventHandlers[I_END];
 CommandMap Commandsmap;
 CommandMap ChanCommandMap;
 /** 

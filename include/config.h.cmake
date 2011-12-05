@@ -27,6 +27,7 @@
 #define VERSION_GIT "@VERSION_GIT@"
 #define VERSION_EXTRA "@ant_VERSION_EXTRA@"
 #define VERSION_FULL "@VERSION_FULL@"
+#define COMPILED_NAME "@PROGRAM_NAME@"
 
 #cmakedefine HAVE_UINT8_T 1
 #cmakedefine HAVE_U_INT8_T 1

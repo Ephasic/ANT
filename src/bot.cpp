@@ -7,15 +7,4 @@ Bot::Bot(Network *net, const Flux::string &n, const Flux::string &i, const Flux:
 
 void Bot::AnnounceCommit(CommitMessage &msg)
 {
-  for(unsigned i=0; i < msg.MessageMeta.size(); ++i)
-  {
-    for(auto it : this->channels)
-    {
-      Channel *c = it.second;
-      if(c != NULL)
-      {
-	printf("I would process the channel for commiting.. this needs work!\n");
-      }
-    }
-  }
 }

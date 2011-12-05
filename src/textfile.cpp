@@ -19,6 +19,8 @@ TextFile::TextFile(const Flux::string &FileName) : filename(FileName), lasterror
 /** \overload TextFile::TextFile(std::vector<Flux::string> conts) */
 TextFile::TextFile(std::vector<Flux::string> conts) { lines = conts; Contents = conts; }
 
+TextFile::TextFile() {}
+
 TextFile::~TextFile() {}
 /** TextFile Error Decoder
  * \brief This is just a simple error code to string (like strerror) for TextFile

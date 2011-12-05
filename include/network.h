@@ -9,7 +9,7 @@ struct CommitMessage
 {
   Flux::string project;
   Flux::string branch;
-  Flux::string ScriptVersion
+  Flux::string ScriptVersion;
   Flux::string ScriptName;
   Flux::string ScriptURL;
   Flux::string module;

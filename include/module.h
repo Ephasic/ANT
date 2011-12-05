@@ -11,7 +11,8 @@
 #  error dlfcn.h is required by navn to compile modules!
 # endif
 #endif
-enum Implementation{
+
+enum Implementation {
   I_BEGIN,
 	I_OnPrivmsg, I_OnModuleLoad, I_OnModuleUnload,
 	I_OnRestart, I_OnShutdown, I_OnReload, I_OnCommand,
@@ -22,11 +23,13 @@ enum Implementation{
 	I_OnSocketError, I_OnPing, I_OnPong, I_OnCommit, I_OnDatabasesWrite,
   I_END
 };
+
 enum ModulePriority{
   PRIORITY_FIRST,
   PRIORITY_DONTCARE,
   PRIORITY_LAST
 };
+
 class CoreExport module : public Base
 {
   Flux::string author, version;
@@ -90,7 +93,7 @@ public:
 class CoreExport ModuleHandler
 {
 public:
-  static std::vector<module*> EventHandlers[I_END];
+  static EventsVector EventHandlers[I_END];
   static ModErr LoadModule(const Flux::string&);
   static Flux::string DecodePriority(ModulePriority);
   static void SanitizeRuntime();

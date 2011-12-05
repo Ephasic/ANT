@@ -1,5 +1,6 @@
 #ifndef WINDOWS_H
 #define WINDOWS_H
+class module;
 #ifdef _WIN32
 	/* include the various windows libraries for compile */
 	#include <winsock2.h>
@@ -19,6 +20,8 @@
 	#include <io.h>
 	#undef read
 	#undef write
+
+	#define getpid GetCurrentProcessId
 
 	/* redefine some functions because microsoft has their own standards */
 	#define MARK_DEPRECATED
@@ -91,8 +94,8 @@
 	#define GetCurrentDir getcwd
 	#define Delete unlink
 	#define MODULE_HOOK(x) \
-	extern "C" module *ModInit(const Flux::string &name) { return new x(name); } \
-	extern "C" void ModunInit(x *m) { if(m) delete m; }
+	 extern "C" module *ModInit(const Flux::string &name) { return new x(name); } \
+	 extern "C" void ModunInit(x *m) { if(m) delete m; }
 #endif // _WIN32
 
 #endif // WINDOWS_H

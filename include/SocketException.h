@@ -75,6 +75,7 @@ class LogException : public CoreException
 		LogException(const Flux::string &message) : CoreException(message, "A Log") { }
 		virtual ~LogException() throw() { }
 };
+
 class ModuleException : public CoreException
 {
  public:

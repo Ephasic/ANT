@@ -10,6 +10,7 @@
 BotConfig *Config;
 Network *FluxNet;
 module *LastRunModule; // For crashes
+
 /**Runtime directory finder
  * This will get the bots runtime directory
  * @param getprogdir(const Flux::string dir)
@@ -29,20 +30,6 @@ Flux::string getprogdir(const Flux::string &dir){
     return fullpath;
   }
   return "/";
-}
-
-/**
- * \fn Flux::string removeCommand(Flux::string command, Flux::string s)
- * \brief Removes a command from a Flux::string.
- * \param command String to be taken out.
- * \param s Original Flux::string.
- * This takes out \a command from \a s and returns \a s without \a command It's very useful when you want
- * to use the rest of a Flux::string as an argument for a command.
- * \return A Flux::string \a s without \a command.
- */
-Flux::string removeCommand(Flux::string command, Flux::string s){
-  size_t pos = s.find(command);
-  return s.substr(pos+(command.size())+1);
 }
 
 /**
@@ -185,11 +172,7 @@ static void WritePID(){
     throw CoreException("Cannot write PID file, no PID file specified.");
   FILE *pidfile = fopen(Config->PidFile.c_str(), "w");
   if(pidfile){
-    #ifdef _WIN32
-    fprintf(pidfile, "%d\n", static_cast<int>(GetCurrentProcessId()));
-    #else
     fprintf(pidfile, "%d\n", static_cast<int>(getpid()));
-    #endif
     fclose(pidfile);
     atexit(remove_pidfile);
   }

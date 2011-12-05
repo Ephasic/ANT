@@ -310,8 +310,8 @@ namespace Flux{
        this->_string.erase(this->_string.length() - 1);
     }
 
-    inline void tolower() { std::transform(_string.begin(), _string.end(), _string.begin(), ::tolower); }
-    inline void toupper() { std::transform(_string.begin(), _string.end(), _string.begin(), ::toupper); }
+    inline string tolower() { std::transform(_string.begin(), _string.end(), _string.begin(), ::tolower); return *this; }
+    inline string toupper() { std::transform(_string.begin(), _string.end(), _string.begin(), ::toupper); return *this; }
     inline void clear() { this->_string.clear(); }
     inline bool search(const string &_str) { if(_string.find(_str._string) != base_string::npos) return true; return false; }
     inline bool search(const string &_str) const { if(_string.find(_str._string) != base_string::npos) return true; return false; }
@@ -426,12 +426,27 @@ namespace Flux{
 	new_buf = new_buf.replace_all_cs("\r", "");
 	return new_buf;
     }
+    
+    inline string strip() const
+    {
+      string new_buf = *this;
+      new_buf = new_buf.replace_all_cs("\n", "");
+      new_buf = new_buf.replace_all_cs("\r", "");
+      return new_buf;
+    }
     /* Strip specific chars */
     inline string strip(const char &_delim)
     {
 	string new_buf = *this;
 	new_buf = new_buf.replace_all_cs(_delim, "");
 	return new_buf;
+    }
+    
+    inline string strip(const char &_delim) const
+    {
+      string new_buf = *this;
+      new_buf = new_buf.replace_all_cs(_delim, "");
+      return new_buf;
     }
     //Transform from Text to Base64
     inline string b64encode()

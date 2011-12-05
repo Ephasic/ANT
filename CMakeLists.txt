@@ -54,14 +54,6 @@ SET(VERSION_FULL "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSI
 # because some of this is copypasta we set this var here
 SET(PROGRAM_NAME ${PROJECT_NAME})
 
-#
-# Configure paths
-#
-SET(CONFIG_DIR_BIN bin/)
-
-SET(EXECUTABLE_OUTPUT_PATH bin)
-SET(LIBRARY_OUTPUT_PATH bin)
-
 # Start with empty defaults for library and include directories, to be used by GNU compilers only
 set(DEFAULT_LIBRARY_DIRS)
 set(DEFAULT_INCLUDE_DIRS)
