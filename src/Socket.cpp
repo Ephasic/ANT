@@ -758,7 +758,6 @@ bool ConnectionSocket::Process()
     if (this->IsConnected())
       return true;
     else if (this->IsConnecting())
-      //this->SetFlag(this->IO->FinishConnect(this));
       this->SetStatus(this->IO->FinishConnect(this), true);
     else
       this->SetDead(true);
@@ -798,7 +797,6 @@ bool ClientSocket::Process()
     if (this->IsAccepted())
       return true;
     else if (this->IsAccepting())
-//       this->SetFlag(this->IO->FinishAccept(this));
 	this->SetStatus(this->IO->FinishAccept(this), true);
     else
       this->SetDead(true);

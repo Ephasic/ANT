@@ -5,3 +5,16 @@ ANT 1.0.0
 ==========
 Forked from Navn's (version 2.0.1) repository.
 Updated names, versions, docs, etc.
+Forced c++11
+Removed old socket engine code
+Imported Anopes socket engine
+Created Network class
+Created NetworkSocket for Network class
+Added EventsVector which is std::vector<module*> to fix g++ stupidness
+Made fsprintf accept Flux::string
+Made Flux::string tolower and toupper return a string
+Created m_XML_RPC module which will handle XML-RPC commits
+Removed removeCommand
+Made Flux::string::strip() constant so it may be used mid-line
+fixed getpid() function not defined in windows code (even though we dont compile in windows yet)
+Added COMPILED_NAME macro from CMake

@@ -59,7 +59,6 @@ int INIReader::Parse(const Flux::string &filename)
     if(in_comment || contin)
       continue;
     /********************************************/
-    //printf("PARSING: %s\n", line.c_str());
     if(line[0] == '[' && line[line.size() -1] == ']')
     {
       line = line.erase(0,1);
@@ -89,7 +88,6 @@ int INIReader::Parse(const Flux::string &filename)
       }
       value.trim();
       /************************************/
-      //printf("PARSED: %s | %s | %s | %s | %i\n", line.c_str(), value.c_str(), name.c_str(), section.c_str(), error);
       if(error != 0)
 	break;
       else if(value.empty() || section.empty() || name.empty() || value.search(';'))
@@ -204,7 +202,6 @@ BotConfig::BotConfig(const Flux::string &dir)
    else
       Log(LOG_TERMINAL) << "Config Exception: " << e.GetReason();
    return;
-   //delete this; //This makes segfault :D
  }
 }
 BotConfig::~BotConfig() { if(Parser) delete Parser; }
