@@ -111,7 +111,7 @@ int main (int argcx, char** argvx, char *envp[])
       Log(LOG_DEBUG) << "Socket Exception Caught: " << e.GetReason();
       goto SocketStart;
     }
-    if(!FluxNet->s)
+    if(!FluxNet || !FluxNet->s)
       goto SocketStart;
 //     ircproto = new IRCProto(Fluxsocket);
     time_t last_check = time(NULL);

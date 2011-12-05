@@ -24,8 +24,6 @@
 #include "extern.h"
 #include "SocketException.h"
 #include "log.h"
-// const int MAXHOSTNAME = 200;
-// const int MAXCONNECTIONS = 5;
 
 #define NET_BUFSIZE 65535
 
@@ -562,36 +560,4 @@ public:
   void OnError(const Flux::string&);
 };
 
-// class FluxSocket : public ConnectionSocket, public BufferedSocket
-// {
-// public:
-//   FluxSocket();
-//   ~FluxSocket();
-//   bool Read(const Flux::string&);
-//   void OnConnect();
-//   void OnError(const Flux::string&);
-// };
-
-// class CoreExport SocketIO2
-// {
-// private:
-//   Flux::string server, port;
-//   int sockn;
-//   size_t recvlen;
-//   struct addrinfo hints, *servinfo;
-// public:
-//   SocketIO(const Flux::string &server, const Flux::string &port);
-//   ~SocketIO();
-//   void get_address();
-//   int GetFD() const;
-//   bool SetNonBlocking();
-//   bool SetBlocking();
-//   int recv() const;
-//   int send(const Flux::string buf) const;
-//   bool Connect();
-//   bool is_valid() const { return this->GetFD() != -1; }
-//   int Process();
-//   bool Read(const Flux::string&) const;
-//   void ThrowException(const Flux::string&);
-// };
 #endif

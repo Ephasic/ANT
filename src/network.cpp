@@ -99,6 +99,7 @@ void NetworkSocket::OnConnect()
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
   this->Write("derpy!");
   this->ProcessWrite();
+  this->net->ircproto = new IRCProto(this); // Create the new protocol class for the network
 }
 
 void NetworkSocket::OnError(const Flux::string &buf)
