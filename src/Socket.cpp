@@ -442,82 +442,38 @@ void Socket::SetDead(bool dead)
 /** Get socket status if it is dead or not
  * @return bool boolean if the socket is dead
  */
-bool Socket::IsDead()
-{
-  return isdead;
-}
-
-void Socket::SetConnecting(bool s)
-{
-  isconnecting = s;
-}
-
-bool Socket::IsConnecting()
-{
-  return isconnecting;
-}
-
-void Socket::SetConnected(bool s)
-{
-  isconnected = s;
-}
-
-bool Socket::IsConnected()
-{
-  return isconnected;
-}
-
-void Socket::SetAccepting(bool s)
-{
-  isaccepting = s;
-}
-
-bool Socket::IsAccepting()
-{
-  return isaccepting;
-}
-
-void Socket::SetAccepted(bool s)
-{
-  isaccepted = s;
-}
-
-bool Socket::IsAccepted()
-{
-  return isaccepted;
-}
-
-void Socket::SetWritable(bool s)
-{
-  iswritable = s;
-}
-
-bool Socket::IsWritable()
-{
-  return iswritable;
-}
-
-void Socket::SetStatus(SocketFlag s)
+bool Socket::IsDead() { return isdead; }
+void Socket::SetConnecting(bool s) { isconnecting = s; }
+bool Socket::IsConnecting() { return isconnecting; }
+void Socket::SetConnected(bool s) { isconnected = s; }
+bool Socket::IsConnected() { return isconnected; }
+void Socket::SetAccepting(bool s) { isaccepting = s; }
+bool Socket::IsAccepting() { return isaccepting; }
+void Socket::SetAccepted(bool s) { isaccepted = s; }
+bool Socket::IsAccepted() { return isaccepted; }
+void Socket::SetWritable(bool s) { iswritable = s; }
+bool Socket::IsWritable() { return iswritable; }
+void Socket::SetStatus(SocketFlag s, bool status)
 {
   switch(s)
   {
     case SF_WRITABLE:
-      this->SetWritable(true);
+      this->SetWritable(status);
       break;
     case SF_ACCEPTED:
-      this->SetAccepted(true);
+      this->SetAccepted(status);
       break;
     case SF_ACCEPTING:
-      this->SetAccepting(true);
+      this->SetAccepting(status);
       break;
     case SF_CONNECTED:
-      this->SetConnected(true);
+      this->SetConnected(status);
       break;
     case SF_CONNECTING:
-      this->SetConnecting(true);
+      this->SetConnecting(status);
       break;
     case SF_DEAD:
-      this->SetDead(true);
+      this->SetDead(status);
       break;
   }
 }
@@ -803,7 +759,7 @@ bool ConnectionSocket::Process()
       return true;
     else if (this->IsConnecting())
       //this->SetFlag(this->IO->FinishConnect(this));
-      this->SetStatus(this->IO->FinishConnect(this));
+      this->SetStatus(this->IO->FinishConnect(this), true);
     else
       this->SetDead(true);
   }
@@ -843,7 +799,7 @@ bool ClientSocket::Process()
       return true;
     else if (this->IsAccepting())
 //       this->SetFlag(this->IO->FinishAccept(this));
-	this->SetStatus(this->IO->FinishAccept(this));
+	this->SetStatus(this->IO->FinishAccept(this), true);
     else
       this->SetDead(true);
   }
@@ -882,10 +838,13 @@ void send_cmd(BufferedSocket *s, const char *fmt, ...)
   va_list args;
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
-  if(s){
-    Log(LOG_DEBUG) << buffer;
-    s->Write(buffer);
-  }else
+  if(s)
+    if(!s->IsDead()){
+      Log(LOG_DEBUG) << buffer;
+      s->Write(buffer);
+    }else
+    Log(LOG_DEBUG) << "Attempted to send \"" << buffer << "\"";
+  else
     Log(LOG_DEBUG) << "Attempted to send \"" << buffer << "\"";
   va_end(args);
 }

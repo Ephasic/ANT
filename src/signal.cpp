@@ -109,8 +109,11 @@ void HandleSegfault(module *m)
  */
 void sigact(int sig)
 {
+  FOREACH_MOD(I_OnSignal, OnSignal(sig));
   Flux::string sigstr;
   switch(sig){
+    case SIGPIPE:
+      break;
     case SIGHUP:
       signal(sig, SIG_IGN);
       Rehash();

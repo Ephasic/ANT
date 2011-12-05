@@ -159,7 +159,7 @@ if(MSVC)
 # Otherwise, we're not using Visual Studio
 else(MSVC)
   # Set the compile flags to have all warnings on (including shadowed variables)
-  set(CXXFLAGS "${CXXFLAGS} -Wall -Wshadow")
+  set(CXXFLAGS "${CXXFLAGS} -Wall -Wshadow -g")
   # If on a *nix system, also set the compile flags to remove GNU extensions (favor ISO C++) as well as reject non-ISO C++ code, also remove all leading underscores in exported symbols (only on GNU compiler)
   if(UNIX)
     set(CXXFLAGS "${CXXFLAGS} -ansi -pedantic")

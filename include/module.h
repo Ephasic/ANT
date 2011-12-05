@@ -21,6 +21,7 @@ enum Implementation {
 	I_OnNotice, I_OnNickChange, I_OnChannelMode, I_OnUserMode,
 	I_OnChannelOp, I_OnPart, I_OnInvite, I_OnArgument, I_OnFork,
 	I_OnSocketError, I_OnPing, I_OnPong, I_OnCommit, I_OnDatabasesWrite,
+	I_OnSignal,
   I_END
 };
 
@@ -55,6 +56,7 @@ public:
   virtual ~module();
   virtual void OnPrivmsg(User*, const std::vector<Flux::string>&) {}
   virtual void OnCommit(CommitMessage&) {}
+  virtual void OnSignal(int) {}
   virtual void OnPrivmsg(User*, Channel*, const std::vector<Flux::string>&) {}
   virtual void OnDatabasesWrite(void (*WriteDB)(const Flux::string&)) {}
   virtual void OnNotice(User*, const std::vector<Flux::string>&) {}

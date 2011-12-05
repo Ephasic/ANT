@@ -227,7 +227,7 @@ public:
   void SetDead(bool);
   bool IsDead();
 
-  void SetStatus(SocketFlag);
+  void SetStatus(SocketFlag, bool);
   void SetConnecting(bool);
   bool IsConnecting();
   void SetConnected(bool);
