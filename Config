@@ -25,6 +25,7 @@ Load_Cache () {
 Run_Build_System () {
 	WITH_INST=""
 	RUN_CC_PL=""
+	BUILD_TYPE=""
 	GEN_TYPE=""
 
 	if [ "$INSTDIR" != "" ] ; then
@@ -35,6 +36,12 @@ Run_Build_System () {
 		RUN_CC_PL="-DUSE_RUN_CC_PL:BOOLEAN=ON"
 	else
 		RUN_CC_PL="-DUSE_RUN_CC_PL:BOOLEAN=OFF"
+	fi
+
+	if [ "$DEBUG" = "yes" ] ; then
+		BUILD_TYPE="-DCMAKE_BUILD_TYPE:STRING=DEBUG"
+	else
+		BUILD_TYPE="-DCMAKE_BUILD_TYPE:STRING=RELEASE"
 	fi
 
 	case `uname -s` in
@@ -52,9 +59,9 @@ Run_Build_System () {
 		REAL_SOURCE_DIR="$SOURCE_DIR"
 	fi
 
-	echo "cmake $GEN_TYPE $WITH_INST $RUN_CC_PL $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR"
+	echo "cmake $GEN_TYPE $WITH_INST $BUILD_TYPE $RUN_CC_PL $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR"
 
-	cmake $GEN_TYPE $WITH_INST $RUN_CC_PL $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR
+	cmake $GEN_TYPE $WITH_INST $BUILD_TYPE $RUN_CC_PL $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR
 
 	echo ""
 	echo "Now cd build and run make to build Navn."
@@ -79,6 +86,7 @@ export ECHO2 ECHO2SUF
 
 INSTDIR=$HOME/navn
 USE_RUN_CC_PL="no"
+DEBUG="yes"
 EXTRA_CONFIG_ARGS=
 CAN_QUICK="no"
 SOURCE_DIR=`dirname $0`
@@ -185,6 +193,24 @@ echo ""
 
 ####
 
+TEMP_YN="n"
+if [ "$DEBUG" = "yes" ] ; then
+	TEMP_YN="y"
+fi
+echo "Would you like to build a debug version of Anope?"
+echo2 "[$TEMP_YN] "
+read YN
+if [ "$YN" ] ; then
+	if [ "$YN" = "y" ] ; then
+		DEBUG="yes"
+	else
+		DEBUG="no"
+	fi
+fi
+echo ""
+
+####
+
 echo "Are there any extra arguments you wish to pass to cmake?"
 echo "You may only need to do this if cmake is unable to locate"
 echo "missing dependencies without hints."
@@ -206,6 +232,7 @@ echo2 "Saving configuration results in config.cache... "
 
 cat <<EOT >$SOURCE_DIR/config.cache
 INSTDIR="$INSTDIR"
+DEBUG="$DEBUG"
 USE_RUN_CC_PL="$USE_RUN_CC_PL"
 EXTRA_CONFIG_ARGS="$EXTRA_CONFIG_ARGS"
 EOT
