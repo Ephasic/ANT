@@ -4,12 +4,12 @@
 #include "includes.h"
 #include "command.h"
 
-class BufferedSocket;
+class Network;
 class CoreExport IRCProto
 {
 public:
-  BufferedSocket *s;
-  IRCProto(BufferedSocket*);
+  Network *net;
+  IRCProto(Network*);
   void privmsg(const Flux::string &where, const char *fmt, ...);
   void privmsg(const Flux::string &where, const Flux::string &msg);
   void notice(const Flux::string &where, const char *fmt, ...);

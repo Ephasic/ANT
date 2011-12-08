@@ -197,7 +197,7 @@ TEMP_YN="n"
 if [ "$DEBUG" = "yes" ] ; then
 	TEMP_YN="y"
 fi
-echo "Would you like to build a debug version of Anope?"
+echo "Would you like to build a debug version of ANT?"
 echo2 "[$TEMP_YN] "
 read YN
 if [ "$YN" ] ; then

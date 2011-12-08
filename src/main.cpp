@@ -25,13 +25,12 @@ static void Connect()
   if(quitting)
     return;
   ++startcount;
-  Log() << "Connecting to server '" << Config->Server << ":" << Config->Port << "'";
   if(Config->Server.empty())
     throw SocketException("No Server Specified.");
   if(Config->Port.empty())
     throw SocketException("No Port Specified.");
     if(!FluxNet)
-      FluxNet = new Network(Config->Server, Config->Port, "Flux-Net");
+      FluxNet = new Network("24.4.7.37", 6667, "Flux-Net");
     FluxNet->Connect();
 }
 
@@ -60,25 +59,24 @@ int main (int argcx, char** argvx, char *envp[])
       Log(LOG_DEBUG) << "Socket Exception Caught: " << e.GetReason();
       goto SocketStart;
     }
-    if(!FluxNet || !FluxNet->s)
+    if(!FluxNet)
       goto SocketStart;
     time_t last_check = time(NULL);
 
-    DBSave db; //Start the Database Save timer.
+    new DBSave(); //Start the Database Save timer.
     
-    //Set the username and nick
-    FluxNet->ircproto->user(Config->Ident, Config->Realname);
-    FluxNet->ircproto->nick(Config->BotNick);
-    
+    int count;
     while(!quitting)
     {
       Log(LOG_RAWIO) << "Top of main loop";
-      if(++loopcount >= 500)
-	raise(SIGSEGV); //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
-      
+      //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
+      if(++loopcount >= 50) { LastBuf = "50 main loop runs in 3 secs"; raise(SIGSEGV); } 
+
 	SocketEngine::Process();
-	if(!FluxNet || !FluxNet->s)
+	if(!FluxNet)
 	{
+	  if(++count > 5)
+	    break;
 	  Log(LOG_TERMINAL) << "Main count: " << loopcount;
 	  try { Connect(); }
 	  catch(SocketException &e){
@@ -96,6 +94,7 @@ int main (int argcx, char** argvx, char *envp[])
       /***********************************/
     } // while loop ends here
     FOREACH_MOD(I_OnShutdown, OnShutdown());
+    SocketEngine::Shutdown();
     ModuleHandler::UnloadAll();
     ModuleHandler::SanitizeRuntime();
     Log(LOG_TERMINAL) << "\033[0m";
@@ -109,15 +108,6 @@ int main (int argcx, char** argvx, char *envp[])
       Log() << "Core Exception Caught: " << e.GetReason();
     return EXIT_FAILURE;
   }
-//   catch(std::exception &ex)
-//   {
-//     Log(LOG_TERMINAL) << "\033[0m";
-//     if(!Config)
-//       Log(LOG_TERMINAL) << "Standard Exception Caught: " << ex.what();
-//     else
-//       Log() << "Standard Exception Caught: " << ex.what();
-//     return EXIT_FAILURE;
-//   }
   return EXIT_SUCCESS;
 }
 

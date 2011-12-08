@@ -556,6 +556,7 @@ public:
   ~NetworkSocket();
   Network *net;
   bool Read(const Flux::string&);
+  bool ProcessWrite();
   void OnConnect();
   void OnError(const Flux::string&);
 };

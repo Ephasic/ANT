@@ -27,7 +27,6 @@ E jmp_buf sigbuf;
 class Channel;
 class Log;
 class User;
-// class FluxSocket;
 class NetworkSocket;
 class BufferedSocket;
 class Socket;
@@ -58,11 +57,13 @@ enum LogType
   LOG_TERMINAL,
   LOG_SILENT
 };
+
 enum CommandType
 {
   COMMAND_CHANNEL,
   COMMAND_PRIVATE
 };
+
 enum ModErr
 {
   MOD_ERR_OK,
@@ -89,8 +90,6 @@ E Network *FindNetwork(const Flux::string&);
 E Network *FindNetworkByHost(const Flux::string&);
 
 /* extern's */
-// E FluxSocket *Fluxsocket;
-// E IRCProto *ircproto;
 E Network *FluxNet;
 E BotConfig *Config;
 E module *LastRunModule;
@@ -131,8 +130,7 @@ E void HandleSegfault(module*);
 E void restart(const Flux::string&);
 E void ListChans(CommandSource &source);
 E void ListUsers(CommandSource &source);
-E void send_cmd(BufferedSocket*, const char *fmt, ...);
-E void process(NetworkSocket*, const Flux::string&);
+E void process(Network*, const Flux::string&);
 E void ProcessJoin(CommandSource&, const Flux::string&);
 E void ProcessCommands(CommandSource&, std::vector<Flux::string>&);
 E void ReadConfig();

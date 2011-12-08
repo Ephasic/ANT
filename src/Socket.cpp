@@ -591,6 +591,9 @@ bool BufferedSocket::ProcessRead()
   this->RecvLen = 0;
   
   int len = this->IO->Recv(this, tbuffer, sizeof(tbuffer) - 1);
+  Flux::string err = "Error: ";
+  err += strerror(errno);
+  Log(LOG_TERMINAL) << "Recv: " << (len <=0?err:Flux::string(len+" bytes"));
   if (len <= 0)
     return false;
   
@@ -622,7 +625,7 @@ bool BufferedSocket::ProcessRead()
     if (!tbuf.empty() && !Read(tbuf))
       return false;
   }
-  
+  Log(LOG_TERMINAL) << "Returning false";
   return true;
 }
 
@@ -823,23 +826,4 @@ void ClientSocket::OnAccept()
 
 void ClientSocket::OnError(const Flux::string &error)
 {
-}
-
-/** \fn void send_cmd(const char *fmt, ...)
- * \brief Sends something directly out the socket after being processed by vsnprintf
- * \param char* a string of what to send to the server including printf style format
- * \param va_list all the variables to be replaced with the printf style variables
- */
-void send_cmd(BufferedSocket *s, const char *fmt, ...)
-{
-  char buffer[BUFSIZE] = "";
-  va_list args;
-  va_start(args, fmt);
-  vsnprintf(buffer, sizeof(buffer), fmt, args);
-  if(s){
-      Log(LOG_DEBUG) << buffer;
-      s->Write(buffer);
-  }else
-    Log(LOG_DEBUG) << "Attempted to send \"" << buffer << "\"";
-  va_end(args);
 }

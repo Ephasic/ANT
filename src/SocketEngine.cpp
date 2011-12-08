@@ -91,11 +91,11 @@ void SocketEngine::Process()
   else if (sresult)
   {
     int processed = 0;
-    for (std::map<int, Socket*>::const_iterator it = Sockets.begin(), it_end = Sockets.end(); it != it_end && processed != sresult;)
+    for (auto it = Sockets.begin(), it_end = Sockets.end(); it != it_end && processed != sresult;)
     {
       Socket *s = it->second;
       ++it;
-
+      Log(LOG_TERMINAL) << "Processing Socket " << s->GetFD();
       bool has_read = FD_ISSET(s->GetFD(), &rfdset), has_write = FD_ISSET(s->GetFD(), &wfdset), has_error = FD_ISSET(s->GetFD(), &efdset);
       if (has_read || has_write || has_error)
 	++processed;
@@ -110,12 +110,14 @@ void SocketEngine::Process()
       if (!s->Process())
 	continue;
 
-      if (has_read && !s->ProcessRead())
-	s->SetDead(true);
+      if (has_read && !s->ProcessRead()){
+ 	s->SetDead(true);
+	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " set dead due to no read data! | " << (has_read?"Has Read": "No Read") << (s->ProcessRead()?"| READ DATA!":" | KEIN READ DATA!");
+      }
 
       if (has_write && !s->ProcessWrite())
 	s->SetDead(true);
-
+      
       if (s->IsDead()){
 	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " died!";
 	delete s;

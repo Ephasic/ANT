@@ -63,8 +63,26 @@ Network *FindNetworkByHost(const Flux::string &name)
     return it->second;
   return NULL;
 }
-
 /**********************************************************/
+
+class ReconnectTimer : public Timer
+{
+  Network *n;
+public:
+  ReconnectTimer(int wait, Network *net) : Timer(wait), n(net) { }
+  void Tick(time_t)
+  {
+    try
+    {
+      n->Connect();
+    }
+    catch (const SocketException &e)
+    {
+      Log() << "Connection to " << n->name << " [" << n->hostname << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << this->GetSecs() << " seconds.";
+    }
+  }
+};
+
 NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet)
 {
   tnet->s = this;
@@ -75,19 +93,22 @@ NetworkSocket::~NetworkSocket()
 {
   this->Write("QUIT :Socket Closed\n");
   this->ProcessWrite();
+  this->net->s = NULL;
+  Log() << "Connection to " << net->name << " [" << net->hostname << ':' << net->port << "] Failed! Retrying in 30 seconds.";
+  new ReconnectTimer(30, this->net);
 }
 
 bool NetworkSocket::Read(const Flux::string &buf)
 {
+  Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << buf;
   Flux::vector params = StringVector(buf, ' ');
-  if(!params.empty() && params[0].equals_ci("ERROR"))
+  if(buf.search_ci("ERROR"))
   {
     FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
-    return false; //Socket is dead so we'll let the socket engine handle it
+    Log(LOG_TERMINAL) << "Socket Error, Closing socket!";
+    return true; //Socket is dead so we'll let the socket engine handle it
   }
-  Log(LOG_TERMINAL) << "Socket " << this->GetFD() << ": " << buf;
-  //process(buf); //Work on this later, for now we just log what we get
-  process(this, buf);
+//   process(this->net, buf);
   if(!params.empty() && params[0].equals_ci("PING"))
     this->Write("PONG :"+params[1]);
   return true;
@@ -97,13 +118,19 @@ void NetworkSocket::OnConnect()
 {
   Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " (" << this->net->hostname << ':' << this->net->port << ')';
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
-  this->Write("derpy!");
-  this->ProcessWrite();
-  this->net->ircproto = new IRCProto(this); // Create the new protocol class for the network
+  this->Write("USER %s * * :%s", Config->Ident.c_str(), Config->Realname.c_str());
+  this->Write("NICK ANT-%i", randint(1,100));
+  new IRCProto(this->net); // Create the new protocol class for the network
 }
 
 void NetworkSocket::OnError(const Flux::string &buf)
 {
   Log(LOG_TERMINAL) << "Unable to connect to " << this->net->name << " (" << this->net->hostname << ':' << this->net->port << ')' << (!buf.empty()?(": " + buf):"");
+}
+
+bool NetworkSocket::ProcessWrite()
+{
+  Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << this->WriteBuffer;
+  return true;
 }
 /**********************************************************/

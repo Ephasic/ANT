@@ -127,7 +127,7 @@ void ProcessCommand(CommandSource &Source, std::vector<Flux::string> &params2,
  * \brief Main Processing function
  * \param buffer The raw socket buffer
  */
-void process(NetworkSocket *s, const Flux::string &buffer){
+void process(Network *n, const Flux::string &buffer){
   SET_SEGV_LOCATION();
   Flux::string buf = buffer;
   buf = buf.replace_all_cs("  ", " ");
@@ -181,12 +181,11 @@ void process(NetworkSocket *s, const Flux::string &buffer){
   Flux::string nickname = h.nick, uident = h.ident, uhost = h.host, cmd;
   User *u = finduser(nickname);
   Channel *c = findchannel(receiver);
-  std::vector<Flux::string> params2 = StringVector(message, ' ');
+  Flux::vector params2 = StringVector(message, ' ');
   /***********************************************/
-  Network *n = s->net != NULL?s->net:FindNetworkByHost(source);
   if(!n)
   {
-    Log(LOG_TERMINAL) << "Socket with no source network??";
+    Log(LOG_TERMINAL) << "Process() called with no source Network??";
     return;
   }
   

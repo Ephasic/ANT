@@ -8,9 +8,10 @@ public:
   void Tick(time_t){
     for(auto it : Networks)
     {
-      send_cmd(it.second->s, "PING :%i\n", time(NULL));
+      if(it.second->s)
+      it.second->s->Write("PING :%i\n", time(NULL));
 //       if(++pings >= 3) //FIXME: This needs fixing
-// 	Fluxsocket->SetDead(true);
+// 		it.second->s->SetDead(true);
     }
   }
 };
@@ -41,7 +42,7 @@ public:
   void OnPing(const std::vector<Flux::string> &params, Network *n)
   {
     pingtimer.pings = 0;
-    send_cmd(n->s, "PONG :%s\n", params[0].c_str());
+    n->s->Write("PONG :%s\n", params[0].c_str());
   }
   void OnConnectionError(const Flux::string &buffer)
   {

@@ -4,7 +4,7 @@
  *\file  ircproto.cpp
  *\brief Contains the IRCProto class.
  */
-IRCProto::IRCProto(BufferedSocket *sock) { this->s = sock; } //Because we have multiple networks, we need this to be dynamic with the sockets
+IRCProto::IRCProto(Network *n) : net(n) { n->ircproto = this; } //Because we have multiple networks, we need this to be dynamic with the sockets
 /**
  * \brief Sends a IRC private message to the user or channel
  * \param Destination Where the message will go
@@ -29,7 +29,7 @@ void IRCProto::privmsg(const Flux::string &where, const Flux::string &msg){
  sepstream sep(msg, '\n');
  Flux::string tok;
  while(sep.GetToken(tok))
-   send_cmd(this->s, "PRIVMSG %s :%s\n", where.c_str(), tok.c_str());
+   this->net->s->Write("PRIVMSG %s :%s\n", where.c_str(), tok.c_str());
 }
 /**
  * \brief Sends a IRC notice to the user or channel
@@ -55,7 +55,7 @@ void IRCProto::notice(const Flux::string &where, const Flux::string &msg){
  sepstream sep(msg, '\n');
  Flux::string tok;
  while(sep.GetToken(tok))
-   send_cmd(this->s, "NOTICE %s :%s\n", where.c_str(), tok.c_str());
+   this->net->s->Write("NOTICE %s :%s\n", where.c_str(), tok.c_str());
 }
 /**
  * \brief Sends a IRC action (/me) to the user or channel
@@ -81,7 +81,7 @@ void IRCProto::action(const Flux::string &where, const Flux::string &msg){
  sepstream sep(msg, '\n');
  Flux::string tok;
  while(sep.GetToken(tok))
-   send_cmd(this->s, "PRIVMSG %s :\001ACTION %s\001\n", where.c_str(), tok.c_str());
+   this->net->s->Write("PRIVMSG %s :\001ACTION %s\001\n", where.c_str(), tok.c_str());
 }
 /*****************************************************************************************/
 /**
@@ -147,25 +147,25 @@ void IRCProto::part(const Flux::string &channel, const char *fmt, ...){
  * \overload void command::kick(Flux::string channel, Flux::string user, Flux::string reason)
  */
 void IRCProto::kick(const Flux::string &chan, const Flux::string &userstr, const Flux::string &msg){
-  send_cmd(this->s, "KICK %s %s :%s\n", chan.c_str(), userstr.c_str(), msg.c_str());
+  this->net->s->Write("KICK %s %s :%s\n", chan.c_str(), userstr.c_str(), msg.c_str());
 }
 /**
  * \overload void IRCProto::quit(Flux::string message)
  */
 void IRCProto::quit(const Flux::string &message){
-  send_cmd(this->s, "QUIT :%s\n", message.c_str());
+  this->net->s->Write("QUIT :%s\n", message.c_str());
 }
 /**
  * \overload void IRCProto::part(Flux::string channel, Flux::string msg)
  */
 void IRCProto::part(const Flux::string &channel, const Flux::string &msg){
-  send_cmd(this->s, "PART %s :%s\n", channel.c_str(), msg.c_str());
+  this->net->s->Write("PART %s :%s\n", channel.c_str(), msg.c_str());
 }
 /**
  * \overload void command::topic(Flux::string channel, Flux::string msg)
  */
 void IRCProto::topic(const Flux::string &chan, const Flux::string &msg){
-  send_cmd(this->s, "TOPIC %s :%s\n", chan.c_str(), msg.c_str());
+  this->net->s->Write("TOPIC %s :%s\n", chan.c_str(), msg.c_str());
 }
 /**
  * \fn void command::nick(Flux::string nick)
@@ -173,17 +173,17 @@ void IRCProto::topic(const Flux::string &chan, const Flux::string &msg){
  * \param nickname A Flux::string with the new nickname.
  */
 void IRCProto::nick(const Flux::string &bnick){
-  send_cmd(this->s, "NICK %s\n", bnick.c_str());
+  this->net->s->Write("NICK %s\n", bnick.c_str());
 }
 void IRCProto::away(const Flux::string &message){
-  send_cmd(this->s, "AWAY :%s", message.c_str());
+  this->net->s->Write("AWAY :%s", message.c_str());
 }
 /**
  * \fn void command::oper(Flux::string oper, Flux::string password)
  * \brief Sends IRC command /oper
  */
 void IRCProto::oper(const Flux::string &username, const Flux::string &password){
-  send_cmd(this->s, "OPER %s %s\n", username.c_str(), password.c_str());
+  this->net->s->Write("OPER %s %s\n", username.c_str(), password.c_str());
 }
 /**
  * \fn void command::join(Flux::string chan)
@@ -191,7 +191,7 @@ void IRCProto::oper(const Flux::string &username, const Flux::string &password){
  * \param stringy_chan A Flux::string with the channel you want to join.
  */
 void IRCProto::join(const Flux::string &dchan){
-  send_cmd(this->s, "JOIN %s\n", dchan.c_str());
+  this->net->s->Write("JOIN %s\n", dchan.c_str());
 }
 /**
  * \overload void command::part(Flux::string channel)
@@ -199,7 +199,7 @@ void IRCProto::join(const Flux::string &dchan){
  * \param channel Channel to part from.
  */
 void IRCProto::part(const Flux::string &fchan){
-  send_cmd(this->s, "PART %s\n", fchan.c_str());
+  this->net->s->Write("PART %s\n", fchan.c_str());
 }
 /**
  * \fn void IRCProto::who(Flux::string chan)
@@ -207,7 +207,7 @@ void IRCProto::part(const Flux::string &fchan){
  * \param chan A Flux::string with the channel you want to /who.
  */
 void IRCProto::who(const Flux::string &chan){
-  send_cmd(this->s, "WHO %s\n", chan.c_str());
+  this->net->s->Write("WHO %s\n", chan.c_str());
 }
 /**
  * \fn void IRCProto::names(Flux::string &chan)
@@ -215,7 +215,7 @@ void IRCProto::who(const Flux::string &chan){
  * \param chan A Flux::string with the channel you want to /names.
  */
 void IRCProto::names(const Flux::string &chan){
-  send_cmd(this->s, "NAMES %s\n", chan.c_str());
+  this->net->s->Write("NAMES %s\n", chan.c_str());
 }
 /**
  * \fn void command::whois(Flux::string Nick)
@@ -223,7 +223,7 @@ void IRCProto::names(const Flux::string &chan){
  * \param Nick Nick to query
  */
 void IRCProto::whois(const Flux::string &nickname){
-  send_cmd(this->s, "WHOIS %s\n", nickname.c_str());
+  this->net->s->Write("WHOIS %s\n", nickname.c_str());
 }
 /**
  * \fn void command::mode(Flux::string nickname, Flux::string mode, Flux::string user)
@@ -232,7 +232,7 @@ void IRCProto::whois(const Flux::string &nickname){
  * \param mode The mode to set.
  */
 void IRCProto::mode(const Flux::string &chan, const Flux::string &usermode, const Flux::string &usernick){
-  send_cmd(this->s, "MODE %s %s %s\n", chan.c_str(), usermode.c_str(), usernick.c_str());
+  this->net->s->Write("MODE %s %s %s\n", chan.c_str(), usermode.c_str(), usernick.c_str());
 }
 /**
  * \fn void IRCProto::user(Flux::string ident, Flux::string realname)
@@ -241,7 +241,7 @@ void IRCProto::mode(const Flux::string &chan, const Flux::string &usermode, cons
  * \param realname The real name gecos used in irc.
  */
 void IRCProto::user(const Flux::string &ident, const Flux::string &realname){
-  send_cmd(this->s, "USER %s * * :%s\n", ident.c_str(), realname.c_str());
+  this->net->s->Write("USER %s * * :%s\n", ident.c_str(), realname.c_str());
 }
 /**
  * \overload void command::mode(Flux:;string dest, Flux::string mode)
@@ -250,5 +250,5 @@ void IRCProto::user(const Flux::string &ident, const Flux::string &realname){
  * @param mode mode to set
  */
 void IRCProto::mode(const Flux::string &dest, const Flux::string &chanmode){
-  send_cmd(this->s, "MODE %s %s\n", dest.c_str(), chanmode.c_str());
+  this->net->s->Write("MODE %s %s\n", dest.c_str(), chanmode.c_str());
 }
