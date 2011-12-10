@@ -72,6 +72,7 @@ public:
   Flux::string ServicesService;
   bool IdentOnConn;
   size_t SockWait;
+  int RetryWait;
 private:
   void Read();
 };

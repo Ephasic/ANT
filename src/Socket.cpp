@@ -185,7 +185,7 @@ cidr::cidr(const Flux::string &ip)
   if (ip.find_first_not_of("01234567890:./") != Flux::string::npos)
     throw SocketException("Invalid IP");
   
-  bool ipv6 = ip.find(':') != Flux::string::npos;
+  bool ipv6 = ip.search(':');
   size_t sl = ip.find_last_of('/');
   if (sl == Flux::string::npos)
   {
@@ -208,7 +208,7 @@ cidr::cidr(const Flux::string &ip)
 
 cidr::cidr(const Flux::string &ip, unsigned char len)
 {
-  bool ipv6 = ip.find(':') != Flux::string::npos;
+  bool ipv6 = ip.search(':');
   this->addr.pton(ipv6 ? AF_INET6 : AF_INET, ip);
   this->cidr_ip = ip;
   this->cidr_len = len;

@@ -94,8 +94,8 @@ NetworkSocket::~NetworkSocket()
   this->Write("QUIT :Socket Closed\n");
   this->ProcessWrite();
   this->net->s = NULL;
-  Log() << "Connection to " << net->name << " [" << net->hostname << ':' << net->port << "] Failed! Retrying in 30 seconds.";
-  new ReconnectTimer(30, this->net);
+  Log() << "Connection to " << net->name << " [" << net->hostname << ':' << net->port << "] Failed! Retrying in " << Config->RetryWait << " seconds.";
+  new ReconnectTimer(Config->RetryWait, this->net);
 }
 
 bool NetworkSocket::Read(const Flux::string &buf)

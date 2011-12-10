@@ -223,7 +223,8 @@ void BotConfig::Read(){
   this->OperatorPass = this->Parser->Get("Oper","Oper_Password","");
   this->ModuleDir = Parser->Get("Modules", "ModuleDir", "");
   this->Modules = Parser->Get("Modules", "Modules", "");
-  this->SockWait = Parser->GetInteger("Bot","Socket Timeout",5);
+  this->SockWait = Parser->GetInteger("Socket","Socket Timeout",5);
+  this->RetryWait = Parser->GetInteger("Socket", "Retry Wait", 30);
   
   this->ServicesAccount = this->Parser->Get("Services","Account","");
   this->ServicesPass = this->Parser->Get("Services","Password","");
