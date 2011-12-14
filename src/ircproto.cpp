@@ -252,3 +252,28 @@ void IRCProto::user(const Flux::string &ident, const Flux::string &realname){
 void IRCProto::mode(const Flux::string &dest, const Flux::string &chanmode){
   this->net->s->Write("MODE %s %s\n", dest.c_str(), chanmode.c_str());
 }
+/**
+ * \overload void Send_Global(const Flux::string &str)
+ *\
+void Send_Global(const Flux::string &str)
+{
+  for(auto it : Networks)
+   it.second->s->Write(message);
+}
+/**
+ * \fn void Send_Global(const char *fmt, ...)
+ * \brief Send globally to all networks
+ * \param string The string to send to all networks
+ * \param ... variable parameters for the string
+ *\
+void Send_Global(const char *fmt, ...)
+{
+  if(fmt){
+    char buffer[BUFSIZE] = "";
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    Send_Global(Flux::string(buffer));
+    va_end(args); 
+  }
+}
