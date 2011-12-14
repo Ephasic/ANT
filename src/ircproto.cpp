@@ -258,7 +258,7 @@ void IRCProto::mode(const Flux::string &dest, const Flux::string &chanmode){
 void Send_Global(const Flux::string &str)
 {
   for(auto it : Networks)
-   it.second->s->Write(message);
+   it.second->s->Write(str);
 }
 /**
  * \fn void Send_Global(const char *fmt, ...)
