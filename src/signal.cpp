@@ -99,7 +99,7 @@ void HandleSegfault(module *m)
    printf("\033[0mOh no! A Segmentation Fault has occured!\n");
    printf("This system does not support backtracing, please use gdb or a similar debugger!\n");
    printf("Please follow these instructions on how to file a bug report of Flux-Net:\n");
-   printf("1) type \"gdb navn\"\n2) type \"r -n --protocoldebug\"\n3) Cause the program to crash\n4) Type \"bt full\" and copy and paste the output to http://www.pastebin.com/\n5) File a bug report at http://flux-net.net/bugs/\n");
+   printf("1) type \"gdb ant\"\n2) type \"r -n --protocoldebug\"\n3) Cause the program to crash\n4) Type \"bt full\" and copy and paste the output to http://www.pastebin.com/\n5) File a bug report at http://flux-net.net/bugs/\n");
 #endif
 }
 /** Terminal Signal Handler
@@ -113,7 +113,7 @@ void sigact(int sig)
   Flux::string sigstr;
   switch(sig){
     case SIGPIPE:
-      break;
+      break; //Ignore SIGPIPE
     case SIGHUP:
       signal(sig, SIG_IGN);
       Rehash();
@@ -140,8 +140,8 @@ void sigact(int sig)
       signal(SIGHUP, SIG_IGN);
       sigstr = siginit(randint(1,20));
       quitmsg = "Recieved Signal: "+sigstr;
-      if(FluxNet && FluxNet->ircproto)
-	FluxNet->ircproto->quit(quitmsg);
+      for(auto it : Networks) 
+        it.second->ircproto->quit(quitmsg);
       quitting = true;
       break;
     default:
