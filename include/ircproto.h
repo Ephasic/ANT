@@ -16,7 +16,7 @@ public:
   void notice(const Flux::string &where, const Flux::string &msg);
   void action(const Flux::string &where, const char *fmt, ...);
   void action(const Flux::string &where, const Flux::string &msg);
-  void quit(const char *fmt, ...);
+  void quit(const char*, ...);
   void kick(const Flux::string&, const Flux::string&, const char *fmt, ...);
   void topic(const Flux::string&, const char *fmt, ...);
   void part(const Flux::string&, const char *fmt, ...);
@@ -47,7 +47,7 @@ public:
   void notice(const Flux::string &where, const Flux::string &msg);
   void action(const Flux::string &where, const char *fmt, ...);
   void action(const Flux::string &where, const Flux::string &msg);
-  void quit(const char *fmt, ...);
+  void quit(const char*, ...);
   void kick(const Flux::string&, const Flux::string&, const char *fmt, ...);
   void topic(const Flux::string&, const char *fmt, ...);
   void part(const Flux::string&, const char *fmt, ...);

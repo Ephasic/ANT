@@ -36,6 +36,7 @@ class Oper;
 class Thread;
 class module;
 class IRCProto;
+class GlobalProto;
 class ModuleHandler;
 class INIReader;
 class BotConfig;
@@ -79,7 +80,7 @@ enum ModErr
 
 /* Typedef's */
 typedef std::map<Flux::string, Command*, ci::less> CommandMap;
-typedef std::vector<module*> EventsVector;
+typedef std::vector<module*> EventsVector; //Gay g++
 
 /*  Class pointer finder definitions */
 E Channel *findchannel(const Flux::string&);
@@ -93,6 +94,7 @@ E Network *FindNetworkByHost(const Flux::string&);
 E Network *FluxNet;
 E BotConfig *Config;
 E module *LastRunModule;
+E GlobalProto *GProto;
 E CommandMap Commandsmap;
 E CommandMap ChanCommandMap;
 E time_t starttime;
@@ -120,6 +122,8 @@ E Flux::map<Network*> NetworkHosts;
 
 /* void's */
 E void Rehash();
+E void Send_Global(const Flux::string&);
+E void Send_Global(const char*, ...);
 E void QuitUser(User*);
 E void Fork();
 E void sigact(int);

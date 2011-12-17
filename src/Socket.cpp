@@ -587,12 +587,13 @@ BufferedSocket::~BufferedSocket()
 bool BufferedSocket::ProcessRead()
 {
   char tbuffer[NET_BUFSIZE];
-  
   this->RecvLen = 0;
   
   int len = this->IO->Recv(this, tbuffer, sizeof(tbuffer) - 1);
-  Flux::string err = "Error: ";
+  Flux::string err = "Error: (";
+  err += value_cast<Flux::string>(errno)+") ";
   err += strerror(errno);
+  printf("LEN: %i\n", len);
   Log(LOG_TERMINAL) << "Recv: " << (len <=0?err:Flux::string(len+" bytes"));
   if (len <= 0)
     return false;

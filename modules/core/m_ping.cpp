@@ -8,8 +8,9 @@ public:
   void Tick(time_t){
     for(auto it : Networks)
     {
-      if(it.second->s)
-      it.second->s->Write("PING :%i\n", time(NULL));
+      Send_Global("PING :%i\n", static_cast<int>(time(NULL)));
+//       if(it.second->s)
+//       it.second->s->Write("PING :%i\n", time(NULL));
 //       if(++pings >= 3) //FIXME: This needs fixing
 // 		it.second->s->SetDead(true);
     }

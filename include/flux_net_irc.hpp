@@ -9,6 +9,7 @@
 // IRCProto *ircproto;
 BotConfig *Config;
 Network *FluxNet;
+GlobalProto *GProto;
 module *LastRunModule; // For crashes
 
 /**Runtime directory finder
