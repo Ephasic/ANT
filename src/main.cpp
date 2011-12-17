@@ -69,7 +69,7 @@ int main (int argcx, char** argvx, char *envp[])
     {
       Log(LOG_RAWIO) << "Top of main loop";
       //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
-      if(++loopcount >= 50) { LastBuf = "50 main loop runs in 3 secs"; raise(SIGSEGV); } 
+      if(++loopcount >= 50) { LastBuf = "50 main loop calls in 3 secs"; raise(SIGSEGV); }
 
       SocketEngine::Process();
       /* Process Timers */

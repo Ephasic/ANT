@@ -559,7 +559,6 @@ public:
   bool ProcessWrite();
   void OnConnect();
   void OnError(const Flux::string&);
-  bool Process();
 };
 
 #endif

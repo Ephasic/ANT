@@ -379,7 +379,6 @@ void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port
   s->SetConnecting(false);
   s->conaddr.pton(s->IsIPv6() ? AF_INET6 : AF_INET, target, port);
   int c = connect(s->GetFD(), &s->conaddr.sa, s->conaddr.size());
-  Log(LOG_TERMINAL) << "DEBUG: " << c;
   if (c == -1)
   {
     if (errno != EINPROGRESS)

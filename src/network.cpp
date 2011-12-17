@@ -90,7 +90,7 @@ public:
 NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet)
 {
   tnet->s = this;
-  Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port;
+  Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << ForwardResolution(this->net->hostname) << ')';
 }
 
 NetworkSocket::~NetworkSocket()
@@ -118,12 +118,10 @@ bool NetworkSocket::Read(const Flux::string &buf)
     this->Write("PONG :"+params[1]);
   return true;
 }
-bool NetworkSocket::Process() {
-  return true;
-}
+
 void NetworkSocket::OnConnect()
 {
-  Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " (" << this->net->hostname << ':' << this->net->port << ')';
+  Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << ']';
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
   this->Write("USER %s * * :%s", Config->Ident.c_str(), Config->Realname.c_str());
   this->Write("NICK ANT-%i", randint(1,100));
