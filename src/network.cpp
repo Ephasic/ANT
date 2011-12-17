@@ -109,7 +109,7 @@ bool NetworkSocket::Read(const Flux::string &buf)
     Log(LOG_TERMINAL) << "Socket Error, Closing socket!";
     return true; //Socket is dead so we'll let the socket engine handle it
   }
-//   process(this->net, buf);
+  process(this->net, buf);
   if(!params.empty() && params[0].equals_ci("PING"))
     this->Write("PONG :"+params[1]);
   return true;
