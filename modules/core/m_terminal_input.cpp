@@ -128,30 +128,9 @@ public:
   }
 };
 
-class ErrnoThread : public Thread
-{
-public:
-  ErrnoThread(Thread *t):Thread() { Log(LOG_TERMINAL) << "Errno Thread Initializing."; t = this; this->Start(); }
-  ~ErrnoThread() { Log(LOG_TERMINAL) << "Errno Thread Initializing."; }
-  void ToRun()
-  {
-    int errnonum = 0;
-    while(true)
-    {
-      printf("Top of Errno Loop\n");
-      if(errnonum != static_cast<int>(errno))
-	Log(LOG_TERMINAL) << "ERRNO: " << strerror(errno);
-      else
-	sleep(2);
-      Log(LOG_TERMINAL) << Log::TimeStamp() << "Top of Errno Loop.";
-    }
-  }
-};
-
 class ModTerminalInput : public module
 {
   Thread *t;
-  Thread *errno1;
 public:
   ModTerminalInput(const Flux::string &Name):module(Name)
   {
@@ -164,8 +143,6 @@ public:
     if(nofork && InTerm()){
       if(!t)
 	new InputThread(t);
-      else if(!errno1)
-	new ErrnoThread(errno1);
     }else
       throw ModuleException("Cannot run m_terminal_input when fork'ed");
   }

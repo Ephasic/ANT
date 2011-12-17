@@ -24,14 +24,19 @@ static void Connect()
 {
   if(quitting)
     return;
-  ++startcount;
-  if(Config->Server.empty())
-    throw SocketException("No Server Specified.");
-  if(Config->Port.empty())
-    throw SocketException("No Port Specified.");
-    if(!FluxNet)
-      FluxNet = new Network("24.4.7.37", 6667, "Flux-Net");
-    FluxNet->Connect();
+  try{
+    ++startcount;
+    if(Config->Server.empty())
+      throw SocketException("No Server Specified.");
+    if(Config->Port.empty())
+      throw SocketException("No Port Specified.");
+      if(!FluxNet)
+	FluxNet = new Network("15.0.0.3", 6667, "Flux-Net");
+      FluxNet->Connect();
+  }catch(const SocketException &e)
+  {
+    Log(LOG_DEBUG) << "SocketException: " << e.GetReason();
+  }
 }
 
 class DBSave : public Timer
@@ -52,38 +57,21 @@ int main (int argcx, char** argvx, char *envp[])
   {
     startup(argcx, argvx, envp);
     SocketStart:
-    try { Connect(); }
-    catch(SocketException &e){
-      if(startcount >= 3)
-	throw CoreException(e.GetReason());
-      Log(LOG_DEBUG) << "Socket Exception Caught: " << e.GetReason();
-      goto SocketStart;
-    }
-    if(!FluxNet)
-      goto SocketStart;
+    Connect(); // Connect to our 1st network
+    if(++startcount >= 3) throw CoreException("Could not start master socket!");
+    if(!FluxNet) goto SocketStart;
     time_t last_check = time(NULL);
 
     new DBSave(); //Start the Database Save timer.
 //     GProto = new GlobalProto();
     
-    int count;
     while(!quitting)
     {
       Log(LOG_RAWIO) << "Top of main loop";
       //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
       if(++loopcount >= 50) { LastBuf = "50 main loop runs in 3 secs"; raise(SIGSEGV); } 
 
-	SocketEngine::Process();
-	if(!FluxNet)
-	{
-	  if(++count > 5)
-	    break;
-	  Log(LOG_TERMINAL) << "Main count: " << loopcount;
-	  try { Connect(); }
-	  catch(SocketException &e){
-	    Log(LOG_DEBUG) << "Socket Exception Caught: " << e.GetReason();
-	  }
-	}
+      SocketEngine::Process();
       /* Process Timers */
       /***********************************/
       if(time(NULL) - last_check >= 3)

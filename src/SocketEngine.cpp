@@ -95,10 +95,17 @@ void SocketEngine::Process()
     {
       Socket *s = it->second;
       ++it;
-      Log(LOG_TERMINAL) << "Processing Socket " << s->GetFD();
+      Log(LOG_TERMINAL) << "Processing Socket " << s->GetFD() << " Total: " << processed << '/' << sresult;
+      
       bool has_read = FD_ISSET(s->GetFD(), &rfdset), has_write = FD_ISSET(s->GetFD(), &wfdset), has_error = FD_ISSET(s->GetFD(), &efdset);
+      
+      Log(LOG_TERMINAL) << "Processed has_read";
+      
       if (has_read || has_write || has_error)
 	++processed;
+      
+      Log(LOG_TERMINAL) << "Socket needs processing";
+      
       if (has_error)
       {
 	s->ProcessError();
@@ -106,22 +113,31 @@ void SocketEngine::Process()
 	delete s;
 	continue;
       }
+      
+      Log(LOG_TERMINAL) << "Pre s->Process()";
 
       if (!s->Process())
 	continue;
+
+      Log(LOG_TERMINAL) << "Post s->Process(); Pre s->ProcessRead()";
 
       if (has_read && !s->ProcessRead()){
  	s->SetDead(true);
 	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " set dead due to no read data! | " << (has_read?"Has Read": "No Read") << (s->ProcessRead()?"| READ DATA!":" | KEIN READ DATA!");
       }
 
+      Log(LOG_TERMINAL) << "Post s->ProcessRead(); Pre s->ProcessWrite()";
+      
       if (has_write && !s->ProcessWrite())
 	s->SetDead(true);
+
+      Log(LOG_TERMINAL) << "Post s->ProcessWrite(); Pre s->IsDead()";
       
       if (s->IsDead()){
 	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " died!";
 	delete s;
       }
+      Log(LOG_TERMINAL) << "Post s->IsDead() | Socket " << s->GetFD() << " finished processing. Processed: " << processed << '/' << sresult;
     }
   }
 }

@@ -503,7 +503,10 @@ void GlobalProto::mode(const Flux::string &dest, const Flux::string &chanmode){
 void Send_Global(const Flux::string &str)
 {
   for(auto it : Networks)
-   it.second->s->Write(str);
+    if(it.second->s)
+      it.second->s->Write(str);
+    else
+      Log(LOG_RAWIO) << "Attempted to send '" << str << "'";
 }
 /**
  * \fn void Send_Global(const char *fmt, ...)

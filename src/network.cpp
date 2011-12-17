@@ -113,7 +113,7 @@ bool NetworkSocket::Read(const Flux::string &buf)
     this->Write("PONG :"+params[1]);
   return true;
 }
-
+bool NetworkSocket::Process() { return true; }
 void NetworkSocket::OnConnect()
 {
   Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " (" << this->net->hostname << ':' << this->net->port << ')';
