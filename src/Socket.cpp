@@ -180,6 +180,50 @@ void sockaddrs::ntop(int type, const void *src)
   throw CoreException("Invalid socket type");
 }
 
+Flux::string ForwardResolution(const Flux::string &hostname)
+{
+  struct addrinfo *result, *res;
+  int err = getaddrinfo(hostname.c_str(), NULL, NULL, &result);
+  if(err != 0)
+  {
+    Log(LOG_TERMINAL) << "Failed to resolve " << hostname << ": " << gai_strerror(err);
+    return "";
+  }
+  bool gothost = false;
+  Flux::string ret = hostname;
+  for(res = result; res != NULL && !gothost; res = res->ai_next)
+  {
+    struct sockaddr *haddr;
+    haddr = res->ai_addr;
+    char address[INET6_ADDRSTRLEN + 1] = "";
+    switch(haddr->sa_family)
+    {
+      case AF_INET:
+	struct sockaddr_in *v4;
+	v4 = reinterpret_cast<struct sockaddr_in*>(haddr);
+	if (!inet_ntop(AF_INET, &v4->sin_addr, address, sizeof(address))){
+	  Log(LOG_DEBUG) << "DNS: " << strerror(errno);
+	  return "";
+	}
+	break;
+      case AF_INET6:
+	struct sockaddr_in6 *v6;
+	v6 = reinterpret_cast<struct sockaddr_in6*>(haddr);
+	if (!inet_ntop(AF_INET6, &v6->sin6_addr, address, sizeof(address))){
+	  Log(LOG_DEBUG) << "DNS: " << strerror(errno);
+	  return "";
+	}
+	break;
+    }
+    ret = address;
+    gothost = true;
+    Log(LOG_TERMINAL) << "DERP: '" << address << "'";
+  }
+  freeaddrinfo(result);
+  Log(LOG_TERMINAL) << ret;
+  return ret;
+}
+
 cidr::cidr(const Flux::string &ip)
 {
   if (ip.find_first_not_of("01234567890:./") != Flux::string::npos)

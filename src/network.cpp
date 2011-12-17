@@ -45,6 +45,7 @@ bool Network::Connect()
 {
   FOREACH_MOD(I_OnPreConnect, OnPreConnect(this));
   new NetworkSocket(this);
+  this->s->Connect(ForwardResolution(this->hostname), this->port);
   return true;
 }
 
