@@ -506,7 +506,7 @@ void Send_Global(const Flux::string &str)
     if(it.second->s)
       it.second->s->Write(str);
     else
-      Log(LOG_RAWIO) << "Attempted to send '" << str << "'";
+      Log(LOG_RAWIO) << '[' << it.second->name << ']' << " Attempted to send '" << str << "'";
 }
 /**
  * \fn void Send_Global(const char *fmt, ...)

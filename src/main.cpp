@@ -31,7 +31,7 @@ static void Connect()
     if(Config->Port.empty())
       throw SocketException("No Port Specified.");
       if(!FluxNet)
-	FluxNet = new Network("15.0.0.3", 6667, "Flux-Net");
+	FluxNet = new Network("northstar.flux-net.net", 6667, "Flux-Net");
       FluxNet->Connect();
   }catch(const SocketException &e)
   {

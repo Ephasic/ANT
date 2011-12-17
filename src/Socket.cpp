@@ -217,10 +217,8 @@ Flux::string ForwardResolution(const Flux::string &hostname)
     }
     ret = address;
     gothost = true;
-    Log(LOG_TERMINAL) << "DERP: '" << address << "'";
   }
   freeaddrinfo(result);
-  Log(LOG_TERMINAL) << ret;
   return ret;
 }
 
@@ -381,6 +379,7 @@ void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port
   s->SetConnecting(false);
   s->conaddr.pton(s->IsIPv6() ? AF_INET6 : AF_INET, target, port);
   int c = connect(s->GetFD(), &s->conaddr.sa, s->conaddr.size());
+  Log(LOG_TERMINAL) << "DEBUG: " << c;
   if (c == -1)
   {
     if (errno != EINPROGRESS)
@@ -634,11 +633,6 @@ bool BufferedSocket::ProcessRead()
   this->RecvLen = 0;
   
   int len = this->IO->Recv(this, tbuffer, sizeof(tbuffer) - 1);
-  Flux::string err = "Error: (";
-  err += value_cast<Flux::string>(errno)+") ";
-  err += strerror(errno);
-  printf("LEN: %i\n", len);
-  Log(LOG_TERMINAL) << "Recv: " << (len <=0?err:Flux::string(len+" bytes"));
   if (len <= 0)
     return false;
   
@@ -670,7 +664,6 @@ bool BufferedSocket::ProcessRead()
     if (!tbuf.empty() && !Read(tbuf))
       return false;
   }
-  Log(LOG_TERMINAL) << "Returning false";
   return true;
 }
 

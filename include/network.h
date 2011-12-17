@@ -26,6 +26,8 @@ struct CommitMessage
 
 class CoreExport Network
 {
+protected:
+  bool disconnecting;
 public:
   Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
   ~Network();
@@ -36,6 +38,7 @@ public:
   Flux::string hostname;
   Flux::string port;
   Flux::string servername;
+  bool IsDisconnecting() { return this->disconnecting; }
   bool Disconnect();
   bool Disconnect(const Flux::string&);
   bool Connect();

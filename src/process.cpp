@@ -162,7 +162,6 @@ void process(Network *n, const Flux::string &buffer){
     else
       params.push_back(bufferseparator_token);
   }
-  Log(LOG_RAWIO) << "Received: " << Flux::Sanitize(buffer);
   if(protocoldebug)
   {
     Log(LOG_TERMINAL) << "Source: " << (source.empty()?"No Source":source);

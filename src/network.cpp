@@ -18,6 +18,7 @@ Network::Network(const Flux::string &host, const Flux::string &p, const Flux::st
 Network::~Network()
 {
   Log(LOG_DEBUG) << "Deleting network " << this->name << " (" << this->hostname << ':' << this->port << ')';
+  this->Disconnect("Network Removed");
   Networks.erase(this->name);
   NetworkHosts.erase(this->hostname);
 }
@@ -26,6 +27,7 @@ bool Network::Disconnect()
 {
   Socket *tmp = this->s;
   IRCProto *ptmp = this->ircproto;
+  this->disconnecting = true;
   this->s = NULL;
   this->ircproto = NULL;
   delete ptmp;
@@ -43,6 +45,7 @@ bool Network::Disconnect(const Flux::string &buf)
 
 bool Network::Connect()
 {
+  this->disconnecting = false;
   FOREACH_MOD(I_OnPreConnect, OnPreConnect(this));
   new NetworkSocket(this);
   this->s->Connect(ForwardResolution(this->hostname), this->port);
@@ -96,7 +99,8 @@ NetworkSocket::~NetworkSocket()
   this->ProcessWrite();
   this->net->s = NULL;
   Log() << "Connection to " << net->name << " [" << net->hostname << ':' << net->port << "] Failed! Retrying in " << Config->RetryWait << " seconds.";
-  new ReconnectTimer(Config->RetryWait, this->net);
+  if(!this->net->IsDisconnecting())
+    new ReconnectTimer(Config->RetryWait, this->net);
 }
 
 bool NetworkSocket::Read(const Flux::string &buf)
@@ -114,7 +118,9 @@ bool NetworkSocket::Read(const Flux::string &buf)
     this->Write("PONG :"+params[1]);
   return true;
 }
-bool NetworkSocket::Process() { return true; }
+bool NetworkSocket::Process() {
+  return true;
+}
 void NetworkSocket::OnConnect()
 {
   Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " (" << this->net->hostname << ':' << this->net->port << ')';
