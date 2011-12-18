@@ -136,6 +136,13 @@ void NetworkSocket::OnError(const Flux::string &buf)
 bool NetworkSocket::ProcessWrite()
 {
   Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << this->WriteBuffer;
+  int count = this->IO->Send(this, this->WriteBuffer);
+  if (count <= -1)
+    return false;
+  this->WriteBuffer = this->WriteBuffer.substr(count);
+  if (this->WriteBuffer.empty())
+    SocketEngine::ClearWritable(this);
+  
   return true;
 }
 /**********************************************************/
