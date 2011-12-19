@@ -1,7 +1,6 @@
 /* All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html) */
 #include <channel.h>
 
-Flux::insensitive_map<Channel*> ChanMap;
 Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   if(nname.empty())
     throw CoreException("I don't like empty channel names in my channel constructor >:d");
@@ -15,14 +14,14 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   this->creation_time = ts;
   this->topic_time = 0;
   this->SendWho();
-  ChanMap[this->name] = this;
+  this->n->ChanMap[this->name] = this;
   Log(LOG_DEBUG) << "Created new channel: " << nname;
 }
 Channel::~Channel()
 {
   this->SendPart();
   Log(LOG_DEBUG) << "Deleted channel " << this->name;
-  ChanMap.erase(this->name);
+  this->n->ChanMap.erase(this->name);
 }
 User *Channel::finduser(const Flux::string &usr)
 {
@@ -156,26 +155,26 @@ void Channel::SendNotice(const char *fmt, ...){
 void Channel::SendNotice(const Flux::string &message){ this->n->ircproto->notice(this->name, message); }
 void Channel::SendWho(){ this->n->ircproto->who(this->name); }
 /****************************************************************/
-void QuitUser(User *u)
+void QuitUser(Network *n, User *u)
 {
   if(!u)
     return;
-    for(auto var : ChanMap)
+    for(auto var : n->ChanMap)
       for(auto var1 : var.second->UserList)
 	if(var1.first == u)
 	  var1.second->DelUser(u);
     delete u;
 }
-void ListChans(CommandSource &source){
-  Flux::string channels;
-  for(auto var : ChanMap)
-    channels += var.second->name+' ';
-  channels.trim();
-  source.Reply("Channels: %s\n", channels.c_str());
-}
-Channel *findchannel(const Flux::string &channel){
-  Flux::map<Channel *>::iterator it = ChanMap.find(channel);
-  if(it != ChanMap.end())
+// void ListChans(CommandSource &source){
+//   Flux::string channels;
+//   for(auto var : ChanMap)
+//     channels += var.second->name+' ';
+//   channels.trim();
+//   source.Reply("Channels: %s\n", channels.c_str());
+// }
+Channel *findchannel(Network *n, const Flux::string &channel){
+  auto it = n->ChanMap.find(channel);
+  if(it != n->ChanMap.end())
     return it->second;
   return NULL;
 }

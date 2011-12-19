@@ -82,8 +82,8 @@ typedef std::map<Flux::string, Command*, ci::less> CommandMap;
 typedef std::vector<module*> EventsVector; //Gay g++
 
 /*  Class pointer finder definitions */
-E Channel *findchannel(const Flux::string&);
 E User *finduser(const Flux::string&);
+E Channel *findchannel(Network*, const Flux::string&);
 E module *FindModule(const Flux::string&);
 E Command *FindCommand(const Flux::string&, CommandType);
 E Network *FindNetwork(const Flux::string&);
@@ -115,7 +115,6 @@ E bool protocoldebug, IsOper, dev, nofork, quitting, started, nocolor, istempnic
 E std::vector<Flux::string> StringVector(const Flux::string&, char);
 E Flux::insensitive_map<module*> Modules;
 E Flux::insensitive_map<User*> UserNickList;
-E Flux::insensitive_map<Channel*> ChanMap;
 E Flux::insensitive_map<Network*> Networks;
 E Flux::map<Network*> NetworkHosts;
 
@@ -123,7 +122,7 @@ E Flux::map<Network*> NetworkHosts;
 E void Rehash();
 E void Send_Global(const Flux::string&);
 E void Send_Global(const char*, ...);
-E void QuitUser(User*);
+E void QuitUser(Network*, User*);
 E void Fork();
 E void sigact(int);
 E void SaveDatabases();

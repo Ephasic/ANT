@@ -55,7 +55,7 @@ public:
     if(!IsValidChannel(chan))
      source.Reply(CHANNEL_X_INVALID, chan.c_str());
     else{
-      Channel *c = findchannel(chan);
+      Channel *c = findchannel(source.n, chan);
       if(c)
 	c->SendPart();
       else

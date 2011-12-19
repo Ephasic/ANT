@@ -22,7 +22,15 @@ Network::~Network()
   Networks.erase(this->name);
   NetworkHosts.erase(this->hostname);
 }
-
+bool Network::JoinChannel(const Flux::string &chan)
+{
+  if(IsValidChannel(chan)){
+    Channel *c = new Channel(this, chan);
+    c->SendJoin();
+    return true;
+  }
+  return false;
+}
 bool Network::Disconnect()
 {
   Socket *tmp = this->s;

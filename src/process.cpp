@@ -24,7 +24,7 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan){
       if((!Host.empty() || !Nickname.empty() || !Ident.empty()) && source.n)
 	u = new User(source.n, Nickname, Ident, Host, realname, Server);
     }
-    Channel *c = findchannel(channel);
+    Channel *c = findchannel(source.n, channel);
     if(!c){
       if(!channel.empty() && source.n)
        c = new Channel(source.n, channel);
@@ -179,7 +179,7 @@ void process(Network *n, const Flux::string &buffer){
   IsoHost h(source);
   Flux::string nickname = h.nick, uident = h.ident, uhost = h.host, cmd;
   User *u = finduser(nickname);
-  Channel *c = findchannel(receiver);
+  Channel *c = findchannel(n, receiver);
   Flux::vector params2 = StringVector(message, ' ');
   /***********************************************/
   if(!n)
@@ -200,7 +200,7 @@ void process(Network *n, const Flux::string &buffer){
   }
   if(command == "QUIT"){
     FOREACH_MOD(I_OnQuit, OnQuit(u, params[0]));
-    QuitUser(u);
+    QuitUser(n, u);
   }
   if(command == "PART"){
     FOREACH_MOD(I_OnPart, OnPart(u, c, params[0]));
@@ -211,8 +211,8 @@ void process(Network *n, const Flux::string &buffer){
        u->DelChan(c);
      if(c)
        c->DelUser(u);
-     if(u && c && !u->findchannel(c->name)){
-       Log(LOG_TERMINAL) << "Deleted " << u->nick << '|' << c->name << '|' << u->findchannel(c->name);
+     if(u && c && !u->findchannel(n, c->name)){
+       Log(LOG_TERMINAL) << "Deleted " << u->nick << '|' << c->name << '|' << u->findchannel(n, c->name);
        delete u; 
       }
     }
@@ -220,7 +220,7 @@ void process(Network *n, const Flux::string &buffer){
   if(command.is_pos_number_only()) { FOREACH_MOD(I_OnNumeric, OnNumeric((int)command, n)); }
   if(command.equals_cs("PING")){ FOREACH_MOD(I_OnPing, OnPing(params, n)); }
   if(command.equals_cs("PONG")){ FOREACH_MOD(I_OnPong, OnPong(params, n)); }
-  if(command.equals_cs("KICK")){ FOREACH_MOD(I_OnKick, OnKick(u, finduser(params[1]), findchannel(params[0]), params[2])); }
+  if(command.equals_cs("KICK")){ FOREACH_MOD(I_OnKick, OnKick(u, finduser(params[1]), findchannel(n, params[0]), params[2])); }
   if(command.equals_ci("ERROR")) { FOREACH_MOD(I_OnConnectionError, OnConnectionError(buffer)); }
   if(command.equals_cs("INVITE")) { FOREACH_MOD(I_OnInvite, OnInvite(u, params[1])); }
   if(command.equals_cs("NOTICE") && !source.find('.')){
@@ -237,7 +237,7 @@ void process(Network *n, const Flux::string &buffer){
       u = new User(n, nickname, uident, uhost);
     else if(!c && n && IsValidChannel(receiver))
       c = new Channel(n, receiver);
-    else if(!u->findchannel(c->name))
+    else if(!u->findchannel(n, c->name))
       u->AddChan(c);
     else if(!c->finduser(u->nick))
       c->AddUser(u);

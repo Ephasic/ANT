@@ -526,6 +526,7 @@ void GlobalProto::mode(const Flux::string &dest, const Flux::string &chanmode){
  */
 void Send_Global(const Flux::string &str)
 {
+  Log(LOG_TERMINAL) << "Send_Global Called";
   Network *n;
   for(auto it : Networks)
     if(it.second->s){

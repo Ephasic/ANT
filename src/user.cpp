@@ -79,9 +79,9 @@ void User::DelChan(Channel *c)
     ChannelList.erase(it);
 }
 
-Channel *User::findchannel(const Flux::string &name)
+Channel *User::findchannel(Network *net, const Flux::string &name)
 {
-  auto it1 = ChanMap.find(name);
+  auto it1 = net->ChanMap.find(name);
   Channel *c = it1->second;
   if(!c)
     return NULL;

@@ -23,7 +23,7 @@ public:
   bool IsOwner();
   void AddChan(Channel*);
   void DelChan(Channel*);
-  Channel *findchannel(const Flux::string&);
+  Channel *findchannel(Network*, const Flux::string&);
   void SetNewNick(const Flux::string&);
   void SendWho();
   void SendMessage(const Flux::string&);

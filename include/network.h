@@ -34,13 +34,17 @@ public:
   NetworkSocket *s;
   IRCProto *ircproto;
   Flux::map<Bot*> bots;
+  Flux::insensitive_map<Channel*> ChanMap;
   Flux::string name;
   Flux::string hostname;
   Flux::string port;
   Flux::string servername;
+  bool JoinChannel(const Flux::string&);
   bool IsDisconnecting() { return this->disconnecting; }
   bool Disconnect();
   bool Disconnect(const Flux::string&);
   bool Connect();
 };
+
+// NetworkSocket is in socket.h :/
 #endif

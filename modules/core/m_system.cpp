@@ -123,7 +123,7 @@ public:
 	source.Reply(CHANNEL_X_INVALID, kickchan.c_str()); 
 	return;
       }
-      Channel *c = findchannel(kickchan);
+      Channel *c = findchannel(source.n, kickchan);
       if(!c){
 	source.Reply("I am not in channel \2%s\2", kickchan.c_str());
 	return;
