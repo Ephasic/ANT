@@ -273,7 +273,7 @@ public:
       while(cs.GetToken(tok))
       {
 	tok.trim();
-	Channel *c = new Channel(FluxNet, tok);
+	Channel *c = new Channel(n, tok);
 	c->SendJoin();
       }
     }

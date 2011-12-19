@@ -419,6 +419,7 @@ SocketFlag SocketIO::FinishConnect(ConnectionSocket *s)
   {
     errno = optval;
     s->OnError(optval ? strerror(errno) : "");
+    Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " Set dead on in FinishConnect!";
     return SF_DEAD;
   }
 }
@@ -437,6 +438,7 @@ Socket::Socket()
  */
 Socket::Socket(int sock, bool ipv6, int type)
 {
+  this->SetDead(false);
   this->IO = &normalSocketIO;
   this->IPv6 = ipv6;
   if (sock == -1)

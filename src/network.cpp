@@ -99,6 +99,7 @@ public:
 NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet)
 {
   tnet->s = this;
+  Log(LOG_TERMINAL) << "Socket " << this->GetFD() << ": " << (this->IsDead()?"TRUE":"FALSE");
   Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << ForwardResolution(this->net->hostname) << ')';
 }
 
@@ -122,7 +123,7 @@ bool NetworkSocket::Read(const Flux::string &buf)
   {
     FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
     Log(LOG_TERMINAL) << "Socket Error, Closing socket!";
-    return true; //Socket is dead so we'll let the socket engine handle it
+    return false; //Socket is dead so we'll let the socket engine handle it
   }
   process(this->net, buf);
   if(!params.empty() && params[0].equals_ci("PING")){
