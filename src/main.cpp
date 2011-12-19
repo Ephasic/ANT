@@ -32,6 +32,8 @@ static void Connect()
       throw SocketException("No Port Specified.");
       if(!FluxNet)
 	FluxNet = new Network("northstar.flux-net.net", 6667, "Flux-Net");
+      Network *FreeNode = new Network("irc.freenode.net", 6667, "FreeNode");
+      FreeNode->Connect();
       FluxNet->Connect();
   }catch(const SocketException &e)
   {

@@ -275,7 +275,6 @@ public:
 	tok.trim();
 	Channel *c = new Channel(FluxNet, tok);
 	c->SendJoin();
-	c->SendMessage(welcome_msg, Config->BotNick.c_str(), Config->BotNick.c_str());
       }
     }
     if((i == 433)){

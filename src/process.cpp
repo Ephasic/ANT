@@ -232,7 +232,7 @@ void process(Network *n, const Flux::string &buffer){
     else if(IsValidChannel(params[0]) && params.size() == 3) { FOREACH_MOD(I_OnChannelOp, OnChannelOp(u, c, params[1], params[2])); }
     else if(params[0] == Config->BotNick) { FOREACH_MOD(I_OnUserMode, OnUserMode(u, params[0], params[1])); }
   }
-  if(command == "JOIN"){
+  if(command.equals_cs("JOIN")){
     if(!u && n && (!nickname.empty() || !uident.empty() || !uhost.empty()))
       u = new User(n, nickname, uident, uhost);
     else if(!c && n && IsValidChannel(receiver))

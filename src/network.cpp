@@ -113,6 +113,11 @@ bool NetworkSocket::Read(const Flux::string &buf)
     Log(LOG_TERMINAL) << "Socket Error, Closing socket!";
     return true; //Socket is dead so we'll let the socket engine handle it
   }
+//   if(buf.search_ci("Found your hostname"))
+//   {
+//     this->Write("USER %s * * :%s", Config->Ident.c_str(), Config->Realname.c_str());
+//     this->Write("NICK ANT-%i", randint(1,100));
+//   }
   process(this->net, buf);
   if(!params.empty() && params[0].equals_ci("PING"))
     this->Write("PONG :"+params[1]);
@@ -123,9 +128,12 @@ void NetworkSocket::OnConnect()
 {
   Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << ']';
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
-  this->Write("USER %s * * :%s", Config->Ident.c_str(), Config->Realname.c_str());
-  this->Write("NICK ANT-%i", randint(1,100));
+//   this->Write("USER %s * * :%s", Config->Ident.c_str(), Config->Realname.c_str());
+//   this->Write("NICK ANT-%i", randint(1,100));
   new IRCProto(this->net); // Create the new protocol class for the network
+  this->net->ircproto->user(Config->Ident, Config->Realname);
+  this->net->ircproto->nick("ANT-%i", randint(1,100));
+  this->ProcessWrite();
 }
 
 void NetworkSocket::OnError(const Flux::string &buf)
@@ -133,16 +141,9 @@ void NetworkSocket::OnError(const Flux::string &buf)
   Log(LOG_TERMINAL) << "Unable to connect to " << this->net->name << " (" << this->net->hostname << ':' << this->net->port << ')' << (!buf.empty()?(": " + buf):"");
 }
 
-bool NetworkSocket::ProcessWrite()
+void NetworkSocket::OnProcessWrite()
 {
+  Log(LOG_TERMINAL) << "ONPROCESSWRITE CALLED!!";
   Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << this->WriteBuffer;
-  int count = this->IO->Send(this, this->WriteBuffer);
-  if (count <= -1)
-    return false;
-  this->WriteBuffer = this->WriteBuffer.substr(count);
-  if (this->WriteBuffer.empty())
-    SocketEngine::ClearWritable(this);
-  
-  return true;
 }
 /**********************************************************/

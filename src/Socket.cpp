@@ -207,8 +207,7 @@ Flux::string ForwardResolution(const Flux::string &hostname)
 	}
 	break;
       case AF_INET6:
-	struct sockaddr_in6 *v6;
-	v6 = reinterpret_cast<struct sockaddr_in6*>(haddr);
+	struct sockaddr_in6 *v6 = reinterpret_cast<struct sockaddr_in6*>(haddr);
 	if (!inet_ntop(AF_INET6, &v6->sin6_addr, address, sizeof(address))){
 	  Log(LOG_DEBUG) << "DNS: " << strerror(errno);
 	  return "";
@@ -668,6 +667,7 @@ bool BufferedSocket::ProcessRead()
 
 bool BufferedSocket::ProcessWrite()
 {
+  this->OnProcessWrite();
   int count = this->IO->Send(this, this->WriteBuffer);
   if (count <= -1)
     return false;
@@ -677,7 +677,7 @@ bool BufferedSocket::ProcessWrite()
   
   return true;
 }
-
+void BufferedSocket::OnProcessWrite() {}
 bool BufferedSocket::Read(const Flux::string &buf)
 {
   return false;
@@ -694,9 +694,10 @@ void BufferedSocket::Write(const char *message, ...)
   va_start(vi, message);
   vsnprintf(tbuffer, sizeof(tbuffer), message, vi);
   va_end(vi);
-  
-  Flux::string sbuf = tbuffer;
-  Write(sbuf);
+
+  //const char *n = tbuffer;
+  std::string tbuf = tbuffer;//n;
+  Write(tbuf);
 }
 
 void BufferedSocket::Write(const Flux::string &message)

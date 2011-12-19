@@ -309,6 +309,10 @@ public:
    * @return true on success, false to drop this socket
    */
   bool ProcessWrite();
+
+  /** Called when the socket write data, this is used because making ProcessWrite virtual causes issues
+   */
+  virtual void OnProcessWrite();
   
   /** Called with a line received from the socket
    * @param buf The line
@@ -556,7 +560,7 @@ public:
   ~NetworkSocket();
   Network *net;
   bool Read(const Flux::string&);
-  bool ProcessWrite();
+  void OnProcessWrite();
   void OnConnect();
   void OnError(const Flux::string&);
 };

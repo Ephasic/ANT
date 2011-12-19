@@ -95,7 +95,6 @@ void SocketEngine::Process()
     {
       Socket *s = it->second;
       ++it;
-      Log(LOG_TERMINAL) << "Processing Socket " << s->GetFD() << " Total: " << processed << '/' << sresult;
       
       bool has_read = FD_ISSET(s->GetFD(), &rfdset), has_write = FD_ISSET(s->GetFD(), &wfdset), has_error = FD_ISSET(s->GetFD(), &efdset);
 

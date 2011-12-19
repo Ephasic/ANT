@@ -15,23 +15,15 @@ public:
   {
     User *u = source.u;
     Flux::string chan = params[1];
-    if(!u->IsOwner()){
-      source.Reply(ACCESS_DENIED);
-      Log(u) << "attempted to make the bot join " << chan;
-      return;
-    }
     if(!IsValidChannel(chan))
       source.Reply(CHANNEL_X_INVALID, chan.c_str());
     else{
-      Log(u) << "made the bot join " << chan;
-      Channel *c = findchannel(chan);
-      if(c){
-	c->SendJoin();
-	c->SendMessage(welcome_msg, Config->BotNick.c_str(), Config->BotNick.c_str());
-      }else{
+      Log(u) << "made the bot join " << chan << " on network " << source.n->name;
+//       Channel *c = findchannel(chan);
+//       if(c)
+// 	c->SendJoin();
+//       else
 	source.n->ircproto->join(chan);
-	source.n->ircproto->privmsg(chan, welcome_msg, Config->BotNick.c_str(), Config->BotNick.c_str());
-      }
     }
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)

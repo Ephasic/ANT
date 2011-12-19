@@ -17,6 +17,8 @@ public:
   void action(const Flux::string &where, const char *fmt, ...);
   void action(const Flux::string &where, const Flux::string &msg);
   void quit(const char*, ...);
+  void Raw(const char*, ...);
+  void nick(const char*, ...);
   void kick(const Flux::string&, const Flux::string&, const char *fmt, ...);
   void topic(const Flux::string&, const char *fmt, ...);
   void part(const Flux::string&, const char *fmt, ...);
