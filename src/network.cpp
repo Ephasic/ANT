@@ -68,7 +68,8 @@ Network *FindNetworkByHost(const Flux::string &name)
   return NULL;
 }
 /**********************************************************/
-
+/****************** Socket Engine *************************/
+/**********************************************************/
 class ReconnectTimer : public Timer
 {
   Network *n;

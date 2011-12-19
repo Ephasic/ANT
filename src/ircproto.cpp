@@ -526,10 +526,14 @@ void GlobalProto::mode(const Flux::string &dest, const Flux::string &chanmode){
  */
 void Send_Global(const Flux::string &str)
 {
+  Network *n;
   for(auto it : Networks)
     if(it.second->s){
-      it.second->s->Write(str);
-      it.second->s->ProcessWrite();
+      if(n != it.second){
+	n = it.second;
+	n->s->Write(str);
+	n->s->ProcessWrite();
+      }
     }
     else
       Log(LOG_RAWIO) << '[' << it.second->name << ']' << " Attempted to send '" << str << "'";

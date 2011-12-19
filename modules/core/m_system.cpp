@@ -286,15 +286,14 @@ public:
     {
       Log(LOG_TERMINAL) << "\033[22;31mStarted with PID \033[22;32m" << getpid() << "\033[22;36m";
       Log(LOG_TERMINAL) << "\033[22;34mSession Password: \033[01;32m" << password << "\033[22;36m";
-      n->ircproto->notice(Config->Owner, "The randomly generated password is: %s", password.c_str());
       started = true;
       /* Identify to the networks services */
-      if((!Config->ServicesAccount.empty() || !Config->ServicesPass.empty()) && Config->IdentOnConn){
-	Flux::string Sendns = Config->ServicesSendString.replace_all_ci("%a", Config->ServicesAccount);
-	Sendns = Sendns.replace_all_ci("%p", Config->ServicesPass);
-	n->ircproto->privmsg(Config->ServicesService, Sendns);
-	Log() << "Identified to " << Config->ServicesService << " with account \"" << Config->ServicesAccount << "\"";
-      }
+//       if((!Config->ServicesAccount.empty() || !Config->ServicesPass.empty()) && Config->IdentOnConn){
+// 	Flux::string Sendns = Config->ServicesSendString.replace_all_ci("%a", Config->ServicesAccount);
+// 	Sendns = Sendns.replace_all_ci("%p", Config->ServicesPass);
+// 	n->ircproto->privmsg(Config->ServicesService, Sendns);
+// 	Log() << "Identified to " << Config->ServicesService << " with account \"" << Config->ServicesAccount << "\"";
+//       }
     }
   }
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
