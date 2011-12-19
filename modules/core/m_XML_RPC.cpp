@@ -42,7 +42,7 @@ public:
   bool Read(const Flux::string &message)
   {
     if(message.search_ci("USER")) // If the user tries to connect via IRC protocol
-      this->Write("ERROR: This is not an IRC connection");
+      this->Write("ERROR: :Closing link: (unknown@%s) This is not an IRC connection", GetPeerIP(this->GetFD()).c_str());
     else if(message.search_ci("GET") && message.search_ci("http/1.1"))
     { //If connection is HTTP GET request
     const Flux::string page = fsprintf(HTTPREQUEST, VERSION_FULL);
@@ -148,6 +148,7 @@ public:
     this->SetVersion(VERSION);
     Implementation i[] = { I_OnCommit };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
+    xmlrpclistensocket *xmll = new xmlrpclistensocket("127.0.0.1", 12345, false);
   }
   
   ~xmlrpcmod()

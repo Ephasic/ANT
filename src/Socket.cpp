@@ -180,6 +180,33 @@ void sockaddrs::ntop(int type, const void *src)
   throw CoreException("Invalid socket type");
 }
 
+Flux::string GetPeerIP(int fd)
+{
+  socklen_t len;
+  struct sockaddr_storage addr;
+  char ipstr[INET6_ADDRSTRLEN] = "";
+  
+  len = sizeof addr;
+  int err = getpeername(fd, reinterpret_cast<struct sockaddr*>(&(addr)), &len);
+  if(err < -1)
+  {
+    Log(LOG_DEBUG) << "Could not retrive ip address for socket " << fd;
+    return "";
+  }
+  // deal with both IPv4 and IPv6:
+  switch(addr.ss_family){
+    case AF_INET:
+      struct sockaddr_in *s4;
+      s4 = reinterpret_cast<struct sockaddr_in*>(&(addr));
+      inet_ntop(AF_INET, &s4->sin_addr, ipstr, sizeof ipstr);
+    case AF_INET6:
+      struct sockaddr_in6 *s6;
+      s6 = reinterpret_cast<struct sockaddr_in6*>(&(addr));
+      inet_ntop(AF_INET6, &s6->sin6_addr, ipstr, sizeof ipstr);
+  }
+  return ipstr;
+}
+
 Flux::string ForwardResolution(const Flux::string &hostname)
 {
   struct addrinfo *result, *res;
