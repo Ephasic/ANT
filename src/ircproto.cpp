@@ -13,8 +13,10 @@ void IRCProto::Raw(const char *fmt, ...)
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
   va_end(args);
-  if(this->net->s)
+  if(this->net->s){
     this->net->s->Write(Flux::string(buffer));
+    this->net->s->ProcessWrite();
+  }
   else
     Log(LOG_RAWIO) << '[' << this->net->name << ']' << " Attempted to send '" << buffer << '\'';
 }
@@ -525,8 +527,10 @@ void GlobalProto::mode(const Flux::string &dest, const Flux::string &chanmode){
 void Send_Global(const Flux::string &str)
 {
   for(auto it : Networks)
-    if(it.second->s)
+    if(it.second->s){
       it.second->s->Write(str);
+      it.second->s->ProcessWrite();
+    }
     else
       Log(LOG_RAWIO) << '[' << it.second->name << ']' << " Attempted to send '" << str << "'";
 }

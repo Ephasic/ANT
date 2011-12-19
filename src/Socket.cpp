@@ -695,9 +695,7 @@ void BufferedSocket::Write(const char *message, ...)
   vsnprintf(tbuffer, sizeof(tbuffer), message, vi);
   va_end(vi);
 
-  //const char *n = tbuffer;
-  std::string tbuf = tbuffer;//n;
-  Write(tbuf);
+  Write(Flux::string(tbuffer));
 }
 
 void BufferedSocket::Write(const Flux::string &message)
