@@ -6,12 +6,13 @@ public:
   int pings;
   PingTimer():Timer(60, time(NULL), true), pings(0) { }
   void Tick(time_t){
-    for(auto it : Networks)
-    {
-      Send_Global("PING :%i\n", static_cast<int>(time(NULL)));
+    Send_Global("PING :%i\n", static_cast<int>(time(NULL)));
+//     for(auto it : Networks)
+//     {
+//       
 //       if(++pings >= 3) //FIXME: This needs fixing
 // 		it.second->s->SetDead(true);
-    }
+//     }
   }
 };
 class Ping_pong:public module
