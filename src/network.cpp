@@ -99,7 +99,6 @@ public:
 NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet)
 {
   tnet->s = this;
-  Log(LOG_TERMINAL) << "Socket " << this->GetFD() << ": " << (this->IsDead()?"TRUE":"FALSE");
   Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << ForwardResolution(this->net->hostname) << ')';
 }
 

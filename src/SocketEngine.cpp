@@ -104,7 +104,6 @@ void SocketEngine::Process()
       if (has_error)
       {
 	s->ProcessError();
-	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " Set dead on Error!";
 	s->SetDead(true);
 	delete s;
 	continue;
@@ -113,15 +112,12 @@ void SocketEngine::Process()
       if (!s->Process())
 	continue;
 
-      if (has_read && !s->ProcessRead()){
-	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " Set dead on read!";
+      if (has_read && !s->ProcessRead())
  	s->SetDead(true);
-      }
 
-      if (has_write && !s->ProcessWrite()){
-	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " Set dead on write!";
+      if (has_write && !s->ProcessWrite())
 	s->SetDead(true);
-      }
+
       if (s->IsDead()){
 	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " died!";
 	delete s;
