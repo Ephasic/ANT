@@ -35,6 +35,7 @@ public:
   NetworkSocket *s;
   IRCProto *ircproto;
   Flux::map<Bot*> bots;
+  Flux::insensitive_map<User*> UserNickList;
   Flux::insensitive_map<Channel*> ChanMap;
   Flux::string name;
   Flux::string hostname;
