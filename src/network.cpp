@@ -107,7 +107,6 @@ NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), Bu
   tnet->s = this;
   Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << ForwardResolution(this->net->hostname) << ')';
   this->Connect(ForwardResolution(tnet->hostname), tnet->port);
-  SocketEngine::Process();
 }
 
 NetworkSocket::~NetworkSocket()
