@@ -24,8 +24,10 @@ Network::~Network()
 }
 bool Network::JoinChannel(const Flux::string &chan)
 {
+  Channel *c;
   if(IsValidChannel(chan)){
-    Channel *c = new Channel(this, chan);
+    if(!(c = findchannel(this, chan)))
+      c = new Channel(this, chan);
     c->SendJoin();
     return true;
   }

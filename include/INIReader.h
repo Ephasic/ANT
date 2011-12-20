@@ -71,6 +71,7 @@ public:
   Flux::string AutoIdentString;
   Flux::string ServicesService;
   bool IdentOnConn;
+  bool dbforce;
   size_t SockWait;
   int RetryWait;
 private:
