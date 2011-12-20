@@ -77,12 +77,13 @@ public:
     Implementation i[] = { I_OnDatabasesWrite, I_OnDatabasesRead, I_OnModuleLoad, I_OnSaveDatabases, I_OnForceDatabasesRead };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
   }
+  
   void OnDatabasesWrite(void (*Write)(const char*, ...))
   {
     for(auto it : Networks) // Save networks
     {
       Network *n = it.second;
-      Write("N %s %s %s", n->name.c_str(), n->hostname.c_str(), n->port.c_str());
+      Write("N %s %s %s", n->hostname.c_str(), n->port.c_str(), n->name.c_str());
       for(auto cit : n->ChanMap) // Save Channels in those networks
       {
 	Channel *c = cit.second;
@@ -101,10 +102,12 @@ public:
     Flux::string key = params[0];
     if(key.equals_ci("N"))
     {
-      Network *n = FindNetwork(params[1]);
-      if(!n)
-	n = new Network(params[2], params[3], params[1]);
+//       Network *n = FindNetwork(params[1]);
+//       if(!n)
+//Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n)
+	Network *n = new Network(params[1], params[2], params[3]);
       n->Connect(); //Connect to networks.
+      SocketEngine::Process();
     }
     if(key.equals_ci("NC"))
     {

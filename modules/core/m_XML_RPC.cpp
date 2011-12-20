@@ -69,12 +69,7 @@ public:
 
 ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 {
-  xmlrpcclient *socket = new xmlrpcclient(this, fd, addr);
-  
-  if(socket->IsDead())
-    Log() << "[XML-RPC] Found dead socket " << fd << " from " << addr.addr();
-  
-  return socket;
+  return new xmlrpcclient(this, fd, addr);
 }
 class module;
 /* This is down here so we don't make a huge mess in the middle of the file */
@@ -148,7 +143,7 @@ public:
     this->SetVersion(VERSION);
     Implementation i[] = { I_OnCommit };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
-    xmlrpclistensocket *xmll = new xmlrpclistensocket("127.0.0.1", 12345, false);
+    /*xmlrpclistensocket *xmll =*/ new xmlrpclistensocket("127.0.0.1", 12345, false);
   }
   
   ~xmlrpcmod()
