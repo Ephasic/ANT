@@ -176,25 +176,10 @@ std::vector<Flux::string> StringVector(const Flux::string &src, char delim)
  */
 bool InTerm() { return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr))); }
 
-/* Database Functions */
-std::fstream db;
-void WriteDB(const Flux::string &buf)
-{
-  db << buf << std::endl;
-}
-static void ReadDB(); // We'll write this later!
 void SaveDatabases()
 {
   Log() << "Saving Databases.";
-  db.clear();
-  db.open("ANT.db", std::ios_base::out | std::ios_base::trunc);
-  if(!db.is_open())
-  {
-    Log() << "Cannot save database! ANT.db";
-  }
-  db << "VER 1" << std::endl;
-  FOREACH_MOD(I_OnDatabasesWrite, OnDatabasesWrite(WriteDB));
-  db.close();
+  FOREACH_MOD(I_OnSaveDatabases, OnSaveDatabases());
 }
 
 /* butt-plug?

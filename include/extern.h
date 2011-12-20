@@ -126,7 +126,7 @@ E void QuitUser(Network*, User*);
 E void Fork();
 E void sigact(int);
 E void SaveDatabases();
-E void WriteDB(const Flux::string&);
+// E void WriteDB(const Flux::string&);
 E void InitSignals();
 E void HandleSegfault(module*);
 E void restart(const Flux::string&);
