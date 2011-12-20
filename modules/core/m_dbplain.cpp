@@ -75,6 +75,7 @@ public:
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
     Implementation i[] = { I_OnDatabasesWrite, I_OnDatabasesRead, I_OnModuleLoad, I_OnSaveDatabases, I_OnForceDatabasesRead };
+    ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
   }
   void OnDatabasesWrite(void (*Write)(const char*, ...))
   {
@@ -82,9 +83,9 @@ public:
     {
       Network *n = it.second;
       Write("N %s %s %s", n->name.c_str(), n->hostname.c_str(), n->port.c_str());
-      for(auto it : n->ChanMap) // Save Channels in those networks
+      for(auto cit : n->ChanMap) // Save Channels in those networks
       {
-	Channel *c = it.second;
+	Channel *c = cit.second;
 	Write("NC %s %s", n->name.c_str(), c->name.c_str());
       }
     }
