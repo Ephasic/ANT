@@ -63,8 +63,8 @@ bool Network::Connect()
 {
   this->disconnecting = false;
   FOREACH_MOD(I_OnPreConnect, OnPreConnect(this));
-  new NetworkSocket(this);
-  this->s->Connect(ForwardResolution(this->hostname), this->port);
+  if(!this->s)
+    new NetworkSocket(this);
   return true;
 }
 
@@ -106,8 +106,11 @@ public:
 
 NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet)
 {
+  if(!tnet)
+    throw CoreException("Network socket created with no network? lolwut?");
   tnet->s = this;
   Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << ForwardResolution(this->net->hostname) << ')';
+  this->Connect(ForwardResolution(tnet->hostname), tnet->port);
 }
 
 NetworkSocket::~NetworkSocket()

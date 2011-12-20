@@ -8,7 +8,7 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   if(!IsValidChannel(nname))
     throw CoreException("An Invalid channel was passed into the Channel constructor :<");
   if(!net)
-    throw CoreException("Channel created with no network!");
+    throw CoreException("Channel created with no network! "+net->name);
 
   this->n = net;
   this->name = nname;

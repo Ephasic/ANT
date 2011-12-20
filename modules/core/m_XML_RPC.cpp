@@ -21,7 +21,7 @@ class xmlrpclistensocket : public ListenSocket
 public:
   xmlrpclistensocket(const Flux::string &bindip, int port, bool ipv6) : ListenSocket(bindip, port, ipv6)
   {
-    Log(LOG_DEBUG) << "XML-RPC: New Listen socket created " << bindip << ':' << port << (ipv6?"(IPv6)":"(IPv4)");
+    Log(LOG_DEBUG) << "[XML-RPC] New Listen socket created " << bindip << ':' << port << (ipv6?"(IPv6)":"(IPv4)");
     listen_sockets.push_back(this);
   }
   ~xmlrpclistensocket()
@@ -55,10 +55,10 @@ public:
     this->Write(page);
     return true;
     }else if(message.search_ci("<message>") || this->in_query){ //This is a commit
-      Log(LOG_DEBUG) << "XML-RPC: " << message;
+      Log(LOG_DEBUG) << "[XML-RPC] " << message;
       this->RawCommitXML += message.strip();
     }else if(message.search_ci("</message>")){
-      Log(LOG_DEBUG) << "XML-RPC: Processing Message";
+      Log(LOG_DEBUG) << "[XML-RPC] Processing Message";
       this->HandleMessage();
     }
     return true;
@@ -72,7 +72,7 @@ ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
   xmlrpcclient *socket = new xmlrpcclient(this, fd, addr);
   
   if(socket->IsDead())
-    Log() << "XML-RPC: Found dead socket " << fd << " from " << addr.addr();
+    Log() << "[XML-RPC] Found dead socket " << fd << " from " << addr.addr();
   
   return socket;
 }
@@ -174,7 +174,7 @@ public:
   
   void OnCommit(CommitMessage &msg)
   {
-    Log(LOG_TERMINAL) << "XML-RPC: Fun stuff!";
+    Log(LOG_TERMINAL) << "[XML-RPC] Fun stuff!";
   }
 };
 

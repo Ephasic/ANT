@@ -30,11 +30,11 @@ static void Connect()
       throw SocketException("No Server Specified.");
     if(Config->Port.empty())
       throw SocketException("No Port Specified.");
-      if(!FluxNet)
-	FluxNet = new Network("northstar.flux-net.net", 6667, "Flux-Net");
+//       if(!FluxNet)
+// 	FluxNet = new Network("northstar.flux-net.net", 6667, "Flux-Net");
 //       Network *FreeNode = new Network("irc.freenode.net", 6667, "FreeNode");
 //       FreeNode->Connect();
-      FluxNet->Connect();
+//       FluxNet->Connect();
   }catch(const SocketException &e)
   {
     Log(LOG_DEBUG) << "SocketException: " << e.GetReason();
@@ -58,10 +58,10 @@ int main (int argcx, char** argvx, char *envp[])
   try
   {
     startup(argcx, argvx, envp);
-    SocketStart:
+//     SocketStart:
     Connect(); // Connect to our 1st network
-    if(++startcount >= 3) throw CoreException("Could not start master socket!");
-    if(!FluxNet) goto SocketStart;
+//     if(++startcount >= 3) throw CoreException("Could not start master socket!");
+//     if(!FluxNet) goto SocketStart;
     time_t last_check = time(NULL);
 
     new DBSave(); //Start the Database Save timer.
@@ -85,6 +85,7 @@ int main (int argcx, char** argvx, char *envp[])
       /***********************************/
     } // while loop ends here
     FOREACH_MOD(I_OnShutdown, OnShutdown());
+    SaveDatabases();
     SocketEngine::Shutdown();
     ModuleHandler::UnloadAll();
     ModuleHandler::SanitizeRuntime();
