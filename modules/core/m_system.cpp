@@ -276,6 +276,7 @@ public:
 	Channel *c = new Channel(n, tok);
 	c->SendJoin();
       }
+      JoinChansInBuffer(n);
     }
     if((i == 433)){
       Config->BotNick.push_back(Flux::RandomNickString(5));

@@ -1,21 +1,25 @@
 /* All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html) */
 #include <channel.h>
 
+std::map<Network*, Channel*> JoinBuffer;
 Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   if(nname.empty())
     throw CoreException("I don't like empty channel names in my channel constructor >:d");
   if(!IsValidChannel(nname))
     throw CoreException("An Invalid channel was passed into the Channel constructor :<");
-  if(!n)
+  if(!net)
     throw CoreException("Channel created with no network!");
 
   this->n = net;
   this->name = nname;
   this->creation_time = ts;
   this->topic_time = 0;
-  this->SendWho();
+  if(this->n->s && this->n->s->IsConnected())
+    this->SendJoin();
+  else
+    JoinBuffer[net] = this;
   this->n->ChanMap[this->name] = this;
-  Log(LOG_DEBUG) << "Created new channel: " << nname;
+  Log(LOG_DEBUG) << "Created new channel '" << nname << "' on " << net->name;
 }
 Channel::~Channel()
 {
@@ -25,7 +29,7 @@ Channel::~Channel()
 }
 User *Channel::finduser(const Flux::string &usr)
 {
-  Flux::insensitive_map<User*>::iterator it1 = UserNickList.find(usr);
+  auto it1 = UserNickList.find(usr);
   User *u = it1->second;
   if(!u)
     return NULL;
@@ -34,7 +38,7 @@ User *Channel::finduser(const Flux::string &usr)
     return it->first;
   return NULL;
 }
-void Channel::SendJoin(){ this->n->ircproto->join(this->name); }
+void Channel::SendJoin(){ this->n->ircproto->join(this->name); this->SendWho(); }
 void Channel::SendPart(){ this->n->ircproto->part(this->name); }
 void Channel::AddUser(User *u) { if(u) this->UserList[u] = this; }
 void Channel::DelUser(User *u)
@@ -164,6 +168,17 @@ void QuitUser(Network *n, User *u)
 	if(var1.first == u)
 	  var1.second->DelUser(u);
     delete u;
+}
+void JoinChansInBuffer(Network *n)
+{
+  for(auto it : JoinBuffer)
+  {
+    if(it.first == n)
+    {
+      it.second->SendJoin();
+      JoinBuffer.erase(it.first);
+    }
+  }
 }
 // void ListChans(CommandSource &source){
 //   Flux::string channels;

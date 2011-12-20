@@ -4,13 +4,17 @@ Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
 Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n)
 {
-  if(host.empty() || p.empty() || n.empty())
+  if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");
-  
+
+  if(n.empty()) //If we didnt specifiy the network name, use the hostname.
+    this->name = host;
+  else
+    this->name = n;
   this->hostname = host;
-  this->name = n;
   this->port = p;
-  Networks[n] = this;
+  this->s = NULL;
+  Networks[this->name] = this;
   NetworkHosts[host] = this;
   Log(LOG_DEBUG) << "New network created: " << n << " " << host << ':' << p;
 }
@@ -26,9 +30,11 @@ bool Network::JoinChannel(const Flux::string &chan)
 {
   Channel *c;
   if(IsValidChannel(chan)){
-    if(!(c = findchannel(this, chan)))
+    c = findchannel(this, chan);
+    if(!c)
       c = new Channel(this, chan);
-    c->SendJoin();
+    else
+      c->SendJoin();
     return true;
   }
   return false;

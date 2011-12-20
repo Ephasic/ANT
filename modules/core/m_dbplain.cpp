@@ -101,7 +101,8 @@ public:
     Flux::string key = params[0];
     if(key.equals_ci("N"))
     {
-      new Network(params[1], params[2], params[3]);
+      Network *n = new Network(params[2], params[3], params[1]);
+      n->Connect();
     }
     if(key.equals_ci("NC"))
     {
