@@ -86,23 +86,19 @@ Network *FindNetworkByHost(const Flux::string &name)
 /**********************************************************/
 /****************** Socket Engine *************************/
 /**********************************************************/
-class ReconnectTimer : public Timer
+
+ReconnectTimer::ReconnectTimer(int wait, Network *net) : Timer(wait), n(net) {}
+void ReconnectTimer::Tick(time_t)
 {
-  Network *n;
-public:
-  ReconnectTimer(int wait, Network *net) : Timer(wait), n(net) { }
-  void Tick(time_t)
+  try
   {
-    try
-    {
-      n->Connect();
-    }
-    catch (const SocketException &e)
-    {
-      Log() << "Connection to " << n->name << " [" << n->hostname << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << this->GetSecs() << " seconds.";
-    }
+    n->Connect();
   }
-};
+  catch (const SocketException &e)
+  {
+    Log() << "Connection to " << n->name << " [" << n->hostname << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << this->GetSecs() << " seconds.";
+  }
+}
 
 NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet)
 {
@@ -111,6 +107,7 @@ NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), Bu
   tnet->s = this;
   Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << ForwardResolution(this->net->hostname) << ')';
   this->Connect(ForwardResolution(tnet->hostname), tnet->port);
+  SocketEngine::Process();
 }
 
 NetworkSocket::~NetworkSocket()

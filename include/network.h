@@ -2,6 +2,7 @@
 #define _NETWORK_H_
 #include "module.h"
 #include "bot.h"
+#include "timers.h"
 #include "includes.h"
 
 class NetworkSocket;
@@ -46,5 +47,12 @@ public:
   bool Connect();
 };
 
+class ReconnectTimer : public Timer
+{
+  Network *n;
+public:
+  ReconnectTimer(int, Network*);
+  void Tick(time_t);
+};
 // NetworkSocket is in socket.h :/
 #endif

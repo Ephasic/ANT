@@ -31,10 +31,10 @@ static void Connect()
     if(Config->Port.empty())
       throw SocketException("No Port Specified.");
 //       if(!FluxNet)
-	FluxNet = new Network("northstar.flux-net.net", 6667, "Flux-Net");
+// 	FluxNet = new Network("northstar.flux-net.net", 6667, "Flux-Net");
 //       Network *FreeNode = new Network("irc.freenode.net", 6667, "FreeNode");
 //       FreeNode->Connect();
-      FluxNet->Connect();
+//       FluxNet->Connect();
   }catch(const SocketException &e)
   {
     Log(LOG_DEBUG) << "SocketException: " << e.GetReason();

@@ -95,12 +95,12 @@ void SocketEngine::Process()
     {
       Socket *s = it->second;
       ++it;
-      
+      Log(LOG_TERMINAL) << "Preprocessing socket " << s->GetFD(); 
       bool has_read = FD_ISSET(s->GetFD(), &rfdset), has_write = FD_ISSET(s->GetFD(), &wfdset), has_error = FD_ISSET(s->GetFD(), &efdset);
 
       if (has_read || has_write || has_error)
 	++processed;
-
+      Log(LOG_TERMINAL) << "Processing socket " << s->GetFD();
       if (has_error)
       {
 	s->ProcessError();

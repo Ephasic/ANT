@@ -45,6 +45,7 @@ class TextFile;
 class XMLFile;
 class Bot;
 class Network;
+class ReconnectTimer;
 struct CommitMessage;
 struct CommandSource;
 

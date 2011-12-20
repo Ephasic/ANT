@@ -66,7 +66,6 @@ void Read(module *m = NULL)
   }
   db.close();
 }
-
 class dbplain : public module
 {
 public:
@@ -102,12 +101,11 @@ public:
     Flux::string key = params[0];
     if(key.equals_ci("N"))
     {
-//       Network *n = FindNetwork(params[1]);
-//       if(!n)
-//Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n)
-	Network *n = new Network(params[1], params[2], params[3]);
-      n->Connect(); //Connect to networks.
-      SocketEngine::Process();
+      Network *n = FindNetwork(params[1]);
+      if(!n)
+	n = new Network(params[1], params[2], params[3]);
+      if(!n->s)
+	new ReconnectTimer(1, n); //Connect to networks.
     }
     if(key.equals_ci("NC"))
     {
