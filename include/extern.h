@@ -116,6 +116,7 @@ E bool protocoldebug, IsOper, dev, nofork, quitting, started, nocolor, istempnic
 E std::vector<Flux::string> StringVector(const Flux::string&, char);
 E Flux::insensitive_map<module*> Modules;
 E Flux::insensitive_map<User*> UserNickList;
+E std::map<Network*, Channel*> JoinBuffer;
 E Flux::insensitive_map<Network*> Networks;
 E Flux::map<Network*> NetworkHosts;
 

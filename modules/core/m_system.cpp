@@ -301,7 +301,7 @@ public:
   {
      if(kickee && kickee->nick.equals_ci(Config->BotNick))
      {
-       Log(u) << "kicked me from " << c->name << '(' << reason << ')';
+       Log(u) << "kicked me from " << c->name  << " in network " << c->n->name << ' ' << '(' << reason << ')';
 	c->SendJoin(); 
      }
   }

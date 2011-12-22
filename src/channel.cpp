@@ -14,9 +14,7 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   this->name = nname;
   this->creation_time = ts;
   this->topic_time = 0;
-  if(this->n->s && this->n->s->IsConnected())
-    this->SendJoin();
-  else
+  if(!this->n->s || !this->n->s->IsConnected())
     JoinBuffer[net] = this;
   this->n->ChanMap[this->name] = this;
   Log(LOG_DEBUG) << "Created new channel '" << nname << "' on " << net->name;
@@ -175,6 +173,7 @@ void JoinChansInBuffer(Network *n)
   {
     if(it.first == n)
     {
+      Log(LOG_TERMINAL) << "CHANNEL: " << it.second->name << " on " << it.first->name;
       it.second->SendJoin();
       JoinBuffer.erase(it.first);
     }

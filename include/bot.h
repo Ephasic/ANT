@@ -19,6 +19,16 @@ public:
   Flux::string realname;
   /* Announce a commit that has been made */
   void AnnounceCommit(CommitMessage&);
+  /* Join a channel */
+  void Join(Channel*);
+  /* Part a channel */
+  void Part(Channel*);
+  /* Quit the IRC network */
+  void Quit();
+  /* Change a nickname */
+  void SetNick(const Flux::string&);
+  /* Send the user credentials for connecting */
+  void SendUser();
   
 };
 

@@ -88,12 +88,12 @@ public:
 	Channel *c = cit.second;
 	Write("NC %s %s", n->name.c_str(), c->name.c_str());
       }
-    }
-//     for(auto it : Bots)
-//     {
-//       Bot *b = it.second;
-//       Write("B %s %s %s", b->nick.c_str(), b->ident.c_str(), b->realname.c_str());
-//     }
+      for(auto it : n->bots)
+      {
+	Bot *b = it.second; //We dont put realnames in the database as its too hard to catch what the full name is
+	Write("NB %s %s %s %s", n->name.c_str(), b->nick.c_str(), b->ident.c_str();
+      }
+    } 
   }
 
   void OnDatabasesRead(const Flux::vector &params)
