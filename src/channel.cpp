@@ -1,6 +1,6 @@
 /* All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html) */
-#include <channel.h>
-
+#include "channel.h"
+#include "bot.h"
 std::map<Network*, Channel*> JoinBuffer;
 Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   if(nname.empty())
@@ -21,10 +21,12 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
 }
 Channel::~Channel()
 {
-  this->SendPart();
+  for(auto it : this->bots)
+    it.second->Part(this);
   Log(LOG_DEBUG) << "Deleted channel " << this->name;
   this->n->ChanMap.erase(this->name);
 }
+
 User *Channel::finduser(const Flux::string &usr)
 {
   auto it1 = UserNickList.find(usr);
@@ -37,7 +39,7 @@ User *Channel::finduser(const Flux::string &usr)
   return NULL;
 }
 void Channel::SendJoin(){ this->n->ircproto->join(this->name); this->SendWho(); }
-void Channel::SendPart(){ this->n->ircproto->part(this->name); }
+// void Channel::SendPart(){ this->n->ircproto->part(this->name); }
 void Channel::AddUser(User *u) { if(u) this->UserList[u] = this; }
 void Channel::DelUser(User *u)
 {
@@ -45,6 +47,7 @@ void Channel::DelUser(User *u)
   if(it != UserList.end())
     UserList.erase(it);
 }
+void Channel::SendPart(const Flux::string &reason) { this->n->ircproto->part(this->name, reason); }
 void Channel::SendPart(const char *fmt, ...){
   if(fmt){
     char buffer[BUFSIZE] = "";
@@ -55,73 +58,8 @@ void Channel::SendPart(const char *fmt, ...){
     va_end(args);
   }
 }
-void Channel::SendPart(const Flux::string &reason){ this->n->ircproto->part(this->name, reason); }
-void Channel::kick(User *u, const Flux::string &reason){ u->kick(this->name, reason); }
-void Channel::kick(User *u, const char *fmt, ...){
-  if(fmt){
-    char buffer[BUFSIZE] = "";
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    this->kick(u, Flux::string(buffer));
-    va_end(args);
-  }
-}
-void Channel::kick(const Flux::string &u, const char *fmt, ...){
-  if(fmt){
-    char buffer[BUFSIZE] = "";
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    this->kick(u, Flux::string(buffer));
-    va_end(args);
-  }
-}
-void Channel::kick(const Flux::string &u, const Flux::string &reason){ this->n->ircproto->kick(this->name, u, reason); }
-void Channel::SetMode(const Flux::string &mode){
- if(mode[0] == '+'){
-   this->n->ircproto->mode(this->name, mode);
- }else{
-   mode == '+' + mode;
-   this->n->ircproto->mode(this->name, mode);
- }
-}
-void Channel::SetMode(User *u, const Flux::string &mode){
- if(mode[0] == '+'){
-   this->n->ircproto->mode(this->name, mode, u->nick);
- }else{
-   mode == '+' + mode;
-   this->n->ircproto->mode(this->name, mode, u->nick);
- }
-}
-void Channel::RemoveMode(const Flux::string &mode){
-  if(mode[0] == '-'){
-    this->n->ircproto->mode(this->name, mode);
-  }else{
-    
-    mode == '-' + mode;
-    this->n->ircproto->mode(this->name, mode);
-  }
-}
-void Channel::RemoveMode(User *u, const Flux::string &mode){
-  if(mode[0] == '-'){
-    this->n->ircproto->mode(this->name, mode, u->nick);
-  }else{
-    mode == '-' + mode;
-    this->n->ircproto->mode(this->name, mode, u->nick);
-  }
-}
-void Channel::ChangeTopic(const char *fmt, ...){
-  if(fmt){
-    char buffer[BUFSIZE] = "";
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    this->ChangeTopic(Flux::string(buffer));
-    va_end(args);
-  }
-}
-void Channel::ChangeTopic(const Flux::string &topicstr){ this->n->ircproto->topic(this->name, topicstr); }
+
+void Channel::SendMessage(const Flux::string &message){ this->n->ircproto->privmsg(this->name, message); }
 void Channel::SendMessage(const char *fmt, ...){
   if(fmt){
     char buffer[BUFSIZE] = "";
@@ -132,7 +70,8 @@ void Channel::SendMessage(const char *fmt, ...){
     va_end(args);
   }
 }
-void Channel::SendMessage(const Flux::string &message){ this->n->ircproto->privmsg(this->name, message); }
+
+void Channel::SendAction(const Flux::string &message) { this->n->ircproto->action(this->name, message); }
 void Channel::SendAction(const char *fmt, ...){
   if(fmt){
     char buffer[BUFSIZE] = "";
@@ -143,7 +82,8 @@ void Channel::SendAction(const char *fmt, ...){
     va_end(args);
   }
 }
-void Channel::SendAction(const Flux::string &message) { this->n->ircproto->action(this->name, message); }
+
+void Channel::SendNotice(const Flux::string &message){ this->n->ircproto->notice(this->name, message); }
 void Channel::SendNotice(const char *fmt, ...){
   if(fmt){
     char buffer[BUFSIZE] = "";
@@ -154,7 +94,7 @@ void Channel::SendNotice(const char *fmt, ...){
     va_end(args);
   }
 }
-void Channel::SendNotice(const Flux::string &message){ this->n->ircproto->notice(this->name, message); }
+
 void Channel::SendWho(){ this->n->ircproto->who(this->name); }
 /****************************************************************/
 void QuitUser(Network *n, User *u)
@@ -179,14 +119,7 @@ void JoinChansInBuffer(Network *n)
     }
   }
 }
-// void ListChans(CommandSource &source){
-//   Flux::string channels;
-//   for(auto var : ChanMap)
-//     channels += var.second->name+' ';
-//   channels.trim();
-//   source.Reply("Channels: %s\n", channels.c_str());
-// }
-Channel *findchannel(Network *n, const Flux::string &channel){
+Channel *FindChannel(Network *n, const Flux::string &channel){
   auto it = n->ChanMap.find(channel);
   if(it != n->ChanMap.end())
     return it->second;

@@ -1,12 +1,13 @@
 #ifndef _BOT_H
 #define _BOT_H
-#include "module.h"
+#include "user.h"
 #include "network.h"
 
-class CoreExport Bot
+class CoreExport Bot : public User
 {
 public:
-  Bot(Network *net, const Flux::string &n, const Flux::string &i, const Flux::string &real);
+  Bot(Network *net, const Flux::string &n, const Flux::string &i, const Flux::string &real = "ANT Bot (http://ANT.Flux-Net.net/)");
+  ~Bot();
   /* The network we're on*/
   Network *network;
   /* List of chans the bot is in */
@@ -21,10 +22,11 @@ public:
   void AnnounceCommit(CommitMessage&);
   /* Join a channel */
   void Join(Channel*);
+  void Join(const Flux::string&);
   /* Part a channel */
-  void Part(Channel*);
+  void Part(Channel*, const Flux::string &msg = "");
   /* Quit the IRC network */
-  void Quit();
+  void Quit(const Flux::string &msg = "");
   /* Change a nickname */
   void SetNick(const Flux::string&);
   /* Send the user credentials for connecting */

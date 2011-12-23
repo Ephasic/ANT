@@ -44,15 +44,11 @@ public:
     pingtimer.pings = 0;
     n->s->Write("PONG :%s\n", params[0].c_str());
   }
-  void OnConnectionError(const Flux::string &buffer)
-  {
-   throw CoreException(buffer.c_str());
-  }
   void OnNumeric(int i, Network *n)
   {
    if((i == 451)){
-     n->ircproto->user(Config->Ident, Config->Realname);
-     n->ircproto->nick(Config->BotNick);
+     static_cast<void>(0);
+//      n->b->SendUser();
    }
   }
 };

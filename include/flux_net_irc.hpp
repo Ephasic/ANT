@@ -154,7 +154,6 @@ void Rehash(){
     ReadConfig();
   }catch(const ConfigException &ex){
     Log() << "Configuration Exception Caught: " << ex.GetReason();
-    FluxNet->ircproto->notice(Config->Owner, "Config Exception Caught: %s", ex.GetReason());
   }
 }
 
@@ -207,14 +206,14 @@ void startup(int argc, char** argv, char *envp[]) {
       if((arg.equals_ci("--developer")) ^ (arg.equals_ci("--dev")) ^ (arg == "-d"))
       {
 	dev = nofork = true;
-	Log(LOG_DEBUG) << Config->BotNick << " is started in Developer mode. (" << arg << ")";
+	Log(LOG_DEBUG) << "ANT Commit System is started in Developer mode. (" << arg << ")";
       }
       else if ((arg.equals_ci("--nofork")) ^ (arg == "-n")){
 	nofork = true;
-	Log(LOG_DEBUG) << Config->BotNick << " is started With No Forking enabled. (" << arg << ")";
+	Log(LOG_DEBUG) << "ANT Commit System is started With No Forking enabled. (" << arg << ")";
       }
       else if ((arg.equals_ci("--help")) ^ (arg == "-h")){
-	Log(LOG_TERMINAL) << "ANT Internet Relay Chat Commit Bot v" << VERSION;
+	Log(LOG_TERMINAL) << "ANT Internet Relay Chat Commit Bot system v" << VERSION;
 	Log(LOG_TERMINAL) << "Usage: " << dir << " [options]";
 	Log(LOG_TERMINAL) << "-h, --help";
 	Log(LOG_TERMINAL) << "-d, --developer";
@@ -241,11 +240,11 @@ void startup(int argc, char** argv, char *envp[]) {
       }
       else if((arg.equals_ci("--protocoldebug")) ^ (arg == "-p")){
 	protocoldebug = true;
-	Log(LOG_RAWIO) << Config->BotNick << " is started in Protocol Debug mode. (" << arg << ")";
+	Log(LOG_RAWIO) << "ANT Commit System is started in Protocol Debug mode. (" << arg << ")";
       }
       else if((arg.equals_ci("--nocolor")) ^ (arg == "-c")){
 	nocolor = true;
-	Log() << Config->BotNick << " is started in No Colors mode. (" << arg << ")\033[0m"; //reset terminal colors
+	Log() << "ANT Commit System is started in No Colors mode. (" << arg << ")\033[0m"; //reset terminal colors
       }
       else
       {

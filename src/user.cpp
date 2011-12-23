@@ -27,14 +27,6 @@ User::~User(){
   UserNickList.erase(this->nick);
 }
 
-void User::kick(const Flux::string &channel, const Flux::string &reason)
-{
-  this->n->ircproto->kick(channel, this->nick, reason);
-}
-void User::kick(Channel *ch, const Flux::string &reason){
-  this->n->ircproto->kick(ch->name, this->nick, reason);
-}
-
 void User::SendWho(){ this->n->ircproto->who(this->nick); }
 
 void User::SendMessage(const char *fmt, ...){
@@ -56,9 +48,7 @@ void User::SendPrivmsg(const char *fmt, ...){
 }
 
 bool User::IsOwner(){
- if(this->nick.equals_ci(Config->Owner))
-   return true;
- return false;
+   return true; //FIXME: removve this.
 }
 
 void User::SetNewNick(const Flux::string &newnick)
@@ -79,9 +69,9 @@ void User::DelChan(Channel *c)
     ChannelList.erase(it);
 }
 
-Channel *User::findchannel(Network *net, const Flux::string &name)
+Channel *User::findchannel(const Flux::string &name)
 {
-  auto it1 = net->ChanMap.find(name);
+  auto it1 = this->n->ChanMap.find(name);
   Channel *c = it1->second;
   if(!c)
     return NULL;
@@ -94,17 +84,9 @@ Channel *User::findchannel(Network *net, const Flux::string &name)
 void User::SendMessage(const Flux::string &message){ this->n->ircproto->notice(this->nick, message); }
 void User::SendPrivmsg(const Flux::string &message){ this->n->ircproto->privmsg(this->nick, message); }
 
-User *finduser(const Flux::string &fnick){
+User *FindUser(const Flux::string &fnick){
   auto it = UserNickList.find(fnick);
   if(it != UserNickList.end())
     return it->second;
   return NULL;
-}
-
-void ListUsers(CommandSource &source){
-  Flux::string users;
-  for(auto var : UserNickList)
-    users += var.second->nick+' ';
-  users.trim();
-  source.Reply("Users: %s\n", users.c_str());
 }

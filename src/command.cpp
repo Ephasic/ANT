@@ -109,7 +109,7 @@ void Command::SendSyntax(CommandSource &source)
 /** \overload void Command::SendSyntax(CommandSource &source, const Flux::string &syn) */
 void Command::SendSyntax(CommandSource &source, const Flux::string &syn){
   source.Reply("Syntax: \2%s %s\2", this->name.c_str(), syn.c_str());
-  source.Reply("\002/msg %s HELP %s\002 for more information.", Config->BotNick.c_str(), this->name.c_str());
+  source.Reply("\002/msg %s HELP %s\002 for more information.", "FIXME: this.", this->name.c_str());
 }
 /**
  * \brief Returns a flux::string with the commands description
@@ -139,5 +139,5 @@ void Command::OnSyntaxError(CommandSource &source, const Flux::string &subcomman
  this->SendSyntax(source);
  auto it = ChanCommandMap.find(this->name);
  if((it->second != NULL)){}else
-    source.Reply("\002/msg %s HELP %s\002 for more information.", Config->BotNick.c_str(), source.command.c_str());
+    source.Reply("\002/msg %s HELP %s\002 for more information.", "FIXME: this.", source.command.c_str());
 }

@@ -53,10 +53,8 @@ public:
      return;
     }
     for(unsigned i = 0, end = newnick.length(); i < end; i++)
-      if(!isvalidnick(newnick[i])){
+      if(!isvalidnick(newnick[i]))
 	source.Reply("\2%s\2 is an invalid nickname.");
-	Config->BotNick = newnick;
-      }
       source.n->ircproto->nick(newnick);
     Log(u, this) << "to change the bots nickname to " << newnick;
   }
@@ -101,50 +99,6 @@ public:
   }
 };
 
-class CommandKick : public Command
-{
-public:
-  CommandKick():Command("KICK", 1, 3)
-  {
-    this->SetDesc("Kick a user from the channel");
-    this->SetSyntax("channel \37nick\15");
-  }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
-  {
-    User *u = source.u;
-    if(u->IsOwner()){
-      Flux::string kickchan = params[1];
-      Flux::string kickee = params[2];
-      if(kickee.empty() || kickchan.empty()){
-	this->SendSyntax(source);
-	return;
-      }
-      if(!IsValidChannel(kickchan)){
-	source.Reply(CHANNEL_X_INVALID, kickchan.c_str()); 
-	return;
-      }
-      Channel *c = findchannel(source.n, kickchan);
-      if(!c){
-	source.Reply("I am not in channel \2%s\2", kickchan.c_str());
-	return;
-      }
-      c->kick(kickee, "Kick from %s", u->nick.c_str());
-    }else{
-      source.Reply(ACCESS_DENIED);
-    }
-  }
-  bool OnHelp(CommandSource &source, const Flux::string &nill)
-  {
-    this->SendSyntax(source);
-    source.Reply(" ");
-    source.Reply("This command kicks a user from the channel\n"
-		 "if the bot is an op higher than the user\n"
-		 "to be kicked\n"
-		 "Note: You must be a bot owner to use this command");
-    return true;
-  }
-};
-
 class CommandQuit : public Command
 {
 public:
@@ -158,7 +112,7 @@ public:
     User *u = source.u;
     Flux::string pass = params[1];
     
-    if(pass == password || pass == Config->UserPass){
+    if(pass == password){
       source.Reply("Quitting..");
       Log(u) << "quit the bot with password: \"" << password << "\"";
       source.n->ircproto->quit("Requested From \2%s\17. Pass: \00320%s\017", u->nick.c_str(), password.c_str());
@@ -242,7 +196,6 @@ public:
 
 class m_system : public module
 {
-  CommandKick cmdkick;
   CommandRehash cmdrehash;
   CommandQuit cmdquit;
   CommandRestart cmdrestart;
@@ -253,13 +206,12 @@ public:
   m_system(const Flux::string &Name):module(Name)
   {
     this->AddCommand(&cmdrehash);
-    this->AddCommand(&cmdkick);
     this->AddCommand(&cmdquit);
     this->AddCommand(&cmdrestart);
     this->AddCommand(&nick);
     this->AddCommand(&pid);
     this->AddCommand(&pass);
-    Implementation i[] = { I_OnNumeric, I_OnJoin, I_OnKick, I_OnNotice, I_OnChannelOp };
+    Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
@@ -278,66 +230,20 @@ public:
       }
       JoinChansInBuffer(n);
     }
-    if((i == 433)){
-      Config->BotNick.push_back(Flux::RandomNickString(5));
-      n->ircproto->nick(Config->BotNick);
-      istempnick = true;
-    }
     if((i == 376))
     {
       Log(LOG_TERMINAL) << "\033[22;31mStarted with PID \033[22;32m" << getpid() << "\033[22;36m";
       Log(LOG_TERMINAL) << "\033[22;34mSession Password: \033[01;32m" << password << "\033[22;36m";
       started = true;
-      /* Identify to the networks services */
-//       if((!Config->ServicesAccount.empty() || !Config->ServicesPass.empty()) && Config->IdentOnConn){
-// 	Flux::string Sendns = Config->ServicesSendString.replace_all_ci("%a", Config->ServicesAccount);
-// 	Sendns = Sendns.replace_all_ci("%p", Config->ServicesPass);
-// 	n->ircproto->privmsg(Config->ServicesService, Sendns);
-// 	Log() << "Identified to " << Config->ServicesService << " with account \"" << Config->ServicesAccount << "\"";
-//       }
     }
   }
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
   {
-     if(kickee && kickee->nick.equals_ci(Config->BotNick))
-     {
-       Log(u) << "kicked me from " << c->name  << " in network " << c->n->name << ' ' << '(' << reason << ')';
+//      if(kickee && kickee->nick.equals_ci(Config->BotNick))
+//      {
+       Log(u) << "kicked " << kickee->nick << " from " << c->name  << " in network " << c->n->name << ' ' << '(' << reason << ')';
 	c->SendJoin(); 
-     }
-  }
-  void OnNotice(User *u, const std::vector<Flux::string> &params)
-  {
-    Flux::string msg;
-    for(unsigned i=0; i < params.size(); ++i)
-      msg += params[i]+' ';
-      
-    msg.trim(); // Auto-Identify
-    if(msg.search(Config->AutoIdentString)){
-      if((!Config->ServicesPass.empty() || !Config->ServicesAccount.empty()) && u->nick == Config->ServicesService && Config->IdentOnConn){
-	Flux::string Sendns = Config->ServicesSendString.replace_all_ci("%a", Config->ServicesAccount);
-	Sendns = Sendns.replace_all_ci("%p", Config->ServicesPass);
-	u->SendPrivmsg(Sendns);
-	Log() << "Identified to " << u->nick << " with account \"" << Config->ServicesAccount << "\"";
-      }
-    }
-  }
-  void OnNickChange(User *u, const Flux::string &newnick)
-  {
-    IsoHost *Host = new IsoHost(u->fullhost);
-    if(Host->nick == Config->BotNick)
-      Config->BotNick = Host->nick;
-    if(newnick == Config->Owner)
-      Config->Owner = Host->nick;
-    delete Host;
-   /*if(command == "NICK"){
-   if(u && u->nick == Config->BotNick){
-       nick = params[0];
-       delete u; //we shouldnt be a user in the 1st place (:
-  }else if(u->IsOwner())
-    owner_nick = params[0];
-  else
-    delete u; //we delete the user because the above if statement makes a new one for the nick change
-   }*/
+//      }
   }
 };
 

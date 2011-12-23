@@ -1,10 +1,11 @@
 #ifndef _NETWORK_H_
 #define _NETWORK_H_
 #include "module.h"
-#include "bot.h"
+// #include "bot.h"
 #include "timers.h"
-#include "includes.h"
+// #include "includes.h"
 
+class Bot;
 class NetworkSocket;
 struct CommitMessage
 {
@@ -33,6 +34,7 @@ public:
   Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
   ~Network();
   NetworkSocket *s;
+  Bot *b;
   IRCProto *ircproto;
   Flux::insensitive_map<Bot*> bots;
   Flux::insensitive_map<User*> UserNickList;

@@ -29,7 +29,7 @@ Network::~Network()
 bool Network::JoinChannel(const Flux::string &chan)
 {
   if(IsValidChannel(chan)){
-    Channel *c = findchannel(this, chan);
+    Channel *c = FindChannel(this, chan);
     if(!c)
       c = new Channel(this, chan);
     if(!this->s || !this->s->IsConnected())

@@ -19,27 +19,7 @@
  */
 #include "flux_net_irc.hpp"
 
-int startcount, loopcount;
-static void Connect()
-{
-  if(quitting)
-    return;
-  try{
-    ++startcount;
-    if(Config->Server.empty())
-      throw SocketException("No Server Specified.");
-    if(Config->Port.empty())
-      throw SocketException("No Port Specified.");
-//       if(!FluxNet)
-// 	FluxNet = new Network("northstar.flux-net.net", 6667, "Flux-Net");
-//       Network *FreeNode = new Network("irc.freenode.net", 6667, "FreeNode");
-//       FreeNode->Connect();
-//       FluxNet->Connect();
-  }catch(const SocketException &e)
-  {
-    Log(LOG_DEBUG) << "SocketException: " << e.GetReason();
-  }
-}
+int loopcount;
 
 class DBSave : public Timer
 {
@@ -54,14 +34,9 @@ public:
 int main (int argcx, char** argvx, char *envp[])
 {
   SET_SEGV_LOCATION();
-  startcount = 0;
   try
   {
     startup(argcx, argvx, envp);
-//     SocketStart:
-    Connect(); // Connect to our 1st network
-//     if(++startcount >= 3) throw CoreException("Could not start master socket!");
-//     if(!FluxNet) goto SocketStart;
     time_t last_check = time(NULL);
 
     new DBSave(); //Start the Database Save timer.

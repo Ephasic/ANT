@@ -209,28 +209,16 @@ void BotConfig::Read(){
   SET_SEGV_LOCATION();
   this->LogFile = this->Parser->Get("Log","Log_File","navn.log");
 
-  this->Owner = this->Parser->Get("Bot","Owner","");
   this->Realname = this->Parser->Get("Connect","Realname",Flux::string("Flux-Net's ANT bot "+value_cast<Flux::string>(VERSION)+" (http://ANT.Flux-Net.net/)"));
   this->Ident = this->Parser->Get("Connect","Ident","Navn");
-  this->BotNick = this->Parser->Get("Connect","Nick","Navn");
   this->Channel = this->Parser->Get("Connect","Channel","#Test");
-  this->Port = this->Parser->Get("Connect","Port","6667");
-  this->Server = this->Parser->Get("Connect", "Server", "");
   this->LogChannel = this->Parser->Get("Modules", "LogChannel","");
   this->PidFile = this->Parser->Get("Bot","PID File","navn.pid");
   this->UserPass = this->Parser->Get("Bot","Password","Navn");
-  this->OperatorAccount = this->Parser->Get("Oper","Oper_Username","");
-  this->OperatorPass = this->Parser->Get("Oper","Oper_Password","");
   this->ModuleDir = Parser->Get("Modules", "ModuleDir", "");
   this->Modules = Parser->Get("Modules", "Modules", "");
   this->SockWait = Parser->GetInteger("Socket","Socket Timeout",5);
   this->RetryWait = Parser->GetInteger("Socket", "Retry Wait", 30);
   this->dbforce = Parser->GetBoolean("Bot", "Force Database Read", false);
-  this->ServicesAccount = this->Parser->Get("Services","Account","");
-  this->ServicesPass = this->Parser->Get("Services","Password","");
-  this->ServicesSendString = this->Parser->Get("Services","Send String","");
-  this->IdentOnConn = this->Parser->GetBoolean("Services","Identify on connect", true);
-  this->ServicesService = this->Parser->Get("Services", "Service", "");
-  this->AutoIdentString = this->Parser->Get("Services", "AutoIdent String", "");
 }
 

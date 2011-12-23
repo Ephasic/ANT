@@ -83,8 +83,8 @@ typedef std::map<Flux::string, Command*, ci::less> CommandMap;
 typedef std::vector<module*> EventsVector; //Gay g++
 
 /*  Class pointer finder definitions */
-E User *finduser(const Flux::string&);
-E Channel *findchannel(Network*, const Flux::string&);
+E User *FindUser(const Flux::string&);
+E Channel *FindChannel(Network*, const Flux::string&);
 E module *FindModule(const Flux::string&);
 E Command *FindCommand(const Flux::string&, CommandType);
 E Network *FindNetwork(const Flux::string&);

@@ -88,10 +88,10 @@ public:
 	Channel *c = cit.second;
 	Write("NC %s %s", n->name.c_str(), c->name.c_str());
       }
-      for(auto it : n->bots)
+      for(auto bit : n->bots)
       {
-	Bot *b = it.second; //We dont put realnames in the database as its too hard to catch what the full name is
-	Write("NB %s %s %s %s", n->name.c_str(), b->nick.c_str(), b->ident.c_str();
+	Bot *b = bit.second; //We dont put realnames in the database as its too hard to catch what the full name is
+	Write("NB %s %s %s %s", n->name.c_str(), b->nick.c_str(), b->ident.c_str());
       }
     } 
   }
@@ -114,6 +114,13 @@ public:
 	Log() << "[db_plain] Unable to find network " << params[1] << " for channel creation";
       else
 	n->JoinChannel(params[2]);
+    }
+    if(key.equals_ci("NB"))
+    {
+      Network *n = FindNetwork(params[1]);
+      if(n){
+	new Bot(n, params[2], params[3], Config->Realname);
+      }
     }
   }
   
