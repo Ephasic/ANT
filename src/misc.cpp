@@ -190,5 +190,58 @@ void SaveDatabases()
   FOREACH_MOD(I_OnSaveDatabases, OnSaveDatabases());
 }
 
+/**
+ * \fn Flux::string duration(const time_t &t)
+ * Expresses in a string the period of time represented by a given amount
+ * of seconds (with days/hours/minutes).
+ * \param seconds time in seconds
+ * \return buffer
+ */
+Flux::string duration(const time_t &t)
+{
+  /* We first calculate everything */
+  time_t days = (t / 86400);
+  time_t hours = (t / 3600) % 24;
+  time_t minutes = (t / 60) % 60;
+  time_t seconds = (t) % 60;
+  
+  if (!days && !hours && !minutes)
+    return value_cast<Flux::string>(seconds) + " " + (seconds != 1 ? "seconds" : "second");
+  else
+  {
+    bool need_comma = false;
+    Flux::string buffer;
+    if (days)
+    {
+      buffer = value_cast<Flux::string>(days) + " " + (days != 1 ? "days" : "day");
+      need_comma = true;
+    }
+    if (hours)
+    {
+      buffer += need_comma ? ", " : "";
+      buffer += value_cast<Flux::string>(hours) + " " + (hours != 1 ? "hours" : "hour");
+      need_comma = true;
+    }
+    if (minutes)
+    {
+      buffer += need_comma ? ", " : "";
+      buffer += value_cast<Flux::string>(minutes) + " " + (minutes != 1 ? "minutes" : "minute");
+    }
+    return buffer;
+  }
+}
+
+Flux::string do_strftime(const time_t &t, bool short_output)
+{
+  tm tm = *localtime(&t);
+  char buf[BUFSIZE];
+  strftime(buf, sizeof(buf), "%b %d %H:%M:%S %Y %Z", &tm);
+  if (short_output)
+    return buf;
+  if (t < time(NULL))
+    return Flux::string(buf) + " " + fsprintf("(%s ago)", duration(time(NULL) - t).c_str());
+  else
+    return Flux::string(buf) + " " + fsprintf("(%s from now)", duration(t - time(NULL)).c_str());
+}
 /* butt-plug?
  * http://www.albinoblacksheep.com/flash/plugs */

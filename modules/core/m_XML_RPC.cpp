@@ -69,6 +69,7 @@ public:
   bool Read(const Flux::string &m)
   {
     Flux::string message = SanitizeXML(m);
+    Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
     if(message.search_ci("USER")) // If the user tries to connect via IRC protocol
       this->Write("ERROR: :Closing link: (unknown@%s) This is not an IRC connection", GetPeerIP(this->GetFD()).c_str());
     else if(message.search_ci("GET") && message.search_ci("HTTP/1."))
@@ -81,11 +82,16 @@ public:
       this->Write("SERVER: ANT Commit System version " + value_cast<Flux::string>(VERSION_FULL));
       this->Write("");
       this->Write(page);
-    }else if(message.search_ci("POST" && message.search_ci("HTTP/1.")) || this->in_query){ //This is a commit
+    }else if((message.search_ci("POST") && message.search_ci("Content-Type: text/xml")) || this->in_query){ //This is a commit
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
       this->RawCommitXML += message.strip();
-    }else if(message.search_ci("</message>")){
+    }else if(message.search_ci("</message>") && this->in_query){
+      this->in_query = false;
       Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
+      this->Write("HTTP/1.1 200 OK");
+      this->Write("Connection: close");
+      this->Write("Date: "+do_strftime(time(NULL)));
+      this->Write("Server: ANT Commit System version "+value_cast<Flux::string>(VERSION_FULL));
       this->HandleMessage();
     }else{
       this->Write("ERROR: Unknown connection from "+GetPeerIP(this->GetFD()));
