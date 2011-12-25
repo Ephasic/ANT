@@ -31,7 +31,6 @@ public:
   void SetNick(const Flux::string&);
   /* Send the user credentials for connecting */
   void SendUser();
-  
 };
 
 #endif

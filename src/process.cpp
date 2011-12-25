@@ -174,6 +174,7 @@ void process(Network *n, const Flux::string &buffer){
   Flux::string nickname = h.nick, uident = h.ident, uhost = h.host, cmd;
   User *u = FindUser(nickname);
   Channel *c = FindChannel(n, receiver);
+  Bot *b =  n->bots.begin()->second;
   Flux::vector params2 = StringVector(message, ' ');
   /***********************************************/
   if(!n)
@@ -242,6 +243,7 @@ void process(Network *n, const Flux::string &buffer){
   /**************************************/
   CommandSource Source;
   Source.u = u; //User class
+  Source.b = b;
   Source.c = c; //Channel class
   Source.n = n; //Network class
   Source.message = message;

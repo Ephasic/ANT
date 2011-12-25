@@ -49,6 +49,14 @@ void Fork()
     Log() << "ANT Commit System Started, PID: " << getpid() << "\033[22;36m";
 }
 
+Flux::string CondenseVector(const Flux::vector &params)
+{
+  Flux::string ret;
+  for(auto it : params)
+    ret += it;
+  return ret;
+}
+
 Flux::string Flux::Sanitize(const Flux::string &string)
 {
  static struct special_chars{

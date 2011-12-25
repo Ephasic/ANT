@@ -635,6 +635,7 @@ ListenSocket::~ListenSocket()
  */
 bool ListenSocket::ProcessRead()
 {
+  Log(LOG_TERMINAL) << "Process Read from ListenSocket";
   try
   {
     this->IO->Accept(this);
@@ -860,6 +861,7 @@ ClientSocket::ClientSocket(ListenSocket *ls, const sockaddrs &addr) : Socket(), 
 
 bool ClientSocket::Process()
 {
+  Log(LOG_TERMINAL) << "Processing Client Socket!";
   try
   {
     if (this->IsAccepted())

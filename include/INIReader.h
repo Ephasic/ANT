@@ -51,6 +51,7 @@ public:
   INIReader *Parser;
   Flux::string LogFile;
   Flux::string Binary_Dir;
+  Flux::string NicknamePrefix;
   Flux::string Realname;
   Flux::string Ident;
   Flux::string Channel;

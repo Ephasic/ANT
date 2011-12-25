@@ -3,7 +3,29 @@
  */
 #include "flux_net_irc.hpp"
 #include "module.h"
-
+// Convert the XML data to something parsable.
+Flux::string SanitizeXML(const Flux::string &str)
+{
+  static struct chars
+  {
+    Flux::string character;
+    Flux::string replace;
+    chars(const Flux::string &c, const Flux::string &r) : character(c), replace(r) { }
+  }
+  special[] = {
+    chars("&amp;", "&"),
+    chars("&quot;", "\""),
+    chars("&lt;", "<"),
+    chars("&gt;", ">"),
+    chars("&#39", "'"),
+    chars("&#xA", "\n"),
+    chars("", "")
+  };
+  Flux::string ret = str;
+  for(int i = 0; special[i].character.empty() == false; ++i)
+    ret = ret.replace_all_cs(special[i].character, special[i].replace);
+  return ret;
+}
 // Simple web page incase a web browser decides to go to the link
 const Flux::string HTTPREQUEST = "<center><h1>ANT Commit system version %s</h1></center>"
 "<center><h4>This is the address for XML-RPC commits</h4>"
@@ -16,12 +38,15 @@ class xmlrpcclient;
 class xmlrpclistensocket;
 std::vector<xmlrpclistensocket*> listen_sockets;
 
+/*****************************************************************/
+/*********************** Listen Socket ***************************/
+/*****************************************************************/
 class xmlrpclistensocket : public ListenSocket
 {
 public:
   xmlrpclistensocket(const Flux::string &bindip, int port, bool ipv6) : ListenSocket(bindip, port, ipv6)
   {
-    Log(LOG_DEBUG) << "[XML-RPC] New Listen socket created " << bindip << ':' << port << (ipv6?"(IPv6)":"(IPv4)");
+    Log(LOG_DEBUG) << "[XML-RPC] New Listen socket created " << bindip << ':' << port << (ipv6?" (IPv6)":" (IPv4)");
     listen_sockets.push_back(this);
   }
   ~xmlrpclistensocket()
@@ -32,34 +57,38 @@ public:
   }
   ClientSocket *OnAccept(int fd, const sockaddrs &addr);
 };
-
+/*****************************************************************/
+/*********************** Client Socket ***************************/
+/*****************************************************************/
 class xmlrpcclient : public ClientSocket, public BufferedSocket
 {
   Flux::string RawCommitXML;
   bool in_query;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket() {}
-  bool Read(const Flux::string &message)
+  bool Read(const Flux::string &m)
   {
+    Flux::string message = SanitizeXML(m);
     if(message.search_ci("USER")) // If the user tries to connect via IRC protocol
       this->Write("ERROR: :Closing link: (unknown@%s) This is not an IRC connection", GetPeerIP(this->GetFD()).c_str());
-    else if(message.search_ci("GET") && message.search_ci("http/1.1"))
+    else if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
-    const Flux::string page = fsprintf(HTTPREQUEST, VERSION_FULL);
-    this->Write("HTTP/1.0 200 OK");
-    this->Write("CONNECTION: CLOSE");
-    this->Write("CONTENT-TYPE: TEXT/HTML");
-    this->Write("CONTENT-LENGTH: " + value_cast<Flux::string>(page.length()));
-    this->Write("SERVER: ANT Commit System version " + value_cast<Flux::string>(VERSION_FULL));
-    this->Write("");
-    this->Write(page);
-    return true;
-    }else if(message.search_ci("<message>") || this->in_query){ //This is a commit
+      const Flux::string page = fsprintf(HTTPREQUEST, VERSION_FULL);
+      this->Write("HTTP/1.0 200 OK");
+      this->Write("CONNECTION: CLOSE");
+      this->Write("CONTENT-TYPE: TEXT/HTML");
+      this->Write("CONTENT-LENGTH: " + value_cast<Flux::string>(page.length()));
+      this->Write("SERVER: ANT Commit System version " + value_cast<Flux::string>(VERSION_FULL));
+      this->Write("");
+      this->Write(page);
+    }else if(message.search_ci("POST" && message.search_ci("HTTP/1.")) || this->in_query){ //This is a commit
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
       this->RawCommitXML += message.strip();
     }else if(message.search_ci("</message>")){
-      Log(LOG_DEBUG) << "[XML-RPC] Processing Message";
+      Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
       this->HandleMessage();
+    }else{
+      this->Write("ERROR: Unknown connection from "+GetPeerIP(this->GetFD()));
     }
     return true;
   }
@@ -69,8 +98,10 @@ public:
 
 ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 {
+  Log(LOG_DEBUG) << "[XML-RPC] Accepting connection from " << addr.addr();
   return new xmlrpcclient(this, fd, addr);
 }
+
 class module;
 /* This is down here so we don't make a huge mess in the middle of the file */
 void xmlrpcclient::HandleMessage()
@@ -134,6 +165,21 @@ void xmlrpcclient::HandleMessage()
   FOREACH_MOD(I_OnCommit, OnCommit(msg));
 }
 
+class SocketStart : public Timer //Weird socket glitch where we need to use a timer to start the socket correctly.
+{
+public:
+  SocketStart():Timer(1, time(NULL), false) {}
+  void Tick(time_t)
+  {
+    try{
+      new xmlrpclistensocket("127.0.0.1", 12345, false);
+    }catch(const SocketException &ex){
+      Log() << "[XML-RPC] " << ex.GetReason();
+      new SocketStart();
+    }
+  }
+};
+
 class xmlrpcmod : public module
 {
 public:
@@ -143,7 +189,7 @@ public:
     this->SetVersion(VERSION);
     Implementation i[] = { I_OnCommit };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
-    /*xmlrpclistensocket *xmll =*/ new xmlrpclistensocket("127.0.0.1", 12345, false);
+    new SocketStart();
   }
   
   ~xmlrpcmod()

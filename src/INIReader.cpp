@@ -212,6 +212,7 @@ void BotConfig::Read(){
   this->Realname = this->Parser->Get("Connect","Realname",Flux::string("Flux-Net's ANT bot "+value_cast<Flux::string>(VERSION)+" (http://ANT.Flux-Net.net/)"));
   this->Ident = this->Parser->Get("Connect","Ident","Navn");
   this->Channel = this->Parser->Get("Connect","Channel","#Test");
+  this->NicknamePrefix = this->Parser->Get("Bot", "Nickname Prefix", "ANT-");
   this->LogChannel = this->Parser->Get("Modules", "LogChannel","");
   this->PidFile = this->Parser->Get("Bot","PID File","navn.pid");
   this->UserPass = this->Parser->Get("Bot","Password","Navn");

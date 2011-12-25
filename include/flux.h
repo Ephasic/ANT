@@ -36,15 +36,17 @@ namespace Flux{
   class string;
 }
 extern CoreExport bool protocoldebug;
-template<typename T, typename V> inline T value_cast(const V &y)
+template<typename type_name, typename value> inline type_name value_cast(const value &y)
 {
-  std::stringstream stream;
-  T x;
+  std::stringstream stream; //Try safe casting with a stringstream.
+  type_name x;
   if(!(stream << std::setprecision(800) << y)) //we use setprecision so scientific notation does not get in the way.
     throw;
-  if(!(stream >> x))
-    if(protocoldebug)
-      printf("Failed to convert %s to %s\n", typeid(V).name(), typeid(T).name());
+  if(!(stream >> x)){ //If stringstream fails, force the cast.
+    if(protocoldebug) 
+      printf("Failed to cast \"%s\" to \"%s\", attempting to force with reinterpret_cast\n", typeid(value).name(), typeid(type_name).name());
+    x = *reinterpret_cast<type_name*>(const_cast<value*>(&(y)));
+  }
   return x;
 }
 /** Case insensitive map, ASCII rules.

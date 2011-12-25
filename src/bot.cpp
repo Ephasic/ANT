@@ -24,21 +24,21 @@
 #define WHITE "\00316"
 
 //Other formatting
-#define NORMAL "\15"
-#define BOLD "\2"
+#define NORMAL "\15\15"
+#define BOLD "\2\2"
 #define REVERSE ""
-#define UNDERLINE "\13"
+#define UNDERLINE "\13\13"
 
-Bot::Bot(Network *net, const Flux::string &n, const Flux::string &i, const Flux::string &real): User(net, n, i, net->hostname, real), network(net), nick(n), ident(i), realname(real)
+Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net), nick(ni), ident(i), realname(real)
 {
   if(!net)
     throw CoreException("Bot with no network??");
-  if(n.empty())
+  if(ni.empty())
     throw CoreException("Bot with no nickname??");
   if(i.empty())
     throw CoreException("Bot with no ident??");
   
-  net->bots[n] = this;
+  this->n->bots[ni] = this;
   Log(LOG_DEBUG) << "New bot created on " << net->name << ": " << n << i << ": " << real;
 }
 
@@ -52,7 +52,12 @@ void Bot::AnnounceCommit(CommitMessage &msg)
 {
   for(auto it : msg.Channels)
   {
-    this->SendMessage(fsprintf(""));
+    Channel *c = it;
+    Flux::string files = CondenseVector(msg.Files);
+    std::stringstream ss;
+    ss << RED << BOLD << msg.project+" " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << files;
+    c->SendMessage(ss.str());
+//     c->SendMessage(RED+BOLD+"%s: "+NORMAL+ORANGE+"%s * "+NORMAL+YELLOW+"%s "+NORMAL+BOLD+"| "+NORMAL+LIGHT_BLUE+"%s"+NORMAL+": %s", msg.project.c_str(), msg.author.c_str(), msg.revision.c_str(), files.c_str());
   }
 }
 

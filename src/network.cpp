@@ -1,4 +1,5 @@
 #include "network.h"
+#include "bot.h"
 
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
@@ -26,6 +27,7 @@ Network::~Network()
   Networks.erase(this->name);
   NetworkHosts.erase(this->hostname);
 }
+
 bool Network::JoinChannel(const Flux::string &chan)
 {
   if(IsValidChannel(chan)){
@@ -40,6 +42,7 @@ bool Network::JoinChannel(const Flux::string &chan)
   }
   return false;
 }
+
 bool Network::Disconnect()
 {
   Socket *tmp = this->s;
@@ -67,6 +70,14 @@ bool Network::Connect()
   if(!this->s)
     new NetworkSocket(this);
   return true;
+}
+
+Bot *Network::findbot(const Flux::string &nick)
+{
+  auto it = this->bots.find(nick);
+  if(it != this->bots.end())
+    return it->second;
+  return NULL;
 }
 
 Network *FindNetwork(const Flux::string &name)
@@ -145,8 +156,8 @@ void NetworkSocket::OnConnect()
   Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << ']';
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
   new IRCProto(this->net); // Create the new protocol class for the network
-  this->net->ircproto->user(Config->Ident, Config->Realname);
-  this->net->ircproto->nick("ANT-%i", randint(1,100));
+  Bot *b = new Bot(this->net, Config->NicknamePrefix+value_cast<Flux::string>(randint(1, 100)), Config->Ident, Config->Realname);
+  b->SendUser();
   this->ProcessWrite();
 }
 

@@ -109,6 +109,7 @@ E Flux::string do_strftime(const time_t &t, bool short_output = false);
 E Flux::string duration(const time_t &t);
 E Flux::string fsprintf(const char*, ...);
 E Flux::string fsprintf(const Flux::string&, ...);
+E Flux::string CondenseVector(const Flux::vector&);
 E int randint(int x, int y);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();

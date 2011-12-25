@@ -105,7 +105,7 @@ public:
       if(!n)
 	n = new Network(params[1], params[2], params[3]);
       if(!n->s)
-	new ReconnectTimer(1, n); //Connect to networks.
+	new ReconnectTimer(0, n); //Connect to networks.
     }
     if(key.equals_ci("NC"))
     {

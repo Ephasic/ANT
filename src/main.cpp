@@ -42,6 +42,7 @@ int main (int argcx, char** argvx, char *envp[])
     new DBSave(); //Start the Database Save timer.
 //     GProto = new GlobalProto();
     
+    TimerManager::TickTimers(time(NULL)); //Call timers to tick to start sockets instantly.
     while(!quitting)
     {
       Log(LOG_RAWIO) << "Top of main loop";

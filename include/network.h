@@ -34,11 +34,11 @@ public:
   Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
   ~Network();
   NetworkSocket *s;
-  Bot *b;
   IRCProto *ircproto;
   Flux::insensitive_map<Bot*> bots;
   Flux::insensitive_map<User*> UserNickList;
   Flux::insensitive_map<Channel*> ChanMap;
+  Bot *findbot(const Flux::string&);
   Flux::string name;
   Flux::string hostname;
   Flux::string port;
