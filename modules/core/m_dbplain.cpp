@@ -91,7 +91,7 @@ public:
       for(auto bit : n->bots)
       {
 	Bot *b = bit.second; //We dont put realnames in the database as its too hard to catch what the full name is
-	Write("NB %s %s %s %s", n->name.c_str(), b->nick.c_str(), b->ident.c_str());
+	Write("NB %s %s %s", n->name.c_str(), b->nick.c_str(), b->ident.c_str());
       }
     } 
   }
