@@ -63,45 +63,73 @@ public:
 class xmlrpcclient : public ClientSocket, public BufferedSocket
 {
   Flux::string RawCommitXML;
-  bool in_query;
+  bool in_query, in_header, IsXML;
 public:
-  xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket() {}
+  xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), IsXML(false) {}
   bool Read(const Flux::string &m)
   {
     Flux::string message = SanitizeXML(m);
     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
-    if(message.search_ci("USER")){ // If the user tries to connect via IRC protocol
-      this->Write("ERROR: :Closing link: (unknown@%s) This is not an IRC connection", GetPeerIP(this->GetFD()).c_str());
-      return false; //Close the connection.
-    }else if(message.search_ci("GET") && message.search_ci("HTTP/1."))
+    if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
       const Flux::string page = fsprintf(HTTPREQUEST, VERSION_FULL);
-      this->Write("HTTP/1.0 200 OK");
-      this->Write("CONNECTION: CLOSE");
-      this->Write("CONTENT-TYPE: TEXT/HTML");
-      this->Write("CONTENT-LENGTH: " + value_cast<Flux::string>(page.length()));
-      this->Write("SERVER: ANT Commit System version " + value_cast<Flux::string>(VERSION_FULL));
-      this->Write("");
-      this->Write(page);
+      this->HTTPReply(page);
+      Log(LOG_TERMINAL) << "HTTP GET Request.";
       return false; //Close the connection.
-    }else if((message.search_ci("POST") && message.search_ci("Content-Type: text/xml")) || this->in_query){
-      //This is a commit
+    }
+    else if((message.search_ci("POST") && message.search_ci("HTTP/1."))) 
+    { //This is a commit
+      this->in_header = true;
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
-      this->RawCommitXML += message.strip();
-    }else if(message.search_ci("</message>") && this->in_query){
-      this->in_query = false;
-      Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
-      this->Write("HTTP/1.1 200 OK");
-      this->Write("Connection: close");
-      this->Write("Date: "+do_strftime(time(NULL)));
-      this->Write("Server: ANT Commit System version "+value_cast<Flux::string>(VERSION_FULL));
-      this->HandleMessage();
-      return false; //Close the connection.
-    }else{
+    }
+    else if(this->in_header && message.search_ci("Content-Type: text/xml"))
+      this->IsXML = true;
+    else if(message.search_ci("<"))
+    {
+      if(message.search_ci("<?xml"))
+	this->in_query = this->IsXML = true;
+      this->in_header = false;
+    }
+    else if(this->in_query)
+    {
+      if(!message.search_ci("</message>"))
+	this->RawCommitXML += message.strip();
+      else{
+	this->in_query = false;
+	this->RawCommitXML += message.strip();
+	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
+	this->HTTPReply();
+	this->HandleMessage();
+	return false; //Close the connection.
+      }
+    }
+    else if(!this->in_query && !this->in_header && !this->IsXML)
+    {
+      Log(LOG_TERMINAL) << "Invalid HTTP POST.";
+      return false; //Invalid HTTP POST, not XML-RPC
+    }
+    else if(this->in_header) //We're still in the header, but don't need the junk.
+      return true;
+    else
+    {
       this->Write("ERROR: Unknown connection from "+GetPeerIP(this->GetFD()));
+      this->ProcessWrite(); //Write the data
+      Log(LOG_TERMINAL) << "Unknown: " << message;
       return false; //Close the connection.
     }
     return true;
+  }
+  
+  void HTTPReply(const Flux::string &msg = "")
+  {
+    this->Write("HTTP/1.1 200 OK");
+    this->Write("CONNECTION: CLOSE");
+    this->Write("CONTENT-TYPE: TEXT/HTML");
+    this->Write("CONTENT-LENGTH: " + value_cast<Flux::string>(msg.length()));
+    this->Write("DATE: "+do_strftime(time(NULL)));
+    this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
+    this->Write(msg);
+    this->ProcessWrite();
   }
   bool GetData(Flux::string&, Flux::string&);
   void HandleMessage();
@@ -119,7 +147,7 @@ void xmlrpcclient::HandleMessage()
 {
   if(this->RawCommitXML.empty())
     return;
-  
+  Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
   XMLFile xf(this->RawCommitXML, 1);
   
   /* This code was based off the commit in this script: http://cia.vc/clients/git/ciabot.bash */
@@ -183,7 +211,7 @@ public:
   void Tick(time_t)
   {
     try{
-      new xmlrpclistensocket("127.0.0.1", 12345, false);
+      new xmlrpclistensocket("0.0.0.0", 12345, false);
     }catch(const SocketException &ex){
       Log() << "[XML-RPC] " << ex.GetReason();
       new SocketStart();

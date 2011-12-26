@@ -26,7 +26,7 @@ include(navn)
 SET(${PROJECT_NAME}_MAJOR_VERSION 1)
 SET(${PROJECT_NAME}_MINOR_VERSION 0)
 SET(${PROJECT_NAME}_PATCH_LEVEL 0)
-SET(${PROJECT_NAME}_VERSION_EXTRA -ham-and-cheese)
+SET(${PROJECT_NAME}_VERSION_EXTRA -Dachau-Core)
 
 # Get the git revision location for the branch we're on
 if(EXISTS "${ant_SOURCE_DIR}/.git/HEAD")
