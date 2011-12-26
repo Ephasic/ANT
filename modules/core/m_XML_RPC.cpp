@@ -72,8 +72,14 @@ public:
     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
     if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
-      const Flux::string page = fsprintf(HTTPREQUEST, VERSION_FULL);
-      this->HTTPReply(page);
+    const Flux::string page = fsprintf(HTTPREQUEST, Flux::string(VERSION_FULL).c_str());
+      this->Write("HTTP/1.0 200 OK");
+      this->Write("CONNECTION: CLOSE");
+      this->Write("CONTENT-TYPE: TEXT/HTML");
+      this->Write("CONTENT-LENGTH: " + page.length());
+      this->Write("DATE: "+do_strftime(time(NULL)));
+      this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
+      this->Write(page);
       Log(LOG_TERMINAL) << "HTTP GET Request.";
       return false; //Close the connection.
     }
@@ -92,13 +98,17 @@ public:
     }
     else if(this->in_query)
     {
+      Log(LOG_DEBUG) << "[XML-RPC] " << message;
       if(!message.search_ci("</message>"))
 	this->RawCommitXML += message.strip();
       else{
 	this->in_query = false;
 	this->RawCommitXML += message.strip();
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
-	this->HTTPReply();
+	this->Write("HTTP/1.1 200 OK");
+	this->Write("CONNECTION: CLOSE");
+	this->Write("DATE: "+do_strftime(time(NULL)));
+	this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
 	this->HandleMessage();
 	return false; //Close the connection.
       }
@@ -118,18 +128,6 @@ public:
       return false; //Close the connection.
     }
     return true;
-  }
-  
-  void HTTPReply(const Flux::string &msg = "")
-  {
-    this->Write("HTTP/1.1 200 OK");
-    this->Write("CONNECTION: CLOSE");
-    this->Write("CONTENT-TYPE: TEXT/HTML");
-    this->Write("CONTENT-LENGTH: " + value_cast<Flux::string>(msg.length()));
-    this->Write("DATE: "+do_strftime(time(NULL)));
-    this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
-    this->Write(msg);
-    this->ProcessWrite();
   }
   bool GetData(Flux::string&, Flux::string&);
   void HandleMessage();
