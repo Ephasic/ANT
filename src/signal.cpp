@@ -114,6 +114,7 @@ void sigact(int sig)
   switch(sig){
     case SIGPIPE:
       signal(sig, SIG_IGN);
+      Log(LOG_TERMINAL) << "Recieved SIGPIPE";
       break; //Ignore SIGPIPE
     case SIGHUP:
       signal(sig, SIG_IGN);
@@ -159,4 +160,5 @@ void InitSignals()
   signal(SIGINT, sigact);
   signal(SIGHUP, sigact);
   signal(SIGSEGV, sigact);
+  signal(SIGPIPE, sigact);
 }
