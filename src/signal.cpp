@@ -113,6 +113,7 @@ void sigact(int sig)
   Flux::string sigstr;
   switch(sig){
     case SIGPIPE:
+      signal(sig, SIG_IGN);
       break; //Ignore SIGPIPE
     case SIGHUP:
       signal(sig, SIG_IGN);
