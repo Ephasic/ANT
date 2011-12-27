@@ -19,7 +19,7 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan){
     Flux::string opstatus = params[6];
     Flux::string realname = params[7].erase(0,2);
     /*******************************************************/
-    User *u = FindUser(Nickname);
+    User *u = FindUser(source.n, Nickname);
     if(!u){
       if((!Host.empty() || !Nickname.empty() || !Ident.empty()) && source.n)
 	u = new User(source.n, Nickname, Ident, Host, realname, Server);
@@ -166,22 +166,22 @@ void process(Network *n, const Flux::string &buffer){
      for(unsigned i =0; i < params.size(); ++i)
        Log(LOG_TERMINAL) << "Params " << i << ": " << Flux::Sanitize(params[i]);
   }
+  if(!n)
+  {
+    Log(LOG_TERMINAL) << "Process() called with no source Network??";
+    return;
+  }
   /***********************************************/
   /* make local variables instead of global ones */
   const Flux::string &receiver = params.size() > 0 ? params[0] : "";
   Flux::string message = params.size() > 1? params[1] : "";
   IsoHost h(source);
   Flux::string nickname = h.nick, uident = h.ident, uhost = h.host, cmd;
-  User *u = FindUser(nickname);
+  User *u = FindUser(n, nickname);
   Channel *c = FindChannel(n, receiver);
   Bot *b =  n->bots.begin()->second;
   Flux::vector params2 = StringVector(message, ' ');
   /***********************************************/
-  if(!n)
-  {
-    Log(LOG_TERMINAL) << "Process() called with no source Network??";
-    return;
-  }
   
   if(command == "004" && source.search('.')) { server_name = source; }
   if(message[0] == '\1' && message[message.length() -1] == '\1' && !params2[0].equals_cs("\001ACTION")){
@@ -189,7 +189,7 @@ void process(Network *n, const Flux::string &buffer){
     return; //Dont allow the rest of the system to process ctcp's as it will be caught by the command handler.
   }
   if(command.equals_cs("NICK") && u) { FOREACH_MOD(I_OnNickChange, OnNickChange(u, params[0])); u->SetNewNick(params[0]); }
-  if(!u && !FindUser(nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty())){
+  if(!u && !FindUser(n, nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty())){
     if(!nickname.search('.') && n)
       u = new User(n, nickname, uident, uhost);
   }
@@ -215,7 +215,7 @@ void process(Network *n, const Flux::string &buffer){
   if(command.is_pos_number_only()) { FOREACH_MOD(I_OnNumeric, OnNumeric((int)command, n)); }
   if(command.equals_cs("PING")){ FOREACH_MOD(I_OnPing, OnPing(params, n)); }
   if(command.equals_cs("PONG")){ FOREACH_MOD(I_OnPong, OnPong(params, n)); }
-  if(command.equals_cs("KICK")){ FOREACH_MOD(I_OnKick, OnKick(u, FindUser(params[1]), FindChannel(n, params[0]), params[2])); }
+  if(command.equals_cs("KICK")){ FOREACH_MOD(I_OnKick, OnKick(u, FindUser(n, params[1]), FindChannel(n, params[0]), params[2])); }
   if(command.equals_ci("ERROR")) { FOREACH_MOD(I_OnConnectionError, OnConnectionError(buffer)); }
   if(command.equals_cs("INVITE")) { FOREACH_MOD(I_OnInvite, OnInvite(u, params[1])); }
   if(command.equals_cs("NOTICE") && !source.find('.')){
@@ -234,7 +234,7 @@ void process(Network *n, const Flux::string &buffer){
       c = new Channel(n, receiver);
     else if(!u->findchannel(c->name))
       u->AddChan(c);
-    else if(!c->finduser(u->nick))
+    else if(!c->finduser(n, u->nick))
       c->AddUser(u);
 //     else if(u->nick != Config->BotNick){
       FOREACH_MOD(I_OnJoin, OnJoin(u, c));

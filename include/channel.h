@@ -42,7 +42,7 @@ public:
   Channel(Network*, const Flux::string&, time_t ts = time(NULL));
   ~Channel();
   UList UserList;
-  User *finduser(const Flux::string&);
+  User *finduser(Network*, const Flux::string&);
   Flux::string name;
   Flux::string topic;
   Flux::string topic_setter;

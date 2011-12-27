@@ -71,8 +71,8 @@ public:
    if(params[0].equals_ci("!userlist"))
    {
      Flux::string users;
-    for(Flux::insensitive_map<User*>::iterator it = UserNickList.begin(); it != UserNickList.end(); ++it)
-      users += it->second->nick+" ";
+     for(auto it : u->n->UserNickList)
+      users += it.second->nick+" ";
     u->SendMessage(users);
    }
   }

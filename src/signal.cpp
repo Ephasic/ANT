@@ -1,38 +1,6 @@
 #include "includes.h"
 #include "module.h"
 
-/** Random Quit message selector
- * \fn Flux::string siginit(int sigstring)
- * \brief this selects a quit message out of 20, this should be used with a random number between 1 and 20.
- * \param int the string number to return.
- */
-Flux::string siginit(int sigstring)
-{
-  Flux::string message;
-  switch(sigstring){
-    case 1: message = "Read on an empty pipe (ENOTOBACCO)"; break;
-    case 2: message = "Invalid syntax (EBEFOREI)"; break;
-    case 3: message = "Core dumped (ECHERNOBYL)"; break;
-    case 4: message = "Program exited before being run (ECRAY)"; break;
-    case 5: message = "The daemon is dead (EDINGDONG)"; break;
-    case 6: message = "System needs tuning (EFLAT)"; break;
-    case 7: message = "Program written by inept Frat member (EGEEK)"; break;
-    case 8: message = "Here-a-bug, there-a-bug, .... (EIEIO)"; break;
-    case 9: message = "Missing period (EIUD)"; break;
-    case 10: message = "Your code could stand to be cleaned up (ELECTROLUX)"; break;
-    case 11: message = "Wrong fork (EMILYPOST)"; break;
-    case 12: message = "Silo overflow (END.ARMS.CONTROL)"; break;
-    case 13: message = "Mount failed (ENOHORSE)"; break;
-    case 14: message = "C program not derived from main() { printf(\"Hello, world\"); } (ENONSEQUETOR)"; break;
-    case 15: message = "Extended tape gap (EWATERGATE)"; break;
-    case 16: message = "Aliens sighted (EWOK)"; break;
-    case 17: message = "Your code appears to have been stir-fried (EWOK)"; break;
-    case 18: message = "The feature you want has not been implemented yet (EWOULDBNICE)"; break;
-    case 19: message = "Nuclear event occurred (SIGNUKE)"; break;
-    case 20: message = "Someone pressed CTRL + C.."; break;
-  }
-  return message;
-}
 /** Segmentation Fault Handler
  * \fn void HandleSegfault(module *m)
  * \brief A segfault handler to report what happened and where it happened.
@@ -110,17 +78,17 @@ void HandleSegfault(module *m)
 void sigact(int sig)
 {
   FOREACH_MOD(I_OnSignal, OnSignal(sig));
-  Flux::string sigstr;
   switch(sig){
     case SIGPIPE:
       signal(sig, SIG_IGN);
-      Log(LOG_TERMINAL) << "Recieved SIGPIPE";
+      Log(LOG_RAWIO) << "Recieved SIGPIPE, must be a dead socket somewhere..";
       break; //Ignore SIGPIPE
     case SIGHUP:
       signal(sig, SIG_IGN);
       Rehash();
       break;
     case SIGSEGV:
+      Log(LOG_RAWIO) << "Recieved SIGSEGV, Segmentation Fault caught.";
       /* this is where the module stack needs to be */
       #ifdef HAVE_SETJMP_H
       if(LastRunModule){
@@ -133,15 +101,15 @@ void sigact(int sig)
       }
       #endif
       HandleSegfault(NULL);
-      raise(SIGABRT);
+      raise(SIGABRT); //Force exit.
       break;
     case SIGINT:
     case SIGKILL:
     case SIGTERM:
       signal(sig, SIG_IGN);
       signal(SIGHUP, SIG_IGN);
-      sigstr = siginit(randint(1,20));
-      quitmsg = "Recieved Signal: "+sigstr;
+      quitmsg = "Recieved Signal SIGTERM, exiting..";
+      Log(LOG_RAWIO) << quitmsg;
       for(auto it : Networks) 
         it.second->ircproto->quit(quitmsg);
       quitting = true;

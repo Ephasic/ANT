@@ -27,9 +27,9 @@ Channel::~Channel()
   this->n->ChanMap.erase(this->name);
 }
 
-User *Channel::finduser(const Flux::string &usr)
+User *Channel::finduser(Network *net, const Flux::string &usr)
 {
-  auto it1 = UserNickList.find(usr);
+  auto it1 = net->UserNickList.find(usr);
   User *u = it1->second;
   if(!u)
     return NULL;

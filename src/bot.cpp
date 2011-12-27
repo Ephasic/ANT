@@ -77,7 +77,7 @@ void Bot::Join(const Flux::string &chan)
 
 void Bot::Part(Channel *c, const Flux::string &message)
 {
-  if(!c->finduser(this->nick))
+  if(!c->finduser(this->n, this->nick))
     return;
 
   c->SendPart(message);
