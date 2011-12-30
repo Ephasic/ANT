@@ -60,6 +60,9 @@ public:
   Flux::string UserPass;
   Flux::string ModuleDir;
   Flux::string Modules;
+  Flux::string xmlrpcbindip;
+  int xmlrpcport;
+  bool xmlrpcipv6;
   bool dbforce;
   size_t SockWait;
   int RetryWait;

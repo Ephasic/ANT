@@ -210,7 +210,7 @@ void BotConfig::Read(){
   this->LogFile = this->Parser->Get("Log","Log_File","navn.log");
 
   this->Realname = this->Parser->Get("Connect","Realname",Flux::string("Flux-Net's ANT bot "+value_cast<Flux::string>(VERSION)+" (http://ANT.Flux-Net.net/)"));
-  this->Ident = this->Parser->Get("Connect","Ident","Navn");
+  this->Ident = this->Parser->Get("Connect","Ident","ANT");
   this->Channel = this->Parser->Get("Connect","Channel","#Test");
   this->NicknamePrefix = this->Parser->Get("Bot", "Nickname Prefix", "ANT-");
   this->LogChannel = this->Parser->Get("Modules", "LogChannel","");
@@ -218,6 +218,9 @@ void BotConfig::Read(){
   this->UserPass = this->Parser->Get("Bot","Password","Navn");
   this->ModuleDir = Parser->Get("Modules", "ModuleDir", "");
   this->Modules = Parser->Get("Modules", "Modules", "");
+  this->xmlrpcbindip = Parser->Get("XML-RPC", "BindAddress", "0.0.0.0");
+  this->xmlrpcport = Parser->GetInteger("XML-RPC", "Port", 12345);
+  this->xmlrpcipv6 = Parser->GetBoolean("XML-RPC", "IPv6", false);
   this->SockWait = Parser->GetInteger("Socket","Socket Timeout",5);
   this->RetryWait = Parser->GetInteger("Socket", "Retry Wait", 30);
   this->dbforce = Parser->GetBoolean("Bot", "Force Database Read", false);

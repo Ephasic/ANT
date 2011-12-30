@@ -212,7 +212,7 @@ public:
   void Tick(time_t)
   {
     try{
-      new xmlrpclistensocket("0.0.0.0", 12345, false);
+      new xmlrpclistensocket(Config->xmlrpcbindip, Config->xmlrpcport, Config->xmlrpcipv6);
     }catch(const SocketException &ex){
       Log() << "[XML-RPC] " << ex.GetReason();
       new SocketStart();
