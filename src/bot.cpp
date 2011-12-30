@@ -29,7 +29,7 @@
 #define REVERSE ""
 #define UNDERLINE "\13\13"
 
-Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net), nick(ni), ident(i), realname(real)
+Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net)
 {
   if(!net)
     throw CoreException("Bot with no network??");
@@ -40,8 +40,9 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
   if(net->b){
     Log() << "Bot assigned to a network with a bot already assigned??";
     return; //close the constructor instead of throwing.
-  }
 //     throw CoreException("Bot assigned to a network with a bot already assigned??");
+  }
+
   
   this->n->b = this;
   new IRCProto(this->n);
@@ -95,9 +96,10 @@ void Bot::Quit(const Flux::string &message)
   this->ircproto->quit(message);
 }
 
-void Bot::SetNick(const Flux::string &)
+void Bot::SetNick(const Flux::string &nickname)
 {
-  //FIXME: this needs fixing
+  this->SetNewNick(nickname);
+  this->ircproto->nick(nickname);
 }
 
 void Bot::SendUser()

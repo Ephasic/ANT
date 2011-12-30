@@ -12,12 +12,6 @@ public:
   Network *network;
   /* List of chans the bot is in */
   Flux::map<Channel*> channels;
-  /* Bot's current nickname */
-  Flux::string nick;
-  /* Bot's current ident */
-  Flux::string ident;
-  /* Bot's current realname */
-  Flux::string realname;
   /* IRCProto class for the network */
   IRCProto *ircproto;
   /* Announce a commit that has been made */
