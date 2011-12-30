@@ -19,6 +19,7 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   this->n->ChanMap[this->name] = this;
   Log(LOG_DEBUG) << "Created new channel '" << nname << "' on " << net->name;
 }
+
 Channel::~Channel()
 {
   for(auto it : this->bots)
@@ -39,7 +40,6 @@ User *Channel::finduser(Network *net, const Flux::string &usr)
   return NULL;
 }
 void Channel::SendJoin(){ this->n->b->ircproto->join(this->name); this->SendWho(); }
-// void Channel::SendPart(){ this->n->b->ircproto->part(this->name); }
 void Channel::AddUser(User *u) { if(u) this->UserList[u] = this; }
 void Channel::DelUser(User *u)
 {
@@ -111,6 +111,7 @@ void JoinChansInBuffer(Network *n)
 {
   for(auto it : JoinBuffer)
   {
+    Log(LOG_TERMINAL) << "BUFFER: " << it.first->name << " " << it.second->name;
     if(it.first == n)
     {
       Log(LOG_TERMINAL) << "CHANNEL: " << it.second->name << " on " << it.first->name;

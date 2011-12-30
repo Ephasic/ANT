@@ -560,6 +560,7 @@ public:
   NetworkSocket(Network*);
   ~NetworkSocket();
   Network *net;
+  bool SentPing;
   bool Read(const Flux::string&);
   void OnProcessWrite();
   void OnConnect();

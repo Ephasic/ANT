@@ -103,7 +103,7 @@ void ReconnectTimer::Tick(time_t)
   }
 }
 
-NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet)
+NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet), SentPing(false)
 {
   if(!tnet)
     throw CoreException("Network socket created with no network? lolwut?");

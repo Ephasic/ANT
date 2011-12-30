@@ -183,7 +183,7 @@ void process(Network *n, const Flux::string &buffer){
   Flux::vector params2 = StringVector(message, ' ');
   /***********************************************/
   
-  if(command == "004" && source.search('.')) { server_name = source; }
+  if(command == "004" && source.search('.')) { FOREACH_MOD(I_OnUserRegister, OnUserRegister(n)); }
   if(message[0] == '\1' && message[message.length() -1] == '\1' && !params2[0].equals_cs("\001ACTION")){
     FOREACH_MOD(I_OnCTCP, OnCTCP(nickname, params2, n));
     return; //Dont allow the rest of the system to process ctcp's as it will be caught by the command handler.

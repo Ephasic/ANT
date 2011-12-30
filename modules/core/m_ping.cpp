@@ -1,55 +1,51 @@
 #include "flux_net_irc.hpp"
+class WaitTimer:public Timer
+{
+public:
+  WaitTimer():Timer(120, time(NULL)) {}
+  void Tick(time_t)
+  {
+    Log(LOG_RAWIO) << "Wait Timer Tick.";
+    for(auto it : Networks)
+      if(it.second->s && it.second->s->IsConnected() && it.second->s->SentPing)
+	it.second->s->SetDead(true); // Ping Timeout, let the SocketEngine class handle this :P
+  }
+};
 
 class PingTimer:public Timer
 {
 public:
-  int pings;
-  PingTimer():Timer(60, time(NULL), true), pings(0) { }
+  PingTimer():Timer(60, time(NULL), true) { }
   void Tick(time_t){
     Send_Global("PING :%i\n", static_cast<int>(time(NULL)));
-//     for(auto it : Networks)
-//     {
-//       
-//       if(++pings >= 3) //FIXME: This needs fixing
-// 		it.second->s->SetDead(true);
-//     }
+    new WaitTimer();
   }
 };
+
 class Ping_pong:public module
 {
   PingTimer pingtimer;
 public:
   Ping_pong(const Flux::string &Name):module(Name)
   {
-    Implementation i[] = { I_OnNumeric, I_OnPong, I_OnPing, I_OnPostConnect };
+    Implementation i[] = { I_OnPong, I_OnPing, I_OnPostConnect };
     ModuleHandler::Attach(i, this, sizeof(i) / sizeof(Implementation));
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);
   }
-  void OnPostConnect(Socket*)
-  {
-    pingtimer.pings = 0;
-  }
-  void OnPong(const std::vector<Flux::string> &params, Network*)
+  void OnPong(const std::vector<Flux::string> &params, Network *n)
   {
      Flux::string ts = params[1];
      int lag = time(NULL)-(int)ts;
-     pingtimer.pings = 0;
+     n->s->SentPing = false;
      if(protocoldebug)
         Log(LOG_RAWIO) << lag << " sec lag (" << ts << " - " << time(NULL) << ')';
   }
   void OnPing(const std::vector<Flux::string> &params, Network *n)
   {
-    pingtimer.pings = 0;
+    n->s->SentPing = false;
     n->s->Write("PONG :%s\n", params[0].c_str());
-  }
-  void OnNumeric(int i, Network *n)
-  {
-   if((i == 451)){
-     static_cast<void>(0);
-//      n->b->SendUser();
-   }
   }
 };
 MODULE_HOOK(Ping_pong)
