@@ -98,7 +98,8 @@ void ReconnectTimer::Tick(time_t)
   catch (const SocketException &e)
   {
     n->s = NULL; // Does this memleak?
-    Log() << "Connection to " << n->name << " [" << n->hostname << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << this->GetSecs() << " seconds.";
+    Log() << "Connection to " << n->name << " [" << n->hostname << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
+    new ReconnectTimer(Config->RetryWait, n);
   }
 }
 
