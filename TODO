@@ -9,11 +9,12 @@ ANT 1.0.0
 ----------
 [ ] Fix Glibc crash
 [X] Multisocket the socket engine
-  [+] Multi-Network handling
-  [+] Multi-bot handling
-  [+] Network class for handling network information
+  [X] Multi-Network handling
+  [?] Multi-bot handling
+  [X] Network class for handling network information
 
 [+] Add Database/User accounts type system for metadata
+  [ ] MySQL Backend.
   [ ] Add E-Mail handling
   [ ] Add lists of networks, channels, etc.
   [+] Add Commit processing system
@@ -33,12 +34,12 @@ ANT 1.0.0
 [ ] Add Network Oper handling similar to SearchIRC's Oper handling
   [ ] Add Channel Op's?
 
-[ ] Add more event handlers (FOREACH_MOD)
-[ ] Fix parts of the core that are designed for 1 network only (like events)
+[+] Add more event handlers (FOREACH_MOD)
+[+] Fix parts of the core that are designed for 1 network only (like events)
 [ ] Wtf is this Priority system? fix that
 [ ] Add buffer limiter (so freenode does not kill the bot)
 [ ] Better config format
-[ ] Better startup switch management
+[+] Better startup switch management
 [ ] Better terminal Commands Parsing
 
 
