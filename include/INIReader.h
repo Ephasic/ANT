@@ -63,6 +63,7 @@ public:
   Flux::string xmlrpcbindip;
   int xmlrpcport;
   bool xmlrpcipv6;
+  bool UseIPv6;
   bool dbforce;
   size_t SockWait;
   int RetryWait;

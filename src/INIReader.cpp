@@ -221,6 +221,7 @@ void BotConfig::Read(){
   this->xmlrpcbindip = Parser->Get("XML-RPC", "BindAddress", "0.0.0.0");
   this->xmlrpcport = Parser->GetInteger("XML-RPC", "Port", 12345);
   this->xmlrpcipv6 = Parser->GetBoolean("XML-RPC", "IPv6", false);
+  this->UseIPv6 = Parser->GetBoolean("Connect", "UseIPv6", false);
   this->SockWait = Parser->GetInteger("Socket","Socket Timeout",5);
   this->RetryWait = Parser->GetInteger("Socket", "Retry Wait", 30);
   this->dbforce = Parser->GetBoolean("Bot", "Force Database Read", false);

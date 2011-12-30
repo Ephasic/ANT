@@ -242,7 +242,8 @@ Flux::string ForwardResolution(const Flux::string &hostname)
 	break;
     }
     ret = address;
-    gothost = true;
+    if(Config->UseIPv6 && !ret.search(':'))
+      gothost = true;
   }
   freeaddrinfo(result);
   return ret;
