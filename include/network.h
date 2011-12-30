@@ -1,9 +1,7 @@
 #ifndef _NETWORK_H_
 #define _NETWORK_H_
 #include "module.h"
-// #include "bot.h"
 #include "timers.h"
-// #include "includes.h"
 
 class Bot;
 class NetworkSocket;
@@ -34,11 +32,9 @@ public:
   Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
   ~Network();
   NetworkSocket *s;
-  IRCProto *ircproto;
-  Flux::insensitive_map<Bot*> bots;
+  Bot *b;
   Flux::insensitive_map<User*> UserNickList;
   Flux::insensitive_map<Channel*> ChanMap;
-  Bot *findbot(const Flux::string&);
   Flux::string name;
   Flux::string hostname;
   Flux::string port;

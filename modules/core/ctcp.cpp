@@ -42,16 +42,16 @@ public:
       if(uname(&uts) < 0)
 	      throw CoreException("uname() Error");
 
-	n->ircproto->notice(source, "\001VERSION ANT-%s %s %s\001",VERSION_FULL, uts.sysname, uts.machine);
+	n->b->ircproto->notice(source, "\001VERSION ANT-%s %s %s\001",VERSION_FULL, uts.sysname, uts.machine);
     }
     if(cmd == "\001TIME\001"){ // for CTCP TIME reply
-	n->ircproto->notice(source,"\001TIME %s\001", do_strftime(time(NULL), true).c_str());
+	n->b->ircproto->notice(source,"\001TIME %s\001", do_strftime(time(NULL), true).c_str());
     }
     if(cmd == "\001SOURCE\001"){
-      n->ircproto->notice(source, "\001SOURCE http://code.google.com/p/arbitrary-navn-tool/\001");
+      n->b->ircproto->notice(source, "\001SOURCE http://code.google.com/p/arbitrary-navn-tool/\001");
     }
     if(cmd == "\001DCC")
-      n->ircproto->notice(source, "I do not accept or support DCC connections.");
+      n->b->ircproto->notice(source, "I do not accept or support DCC connections.");
   }
 };
 /**

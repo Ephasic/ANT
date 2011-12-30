@@ -83,16 +83,12 @@ public:
     {
       Network *n = it.second;
       Write("N %s %s %s", n->hostname.c_str(), n->port.c_str(), n->name.c_str());
+      Write("NB %s %s %s", n->name.c_str(), n->b->nick.c_str(), n->b->ident.c_str());
       for(auto cit : n->ChanMap) // Save Channels in those networks
       {
 	Channel *c = cit.second;
 	Write("NC %s %s", n->name.c_str(), c->name.c_str());
-      }
-      for(auto bit : n->bots)
-      {
-	Bot *b = bit.second; //We dont put realnames in the database as its too hard to catch what the full name is
-	Write("NB %s %s %s", n->name.c_str(), b->nick.c_str(), b->ident.c_str());
-      }
+      } //We dont put realnames in the database as its too hard to catch what the full name is
     } 
   }
 

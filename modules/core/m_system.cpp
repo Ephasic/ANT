@@ -10,14 +10,9 @@ public:
   }
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
-    User *u = source.u;
-   if(!u->IsOwner())
-      source.Reply(ACCESS_DENIED);
-   else{
      source.Reply("Rehashing Configuration file");
-     Log(u, this) << "to rehash the configuration";
+     Log(source.u, this) << "to rehash the configuration";
      Rehash();
-   }
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
@@ -28,44 +23,6 @@ public:
 		 "to be made while the bot is running\n"
 		 "Note: you must be the bots owner and does not\n"
 		 "change all values in the config (such as IRC nicknames)");
-    return true;
-  }
-};
-
-class CommandNick : public Command
-{
-public:
-  CommandNick():Command("NICK", 1, 1)
-  {
-    this->SetDesc("Change the bots nickname");
-    this->SetSyntax("\37nickname\37");
-  }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
-  {
-    User *u = source.u;
-    Flux::string newnick = params[1];
-    if(newnick.empty()){
-     this->SendSyntax(source);
-     return;
-    }
-    if(!u->IsOwner()){
-     source.Reply(ACCESS_DENIED);
-     return;
-    }
-    for(unsigned i = 0, end = newnick.length(); i < end; i++)
-      if(!isvalidnick(newnick[i]))
-	source.Reply("\2%s\2 is an invalid nickname.");
-      source.n->ircproto->nick(newnick);
-    Log(u, this) << "to change the bots nickname to " << newnick;
-  }
-  bool OnHelp(CommandSource &source, const Flux::string &nill)
-  {
-    this->SendSyntax(source);
-    source.Reply(" ");
-    source.Reply("This command changes the bots nickname\n"
-		 "in IRC to a valid IRC nickname that is\n"
-		 "checked before being set.\n"
-		 "Note: You must be the bots owner to use this command");
     return true;
   }
 };
@@ -115,7 +72,7 @@ public:
     if(pass == password){
       source.Reply("Quitting..");
       Log(u) << "quit the bot with password: \"" << password << "\"";
-      source.n->ircproto->quit("Requested From \2%s\17. Pass: \00320%s\017", u->nick.c_str(), password.c_str());
+      source.n->b->ircproto->quit("Requested From \2%s\17. Pass: \00320%s\017", u->nick.c_str(), password.c_str());
       quitting = true;
     }else{
       source.Reply(ACCESS_DENIED);
@@ -144,13 +101,8 @@ public:
   }
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
-    User *u = source.u;
-    if(u->IsOwner()){
       source.Reply("My PID is: \2%i\2", (int)getpid());
-      Log(u, this) << "command to get navn's PID " << getpid();
-    }else{
-      source.Reply(ACCESS_DENIED);
-    }
+      Log(source.u, this) << "command to get navn's PID " << getpid();
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
@@ -163,54 +115,19 @@ public:
   }
 };
 
-class CommandPass: public Command
-{
-public:
-  CommandPass():Command("PASS", 0,0)
-  {
-    this->SetDesc("Gets the bots Random Password");
-  }
-  void Run(CommandSource &source, const std::vector<Flux::string> &params)
-  {
-    User *u = source.u;
-    if (u->IsOwner()){
-      source.Reply("The password is:\2 %s", password.c_str());
-      Log(u, this) << "to request navn's quit password: " << password;
-    }else{
-      source.Reply(ACCESS_DENIED);
-      Log(u, this) << "to attempt to request navn's quit password.";
-    }
-  }
-  bool OnHelp(CommandSource &source, const Flux::string &nill)
-  {
-    this->SendSyntax(source);
-    source.Reply(" ");
-    source.Reply("This command displays the bots randomly\n"
-		 "generated password to the user so they may\n"
-		 "quit the bot or use a command which requires\n"
-		 "the random password\n"
-		 "Note: You must be the bots owner to use this command");
-    return true;
-  }
-};
-
 class m_system : public module
 {
   CommandRehash cmdrehash;
   CommandQuit cmdquit;
   CommandRestart cmdrestart;
-  CommandNick nick;
   CommandPID pid;
-  CommandPass pass;
 public:
   m_system(const Flux::string &Name):module(Name)
   {
     this->AddCommand(&cmdrehash);
     this->AddCommand(&cmdquit);
     this->AddCommand(&cmdrestart);
-    this->AddCommand(&nick);
     this->AddCommand(&pid);
-    this->AddCommand(&pass);
     Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
     this->SetAuthor("Justasic");
@@ -239,11 +156,11 @@ public:
   }
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
   {
-//      if(kickee && kickee->nick.equals_ci(Config->BotNick))
-//      {
+     if(kickee && kickee == c->n->b)
+     {
        Log(u) << "kicked " << kickee->nick << " from " << c->name  << " in network " << c->n->name << ' ' << '(' << reason << ')';
-	c->SendJoin(); 
-//      }
+	c->SendJoin();
+     }
   }
 };
 

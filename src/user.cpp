@@ -1,5 +1,6 @@
 /* All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html) */
-#include <user.h>
+#include "user.h"
+#include "bot.h"
 
 uint32_t usercnt = 0, maxusercnt = 0;
 User::User(Network *net, const Flux::string &snick, const Flux::string &sident, const Flux::string &shost, const Flux::string &srealname, const Flux::string &sserver){
@@ -29,7 +30,7 @@ User::~User(){
   this->n->UserNickList.erase(this->nick);
 }
 
-void User::SendWho(){ this->n->ircproto->who(this->nick); }
+void User::SendWho(){ this->n->b->ircproto->who(this->nick); }
 
 void User::SendMessage(const char *fmt, ...){
   char buffer[BUFSIZE] = "";
@@ -83,8 +84,8 @@ Channel *User::findchannel(const Flux::string &name)
   return NULL;
 }
 
-void User::SendMessage(const Flux::string &message){ this->n->ircproto->notice(this->nick, message); }
-void User::SendPrivmsg(const Flux::string &message){ this->n->ircproto->privmsg(this->nick, message); }
+void User::SendMessage(const Flux::string &message){ this->n->b->ircproto->notice(this->nick, message); }
+void User::SendPrivmsg(const Flux::string &message){ this->n->b->ircproto->privmsg(this->nick, message); }
 
 User *FindUser(Network *n, const Flux::string &fnick){
   auto it = n->UserNickList.find(fnick);

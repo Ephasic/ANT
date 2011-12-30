@@ -37,14 +37,21 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
     throw CoreException("Bot with no nickname??");
   if(i.empty())
     throw CoreException("Bot with no ident??");
+  if(net->b){
+    Log() << "Bot assigned to a network with a bot already assigned??";
+    return; //close the constructor instead of throwing.
+  }
+//     throw CoreException("Bot assigned to a network with a bot already assigned??");
   
-  this->n->bots[ni] = this;
+  this->n->b = this;
+  new IRCProto(this->n);
   Log(LOG_DEBUG) << "New bot created on " << net->name << ": " << n << i << ": " << real;
 }
 
 Bot::~Bot()
 {
-  this->n->bots.erase(this->nick);
+  this->n->b = NULL;
+  delete this->ircproto;
   Log(LOG_DEBUG) << "Bot " << this->nick << " for network " << this->n->name << " deleted!";
 }
 
@@ -85,7 +92,7 @@ void Bot::Part(Channel *c, const Flux::string &message)
 
 void Bot::Quit(const Flux::string &message)
 {
-  this->n->ircproto->quit(message);
+  this->ircproto->quit(message);
 }
 
 void Bot::SetNick(const Flux::string &)
@@ -95,6 +102,6 @@ void Bot::SetNick(const Flux::string &)
 
 void Bot::SendUser()
 {
-  this->n->ircproto->user(this->ident, this->realname);
-  this->n->ircproto->nick(this->nick);
+  this->ircproto->user(this->ident, this->realname);
+  this->ircproto->nick(this->nick);
 }

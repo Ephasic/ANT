@@ -160,18 +160,21 @@ void xmlrpcclient::HandleMessage()
   Flux::string revision = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["revision"].Value;
   Flux::string log = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["log"].Value;
   Flux::string url = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["url"].Value;
-  Flux::string files = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["files"].Value;
+  auto files = xf.Tags["message"].Tags["body"].Tags["commit"].Tags["files"].Tags;
   
   /* Source info */
   Flux::string project = xf.Tags["message"].Tags["source"].Attributes["project"].Value;
   Flux::string branch = xf.Tags["message"].Tags["source"].Attributes["branch"].Value;
   Flux::string module = xf.Tags["message"].Tags["source"].Attributes["module"].Value;
   
-  sepstream sep(files, ' ');
-  Flux::string tok;
-  Flux::vector Files;
-  while(sep.GetToken(tok))
-    Files.push_back(tok);
+//   sepstream sep(files, ' ');
+//   Flux::string tok;
+//   Flux::vector Files;
+//   while(sep.GetToken(tok))
+//     Files.push_back(tok);
+  Flux::vector Files; //Parse the file list.
+  for(auto it : files)
+    Files.push_back(it.second.Attributes["file"].Value);
   
   /* This is seperated now to keep
    * the differences in how stuff is
@@ -253,6 +256,8 @@ public:
   void OnCommit(CommitMessage &msg)
   {
     Log(LOG_TERMINAL) << "[XML-RPC] Fun stuff!";
+    for(auto it : Networks)
+      it.second->b->AnnounceCommit(msg);
   }
 };
 

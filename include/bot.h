@@ -18,6 +18,8 @@ public:
   Flux::string ident;
   /* Bot's current realname */
   Flux::string realname;
+  /* IRCProto class for the network */
+  IRCProto *ircproto;
   /* Announce a commit that has been made */
   void AnnounceCommit(CommitMessage&);
   /* Join a channel */

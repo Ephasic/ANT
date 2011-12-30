@@ -1,10 +1,11 @@
 /* All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html) */
 #include "ircproto.h"
+#include "bot.h"
 /**
  *\file  ircproto.cpp
  *\brief Contains the IRCProto class.
  */
-IRCProto::IRCProto(Network *n) : net(n) { n->ircproto = this; } //Because we have multiple networks, we need this to be dynamic with the sockets
+IRCProto::IRCProto(Network *n) : net(n) { n->b->ircproto = this; } //Because we have multiple networks, we need this to be dynamic with the sockets
 
 void IRCProto::Raw(const char *fmt, ...)
 {
@@ -520,23 +521,20 @@ void GlobalProto::mode(const Flux::string &dest, const Flux::string &chanmode){
 }
 
 /*******************************************************************************/
-
 /**
  * \overload void Send_Global(const Flux::string &str)
  */
 void Send_Global(const Flux::string &str)
 {
   Network *n;
-  for(auto it : Networks)
-    if(it.second->s && it.second->s->IsConnected()){
-      if(n != it.second){
-	n = it.second;
+  for(auto it : Networks){
+    if((n = it.second) && n->s && n->s->IsConnected()){
 	n->s->Write(str);
 	n->s->ProcessWrite();
-      }
     }
     else
-      Log(LOG_RAWIO) << '[' << it.second->name << ']' << " Attempted to send '" << str << "'";
+      Log(LOG_RAWIO) << '[' << (n?n->name:"Unknown") << ']' << " Attempted to send '" << str << "'";
+  }
 }
 /**
  * \fn void Send_Global(const char *fmt, ...)

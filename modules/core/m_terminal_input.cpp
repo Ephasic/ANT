@@ -10,7 +10,7 @@ void ProcessInput(const Flux::string &str)
 	quitting = true;
 	for(auto it : Networks)
 	{
-	  it.second->ircproto->quit(str);
+	  it.second->b->ircproto->quit(str);
 	}
   }
 //   else if(params[0].equals_ci("MSG"))

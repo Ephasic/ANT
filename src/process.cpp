@@ -179,7 +179,7 @@ void process(Network *n, const Flux::string &buffer){
   Flux::string nickname = h.nick, uident = h.ident, uhost = h.host, cmd;
   User *u = FindUser(n, nickname);
   Channel *c = FindChannel(n, receiver);
-  Bot *b =  n->bots.begin()->second;
+  Bot *b =  n->b;
   Flux::vector params2 = StringVector(message, ' ');
   /***********************************************/
   

@@ -3,18 +3,15 @@
 
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
-Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n)
+Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): s(NULL), b(NULL)
 {
   if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");
 
-  if(n.empty()) //If we didnt specifiy the network name, use the hostname.
-    this->name = host;
-  else
-    this->name = n;
+  //If we didnt specifiy the network name, use the hostname.
+  this->name = n.empty()?host:n;
   this->hostname = host;
   this->port = p;
-  this->s = NULL;
   Networks[this->name] = this;
   NetworkHosts[host] = this;
   Log(LOG_DEBUG) << "New network created: " << n << " " << host << ':' << p;
@@ -46,11 +43,11 @@ bool Network::JoinChannel(const Flux::string &chan)
 bool Network::Disconnect()
 {
   Socket *tmp = this->s;
-  IRCProto *ptmp = this->ircproto;
+  Bot *bot = this->b;
   this->disconnecting = true;
   this->s = NULL;
-  this->ircproto = NULL;
-  delete ptmp;
+  this->b = NULL;
+  delete bot;
   delete tmp;
   return true;
 }
@@ -58,7 +55,7 @@ bool Network::Disconnect()
 bool Network::Disconnect(const Flux::string &buf)
 {
   if(!buf.empty() && this->s)
-    this->ircproto->quit(buf);
+    this->b->ircproto->quit(buf);
   this->Disconnect();
   return true;
 }
@@ -70,14 +67,6 @@ bool Network::Connect()
   if(!this->s)
     new NetworkSocket(this);
   return true;
-}
-
-Bot *Network::findbot(const Flux::string &nick)
-{
-  auto it = this->bots.find(nick);
-  if(it != this->bots.end())
-    return it->second;
-  return NULL;
 }
 
 Network *FindNetwork(const Flux::string &name)
@@ -108,6 +97,7 @@ void ReconnectTimer::Tick(time_t)
   }
   catch (const SocketException &e)
   {
+    n->s = NULL; // Does this memleak?
     Log() << "Connection to " << n->name << " [" << n->hostname << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << this->GetSecs() << " seconds.";
   }
 }
@@ -156,8 +146,8 @@ void NetworkSocket::OnConnect()
   Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << ']';
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
   new IRCProto(this->net); // Create the new protocol class for the network
-  Bot *b = new Bot(this->net, Config->NicknamePrefix+value_cast<Flux::string>(randint(1, 100)), Config->Ident, Config->Realname);
-  b->SendUser();
+  new Bot(this->net, Config->NicknamePrefix+value_cast<Flux::string>(randint(1, 100)), Config->Ident, Config->Realname);
+  this->net->b->SendUser();
   this->ProcessWrite();
 }
 

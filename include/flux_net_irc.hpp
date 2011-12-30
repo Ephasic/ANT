@@ -6,7 +6,6 @@
 #include "xmlfile.h"
 #include "network.h" //We'll solve includes later
 #include "bot.h"
-// IRCProto *ircproto;
 BotConfig *Config;
 Network *FluxNet;
 GlobalProto *GProto;
@@ -120,12 +119,12 @@ void restart(const Flux::string &reason){
     Network *n = it.second;
     if(reason.empty()){
       Log() << "Restarting: No Reason";
-      if(n->ircproto)
-	n->ircproto->quit("Restarting: No Reason");
+      if(n->b->ircproto)
+	n->b->ircproto->quit("Restarting: No Reason");
     }else{
       Log() << "Restarting: " << reason;
-      if(n->ircproto)
-	n->ircproto->quit("Restarting: %s", reason.c_str());
+      if(n->b->ircproto)
+	n->b->ircproto->quit("Restarting: %s", reason.c_str());
     }
   }
   chdir(CurrentPath);
@@ -186,7 +185,6 @@ void startup(int argc, char** argv, char *envp[]) {
   SET_SEGV_LOCATION();
   InitSignals();
   Config = NULL;
-//   ircproto = NULL;
   my_av = argv;
   my_envp = envp;
   starttime = time(NULL); //for bot uptime

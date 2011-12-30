@@ -38,8 +38,8 @@ User *Channel::finduser(Network *net, const Flux::string &usr)
     return it->first;
   return NULL;
 }
-void Channel::SendJoin(){ this->n->ircproto->join(this->name); this->SendWho(); }
-// void Channel::SendPart(){ this->n->ircproto->part(this->name); }
+void Channel::SendJoin(){ this->n->b->ircproto->join(this->name); this->SendWho(); }
+// void Channel::SendPart(){ this->n->b->ircproto->part(this->name); }
 void Channel::AddUser(User *u) { if(u) this->UserList[u] = this; }
 void Channel::DelUser(User *u)
 {
@@ -47,7 +47,7 @@ void Channel::DelUser(User *u)
   if(it != UserList.end())
     UserList.erase(it);
 }
-void Channel::SendPart(const Flux::string &reason) { this->n->ircproto->part(this->name, reason); }
+void Channel::SendPart(const Flux::string &reason) { this->n->b->ircproto->part(this->name, reason); }
 void Channel::SendPart(const char *fmt, ...){
   if(fmt){
     char buffer[BUFSIZE] = "";
@@ -59,7 +59,7 @@ void Channel::SendPart(const char *fmt, ...){
   }
 }
 
-void Channel::SendMessage(const Flux::string &message){ this->n->ircproto->privmsg(this->name, message); }
+void Channel::SendMessage(const Flux::string &message){ this->n->b->ircproto->privmsg(this->name, message); }
 void Channel::SendMessage(const char *fmt, ...){
   if(fmt){
     char buffer[BUFSIZE] = "";
@@ -71,7 +71,7 @@ void Channel::SendMessage(const char *fmt, ...){
   }
 }
 
-void Channel::SendAction(const Flux::string &message) { this->n->ircproto->action(this->name, message); }
+void Channel::SendAction(const Flux::string &message) { this->n->b->ircproto->action(this->name, message); }
 void Channel::SendAction(const char *fmt, ...){
   if(fmt){
     char buffer[BUFSIZE] = "";
@@ -83,7 +83,7 @@ void Channel::SendAction(const char *fmt, ...){
   }
 }
 
-void Channel::SendNotice(const Flux::string &message){ this->n->ircproto->notice(this->name, message); }
+void Channel::SendNotice(const Flux::string &message){ this->n->b->ircproto->notice(this->name, message); }
 void Channel::SendNotice(const char *fmt, ...){
   if(fmt){
     char buffer[BUFSIZE] = "";
@@ -95,7 +95,7 @@ void Channel::SendNotice(const char *fmt, ...){
   }
 }
 
-void Channel::SendWho(){ this->n->ircproto->who(this->name); }
+void Channel::SendWho(){ this->n->b->ircproto->who(this->name); }
 /****************************************************************/
 void QuitUser(Network *n, User *u)
 {

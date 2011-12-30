@@ -1,5 +1,6 @@
 #include "includes.h"
 #include "module.h"
+#include "bot.h"
 
 /** Segmentation Fault Handler
  * \fn void HandleSegfault(module *m)
@@ -111,7 +112,7 @@ void sigact(int sig)
       quitmsg = "Recieved Signal SIGTERM, exiting..";
       Log(LOG_RAWIO) << quitmsg;
       for(auto it : Networks) 
-        it.second->ircproto->quit(quitmsg);
+        it.second->b->ircproto->quit(quitmsg);
       quitting = true;
       break;
     default:
