@@ -18,3 +18,24 @@ Removed removeCommand
 Made Flux::string::strip() constant so it may be used mid-line
 fixed getpid() function not defined in windows code (even though we dont compile in windows yet)
 Added COMPILED_NAME macro from CMake
+Fixed lots of issues with socket engine and network class
+Fixed bot not rejoining on kick
+Added Bot Class
+Added XML-RPC module
+Added m_dbplain module
+Removed many Navn specific commands that arent needed
+Bot Class now inherits from User class
+Removed clock.cpp
+Removed many config variables not used by the Core
+Ignore SIGPIPE
+Added ForwardResolution so we can resolve hostnames
+Added Send_Global
+Added Global Protocol class
+Moved IRCProto to Bot class
+Added Debug and Release builds
+Fixed sockets starting dead, causing instant connections to be impossible.
+Fixed m_ping module sending pings twice
+Added GetPeerIP to get the ip address of a peer on a listen/client socket using a file descriptor
+Moved most global maps into Network Class
+Fixed throwing CoreExceptions in the socket engine when we reconnect to a network
+Added ping timeout function for multiple networks
