@@ -62,6 +62,7 @@ public:
   Flux::string Modules;
   Flux::string xmlrpcbindip;
   int xmlrpcport;
+  time_t xmlrpctimeout;
   bool xmlrpcipv6;
   bool UseIPv6;
   bool dbforce;

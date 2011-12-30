@@ -34,6 +34,14 @@ const Flux::string HTTPREQUEST = "<center><h1>ANT Commit system version %s</h1><
 "Channel: <FONT COLOR=\"Green\">#Commits</FONT></br>"
 "Channel: <FONT COLOR=\"Green\">#Computers</FONT></br></center>";
 
+class WaitTimer : public Timer
+{
+  Socket *s;
+public:
+  WaitTimer(Socket *ss):Timer(Config->xmlrpctimeout, time(NULL)), s(ss) { Log(LOG_TERMINAL) << "WAIT TIMER!"; }
+  void Tick(time_t) { s->SetDead(true); }
+};
+
 class xmlrpcclient;
 class xmlrpclistensocket;
 std::vector<xmlrpclistensocket*> listen_sockets;
@@ -80,8 +88,8 @@ public:
       this->Write("DATE: "+do_strftime(time(NULL)));
       this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
       this->Write(page);
+      this->ProcessWrite();
       Log(LOG_TERMINAL) << "HTTP GET Request.";
-      return false; //Close the connection.
     }
     else if((message.search_ci("POST") && message.search_ci("HTTP/1."))) 
     { //This is a commit
@@ -110,6 +118,7 @@ public:
 	this->Write("DATE: "+do_strftime(time(NULL)));
 	this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
 	this->HandleMessage();
+	this->ProcessWrite();
 	return false; //Close the connection.
       }
     }
@@ -127,6 +136,7 @@ public:
       Log(LOG_TERMINAL) << "Unknown: " << message;
       return false; //Close the connection.
     }
+    this->ProcessWrite();
     return true;
   }
   bool GetData(Flux::string&, Flux::string&);
@@ -136,7 +146,9 @@ public:
 ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 {
   Log(LOG_DEBUG) << "[XML-RPC] Accepting connection from " << addr.addr();
-  return new xmlrpcclient(this, fd, addr);
+  ClientSocket *c = new xmlrpcclient(this, fd, addr);
+  new WaitTimer(c);
+  return c;
 }
 
 class module;
