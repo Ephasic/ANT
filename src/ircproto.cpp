@@ -14,7 +14,7 @@ void IRCProto::Raw(const char *fmt, ...)
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
   va_end(args);
-  if(this->net->s && this->net->s->IsConnected()){
+  if(this->net && this->net->s && this->net->s->IsConnected()){
     this->net->s->Write(Flux::string(buffer));
     this->net->s->ProcessWrite();
   }
