@@ -1,6 +1,17 @@
+/* Arbitrary Navn Tool -- Seperator Streams
+ * 
+ * (C) 2011-2012 Flux-Net
+ * Contact us at Dev@Flux-Net.net
+ *
+ * Please read COPYING and README for further details.
+ *
+ * Based on the original code of CIA.vc by Micah Dowty
+ * Based on the original code of Anope by The Anope Team.
+ */
+
 #include "flux.h"
 #include "extern.h"
-/* All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html) */
+
 /**
  *\file  Sepstream.cpp 
  *\brief Contains the Seperator Stream class.

@@ -1,5 +1,13 @@
-/* SocketException.h */
-/* All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html) */
+/* Arbitrary Navn Tool -- Exceptions
+ * 
+ * (C) 2011-2012 Flux-Net
+ * Contact us at Dev@Flux-Net.net
+ *
+ * Please read COPYING and README for further details.
+ *
+ * Based on the original code of CIA.vc by Micah Dowty
+ * Based on the original code of Anope by The Anope Team.
+ */
 /**
  *\file  SocketException.h
  *\brief Contains the Exception throw classes.
@@ -7,20 +15,6 @@
 #ifndef SOCKET_EXCEPTION_H
 #define SOCKET_EXCEPTION_H
 #include "flux.h"
-/** SocketExceptions are to be thrown with anything Socket related
- * Throws Socket Exception
- * @param throw SocketException(message)
- */
-// class SocketException
-// {
-//  public:
-//   SocketException(Flux::string s):m_s(s) {};
-//   ~SocketException(){};
-// 
-//   Flux::string description() { return m_s; }
-//  private:
-//   Flux::string m_s;
-// };
 
 /**CoreExceptions are to be thrown with everything else
  * Throws Core Exception

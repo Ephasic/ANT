@@ -1,3 +1,14 @@
+/* Arbitrary Navn Tool -- Windows Specific Routines and Fixes.
+ * 
+ * (C) 2011-2012 Flux-Net
+ * Contact us at Dev@Flux-Net.net
+ *
+ * Please read COPYING and README for further details.
+ *
+ * Based on the original code of CIA.vc by Micah Dowty
+ * Based on the original code of Anope by The Anope Team.
+ */
+
 #ifdef _WIN32
 #include "windows_navn.h"
 static WSADATA wsa;

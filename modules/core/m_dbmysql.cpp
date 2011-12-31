@@ -24,7 +24,7 @@ public:
   void OnLoad()
   {
     Log() << "[MySQL] Loading Databases.";
-    Read()
+    Read();
   }
   
   void OnDatabasesWrite(void (*Write)(const char*, ...))
