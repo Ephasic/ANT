@@ -16,7 +16,8 @@ ANT 1.0.0
   [X] Network class for handling network information
 
 [+] Add Database/User accounts type system for metadata
-  [ ] MySQL Backend.
+  [+] MySQL Backend.
+  [X] File based Backend
   [ ] Add E-Mail handling
   [ ] Add lists of networks, channels, etc.
   [+] Add Commit processing system

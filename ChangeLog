@@ -39,3 +39,6 @@ Added GetPeerIP to get the ip address of a peer on a listen/client socket using 
 Moved most global maps into Network Class
 Fixed throwing CoreExceptions in the socket engine when we reconnect to a network
 Added ping timeout function for multiple networks
+Removed Clock.h
+Added m_dbmysql module
+
