@@ -6,14 +6,12 @@
  *
  * Based on the original code of Epona by Lara.
  * Based on the original code of Services by Andy Church.
- * All code is licensed under GNU General Public License GPL v3 (http://www.gnu.org/licenses/gpl.html)
  */
 
 #ifndef TIMERS_H
 #define TIMERS_H
 
 #include "includes.h"
-#include "clock.h"
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
