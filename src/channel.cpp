@@ -23,8 +23,7 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   this->name = nname;
   this->creation_time = ts;
   this->topic_time = 0;
-  if(!this->n->s || !this->n->s->IsConnected())
-    JoinBuffer[net] = this;
+  JoinBuffer[net] = this;
   this->n->ChanMap[this->name] = this;
   Log(LOG_DEBUG) << "Created new channel '" << nname << "' on " << net->name;
 }

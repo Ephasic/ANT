@@ -223,7 +223,7 @@ void process(Network *n, const Flux::string &buffer){
       }
     }
   }
-  if(command.is_pos_number_only()) { FOREACH_MOD(I_OnNumeric, OnNumeric((int)command, n)); }
+  if(command.is_pos_number_only()) { FOREACH_MOD(I_OnNumeric, OnNumeric((int)command, n, params)); }
   if(command.equals_cs("PING")){ FOREACH_MOD(I_OnPing, OnPing(params, n)); }
   if(command.equals_cs("PONG")){ FOREACH_MOD(I_OnPong, OnPong(params, n)); }
   if(command.equals_cs("KICK")){ FOREACH_MOD(I_OnKick, OnKick(u, FindUser(n, params[1]), FindChannel(n, params[0]), params[2])); }

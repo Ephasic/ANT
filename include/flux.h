@@ -214,7 +214,7 @@ inline bool operator!=(const base_string &leftval, const ci::string &rightval)
  * most function programming for the string class goes to The Anope development team but
  * a lot (casting operator for example) is done by Justasic
  */
-namespace Flux{
+namespace Flux {
   /** This class was ported from Anope IRC services to work with Navn
    * most function programming credit goes to The Anope Team
    * See http://tinyurl.com/6btqne4
@@ -590,12 +590,15 @@ namespace Flux{
     inline operator long() { return value_cast<long>(this->_string); }
     /* Cast into a unsigned integer */
     inline operator unsigned() { return value_cast<unsigned>(this->_string); }
+    
+    template<typename T> inline T operator ~() const { return value_cast<T>(this->_string); }
 
     friend std::ostream &operator<<(std::ostream &os, const string &_str);
     friend std::istream &operator>>(std::istream &os, string &_str);
   }; //end of string class
   template<typename T> class map : public std::map<string, T> { };
   template<typename T> class insensitive_map : public std::map<string, T, ci::less> { };
+  typedef std::map<string, std::shared_ptr<std::stringstream>> SerializeMap;
   typedef std::vector<string> vector;
   extern CoreExport Flux::string Sanitize(const Flux::string&);
   extern CoreExport Flux::string RandomString(size_t);

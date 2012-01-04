@@ -10,6 +10,7 @@
  */
 
 #include "flux_net_irc.hpp"
+// #include <mysql/mysql.h>
 
 void Read(module *m = NULL)
 {

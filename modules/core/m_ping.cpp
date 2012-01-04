@@ -17,9 +17,11 @@ public:
   void Tick(time_t)
   {
     Log(LOG_RAWIO) << "Wait Timer Tick.";
-    for(auto it : Networks)
+    for(auto it : Networks){
+      JoinChansInBuffer(it.second);
       if(it.second->s && it.second->s->IsConnected() && it.second->s->SentPing)
 	it.second->s->SetDead(true); // Ping Timeout, let the SocketEngine class handle this :P
+    }
   }
 };
 

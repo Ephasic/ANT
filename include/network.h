@@ -45,6 +45,7 @@ public:
   Bot *b;
   Flux::insensitive_map<User*> UserNickList;
   Flux::insensitive_map<Channel*> ChanMap;
+  Flux::string ircdversion;
   Flux::string name;
   Flux::string hostname;
   Flux::string port;

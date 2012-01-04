@@ -77,17 +77,9 @@ public:
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
     User *u = source.u;
-    Flux::string pass = params[1];
-    
-    if(pass == password){
-      source.Reply("Quitting..");
-      Log(u) << "quit the bot with password: \"" << password << "\"";
-      source.n->b->ircproto->quit("Requested From \2%s\17. Pass: \00320%s\017", u->nick.c_str(), password.c_str());
-      quitting = true;
-    }else{
-      source.Reply(ACCESS_DENIED);
-      Log(u) << "Attempted to quit the bot";
-    }
+    source.Reply("Quitting..");
+    Log(u) << "quit the bot from network: \"" << source.n->name << "\"";
+    source.n->Disconnect(fsprintf("Requested From \2%s\17.", u->nick.c_str()));
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
@@ -143,10 +135,18 @@ public:
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
   }
-  void OnNumeric(int i, Network *n)
+  void OnNumeric(int i, Network *n, Flux::vector &params)
   {
     if((i == 4)){
-      //ircproto->mode(Config->BotNick, "+B"); get bot mode?
+      /* Numeric 004
+       * params[0] = Bots nickname
+       * params[1] = servername
+       * params[2] = ircd version
+       * params[3] = user modes
+       * params[4] = channel modes
+       */
+      if(params[3].search('B'))
+	n->b->ircproto->mode(n->b->nick, "+B"); //FIXME: get bot mode?
       sepstream cs(Config->Channel, ',');
       Flux::string tok;
       while(cs.GetToken(tok))
@@ -155,13 +155,9 @@ public:
 	Channel *c = new Channel(n, tok);
 	c->SendJoin();
       }
+      n->servername = params[1];
+      n->ircdversion = params[2];
       JoinChansInBuffer(n);
-    }
-    if((i == 376))
-    {
-      Log(LOG_TERMINAL) << "\033[22;31mStarted with PID \033[22;32m" << getpid() << "\033[22;36m";
-      Log(LOG_TERMINAL) << "\033[22;34mSession Password: \033[01;32m" << password << "\033[22;36m";
-      started = true;
     }
   }
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
