@@ -10,6 +10,7 @@
  */
 
 #include "user.h"
+#include "bot.h"
 #include "module.h"
 
 /** 
