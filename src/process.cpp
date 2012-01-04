@@ -19,7 +19,7 @@
  * \param chan The channel we're processing
  */
 void ProcessJoin(CommandSource &source, const Flux::string &chan){
-    std::vector<Flux::string> &params = source.params;
+    Flux::vector &params = source.params;
     if(params.size() < 7)
       return;
     Flux::string channel = params[1];
@@ -27,7 +27,8 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan){
     Flux::string Host = params[3];
     Flux::string Server = params[4];
     Flux::string Nickname = params[5];
-    Flux::string opstatus = params[6];
+    Flux::string flags = params[6];
+    Flux::string hops = params[7].substr(0,1);
     Flux::string realname = params[7].erase(0,2);
     /*******************************************************/
     User *u = FindUser(source.n, Nickname);
@@ -54,8 +55,7 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan){
  * \param Flux::string receiver
  * \param Flux::string Command sent to the bot in raw form
  */
-void ProcessCommand(CommandSource &Source, std::vector<Flux::string> &params2,
-		    const Flux::string &receiver, const Flux::string &command)
+void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::string &receiver, const Flux::string &command)
 {
   SET_SEGV_LOCATION();
   User *u = Source.u;
@@ -210,7 +210,7 @@ void process(Network *n, const Flux::string &buffer){
   }
   if(command == "PART"){
     FOREACH_MOD(I_OnPart, OnPart(u, c, params[0]));
-    if(IsValidChannel(receiver) && c && u /*&& u->nick == Config->BotNick*/)
+    if(IsValidChannel(receiver) && c && u && u == n->b)
      delete c; //This should remove the channel from all users if the bot is parting..
     else{
      if(u)
@@ -236,7 +236,7 @@ void process(Network *n, const Flux::string &buffer){
   if(command.equals_cs("MODE")) {
     if(IsValidChannel(params[0]) && params.size() == 2) { FOREACH_MOD(I_OnChannelMode, OnChannelMode(u, c, params[1])); }
     else if(IsValidChannel(params[0]) && params.size() == 3) { FOREACH_MOD(I_OnChannelOp, OnChannelOp(u, c, params[1], params[2])); }
-//     else if(params[0] == Config->BotNick) { FOREACH_MOD(I_OnUserMode, OnUserMode(u, params[0], params[1])); }
+    else if(params[0] == n->b->nick) { FOREACH_MOD(I_OnUserMode, OnUserMode(u, params[0], params[1])); }
   }
   if(command.equals_cs("JOIN")){
     if(!u && n && (!nickname.empty() || !uident.empty() || !uhost.empty()))
@@ -247,9 +247,9 @@ void process(Network *n, const Flux::string &buffer){
       u->AddChan(c);
     else if(!c->finduser(n, u->nick))
       c->AddUser(u);
-//     else if(u->nick != Config->BotNick){
+    else if(u != n->b){
       FOREACH_MOD(I_OnJoin, OnJoin(u, c));
-//     }
+    }
   }
   /**************************************/
   CommandSource Source;

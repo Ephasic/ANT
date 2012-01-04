@@ -135,7 +135,7 @@ public:
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
   }
-  void OnNumeric(int i, Network *n, Flux::vector &params)
+  void OnNumeric(int i, Network *n, const Flux::vector &params)
   {
     if((i == 4)){
       /* Numeric 004
