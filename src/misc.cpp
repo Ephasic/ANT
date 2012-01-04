@@ -98,25 +98,6 @@ Flux::string Flux::Sanitize(const Flux::string &string)
   return ret.c_str();
 }
 /**
- * \fn Flux::string make_pass()
- * \brief Makes a random password
- * This generates a 5 number random password for the bots
- * quit and other password protected commands.
- * \return A Flux::string containing the 5 digit password.
- */
-Flux::string make_pass(){
-  int p1,p2,p3,p4,p5;
-  srand(time(NULL));
-  p1 = rand()%10;
-  p2 = rand()%10;
-  p3 = rand()%10;
-  p4 = rand()%10;
-  p5 = rand()%10;
-  std::stringstream pass_ss;
-  pass_ss << p1 << p2 << p3 << p4 << p5;
-  return pass_ss.str();
-}
-/**
  * \fn bool IsValadChannel(const Flux::string nerp)
  * This function returns if the channel is valid or not.
  * \param nerp Channel sring to be tested.

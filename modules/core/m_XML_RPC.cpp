@@ -38,12 +38,12 @@ Flux::string SanitizeXML(const Flux::string &str)
   return ret;
 }
 // Simple web page incase a web browser decides to go to the link
-const Flux::string HTTPREQUEST = "<center><h1>ANT Commit system version %s</h1></center>"
-"<center><h4>This is the address for XML-RPC commits</h4>"
-"<p>This will not provide XML-RPC requests and ONLY uses POST to commit the data (same as most <a href=\"http://cia.vc/doc/clients/\">CIA.vc scripts</a> work), if you are looking for the site, please see <a href=\"http://www.Flux-Net.net/\">Flux-Net.net</a> for the sites location or optionaly connect to Flux-Net IRC for support:</p>"
-"<a href=\"irc://irc.flux-net.net/Computers\"><FONT COLOR=\"red\">irc.flux-net.net</FONT>:<FONT COlOR=\"Blue\">6667</FONT></a></br>"
-"Channel: <FONT COLOR=\"Green\">#Commits</FONT></br>"
-"Channel: <FONT COLOR=\"Green\">#Computers</FONT></br></center>";
+const Flux::string HTTPREQUEST = "<center><h1>ANT Commit system version %s</h1></center>\n"
+"<center><h4>This is the address for XML-RPC commits</h4>\n"
+"<p>This will not provide XML-RPC requests and ONLY uses POST to commit the data (same as most <a href=\"http://cia.vc/doc/clients/\">CIA.vc scripts</a> work), if you are looking for the site, please see <a href=\"http://www.Flux-Net.net/\">Flux-Net.net</a> for the sites location or optionaly connect to Flux-Net IRC for support:</p>\n"
+"<a href=\"irc://irc.flux-net.net/Computers\"><FONT COLOR=\"red\">irc.flux-net.net</FONT>:<FONT COlOR=\"Blue\">6667</FONT></a></br>\n"
+"Channel: <FONT COLOR=\"Green\">#Commits</FONT></br>\n"
+"Channel: <FONT COLOR=\"Green\">#Computers</FONT></br></center>\n";
 
 class WaitTimer : public Timer
 {
@@ -89,14 +89,14 @@ public:
   {
     Flux::string message = SanitizeXML(m);
     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
-    if(message.search_ci("GET") && message.search_ci("HTTP/1."))
+    if(message.search_ci("GET") && message.search_ci("HTTP/1.") && !message.search_ci("/favicon.ico"))
     { //If connection is HTTP GET request
-    const Flux::string page = fsprintf(HTTPREQUEST, Flux::string(VERSION_FULL).c_str());
+    const Flux::string page = fsprintf(HTTPREQUEST, VERSION_FULL);
       this->Write("HTTP/1.0 200 OK");
       this->Write("CONNECTION: CLOSE");
       this->Write("CONTENT-TYPE: TEXT/HTML");
       this->Write("CONTENT-LENGTH: " + page.length());
-      this->Write("DATE: "+do_strftime(time(NULL)));
+      this->Write("DATE: "+do_strftime(time(NULL), true));
       this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
       this->Write(page);
       this->ProcessWrite();
@@ -126,7 +126,7 @@ public:
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
 	this->Write("HTTP/1.1 200 OK");
 	this->Write("CONNECTION: CLOSE");
-	this->Write("DATE: "+do_strftime(time(NULL)));
+	this->Write("DATE: "+do_strftime(time(NULL), true));
 	this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
 	this->HandleMessage();
 	this->ProcessWrite();
@@ -142,13 +142,18 @@ public:
       return true;
     else
     {
-      this->Write("ERROR: Unknown connection from "+GetPeerIP(this->GetFD()));
+      this->Write("ERROR: Unknown connection from "+GetPeerIP(this->GetFD())+"\n");
       this->ProcessWrite(); //Write the data
       Log(LOG_TERMINAL) << "Unknown: " << message;
       return false; //Close the connection.
     }
     this->ProcessWrite();
     return true;
+  }
+  bool ProcessWrite()
+  {
+    Log(LOG_TERMINAL) << "Process Write: " << this->WriteBuffer;
+    return BufferedSocket::ProcessWrite() && ClientSocket::ProcessWrite();
   }
   bool GetData(Flux::string&, Flux::string&);
   void HandleMessage();
