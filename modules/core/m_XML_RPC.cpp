@@ -86,6 +86,7 @@ class xmlrpcclient : public ClientSocket, public BufferedSocket
   bool in_query, in_header, IsXML;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), IsXML(false) {}
+  
   bool Read(const Flux::string &m)
   {
     Flux::string message = SanitizeXML(m);
@@ -113,10 +114,9 @@ public:
     }
     else if(this->in_header && message.search_ci("Content-Type: text/xml"))
       this->IsXML = true;
-    else if(message.search_ci("<"))
+    else if(message.search_ci("<?xml"))
     {
-      if(message.search_ci("<?xml"))
-	this->in_query = this->IsXML = true;
+      this->in_query = this->IsXML = true;
       this->in_header = false;
     }
     else if(this->in_query)
@@ -130,7 +130,7 @@ public:
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
 	this->Write("HTTP/1.1 200 OK");
 	this->Write("CONNECTION: CLOSE");
-	this->Write("DATE: "+do_strftime(time(NULL), true)+"\n");
+	this->Write("DATE: "+do_strftime(time(NULL), true));
 	this->Write("SERVER: ANT Commit System version " + systemver);
 	this->HandleMessage();
 	this->ProcessWrite();
@@ -178,6 +178,7 @@ void xmlrpcclient::HandleMessage()
   if(this->RawCommitXML.empty())
     return;
   Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
+  Log(LOG_TERMINAL) << "COMMIT!!!!! \"\"" << this->RawCommitXML << "\"\"";
   XMLFile xf(this->RawCommitXML, 1);
   
   /* This code was based off the commit in this script: http://cia.vc/clients/git/ciabot.bash */
@@ -232,6 +233,9 @@ void xmlrpcclient::HandleMessage()
   msg.project = project;
   msg.branch = branch;
   msg.module = module;
+
+  for(auto IT : Networks) for(auto it : IT.second->ChanMap)
+      msg.Channels.push_back(it.second);
   
   /* Announce to other modules for commit announcement */
   FOREACH_MOD(I_OnCommit, OnCommit(msg));

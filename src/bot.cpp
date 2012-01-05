@@ -69,12 +69,14 @@ Bot::~Bot()
 
 void Bot::AnnounceCommit(CommitMessage &msg)
 {
+  Log(LOG_DEBUG) << "AnnounceCommit Called.";
   for(auto it : msg.Channels)
   {
     Channel *c = it;
     Flux::string files = CondenseVector(msg.Files);
     std::stringstream ss;
     ss << RED << BOLD << msg.project+" " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << files;
+    Log(LOG_DEBUG) << "BLAH! " << ss.str();
     c->SendMessage(ss.str());
 //     c->SendMessage(RED+BOLD+"%s: "+NORMAL+ORANGE+"%s * "+NORMAL+YELLOW+"%s "+NORMAL+BOLD+"| "+NORMAL+LIGHT_BLUE+"%s"+NORMAL+": %s", msg.project.c_str(), msg.author.c_str(), msg.revision.c_str(), files.c_str());
   }
