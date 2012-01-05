@@ -168,8 +168,9 @@ void NetworkSocket::OnError(const Flux::string &buf)
   Log(LOG_TERMINAL) << "Unable to connect to " << this->net->name << " (" << this->net->hostname << ':' << this->net->port << ')' << (!buf.empty()?(": " + buf):"");
 }
 
-void NetworkSocket::OnProcessWrite()
+bool NetworkSocket::ProcessWrite()
 {
   Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << this->WriteBuffer;
+  return ConnectionSocket::ProcessWrite() && BufferedSocket::ProcessWrite();
 }
 /**********************************************************/

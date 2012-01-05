@@ -38,7 +38,8 @@ Flux::string SanitizeXML(const Flux::string &str)
   return ret;
 }
 // Simple web page incase a web browser decides to go to the link
-const Flux::string HTTPREQUEST = "<center><h1>ANT Commit system version %s</h1></center>\n"
+const Flux::string systemver = value_cast<Flux::string>(VERSION_FULL);
+const Flux::string HTTPREQUEST = "<center><h1>ANT Commit system version "+systemver+"</h1></center>\n"
 "<center><h4>This is the address for XML-RPC commits</h4>\n"
 "<p>This will not provide XML-RPC requests and ONLY uses POST to commit the data (same as most <a href=\"http://cia.vc/doc/clients/\">CIA.vc scripts</a> work), if you are looking for the site, please see <a href=\"http://www.Flux-Net.net/\">Flux-Net.net</a> for the sites location or optionaly connect to Flux-Net IRC for support:</p>\n"
 "<a href=\"irc://irc.flux-net.net/Computers\"><FONT COLOR=\"red\">irc.flux-net.net</FONT>:<FONT COlOR=\"Blue\">6667</FONT></a></br>\n"
@@ -89,18 +90,21 @@ public:
   {
     Flux::string message = SanitizeXML(m);
     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
-    if(message.search_ci("GET") && message.search_ci("HTTP/1.") && !message.search_ci("/favicon.ico"))
+    if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
-    const Flux::string page = fsprintf(HTTPREQUEST, VERSION_FULL);
+      int len = HTTPREQUEST.size();
+      bool isfavicon = message.search_ci("/favicon.ico");
       this->Write("HTTP/1.0 200 OK");
       this->Write("CONNECTION: CLOSE");
       this->Write("CONTENT-TYPE: TEXT/HTML");
-      this->Write("CONTENT-LENGTH: " + page.length());
+      this->Write(fsprintf("CONTENT-LENGTH: %i", isfavicon?0:len));
       this->Write("DATE: "+do_strftime(time(NULL), true));
-      this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
-      this->Write(page);
+      this->Write("SERVER: ANT Commit System version " + systemver);
+      this->Write(" ");
+      this->Write(isfavicon?"":HTTPREQUEST);
       this->ProcessWrite();
       Log(LOG_TERMINAL) << "HTTP GET Request.";
+      return true;
     }
     else if((message.search_ci("POST") && message.search_ci("HTTP/1."))) 
     { //This is a commit
@@ -126,8 +130,8 @@ public:
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
 	this->Write("HTTP/1.1 200 OK");
 	this->Write("CONNECTION: CLOSE");
-	this->Write("DATE: "+do_strftime(time(NULL), true));
-	this->Write("SERVER: ANT Commit System version " + Flux::string(VERSION_FULL));
+	this->Write("DATE: "+do_strftime(time(NULL), true)+"\n");
+	this->Write("SERVER: ANT Commit System version " + systemver);
 	this->HandleMessage();
 	this->ProcessWrite();
 	return false; //Close the connection.
@@ -136,7 +140,7 @@ public:
     else if(!this->in_query && !this->in_header && !this->IsXML)
     {
       Log(LOG_TERMINAL) << "Invalid HTTP POST.";
-      return false; //Invalid HTTP POST, not XML-RPC
+      //return false; //Invalid HTTP POST, not XML-RPC
     }
     else if(this->in_header) //We're still in the header, but don't need the junk.
       return true;

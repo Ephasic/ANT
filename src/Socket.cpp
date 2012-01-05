@@ -706,7 +706,6 @@ bool BufferedSocket::ProcessRead()
 
 bool BufferedSocket::ProcessWrite()
 {
-  this->OnProcessWrite();
   int count = this->IO->Send(this, this->WriteBuffer);
   if (count <= -1)
     return false;
@@ -716,7 +715,6 @@ bool BufferedSocket::ProcessWrite()
   
   return true;
 }
-void BufferedSocket::OnProcessWrite() {}
 bool BufferedSocket::Read(const Flux::string &buf)
 {
   return false;
