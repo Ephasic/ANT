@@ -122,19 +122,7 @@ Flux::string fsprintf(const char *fmt, ...)
   }else
     return fmt;
 }
-Flux::string fsprintf(const Flux::string &msg, ...)
-{
-  if(!msg.empty())
-  {
-    va_list args;
-    char buf[BUFSIZE];
-    va_start(args, msg.c_str());
-    vsnprintf(buf, sizeof(buf), msg.c_str(), args);
-    va_end(args);
-    return buf;
-  }else
-    return msg;
-}
+
 /**
   * \fn Flux::string isolate(char begin, char end, Flux::string msg)
   * \brief Isolates a Flux::string between two characters
