@@ -84,7 +84,7 @@ export ECHO2 ECHO2SUF
 # Init values
 ###########################################################################
 
-INSTDIR=$HOME/navn
+INSTDIR=$HOME/ant
 USE_RUN_CC_PL="no"
 DEBUG="yes"
 EXTRA_CONFIG_ARGS=
@@ -97,7 +97,7 @@ SOURCE_DIR=`dirname $0`
 
 while [ $# -ge 1 ] ; do
 	if [ $1 = "--help" ] ; then
-		echo "Config utility for Navn"
+		echo "Config utility for ANT"
 		echo "------------------------"
 		echo "Syntax: ./Config [options]"
 		echo "-nocache     Ignore settings saved in config.cache"
@@ -120,7 +120,7 @@ while [ $# -ge 1 ] ; do
 	shift 1
 done
 
-echo "Beginning Navn compile configuration."
+echo "Beginning ANT compile configuration."
 echo ""
 
 ###########################################################################
