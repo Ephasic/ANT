@@ -291,6 +291,7 @@ public:
   
   void OnCommit(CommitMessage &msg)
   {
+    //FIXME: if they're no connections, buffer the message
     Log(LOG_TERMINAL) << "[XML-RPC] Fun stuff!";
     for(auto it : Networks)
       it.second->b->AnnounceCommit(msg);

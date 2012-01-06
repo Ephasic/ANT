@@ -159,6 +159,17 @@ public:
       n->ircdversion = params[2];
       JoinChansInBuffer(n);
     }
+    /* Numeric 433
+     * params[0] = *
+     * params[1] = Attempted nickname
+     * params[2] = message
+     */
+    if((i == 433))
+    {
+      
+      int num = (int)params[1].substr(Config->NicknamePrefix.size());
+      n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
+    }
   }
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
   {

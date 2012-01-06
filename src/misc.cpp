@@ -127,9 +127,13 @@ Flux::string fsprintf(const Flux::string &msg, ...)
   if(!msg.empty())
   {
     va_list args;
-    return fsprintf(msg.c_str(), args);
-  }
-  return msg;
+    char buf[BUFSIZE];
+    va_start(args, msg.c_str());
+    vsnprintf(buf, sizeof(buf), msg.c_str(), args);
+    va_end(args);
+    return buf;
+  }else
+    return msg;
 }
 /**
   * \fn Flux::string isolate(char begin, char end, Flux::string msg)
