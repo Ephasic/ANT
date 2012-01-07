@@ -175,19 +175,22 @@ public:
   {
     if(u == u->n->b)
     {
-      Log(LOG_TERMINAL) << u->nick << "|" << u->n->b->nick;
       int num = 0;
-      if(u->nick.size() >= Config->NicknamePrefix.size())
-	num = u->nick.is_pos_number_only()?(int)u->nick.substr(Config->NicknamePrefix.size()):0;
-      else
-	num = 0;
-      if((num <= 0)){
-	num++;
-	Log(LOG_TERMINAL) << num;
-	u->n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(num));
+      if(msg.search(Config->NicknamePrefix))
+      {
+	Log(LOG_TERMINAL) << "1: " << msg;
+	Flux::string end = msg.substr(Config->NicknamePrefix.size());
+	Log(LOG_TERMINAL) << "2: " << end;
+	if(end.find_first_of("0123456789") != Flux::string::npos){
+	  num = (int)end;
+	  Log(LOG_TERMINAL) << "3: " << num;
+	}
       }
+      Log(LOG_TERMINAL) << u->nick << "|" << u->n->b->nick;
+      Log(LOG_TERMINAL) << num;
+      if((num <= 0))
+	u->n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
     }
-    u->SetNewNick(msg);
   }
   
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)

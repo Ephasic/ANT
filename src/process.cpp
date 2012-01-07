@@ -200,7 +200,7 @@ void process(Network *n, const Flux::string &buffer){
     FOREACH_MOD(I_OnCTCP, OnCTCP(nickname, params2, n));
     return; //Dont allow the rest of the system to process ctcp's as it will be caught by the command handler.
   }
-  if(command.equals_cs("NICK") && u) { FOREACH_MOD(I_OnNickChange, OnNickChange(u, params[0])); }
+  if(command.equals_cs("NICK") && u) { FOREACH_MOD(I_OnNickChange, OnNickChange(u, params[0])); u->SetNewNick(params[0]); }
   if(!u && !FindUser(n, nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty())){
     if(!nickname.search('.') && n)
       u = new User(n, nickname, uident, uhost);
