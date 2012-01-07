@@ -130,7 +130,7 @@ public:
     this->AddCommand(&cmdquit);
     this->AddCommand(&cmdrestart);
     this->AddCommand(&pid);
-    Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice };
+    Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice, I_OnNickChange };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
@@ -166,11 +166,30 @@ public:
      */
     if((i == 433))
     {
-      
       int num = (int)params[1].substr(Config->NicknamePrefix.size());
       n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
     }
   }
+
+  void OnNickChange(User *u, const Flux::string &msg)
+  {
+    if(u == u->n->b)
+    {
+      Log(LOG_TERMINAL) << u->nick << "|" << u->n->b->nick;
+      int num = 0;
+      if(u->nick.size() >= Config->NicknamePrefix.size())
+	num = u->nick.is_pos_number_only()?(int)u->nick.substr(Config->NicknamePrefix.size()):0;
+      else
+	num = 0;
+      if((num <= 0)){
+	num++;
+	Log(LOG_TERMINAL) << num;
+	u->n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(num));
+      }
+    }
+    u->SetNewNick(msg);
+  }
+  
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
   {
      if(kickee && kickee == c->n->b)

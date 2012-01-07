@@ -57,7 +57,7 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
   
   this->n->b = this;
   new IRCProto(this->n);
-  Log(LOG_DEBUG) << "New bot created on " << net->name << ": " << n << i << ": " << real;
+  Log(LOG_DEBUG) << "New bot created on " << net->name << ": " << ni << i << ": " << real;
 }
 
 Bot::~Bot()
