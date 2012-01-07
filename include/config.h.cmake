@@ -18,6 +18,7 @@
 #cmakedefine HAVE_SYS_SELECT_H 1
 #cmakedefine HAVE_UMASK 1
 #cmakedefine HAVE_EVENTFD 1
+#cmakedefine HAVE_MYSQL_MYSQL_H 1
 #define LIBINTL "@LIBINTL_INCLUDE@"
 
 #define VERSION_MAJOR @ant_MAJOR_VERSION@

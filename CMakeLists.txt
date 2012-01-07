@@ -251,6 +251,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "DEBUG" OR CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINF
 endif(CMAKE_BUILD_TYPE STREQUAL "DEBUG" OR CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO")
 
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
+check_include_file(mysql/mysql.h HAVE_MYSQL_MYSQL_H)
 check_include_file(strings.h HAVE_STRINGS_H)
 check_include_file(sys/select.h HAVE_SYS_SELECT_H)
 check_include_file(sys/epoll.h HAVE_SYS_EPOLL_H)

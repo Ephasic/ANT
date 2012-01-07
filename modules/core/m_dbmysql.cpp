@@ -10,7 +10,8 @@
  */
 
 #include "flux_net_irc.hpp"
-// #include <mysql/mysql.h>
+#ifdef HAVE_MYSQL_MYSQL_H
+ #include <mysql/mysql.h>
 
 void Read(module *m = NULL)
 {
@@ -69,3 +70,6 @@ public:
 };
 
 MODULE_HOOK(modmysql)
+#else
+  #pragma "You need mysql development libraries to compile this module!"
+#endif
