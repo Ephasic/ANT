@@ -2,6 +2,7 @@ Legend:
 	x = done
 	? = unsure
 	+ = in progress
+	- = not happening
 	$ = half completed
 
 
@@ -12,38 +13,40 @@ ANT 1.0.0
 
 [X] Multisocket the socket engine
   [X] Multi-Network handling
-  [?] Multi-bot handling
+  [-] Multi-bot handling
   [X] Network class for handling network information
 
 [+] Add Database/User accounts type system for metadata
   [+] MySQL Backend.
   [X] File based Backend
+  [ ] BLAKE-512+Skein-512+Tiger2 password hashing
   [ ] Add E-Mail handling
   [ ] Add lists of networks, channels, etc.
   [+] Add Commit processing system
   [+] Add Commit metadata processing
 
 [ ] Add Web Front end
-  [ ] Add event notifications (ie, kick, nick changes, etc)
-  [ ] Add accounts that should sync with MySQL
+  [ ] Add IRC event notifications (ie, kick, nick changes, etc)
+  [ ] Add accounts that should sync with Database backend.
   [ ] Add blog like CIA.vc
   [ ] Add Documentation
   [ ] Seperate C++ script/binary to handle Web Front end
-  [ ] Web Search
+  [ ] Instant Search
   [ ] Add better front page than CIA.vc (should have: Critical Announcements, themes, user themes, commit averages, last commit, etc.)
   [ ] Site Navigation that is understandable
   [ ] Buttons and designs for 'master' page should look like ubuntu-tweak.com in a way.
 
 [ ] Add Network Oper handling similar to SearchIRC's Oper handling
-  [ ] Add Channel Op's?
+  [ ] Add Channel Ops?
 
 [+] Add more event handlers (FOREACH_MOD)
 [+] Fix parts of the core that are designed for 1 network only (like events)
-[ ] Wtf is this Priority system? fix that
+[ ] Wtf is this Module Priority system? fix that
 [ ] Add buffer limiter (so freenode does not kill the bot)
 [ ] Better config format
 [+] Better startup switch management
 [ ] Better terminal Commands Parsing
+[ ] Administrative override of certian functions
 
 
 Future
