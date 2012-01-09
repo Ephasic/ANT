@@ -12,7 +12,7 @@
 /*
  * This is the module file for the XML_RPC commits, this will handle 98% of the commits the bot will process!
  */
-#include "flux_net_irc.hpp"
+#include "modules.h"
 #include "module.h"
 // Convert the XML data to something parsable.
 Flux::string SanitizeXML(const Flux::string &str)

@@ -209,7 +209,7 @@ BotConfig::BotConfig(const Flux::string &dir)
     throw ConfigException(fsprintf("Error on line %i", this->Parser->ParseError()));
  }catch(const ConfigException &e){
    if (starttime == time(NULL))
-     throw CoreException(fsprintf("Config: %s", e.GetReason()));
+     throw; //Let CoreExcepion catch it since its OnStart
    else
       Log(LOG_TERMINAL) << "Config Exception: " << e.GetReason();
    return;

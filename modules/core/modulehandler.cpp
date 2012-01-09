@@ -1,4 +1,4 @@
-#include "flux_net_irc.hpp"
+#include "modules.h"
 
 class CommandMList : public Command
 {

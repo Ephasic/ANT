@@ -8,7 +8,7 @@
  * Based on the original code of CIA.vc by Micah Dowty
  * Based on the original code of Anope by The Anope Team.
  */
-#include "flux_net_irc.hpp"
+#include "modules.h"
 /**
  * \file help.cpp Module file holding the \a help function.
  * \author Lordofsraam. Polished by Justasic.

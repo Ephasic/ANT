@@ -590,8 +590,6 @@ namespace Flux {
     inline operator long() { return value_cast<long>(this->_string); }
     /* Cast into a unsigned integer */
     inline operator unsigned() { return value_cast<unsigned>(this->_string); }
-    
-    template<typename T> inline T operator ~() const { return value_cast<T>(this->_string); }
 
     friend std::ostream &operator<<(std::ostream &os, const string &_str);
     friend std::istream &operator>>(std::istream &os, string &_str);

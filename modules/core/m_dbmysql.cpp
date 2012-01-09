@@ -9,7 +9,7 @@
  * Based on the original code of Anope by The Anope Team.
  */
 
-#include "flux_net_irc.hpp"
+#include "modules.h"
 #ifdef HAVE_MYSQL_MYSQL_H
  #include <mysql/mysql.h>
 
