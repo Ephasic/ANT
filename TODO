@@ -26,6 +26,7 @@ ANT 1.0.0
   [+] Add Commit metadata processing
 
 [ ] Add Web Front end
+  [ ] Use CPPCMS
   [ ] Add IRC event notifications (ie, kick, nick changes, etc)
   [ ] Add accounts that should sync with Database backend.
   [ ] Add blog like CIA.vc

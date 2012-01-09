@@ -313,6 +313,7 @@ else(INSTDIR)
 endif(INSTDIR)
 
 ADD_SUBDIRECTORY(modules)
+ADD_SUBDIRECTORY(web)
 ADD_SUBDIRECTORY(src)
 
 set(CONFIG_INSTALL bot.example.conf README)
