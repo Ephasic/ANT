@@ -1,4 +1,4 @@
-
+  
 #
 # CMake config
 #
@@ -230,6 +230,22 @@ if(NOT MSVC)
     if(HAVE_SOCKET_LIB)
       append_to_list(LINK_LIBS socket)
     endif(HAVE_SOCKET_LIB)
+
+    # Check if we have CPPCMS Framework for the web frontend.
+    find_package(CPPCMS)
+    if(CPPCMS_FOUND)
+      append_to_list(LINK_LIBS cppcms)
+    else(CPPCMS_FOUND)
+      message(FATAL_ERROR "CPPCMS is required for compile! look in libraries directory for library package")
+    endif(CPPCMS_FOUND)
+    # Check if we have CPPDB Database Backend for accounts, metadata storage, etc.
+    find_package(CPPDB)
+    if(CPPDB_FOUND)
+      append_to_list(LINK_LIBS cppdb)
+    else(CPPDB_FOUND)
+      message(FATAL_ERROR "CPPDB is required for compile! look in libraries directory for library package")
+    endif(CPPDB_FOUND)
+    
     # Check if inet_addr is within the nsl library (if the library exists), and add it to the linker flags if needed
     check_library_exists(nsl inet_addr "" HAVE_NSL_LIB)
     if(HAVE_NSL_LIB)
