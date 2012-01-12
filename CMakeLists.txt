@@ -313,6 +313,10 @@ endif(CMAKE_DL_LIBS)
 find_program(GREP grep)
 find_program(SH sh)
 find_program(PERL perl)
+find_program(PYTHON NAMES python2 python)
+if(NOT PYTHON)
+	message(FATAL "Can't build without Python interpreter")
+endif(NOT PYTHON)
 
 # Strip the leading and trailing spaces from the compile flags
 if(CXXFLAGS)

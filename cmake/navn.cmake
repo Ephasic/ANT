@@ -525,9 +525,10 @@ endmacro(check_functions)
 
 macro(compile_tmpl SRC TMPL)
   string(REGEX REPLACE "\\.tmpl$" ".cpp" TMPL_CPP ${SRC})
+  message(${SRC})
   add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${TMPL_CPP}
-    COMMAND ${CPPCMS_TMPL_CC} ${SRC} -o ${CMAKE_CURRENT_BINARY_DIR}/${TMPL_CPP} ${SRC}
+    OUTPUT ${TMPL_CPP}
+    COMMAND cppcms_tmpl_cc ${SRC} -o ${TMPL_CPP} ${SRC}
     DEPENDS ${SRC})
-  set(${TMPL} ${CMAKE_CURRENT_BINARY_DIR}/${TMPL_CPP})
+  set(${TMPL} ${TMPL_CPP})
 endmacro(compile_tmpl)

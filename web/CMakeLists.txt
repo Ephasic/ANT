@@ -5,7 +5,19 @@ sort_list(SRC_SRCS)
 
     set(MODULES_SRCS)
     foreach(TMPL ${SRC_SRCS})
-      compile_tmpl(${TMPL} TMPL_CPP)
+      #compile_tmpl(${CMAKE_CURRENT_SOURCE_DIR}/${TMPL} TMPL_CPP)
+      set(TMPL_SRC ${CMAKE_CURRENT_SOURCE_DIR}/${TMPL})
+
+      string(REGEX REPLACE "\\.tmpl$" ".cpp" TMPL_CPP ${TMPL_SRC})
+      message(${TMPL_SRC})
+      message("${PYTHON} ${CPPCMS_TMPL_CC} ${TMPL_SRC} -o ${TMPL_CPP} ${TMPL_SRC}")
+      add_custom_command(
+	OUTPUT ${TMPL_CPP}
+	COMMAND ${PYTHON} ${CPPCMS_TMPL_CC} ${TMPL_SRC} -o ${TMPL_CPP} ${TMPL_SRC}
+	DEPENDS ${TMPL_SRC}
+		${CPPCMS_TMPL_CC})
+
+      message(${TMPL_CPP})
       set(${MODULES_SRCS} TMPL_CPP)
     endforeach(TMPL ${SRC_SRCS})
     
