@@ -1,4 +1,5 @@
 file(GLOB SRC_SRCS_CPP RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.tmpl")
+remove_item_from_list(SRC_SRCS_CPP "*~")
 set(SRC_SRCS ${SRC_SRCS_C} ${SRC_SRCS_CPP})
 
 sort_list(SRC_SRCS)
@@ -9,15 +10,15 @@ sort_list(SRC_SRCS)
       set(TMPL_SRC ${CMAKE_CURRENT_SOURCE_DIR}/${TMPL})
 
       string(REGEX REPLACE "\\.tmpl$" ".cpp" TMPL_CPP ${TMPL_SRC})
-      message(${TMPL_SRC})
-      message("${PYTHON} ${CPPCMS_TMPL_CC} ${TMPL_SRC} -o ${TMPL_CPP} ${TMPL_SRC}")
+      #message(${TMPL_SRC})
+      #message("${PYTHON} ${CPPCMS_TMPL_CC} ${TMPL_SRC} -o ${TMPL_CPP} ${TMPL_SRC}")
       add_custom_command(
 	OUTPUT ${TMPL_CPP}
 	COMMAND ${PYTHON} ${CPPCMS_TMPL_CC} ${TMPL_SRC} -o ${TMPL_CPP} ${TMPL_SRC}
 	DEPENDS ${TMPL_SRC}
 		${CPPCMS_TMPL_CC})
 
-      message(${TMPL_CPP})
+      #message(${TMPL_CPP})
       set(${MODULES_SRCS} TMPL_CPP)
     endforeach(TMPL ${SRC_SRCS})
     

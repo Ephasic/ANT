@@ -27,6 +27,7 @@ Run_Build_System () {
 	RUN_CC_PL=""
 	BUILD_TYPE=""
 	GEN_TYPE=""
+	P_MODE=""
 
 	if [ "$INSTDIR" != "" ] ; then
 		WITH_INST="-DINSTDIR:STRING=$INSTDIR"
@@ -36,6 +37,12 @@ Run_Build_System () {
 		RUN_CC_PL="-DUSE_RUN_CC_PL:BOOLEAN=ON"
 	else
 		RUN_CC_PL="-DUSE_RUN_CC_PL:BOOLEAN=OFF"
+	fi
+
+	if [ "$PARANOID" = "yes" ] ; then
+		P_MODE="-DUSE_PARANOID:BOOLEAN=ON"
+	else
+		P_MODE="-DUSE_PARANOID:BOOLEAN=OFF"
 	fi
 
 	if [ "$DEBUG" = "yes" ] ; then
@@ -59,9 +66,9 @@ Run_Build_System () {
 		REAL_SOURCE_DIR="$SOURCE_DIR"
 	fi
 
-	echo "cmake $GEN_TYPE $WITH_INST $BUILD_TYPE $RUN_CC_PL $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR"
+	echo "cmake $GEN_TYPE $WITH_INST $BUILD_TYPE $P_MODE $RUN_CC_PL $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR"
 
-	cmake $GEN_TYPE $WITH_INST $BUILD_TYPE $RUN_CC_PL $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR
+	cmake $GEN_TYPE $WITH_INST $BUILD_TYPE $RUN_CC_PL $P_MODE $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR
 
 	echo ""
 	echo "Now cd build and run make to build Navn."
@@ -86,6 +93,7 @@ export ECHO2 ECHO2SUF
 
 INSTDIR=$HOME/ant
 USE_RUN_CC_PL="no"
+PARANOID="no"
 DEBUG="yes"
 EXTRA_CONFIG_ARGS=
 CAN_QUICK="no"
@@ -211,6 +219,24 @@ echo ""
 
 ####
 
+TEMP_YN="n"
+if [ "$PARANOID" = "yes" ] ; then
+	TEMP_YN="y"
+fi
+echo "Would you like to enable paranoid build mode?"
+echo2 "[$TEMP_YN] "
+read YN
+if [ "$YN" ] ; then
+	if [ "$YN" = "y" ] ; then
+		PARANOID="yes"
+	else
+		PARANOID="no"
+	fi
+fi
+echo ""
+
+####
+
 echo "Are there any extra arguments you wish to pass to cmake?"
 echo "You may only need to do this if cmake is unable to locate"
 echo "missing dependencies without hints."
@@ -232,6 +258,7 @@ echo2 "Saving configuration results in config.cache... "
 
 cat <<EOT >$SOURCE_DIR/config.cache
 INSTDIR="$INSTDIR"
+PARANOID="$PARANOID"
 DEBUG="$DEBUG"
 USE_RUN_CC_PL="$USE_RUN_CC_PL"
 EXTRA_CONFIG_ARGS="$EXTRA_CONFIG_ARGS"

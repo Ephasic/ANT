@@ -139,6 +139,8 @@ endif(NOT MSVC)
 
 # Add an optional variable for using run-cc.pl for building, Perl will be checked later regardless of this setting
 option(USE_RUN_CC_PL "Use run-cc.pl for building" OFF)
+# Add an optional variable for using compile options that only a paranoid person would use
+option(USE_PARANOID "Use paranoid compile options" OFF)
 
 INCLUDE_DIRECTORIES(${ant_SOURCE_DIR}/src ${ant_SOURCE_DIR}/include ${CMAKE_INSTALL_PREFIX}/include)
 
@@ -146,6 +148,7 @@ set(ENV{LC_ALL} C)
 SOURCE_GROUP(${PROJECT_NAME} FILES ${ant_source})
 
 include(CheckFunctionExists)
+include(CheckCXXSourceCompiles)
 include(CheckIncludeFile)
 include(CheckTypeSize)
 include(CheckLibraryExists)
@@ -172,10 +175,22 @@ if(MSVC)
 else(MSVC)
   # Set the compile flags to have all warnings on (including shadowed variables)
   set(CXXFLAGS "${CXXFLAGS} -Wall -Wshadow")
+  if(USE_PARANOID)
+    set(CXXFLAGS "${CXXFLAGS} -g -O -Weffc++ -pedantic-errors -Wextra -Waggregate-return -Wcast-align -Wcast-qual -Wchar-subscripts -Wcomment -Wconversion -Wdisabled-optimization -Werror -Wfloat-equal -Wformat -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wimport -Winit-self -Winline -Winvalid-pch -Wunsafe-loop-optimizations -Wlong-long -Wmissing-braces -Wmissing-field-initializers -Wmissing-format-attribute -Wmissing-include-dirs -Wmissing-noreturn -Wpacked -Wpadded -Wparentheses -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wsign-compare -Wstack-protector -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default -Wswitch-enum -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunreachable-code -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvariadic-macros -Wvolatile-register-var -Wwrite-strings")
+  endif(USE_PARANOID)
   # If on a *nix system, also set the compile flags to remove GNU extensions (favor ISO C++) as well as reject non-ISO C++ code, also remove all leading underscores in exported symbols (only on GNU compiler)
   if(UNIX)
     set(CXXFLAGS "${CXXFLAGS} -ansi -pedantic")
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      	check_cxx_source_compiles(
+		"#if __GNUC__ < 4
+		#error
+		#endif
+		int main() {}"
+		GCC_IS_GCC4)
+      if(NOT GCC_IS_GCC4)
+	message(FATAL_ERROR "You MUST use GNU C compiler version 4.5 and above to compile! (or a compiler that supports C++11)")
+      endif(NOT GCC_IS_GCC4)
       set(CXXFLAGS "${CXXFLAGS} -fno-leading-underscore")
     endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # If we aren't on a *nix system, we are using MinGW
