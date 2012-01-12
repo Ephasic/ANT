@@ -140,7 +140,7 @@ endif(NOT MSVC)
 # Add an optional variable for using run-cc.pl for building, Perl will be checked later regardless of this setting
 option(USE_RUN_CC_PL "Use run-cc.pl for building" OFF)
 
-INCLUDE_DIRECTORIES(${ant_SOURCE_DIR}/src ${ant_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${ant_SOURCE_DIR}/src ${ant_SOURCE_DIR}/include ${CMAKE_INSTALL_PREFIX}/include)
 
 set(ENV{LC_ALL} C)
 SOURCE_GROUP(${PROJECT_NAME} FILES ${ant_source})
@@ -232,17 +232,26 @@ if(NOT MSVC)
     endif(HAVE_SOCKET_LIB)
 
     # Check if we have CPPCMS Framework for the web frontend.
-    find_package(CPPCMS)
-    if(CPPCMS_FOUND)
+    # FIXME: This should find the damn library files not programs
+    find_program(CPPCMS_TMPL_CC cppcms_tmpl_cc)
+    find_file(CPPCMS_FOUND forwarder.h ${CMAKE_INSTALL_PREFIX}/include/cppcms/)
+    message("-- Looking for CPPCMS library")
+    if(CPPCMS_TMPL_CC AND CPPCMS_FOUND)
+      message("-- Looking for CPPCMS library - found")
       append_to_list(LINK_LIBS cppcms)
-    else(CPPCMS_FOUND)
-      message(FATAL_ERROR "CPPCMS is required for compile! look in libraries directory for library package")
-    endif(CPPCMS_FOUND)
+    else(CPPCMS_TMPL_CC AND CPPCMS_FOUND)
+      message("-- Looking for CPPCMS library - not found")
+      message(FATAL_ERROR "CPPCMS is required for compile! Either CPPCMS is not installed or installed incorrectly, look in libraries directory for library package")
+    endif(CPPCMS_TMPL_CC AND CPPCMS_FOUND)
     # Check if we have CPPDB Database Backend for accounts, metadata storage, etc.
-    find_package(CPPDB)
+    # FIXME: Does this even work??
+    find_file(CPPDB_FOUND errors.h frontend.h ${CMAKE_INSTALL_PREFIX}/include/cppdb/)
+    message("-- Looking for CPPDB library")
     if(CPPDB_FOUND)
+      message("-- Looking for CPPDB library - found")
       append_to_list(LINK_LIBS cppdb)
     else(CPPDB_FOUND)
+      message("-- Looking for CPPDB library - not found")
       message(FATAL_ERROR "CPPDB is required for compile! look in libraries directory for library package")
     endif(CPPDB_FOUND)
     
@@ -305,7 +314,6 @@ find_program(GREP grep)
 find_program(SH sh)
 find_program(PERL perl)
 
-
 # Strip the leading and trailing spaces from the compile flags
 if(CXXFLAGS)
   strip_string(${CXXFLAGS} CXXFLAGS)
@@ -329,7 +337,7 @@ else(INSTDIR)
 endif(INSTDIR)
 
 ADD_SUBDIRECTORY(modules)
-ADD_SUBDIRECTORY(web)
+#ADD_SUBDIRECTORY(web)
 ADD_SUBDIRECTORY(src)
 
 set(CONFIG_INSTALL bot.example.conf README)
