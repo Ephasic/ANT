@@ -24,7 +24,7 @@ void Write(const char *fmt, ...)
     va_end(args);
 }
 
-void Read(module *m = NULL)
+void Read(module *m = nullptr)
 {
   std::fstream db;
   db.open("ANT.db", std::ios_base::in);

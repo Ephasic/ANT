@@ -72,6 +72,9 @@ public:
   Flux::string ModuleDir;
   Flux::string Modules;
   Flux::string xmlrpcbindip;
+  std::string dbpass;
+  std::string dbname;
+  std::string dbuser;
   int xmlrpcport;
   time_t xmlrpctimeout;
   bool xmlrpcipv6;

@@ -10,17 +10,23 @@
  */
 
 #include "modules.h"
-#ifdef HAVE_MYSQL_MYSQL_H
- #include <mysql/mysql.h>
+// Since we use CPPCMS as the frontend (which is required), we can use its features as well :P
+#include <cppdb/frontend.h>
 
-void Read(module *m = NULL)
+cppdb::session sql("mysql:database="+Config->dbname+";user="+Config->dbuser+";password='"+Config->dbpass+"'");
+void Read(module *m = nullptr)
 {
-  
+  cppdb::result res = sql << "SELECT * from " << Config->dbname << cppdb::exec;
 }
 
 void Write(const char *fmt, ...)
 {
-  /* NULL :D */
+  char buffer[BUFSIZE] = "";
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(buffer, sizeof(buffer), fmt, args);
+  sql << buffer << "\n";
+  va_end(args);
 }
 
 
@@ -60,6 +66,7 @@ public:
   {
     Log() << "[MySQL] Saving Databases..." ;
     FOREACH_MOD(I_OnDatabasesWrite, OnDatabasesWrite(Write));
+    
   }
   
   void OnForceDatabasesRead()
@@ -70,6 +77,3 @@ public:
 };
 
 MODULE_HOOK(modmysql)
-#else
-  #pragma "You need mysql development libraries to compile this module!"
-#endif
