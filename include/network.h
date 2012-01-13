@@ -42,6 +42,7 @@ public:
   Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
   ~Network();
   NetworkSocket *s;
+  PingTimeoutTimer *ptt;
   Bot *b;
   Flux::insensitive_map<User*> UserNickList;
   Flux::insensitive_map<Channel*> ChanMap;
@@ -55,6 +56,14 @@ public:
   bool Disconnect();
   bool Disconnect(const Flux::string&);
   bool Connect();
+};
+
+class PingTimeoutTimer : public Timer
+{
+  Network *n;
+public:
+  PingTimeoutTimer(Network *net);
+  void Tick(time_t);
 };
 
 class ReconnectTimer : public Timer
