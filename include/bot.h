@@ -37,6 +37,8 @@ public:
   void SetNick(const Flux::string&);
   /* Send the user credentials for connecting */
   void SendUser();
+  /* Check that we still have a valid nick, and fix our nick if it isnt */
+  void CheckNickName(const Flux::string &nick = this->nick);
 };
 
 #endif

@@ -518,21 +518,21 @@ namespace Flux {
 	switch (state)
 	{
 	  case 0:
-	    output += pos << 2;
+	    output += static_cast<char>(pos) << 2;
 	    state = 1;
 	    break;
 	  case 1:
-	    output[output.length() - 1] |= pos >> 4;
+	    output[output.length() - 1] |= static_cast<char>(pos) >> 4;
 	    output += (pos & 0x0f) << 4;
 	    state = 2;
 	    break;
 	  case 2:
-	    output[output.length() - 1] |= pos >> 2;
+	    output[output.length() - 1] |= static_cast<char>(pos) >> 2;
 	    output += (pos & 0x03) << 6;
 	    state = 3;
 	    break;
 	  case 3:
-	    output[output.length() - 1] |= pos;
+	    output[output.length() - 1] |= static_cast<char>(pos);
 	    state = 0;
 	}
       }

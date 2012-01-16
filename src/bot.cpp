@@ -40,6 +40,14 @@
 #define REVERSE ""
 #define UNDERLINE "\13\13"
 
+class RenameTimer : public Timer
+{
+  Bot *b;
+public:
+  RenameTimer(time_t wait, Bot *bot):Timer(wait, time(NULL), true), b(bot) {}
+  void Tick(time_t);
+};
+
 Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net)
 {
   if(!net)
@@ -52,7 +60,8 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
     Log() << "Bot assigned to a network with a bot already assigned??";
     return; //close the constructor instead of throwing.
 //     throw CoreException("Bot assigned to a network with a bot already assigned??");
-  }
+  new RenameTimer(60, this);
+}
 
   
   this->n->b = this;
@@ -96,6 +105,27 @@ void Bot::Join(const Flux::string &chan)
   c->SendJoin();
 }
 
+void Bot::CheckNickName(const Flux::string &nick)
+{
+  if(this->n->s && this->n->s->IsConnected())
+  {
+    int num = 0;
+    if(nick.search(Config->NicknamePrefix))
+    {
+      Log(LOG_TERMINAL) << "1: " << msg;
+      Flux::string end = nick.substr(Config->NicknamePrefix.size());
+      Log(LOG_TERMINAL) << "2: " << end;
+      if(end.find_first_of("0123456789") != Flux::string::npos){
+	num = (int)end;
+	Log(LOG_TERMINAL) << "3: " << num;
+      }
+    }
+    Log(LOG_TERMINAL) << num;
+    if((num <= 0))
+      this->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
+  }
+}
+
 void Bot::Part(Channel *c, const Flux::string &message)
 {
   if(!c->finduser(this->n, this->nick))
@@ -119,4 +149,10 @@ void Bot::SendUser()
 {
   this->ircproto->user(this->ident, this->realname);
   this->ircproto->nick(this->nick);
+}
+
+void RenameTimer::Tick(time_t)
+{
+  if(b->n->s && b->n->s->IsConnected())
+    b->CheckNickName();
 }

@@ -159,38 +159,42 @@ public:
       n->ircdversion = params[2];
       JoinChansInBuffer(n);
     }
-    /* Numeric 433
+    /* Nickname is in use numeric
+     * Numeric 433
      * params[0] = *
      * params[1] = Attempted nickname
      * params[2] = message
      */
     if((i == 433))
     {
-      int num = (int)params[1].substr(Config->NicknamePrefix.size());
-      n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
+      n->b->SetNick(fsprintf("%stmp%03d", Config->NicknamePrefix.c_str(), randint(0, 999)));
+//       int num = (int)params[1].substr(Config->NicknamePrefix.size());
+//       n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
     }
   }
 
   void OnNickChange(User *u, const Flux::string &msg)
   {
     if(u == u->n->b)
-    {
-      int num = 0;
-      if(msg.search(Config->NicknamePrefix))
-      {
-	Log(LOG_TERMINAL) << "1: " << msg;
-	Flux::string end = msg.substr(Config->NicknamePrefix.size());
-	Log(LOG_TERMINAL) << "2: " << end;
-	if(end.find_first_of("0123456789") != Flux::string::npos){
-	  num = (int)end;
-	  Log(LOG_TERMINAL) << "3: " << num;
-	}
-      }
-      Log(LOG_TERMINAL) << u->nick << "|" << u->n->b->nick;
-      Log(LOG_TERMINAL) << num;
-      if((num <= 0))
-	u->n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
-    }
+      u->CheckNickName();
+//     if(u == u->n->b)
+//     {
+//       int num = 0;
+//       if(msg.search(Config->NicknamePrefix))
+//       {
+// 	Log(LOG_TERMINAL) << "1: " << msg;
+// 	Flux::string end = msg.substr(Config->NicknamePrefix.size());
+// 	Log(LOG_TERMINAL) << "2: " << end;
+// 	if(end.find_first_of("0123456789") != Flux::string::npos){
+// 	  num = (int)end;
+// 	  Log(LOG_TERMINAL) << "3: " << num;
+// 	}
+//       }
+//       Log(LOG_TERMINAL) << u->nick << "|" << u->n->b->nick;
+//       Log(LOG_TERMINAL) << num;
+//       if((num <= 0))
+// 	u->n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
+//     }
   }
   
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
