@@ -95,9 +95,18 @@ Network *FindNetworkByHost(const Flux::string &name)
     return it->second;
   return NULL;
 }
+
 /**********************************************************/
-/****************** Socket Engine *************************/
+/************************ Timers **************************/
 /**********************************************************/
+
+PingTimeoutTimer::PingTimeoutTimer(Network *net) : Timer(121, time(NULL)), n(net) { net->ptt = this; }
+void PingTimeoutTimer::Tick(time_t)
+{
+  Log(LOG_RAWIO) << n->name << ": Ping Timeout";
+  if(n->s && n->s->IsConnected() && n->s->SentPing)
+    n->s->SetDead(true);
+}
 
 ReconnectTimer::ReconnectTimer(int wait, Network *net) : Timer(wait), n(net) {}
 void ReconnectTimer::Tick(time_t)
@@ -113,6 +122,10 @@ void ReconnectTimer::Tick(time_t)
     new ReconnectTimer(Config->RetryWait, n);
   }
 }
+
+/**********************************************************/
+/****************** Socket Engine *************************/
+/**********************************************************/
 
 NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet), SentPing(false)
 {

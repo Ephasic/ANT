@@ -34,6 +34,7 @@ E jmp_buf sigbuf;
 /* Classes */
 class Channel;
 class Log;
+class PingTimeoutTimer;
 class User;
 class NetworkSocket;
 class BufferedSocket;
