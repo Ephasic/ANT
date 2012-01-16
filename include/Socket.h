@@ -34,7 +34,7 @@
 #include "log.h"
 
 #define NET_BUFSIZE 65535
-E Flux::string ForwardResolution(const Flux::string&);
+E std::map<int, Flux::string> ForwardResolution(const Flux::string&);
 E Flux::string GetPeerIP(int);
 /** A sockaddr union used to combine IPv4 and IPv6 sockaddrs
  */

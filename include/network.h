@@ -38,6 +38,7 @@ class CoreExport Network
 {
 protected:
   bool disconnecting;
+  Flux::string usedhostname;
 public:
   Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
   ~Network();
@@ -49,8 +50,12 @@ public:
   Flux::string ircdversion;
   Flux::string name;
   Flux::string hostname;
+  std::map<int, Flux::string> hostnames;
   Flux::string port;
   Flux::string servername;
+  int CurHost;
+  void SetConnectedHostname(const Flux::string &str) { this->usedhostname = str; }
+  Flux::string GetConHost() { return this->usedhostname; }
   bool JoinChannel(const Flux::string&);
   bool IsDisconnecting() { return this->disconnecting; }
   bool Disconnect();

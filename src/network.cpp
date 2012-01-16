@@ -14,7 +14,7 @@
 
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
-Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): s(NULL), b(NULL)
+Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): s(NULL), b(NULL), CurHost(0)
 {
   if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");
@@ -22,6 +22,7 @@ Network::Network(const Flux::string &host, const Flux::string &p, const Flux::st
   //If we didnt specifiy the network name, use the hostname.
   this->name = n.empty()?host:n;
   this->hostname = host;
+  this->hostnames = ForwardResolution(host);
   this->port = p;
   Networks[this->name] = this;
   NetworkHosts[host] = this;
@@ -118,7 +119,7 @@ void ReconnectTimer::Tick(time_t)
   catch (const SocketException &e)
   {
     n->s = NULL; // Does this memleak?
-    Log() << "Connection to " << n->name << " [" << n->hostname << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
+    Log() << "Connection to " << n->name << " [" << n->GetConHost() << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
     new ReconnectTimer(Config->RetryWait, n);
   }
 }
@@ -132,8 +133,9 @@ NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), Bu
   if(!tnet)
     throw CoreException("Network socket created with no network? lolwut?");
   tnet->s = this;
-  Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << ForwardResolution(this->net->hostname) << ')';
-  this->Connect(ForwardResolution(tnet->hostname), tnet->port);
+  this->net->SetConnectedHostname(this->net->hostnames[++this->net->CurHost]);
+  Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << tnet->GetConHost() << ')';
+  this->Connect(tnet->GetConHost(), tnet->port);
 }
 
 NetworkSocket::~NetworkSocket()
@@ -143,7 +145,7 @@ NetworkSocket::~NetworkSocket()
   this->net->s = NULL;
   Log() << "Closing Connection to " << net->name;
   if(!this->net->IsDisconnecting()){
-    Log() << "Connection to " << net->name << " [" << net->hostname << ':' << net->port << "] Failed! Retrying in " << Config->RetryWait << " seconds.";
+    Log() << "Connection to " << net->name << " [" << net->GetConHost() << ':' << net->port << "] Failed! Retrying in " << Config->RetryWait << " seconds.";
     new ReconnectTimer(Config->RetryWait, this->net);
   }
 }
@@ -168,7 +170,7 @@ bool NetworkSocket::Read(const Flux::string &buf)
 
 void NetworkSocket::OnConnect()
 {
-  Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << ']';
+  Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << "] (" << this->net->GetConHost() << ")";
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
   new IRCProto(this->net); // Create the new protocol class for the network
   new Bot(this->net, Config->NicknamePrefix+value_cast<Flux::string>(randint(1, 100)), Config->Ident, Config->Realname);

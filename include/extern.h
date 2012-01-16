@@ -123,7 +123,7 @@ E int randint(int x, int y);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
 E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick;
-E std::vector<Flux::string> StringVector(const Flux::string&, char);
+E Flux::vector StringVector(const Flux::string&, char);
 E Flux::insensitive_map<module*> Modules;
 E std::map<Network*, Channel*> JoinBuffer;
 E Flux::insensitive_map<Network*> Networks;

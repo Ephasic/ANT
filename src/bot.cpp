@@ -105,15 +105,16 @@ void Bot::Join(const Flux::string &chan)
   c->SendJoin();
 }
 
-void Bot::CheckNickName(const Flux::string &nick)
+void Bot::CheckNickName(const Flux::string &ni)
 {
+  Flux::string nickname = ni.empty()?this->nick:ni;
   if(this->n->s && this->n->s->IsConnected())
   {
     int num = 0;
-    if(nick.search(Config->NicknamePrefix))
+    if(nickname.search(Config->NicknamePrefix))
     {
-      Log(LOG_TERMINAL) << "1: " << msg;
-      Flux::string end = nick.substr(Config->NicknamePrefix.size());
+      Log(LOG_TERMINAL) << "1: " << nickname;
+      Flux::string end = nickname.substr(Config->NicknamePrefix.size());
       Log(LOG_TERMINAL) << "2: " << end;
       if(end.find_first_of("0123456789") != Flux::string::npos){
 	num = (int)end;

@@ -215,18 +215,20 @@ Flux::string GetPeerIP(int fd)
   return ipstr;
 }
 
-Flux::string ForwardResolution(const Flux::string &hostname)
+std::map<int, Flux::string> ForwardResolution(const Flux::string &hostname)
 {
   struct addrinfo *result, *res;
+  std::map<int, Flux::string> null; // empty map used for errors
   int err = getaddrinfo(hostname.c_str(), NULL, NULL, &result);
   if(err != 0)
   {
     Log(LOG_TERMINAL) << "Failed to resolve " << hostname << ": " << gai_strerror(err);
-    return "";
+    return null;
   }
-  bool gothost = false;
   Flux::string ret = hostname;
-  for(res = result; res != NULL && !gothost; res = res->ai_next)
+  std::map<int, Flux::string> rmap;
+  int i = 0;
+  for(res = result; res != NULL; res = res->ai_next)
   {
     struct sockaddr *haddr;
     haddr = res->ai_addr;
@@ -238,23 +240,24 @@ Flux::string ForwardResolution(const Flux::string &hostname)
 	v4 = reinterpret_cast<struct sockaddr_in*>(haddr);
 	if (!inet_ntop(AF_INET, &v4->sin_addr, address, sizeof(address))){
 	  Log(LOG_DEBUG) << "DNS: " << strerror(errno);
-	  return "";
+	  continue;
 	}
 	break;
       case AF_INET6:
 	struct sockaddr_in6 *v6 = reinterpret_cast<struct sockaddr_in6*>(haddr);
 	if (!inet_ntop(AF_INET6, &v6->sin6_addr, address, sizeof(address))){
-	  Log(LOG_DEBUG) << "DNS: " << strerror(errno);
-	  return "";
+	  Log(LOG_DEBUG) << "DNS6: " << strerror(errno);
+	  continue;
 	}
 	break;
     }
     ret = address;
-    if(Config->UseIPv6 && !ret.search(':'))
-      gothost = true;
+    if(!Config->UseIPv6 && ret.search(':'))
+      continue;
+    rmap[++i] = ret;
   }
   freeaddrinfo(result);
-  return ret;
+  return rmap;
 }
 
 cidr::cidr(const Flux::string &ip)

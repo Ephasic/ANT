@@ -176,7 +176,7 @@ public:
   void OnNickChange(User *u, const Flux::string &msg)
   {
     if(u == u->n->b)
-      u->CheckNickName();
+      u->n->b->CheckNickName();
 //     if(u == u->n->b)
 //     {
 //       int num = 0;

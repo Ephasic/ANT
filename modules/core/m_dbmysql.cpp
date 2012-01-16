@@ -10,7 +10,7 @@
  */
 
 #include "modules.h"
-// Since we use CPPCMS as the frontend (which is required), we can use its features as well :P
+// Since we use CPPCMS as the frontend (which is required), we can use its features here as well :P
 #include <cppdb/frontend.h>
 
 cppdb::session sql("mysql:database="+Config->dbname+";user="+Config->dbuser+";password='"+Config->dbpass+"'");
