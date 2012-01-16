@@ -135,6 +135,7 @@ public:
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
   }
+  
   void OnNumeric(int i, Network *n, const Flux::vector &params)
   {
     if((i == 4)){
@@ -145,8 +146,11 @@ public:
        * params[3] = user modes
        * params[4] = channel modes
        */
+      n->b->CheckNickName();
       if(params[3].search('B'))
-	n->b->ircproto->mode(n->b->nick, "+B"); //FIXME: get bot mode?
+	n->b->SetMode("+B"); //FIXME: get bot mode?
+      if(params[2].search_ci("ircd-seven") && params[3].search('Q'))
+	n->b->SetMode("+Q"); //for freenode to stop those redirects
       sepstream cs(Config->Channel, ',');
       Flux::string tok;
       while(cs.GetToken(tok))
@@ -165,36 +169,16 @@ public:
      * params[1] = Attempted nickname
      * params[2] = message
      */
-    if((i == 433))
-    {
-      n->b->SetNick(fsprintf("%stmp%03d", Config->NicknamePrefix.c_str(), randint(0, 999)));
-//       int num = (int)params[1].substr(Config->NicknamePrefix.size());
-//       n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
+    if((i == 433)){
+      n->b->SetNick(fsprintf("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
     }
   }
 
   void OnNickChange(User *u, const Flux::string &msg)
   {
-    if(u == u->n->b)
-      u->n->b->CheckNickName();
+    Log(LOG_TERMINAL) << "Rename: " << u->nick << " " << msg << " " << u->n->b->nick;
 //     if(u == u->n->b)
-//     {
-//       int num = 0;
-//       if(msg.search(Config->NicknamePrefix))
-//       {
-// 	Log(LOG_TERMINAL) << "1: " << msg;
-// 	Flux::string end = msg.substr(Config->NicknamePrefix.size());
-// 	Log(LOG_TERMINAL) << "2: " << end;
-// 	if(end.find_first_of("0123456789") != Flux::string::npos){
-// 	  num = (int)end;
-// 	  Log(LOG_TERMINAL) << "3: " << num;
-// 	}
-//       }
-//       Log(LOG_TERMINAL) << u->nick << "|" << u->n->b->nick;
-//       Log(LOG_TERMINAL) << num;
-//       if((num <= 0))
-// 	u->n->b->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
-//     }
+      u->n->b->CheckNickName(msg);
   }
   
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)

@@ -171,10 +171,9 @@ bool NetworkSocket::Read(const Flux::string &buf)
 void NetworkSocket::OnConnect()
 {
   Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << "] (" << this->net->GetConHost() << ")";
-  FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
-  new IRCProto(this->net); // Create the new protocol class for the network
-  new Bot(this->net, Config->NicknamePrefix+value_cast<Flux::string>(randint(1, 100)), Config->Ident, Config->Realname);
+  new Bot(this->net, fsprintf("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)), Config->Ident, Config->Realname);
   this->net->b->SendUser();
+  FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
   this->ProcessWrite();
 }
 

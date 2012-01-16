@@ -60,10 +60,9 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
     Log() << "Bot assigned to a network with a bot already assigned??";
     return; //close the constructor instead of throwing.
 //     throw CoreException("Bot assigned to a network with a bot already assigned??");
-  new RenameTimer(60, this);
-}
+  }
 
-  
+  new RenameTimer(30, this);
   this->n->b = this;
   new IRCProto(this->n);
   Log(LOG_DEBUG) << "New bot created on " << net->name << ": " << ni << i << ": " << real;
@@ -84,7 +83,7 @@ void Bot::AnnounceCommit(CommitMessage &msg)
     Channel *c = it;
     Flux::string files = CondenseVector(msg.Files);
     std::stringstream ss;
-    ss << RED << BOLD << msg.project+" " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << files;
+    ss << RED << BOLD << msg.project << " " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << files;
     Log(LOG_DEBUG) << "BLAH! " << ss.str();
     c->SendMessage(ss.str());
 //     c->SendMessage(RED+BOLD+"%s: "+NORMAL+ORANGE+"%s * "+NORMAL+YELLOW+"%s "+NORMAL+BOLD+"| "+NORMAL+LIGHT_BLUE+"%s"+NORMAL+": %s", msg.project.c_str(), msg.author.c_str(), msg.revision.c_str(), files.c_str());
@@ -105,19 +104,25 @@ void Bot::Join(const Flux::string &chan)
   c->SendJoin();
 }
 
+void Bot::SetMode(const Flux::string &modestr)
+{
+  if(this->ircproto)
+    this->ircproto->mode(this->nick, modestr);
+}
+
 void Bot::CheckNickName(const Flux::string &ni)
 {
   Flux::string nickname = ni.empty()?this->nick:ni;
   if(this->n->s && this->n->s->IsConnected())
   {
-    int num = 0;
+    unsigned num = 0;
     if(nickname.search(Config->NicknamePrefix))
     {
       Log(LOG_TERMINAL) << "1: " << nickname;
       Flux::string end = nickname.substr(Config->NicknamePrefix.size());
-      Log(LOG_TERMINAL) << "2: " << end;
-      if(end.find_first_of("0123456789") != Flux::string::npos){
-	num = (int)end;
+      Log(LOG_TERMINAL) << "2: " << end << "|" << end.size();
+      if(end.is_pos_number_only() && end.size() < 10){
+	num = (unsigned)end;
 	Log(LOG_TERMINAL) << "3: " << num;
       }
     }
@@ -154,6 +159,7 @@ void Bot::SendUser()
 
 void RenameTimer::Tick(time_t)
 {
+  Log(LOG_TERMINAL) << "RenameTimer Tick.";
   if(b->n->s && b->n->s->IsConnected())
     b->CheckNickName();
 }

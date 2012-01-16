@@ -229,7 +229,6 @@ void BotConfig::Read(){
   this->NicknamePrefix = this->Parser->Get("Bot", "Nickname Prefix", "ANT-");
   this->LogChannel = this->Parser->Get("Modules", "LogChannel","");
   this->PidFile = this->Parser->Get("Bot","PID File","navn.pid");
-  this->UserPass = this->Parser->Get("Bot","Password","Navn");
   this->ModuleDir = Parser->Get("Modules", "ModuleDir", "");
   this->Modules = Parser->Get("Modules", "Modules", "");
   this->xmlrpcbindip = Parser->Get("XML-RPC", "BindAddress", "0.0.0.0");

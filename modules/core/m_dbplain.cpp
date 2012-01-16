@@ -122,13 +122,13 @@ public:
       else
 	n->JoinChannel(params[2]);
     }
-    if(key.equals_ci("NB"))
-    {
-      Network *n = FindNetwork(params[1]);
-      if(n){
-	new Bot(n, params[2], params[3], Config->Realname);
-      }
-    }
+//     if(key.equals_ci("NB"))
+//     {
+//       Network *n = FindNetwork(params[1]);
+//       if(n){
+// 	new Bot(n, params[2], params[3], Config->Realname);
+//       }
+//     }
   }
   
   void OnModuleLoad(module *m)
