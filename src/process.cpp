@@ -134,6 +134,12 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
  * \param buffer The raw socket buffer
  */
 void process(Network *n, const Flux::string &buffer){
+
+  EventResult e;
+  FOREACH_RESULT(I_OnPreReceiveMessage, OnPreReceiveMessage(buffer), e);
+  if(e != EVENT_CONTINUE)
+    return;
+  
   SET_SEGV_LOCATION();
   Flux::string buf = buffer;
   buf = buf.replace_all_cs("  ", " ");
@@ -255,10 +261,9 @@ void process(Network *n, const Flux::string &buffer){
   /**************************************/
   CommandSource Source;
   Source.u = u; //User class
-  Source.b = b;
+  Source.b = b; //Bot class
   Source.c = c; //Channel class
   Source.n = n; //Network class
-  Source.message = message;
   Source.params = params;
   Source.raw = buffer;
   /**************************************/

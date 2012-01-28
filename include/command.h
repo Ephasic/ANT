@@ -50,7 +50,6 @@ struct CoreExport CommandSource
   Network *n;
   Bot *b;
   Flux::string command;
-  Flux::string message;
   Flux::string raw;
   std::vector<Flux::string> params;
   
