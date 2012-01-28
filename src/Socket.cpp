@@ -141,7 +141,7 @@ void sockaddrs::pton(int type, const Flux::string &address, int pport)
       if (i == 0)
 	throw SocketException("Invalid host");
       else if (i <= -1)
-	throw SocketException(fsprintf("Invalid host: %s", strerror(errno)));
+	throw SocketException(printfify("Invalid host: %s", strerror(errno)));
       sa4.sin_family = type;
       sa4.sin_port = htons(pport);
       return;
@@ -152,7 +152,7 @@ void sockaddrs::pton(int type, const Flux::string &address, int pport)
       if (i == 0)
 	throw SocketException("Invalid host");
       else if (i <= -1)
-	throw SocketException(fsprintf("Invalid host: %s", strerror(errno)));
+	throw SocketException(printfify("Invalid host: %s", strerror(errno)));
       sa6.sin6_family = type;
       sa6.sin6_port = htons(pport);
       return;
@@ -382,7 +382,7 @@ ClientSocket *SocketIO::Accept(ListenSocket *s)
     return ns;
   }
   else
-    throw SocketException(fsprintf("Unable to accept connection: %s", strerror(errno)));
+    throw SocketException(printfify("Unable to accept connection: %s", strerror(errno)));
 }
 
 /** Finished accepting a connection from a socket
@@ -403,7 +403,7 @@ void SocketIO::Bind(Socket *s, const Flux::string &ip, int port)
 {
   s->bindaddr.pton(s->IsIPv6() ? AF_INET6 : AF_INET, ip, port);
   if (bind(s->GetFD(), &s->bindaddr.sa, s->bindaddr.size()) == -1)
-    throw SocketException(fsprintf("Unable to bind to address: %s", strerror(errno)));
+    throw SocketException(printfify("Unable to bind to address: %s", strerror(errno)));
 }
 
 /** Connect the socket
@@ -634,7 +634,7 @@ ListenSocket::ListenSocket(const Flux::string &bindip, int port, bool ipv6) : So
   this->IO->Bind(this, bindip, port);
   
   if (listen(Sock, SOMAXCONN) == -1)
-    throw SocketException(fsprintf("Unable to listen: %s", strerror(errno)));
+    throw SocketException(printfify("Unable to listen: %s", strerror(errno)));
 }
 
 /** Destructor

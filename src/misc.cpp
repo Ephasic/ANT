@@ -109,7 +109,7 @@ bool IsValidChannel(const Flux::string &chan){
  return true;
 }
 
-Flux::string fsprintf(const char *fmt, ...)
+Flux::string printfify(const char *fmt, ...)
 {
   if(fmt)
   {
@@ -221,9 +221,9 @@ Flux::string do_strftime(const time_t &t, bool short_output)
   if (short_output)
     return buf;
   if (t < time(NULL))
-    return Flux::string(buf) + " " + fsprintf("(%s ago)", duration(time(NULL) - t).c_str());
+    return Flux::string(buf) + " " + printfify("(%s ago)", duration(time(NULL) - t).c_str());
   else
-    return Flux::string(buf) + " " + fsprintf("(%s from now)", duration(t - time(NULL)).c_str());
+    return Flux::string(buf) + " " + printfify("(%s from now)", duration(t - time(NULL)).c_str());
 }
 /* butt-plug?
  * http://www.albinoblacksheep.com/flash/plugs */

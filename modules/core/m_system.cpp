@@ -79,7 +79,7 @@ public:
     User *u = source.u;
     source.Reply("Quitting..");
     Log(u) << "quit the bot from network: \"" << source.n->name << "\"";
-    source.n->Disconnect(fsprintf("Requested From \2%s\17.", u->nick.c_str()));
+    source.n->Disconnect(printfify("Requested From \2%s\17.", u->nick.c_str()));
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
@@ -170,7 +170,7 @@ public:
      * params[2] = message
      */
     if((i == 433)){
-      n->b->SetNick(fsprintf("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
+      n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
     }
   }
 

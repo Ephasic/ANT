@@ -98,7 +98,7 @@ public:
       this->Write("HTTP/1.0 200 OK");
       this->Write("CONNECTION: CLOSE");
       this->Write("CONTENT-TYPE: TEXT/HTML");
-      this->Write(fsprintf("CONTENT-LENGTH: %i", isfavicon?0:len));
+      this->Write(printfify("CONTENT-LENGTH: %i", isfavicon?0:len));
       this->Write("DATE: "+do_strftime(time(NULL), true));
       this->Write("SERVER: ANT Commit System version " + systemver);
       this->Write(" ");
