@@ -161,7 +161,7 @@ void process(Network *n, const Flux::string &buffer){
   if(bufferseparator.GetToken(bufferseparator_token))
     command = bufferseparator_token;
   std::vector<Flux::string> params;
-
+  
   while(bufferseparator.GetToken(bufferseparator_token))
   {
     if(bufferseparator_token[0] == ':'){

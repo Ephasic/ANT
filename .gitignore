@@ -7,3 +7,4 @@ build/
 # Ignore cache crap from building
 include/config.h
 config.cache
+CMakeCache.txt
