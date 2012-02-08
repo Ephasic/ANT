@@ -58,18 +58,18 @@ void SocketEngine::DelSocket(Socket *s)
 
 void SocketEngine::MarkWritable(Socket *s)
 {
-  if (s->IsWritable())
+  if (s->GetStatus(SF_WRITABLE))
     return;
   FD_SET(s->GetFD(), &WriteFDs);
-  s->SetWritable(true);
+  s->SetStatus(SF_WRITABLE, true);
 }
 
 void SocketEngine::ClearWritable(Socket *s)
 {
-  if (!s->IsWritable())
+  if (!s->GetStatus(SF_WRITABLE))
     return;
   FD_CLR(s->GetFD(), &WriteFDs);
-  s->SetWritable(false);
+  s->SetStatus(SF_WRITABLE, false);
 }
 
 void SocketEngine::Process()

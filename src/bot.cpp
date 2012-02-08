@@ -113,7 +113,7 @@ void Bot::SetMode(const Flux::string &modestr)
 void Bot::CheckNickName(const Flux::string &ni)
 {
   Flux::string nickname = ni.empty()?this->nick:ni;
-  if(this->n->s && this->n->s->IsConnected())
+  if(this->n->s && this->n->s->GetStatus(SF_CONNECTED))
   {
     unsigned num = 0;
     if(nickname.search(Config->NicknamePrefix))
@@ -160,6 +160,6 @@ void Bot::SendUser()
 void RenameTimer::Tick(time_t)
 {
   Log(LOG_TERMINAL) << "RenameTimer Tick.";
-  if(b->n->s && b->n->s->IsConnected())
+  if(b->n->s && b->n->s->GetStatus(SF_CONNECTED))
     b->CheckNickName();
 }

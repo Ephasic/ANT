@@ -23,7 +23,7 @@ void IRCProto::Raw(const char *fmt, ...)
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
   va_end(args);
-  if(this->net && this->net->s && this->net->s->IsConnected()){
+  if(this->net && this->net->s && this->net->s->GetStatus(SF_CONNECTED)){
     this->net->s->Write(Flux::string(buffer));
     this->net->s->ProcessWrite();
   }
@@ -537,7 +537,7 @@ void Send_Global(const Flux::string &str)
 {
   Network *n;
   for(auto it : Networks){
-    if((n = it.second) && n->s && n->s->IsConnected()){
+    if((n = it.second) && n->s && n->s->GetStatus(SF_CONNECTED)){
 	n->s->Write(str);
 	n->s->ProcessWrite();
     }

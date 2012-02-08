@@ -377,7 +377,7 @@ ClientSocket *SocketIO::Accept(ListenSocket *s)
   if (newsock >= 0)
   {
     ClientSocket *ns = s->OnAccept(newsock, conaddr);
-    ns->SetAccepted(true);
+    ns->SetStatus(SF_ACCEPTED, true);
     ns->OnAccept();
     return ns;
   }
@@ -413,8 +413,8 @@ void SocketIO::Bind(Socket *s, const Flux::string &ip, int port)
  */
 void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port)
 {
-  s->SetConnected(false);
-  s->SetConnecting(false);
+  s->SetStatus(SF_CONNECTED, false);
+  s->SetStatus(SF_CONNECTING, false);
   s->conaddr.pton(s->IsIPv6() ? AF_INET6 : AF_INET, target, port);
   int c = connect(s->GetFD(), &s->conaddr.sa, s->conaddr.size());
   if (c == -1)
@@ -424,12 +424,12 @@ void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port
     else
     {
       SocketEngine::MarkWritable(s);
-      s->SetConnecting(true);
+      s->SetStatus(SF_CONNECTING, true);
     }
   }
   else
   {
-    s->SetConnected(true);
+    s->SetStatus(SF_CONNECTED, true);
     s->OnConnect();
   }
 }
@@ -440,17 +440,17 @@ void SocketIO::Connect(ConnectionSocket *s, const Flux::string &target, int port
  */
 SocketFlag SocketIO::FinishConnect(ConnectionSocket *s)
 {
-  if (s->IsConnected())
+  if (s->GetStatus(SF_CONNECTED))
     return SF_CONNECTED;
-  else if (!s->IsConnecting())
+  else if (!s->GetStatus(SF_CONNECTING))
     throw SocketException("SocketIO::FinishConnect called for a socket not connected nor connecting?");
   
   int optval = 0;
   socklen_t optlen = sizeof(optval);
   if (!getsockopt(s->GetFD(), SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&optval), &optlen) && !optval)
   {
-    s->SetConnected(true);
-    s->SetConnecting(false);
+    s->SetStatus(SF_CONNECTED, true);
+    s->SetStatus(SF_CONNECTING, false);
     s->OnConnect();
     return SF_CONNECTED;
   }
@@ -524,38 +524,56 @@ void Socket::SetDead(bool dead)
 /** Get socket status if it is dead or not
  * @return bool boolean if the socket is dead
  */
-bool Socket::IsDead() { return isdead; }
-void Socket::SetConnecting(bool s) { isconnecting = s; }
-bool Socket::IsConnecting() { return isconnecting; }
-void Socket::SetConnected(bool s) { isconnected = s; }
-bool Socket::IsConnected() { return isconnected; }
-void Socket::SetAccepting(bool s) { isaccepting = s; }
-bool Socket::IsAccepting() { return isaccepting; }
-void Socket::SetAccepted(bool s) { isaccepted = s; }
-bool Socket::IsAccepted() { return isaccepted; }
-void Socket::SetWritable(bool s) { iswritable = s; }
-bool Socket::IsWritable() { return iswritable; }
+bool Socket::IsDead() const { return isdead; }
+
+/** Get socket status using flags
+ * @param SocketFlag A flag which indicates the requested status
+ * @return the status of the specified flag
+ */
+bool Socket::GetStatus(SocketFlag s) const
+{
+  switch(s)
+  {
+    case SF_WRITABLE:
+      return iswritable;
+    case SF_ACCEPTED:
+      return isaccepted;
+    case SF_ACCEPTING:
+      return isaccepting;
+    case SF_CONNECTED:
+      return isconnected;
+    case SF_CONNECTING:
+      return isconnecting;
+    case SF_DEAD:
+      return isdead;
+  }
+  return false;
+}
+/** Set socket status using flags
+ * @param SocketFlag A flag which indicates the requested status
+ * @param boolean the boolean status of that flag
+ */
 void Socket::SetStatus(SocketFlag s, bool status)
 {
   switch(s)
   {
     case SF_WRITABLE:
-      this->SetWritable(status);
+      this->iswritable = status;
       break;
     case SF_ACCEPTED:
-      this->SetAccepted(status);
+      this->isaccepted = status;
       break;
     case SF_ACCEPTING:
-      this->SetAccepting(status);
+      this->isaccepting = status;
       break;
     case SF_CONNECTED:
-      this->SetConnected(status);
+      this->isconnected = status;
       break;
     case SF_CONNECTING:
-      this->SetConnecting(status);
+      this->isconnecting = status;
       break;
     case SF_DEAD:
-      this->SetDead(status);
+      this->isdead = status;
       break;
   }
 }
@@ -834,9 +852,9 @@ bool ConnectionSocket::Process()
 {
   try
   {
-    if (this->IsConnected())
+    if (this->GetStatus(SF_CONNECTED))
       return true;
-    else if (this->IsConnecting())
+    else if (this->GetStatus(SF_CONNECTING))
       this->SetStatus(this->IO->FinishConnect(this), true);
     else
       this->SetDead(true);
@@ -874,9 +892,9 @@ bool ClientSocket::Process()
   Log(LOG_TERMINAL) << "Processing Client Socket!";
   try
   {
-    if (this->IsAccepted())
+    if (this->GetStatus(SF_ACCEPTED))
       return true;
-    else if (this->IsAccepting())
+    else if (this->GetStatus(SF_ACCEPTING))
 	this->SetStatus(this->IO->FinishAccept(this), true);
     else
       this->SetDead(true);

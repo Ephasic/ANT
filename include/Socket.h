@@ -234,19 +234,10 @@ public:
    * @param bool boolean if the socket is dead
    */
   void SetDead(bool);
-  bool IsDead();
+  bool IsDead() const;
 
   void SetStatus(SocketFlag, bool);
-  void SetConnecting(bool);
-  bool IsConnecting();
-  void SetConnected(bool);
-  bool IsConnected();
-  void SetAccepting(bool);
-  bool IsAccepting();
-  void SetAccepted(bool);
-  bool IsAccepted();
-  void SetWritable(bool);
-  bool IsWritable();
+  bool GetStatus(SocketFlag) const;
   
   /** Check if this socket is IPv6
    * @return true or false

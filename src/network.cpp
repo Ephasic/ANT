@@ -43,7 +43,7 @@ bool Network::JoinChannel(const Flux::string &chan)
     Channel *c = FindChannel(this, chan);
     if(!c)
       c = new Channel(this, chan);
-    if(!this->s || !this->s->IsConnected())
+    if(!this->s || !this->s->GetStatus(SF_CONNECTED))
       JoinBuffer[this] = c;
     else
       c->SendJoin();
@@ -105,7 +105,7 @@ PingTimeoutTimer::PingTimeoutTimer(Network *net) : Timer(121, time(NULL)), n(net
 void PingTimeoutTimer::Tick(time_t)
 {
   Log(LOG_RAWIO) << n->name << ": Ping Timeout";
-  if(n->s && n->s->IsConnected() && n->s->SentPing)
+  if(n->s && n->s->GetStatus(SF_CONNECTED) && n->s->SentPing)
     n->s->SetDead(true);
 }
 
