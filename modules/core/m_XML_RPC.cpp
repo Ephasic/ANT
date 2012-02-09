@@ -178,7 +178,7 @@ void xmlrpcclient::HandleMessage()
   if(this->RawCommitXML.empty())
     return;
   Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
-  Log(LOG_TERMINAL) << "COMMIT!!!!! \"\"" << this->RawCommitXML << "\"\"";
+  Log(LOG_TERMINAL) << "COMMIT!!!!! \"" << this->RawCommitXML << "\"";
   XMLFile xf(this->RawCommitXML, 1);
   
   /* This code was based off the commit in this script: http://cia.vc/clients/git/ciabot.bash */
@@ -214,6 +214,8 @@ void xmlrpcclient::HandleMessage()
    * processed apart so we can possibly
    * the data in more ways than one
    */
+
+  Log(LOG_TERMINAL) << "***Commit****\nScriptName: " << ScriptName << "\nScriptVersion: " << ScriptVersion << "\nScriptURL: " << ScriptURL << "\nTimestamp: " << timestamp << "\nAuthor: " << author << "\nRevision: " << revision << "\nLog: " << log << "\nURL: " << url << "\nProject: " << project << "\nBranch: " << branch << "\nModule: " << module << "\n***End Of Commit***";
   
   CommitMessage msg;
   /* Script info */

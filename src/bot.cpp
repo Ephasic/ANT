@@ -82,10 +82,15 @@ void Bot::AnnounceCommit(CommitMessage &msg)
   {
     Channel *c = it;
     Flux::string files = CondenseVector(msg.Files);
+    
     std::stringstream ss;
     ss << RED << BOLD << msg.project << " " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << files;
     Log(LOG_DEBUG) << "BLAH! " << ss.str();
-    c->SendMessage(ss.str());
+
+    Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
+
+    Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
+    c->SendMessage(formattedmessgae);
 //     c->SendMessage(RED+BOLD+"%s: "+NORMAL+ORANGE+"%s * "+NORMAL+YELLOW+"%s "+NORMAL+BOLD+"| "+NORMAL+LIGHT_BLUE+"%s"+NORMAL+": %s", msg.project.c_str(), msg.author.c_str(), msg.revision.c_str(), files.c_str());
   }
 }
@@ -118,15 +123,15 @@ void Bot::CheckNickName(const Flux::string &ni)
     unsigned num = 0;
     if(nickname.search(Config->NicknamePrefix))
     {
-      Log(LOG_TERMINAL) << "1: " << nickname;
+      //Log(LOG_DEBUG) << "1: " << nickname;
       Flux::string end = nickname.substr(Config->NicknamePrefix.size());
-      Log(LOG_TERMINAL) << "2: " << end << "|" << end.size();
+      //Log(LOG_DEBUG) << "2: " << end << "|" << end.size();
       if(end.is_pos_number_only() && end.size() < 10){
 	num = (unsigned)end;
-	Log(LOG_TERMINAL) << "3: " << num;
+	//Log(LOG_DEBUG) << "3: " << num;
       }
     }
-    Log(LOG_TERMINAL) << num;
+    //Log(LOG_TERMINAL) << num;
     if((num <= 0))
       this->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
   }
