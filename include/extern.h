@@ -77,8 +77,8 @@ enum EventResult
 
 enum CommandType
 {
-  COMMAND_CHANNEL,
-  COMMAND_PRIVATE
+  C_CHANNEL,
+  C_PRIVATE
 };
 
 enum ModErr

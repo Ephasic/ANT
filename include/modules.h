@@ -13,7 +13,6 @@
 #define MODULES_H
 #include "module.h"
 #include "INIReader.h"
-// #include "defs.h"
 #include "xmlfile.h"
 #include "network.h" //We'll solve includes later
 #include "bot.h"
@@ -33,9 +32,7 @@ GlobalProto *GProto;
 module *LastRunModule; // For crashes
 
 E void startup(int argc, char** argv, char *envp[]);
-// E static void WritePID();
 E void Rehash();
-// E void restart(const Flux::string &reason);
 E Flux::string execute(const char *cmd);
 E Flux::string urlify(const Flux::string &received);
 E Flux::string getprogdir(const Flux::string &dir);

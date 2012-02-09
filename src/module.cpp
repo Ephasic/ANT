@@ -13,8 +13,6 @@
 //Move on and call me an idiot later.
 Flux::insensitive_map<module*> Modules;
 EventsVector ModuleHandler::EventHandlers[I_END];
-CommandMap Commandsmap;
-CommandMap ChanCommandMap;
 /** 
  * \fn module::module(Flux::string n)
  * \brief Module Constructor
@@ -36,10 +34,11 @@ module::module(const Flux::string &n){
     Log() << "Loaded module " << n;
 }
 module::~module(){
+  Flux::string mname = this->name;
   SET_SEGV_LOCATION();
-  Log(LOG_DEBUG) << "Unloading module " << this->name;
+  Log(LOG_DEBUG) << "Unloading module " << mname;
   ModuleHandler::DetachAll(this);
-  Modules.erase(this->name);
+  Modules.erase(mname);
 }
 void module::SetAuthor(const Flux::string &person) { this->author = person; }
 void module::SetVersion(const Flux::string &ver) { this->version = ver; }
@@ -48,67 +47,6 @@ Flux::string module::GetVersion() { return this->version; }
 time_t module::GetLoadTime() { return this->loadtime; }
 Flux::string module::GetAuthor() { return this->author; }
 ModulePriority module::GetPriority() { return this->Priority; }
-/* commands stuff */
-/** 
- * \fn int module::AddCommand(Command *c)
- * \brief Adds commands from modules into the bot
- * \param command The command to add
- */
-int module::AddCommand(Command *c){
- if(!c)
-   return 1;
- auto it = Commandsmap.insert(std::make_pair(c->name, c));
- if(it.second != true){
-   Log() << "Command " << c->name << " already loaded!";
-   return 2;
- }
- c->mod = this;
- c->type = COMMAND_PRIVATE;
- return 0;
-}
-/** 
- * \fn int module::DelCommand(Command *c)
- * \brief delete commands from modules in the bot
- * \param command The command to add
- */
-int module::DelCommand(Command *c){
-  if(!c)
-    return 1;
-  if(!Commandsmap.erase(c->name))
-    return 2;
-  c->mod = NULL;
-  return 0;
-}
-/** 
- * \fn int module::AddCommand(Command *c)
- * \brief Adds commands from modules into the bot
- * \param command The command to add
- */
-int module::AddChanCommand(Command *c){
- if(!c)
-   return 1;
- auto it = ChanCommandMap.insert(std::make_pair(c->name, c));
- if(it.second != true){
-   Log() << "Command " << c->name << " already loaded!";
-   return 2;
- }
- c->mod = this;
- c->type = COMMAND_CHANNEL;
- return 0;
-}
-/** 
- * \fn int module::DelCommand(Command *c)
- * \brief delete commands from modules in the bot
- * \param command The command to add
- */
-int module::DelChanCommand(Command *c){
-  if(!c)
-    return 1;
-  if(!ChanCommandMap.erase(c->name))
-    return 2;
-  c->mod = NULL;
-  return 0;
-}
 
 /*******************************************************************/
 /** 
@@ -263,7 +201,7 @@ bool ModuleHandler::DeleteModule(module *m)
   Flux::string filepath = m->filepath;
   
   dlerror();
-  void (*df)(module*) = class_cast<void (*)(module*)>(dlsym(m->handle, "ModunInit"));
+  bool (*df)(module*) = class_cast<bool (*)(module*)>(dlsym(m->handle, "ModunInit"));
   const char *err = dlerror();
   if (!df && err && *err)
   {
@@ -271,11 +209,13 @@ bool ModuleHandler::DeleteModule(module *m)
 	  delete m; /* we just have to chance they haven't overwrote the delete operator then... */
   }
   else
-	  df(m); /* Let the module delete it self, just in case */
+	  if(df(m))/* Let the module delete it self, just in case */
+	    Log() << "[" << m->name << ".so] Could not be deleted or was already deleted!"; 
 	  
   if(handle)
     if(dlclose(handle))
       Log() << "[" << m->name << ".so] " << dlerror();
+    
   if (!filepath.empty())
     Delete(filepath.c_str());
   return true;

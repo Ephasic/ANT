@@ -11,6 +11,7 @@
 
 #include "command.h"
 #include "module.h"
+#include "bot.h"
 /**
  *\file  command.cpp 
  *\brief Contains the command class.
@@ -49,22 +50,27 @@ void CommandSource::Reply(const Flux::string &msg){
 Command *FindCommand(const Flux::string &name, CommandType type){
   if(name.empty())
     return NULL;
-  if((type == COMMAND_PRIVATE))
+  CommandMap::const_iterator it;
+  switch(type)
   {
-    auto it = Commandsmap.find(name);
+    case C_PRIVATE:
+      it = Commandsmap.find(name);
       if(it != Commandsmap.end())
 	return it->second;
-  }
-  else if((type == COMMAND_CHANNEL))
-  {
-    auto it = ChanCommandMap.find(name);
-    if(it != ChanCommandMap.end())
-      return it->second;
+      break;
+    case C_CHANNEL:
+      it = ChanCommandMap.find(name);
+      if(it != ChanCommandMap.end())
+	return it->second;
+      break;
   }
   return NULL;
 }
 /*******************************************************************************************/
 /* why is this in here with the rest of the commands that send to the server? i dont fucking know lol */
+
+CommandMap Commandsmap;
+CommandMap ChanCommandMap;
 /**
  * \class Command A class which most private message commands inside of modules work in.
  * \fn Command::Command(const Flux::string &sname, size_t min_params, size_t max_params)
@@ -72,21 +78,40 @@ Command *FindCommand(const Flux::string &name, CommandType type){
  * \param size_t the minimum size of the buffer the command vector gets
  * \param size_t the maximum size the vector gets
  */
-Command::Command(const Flux::string &sname, size_t min_params, size_t max_params): MaxParams(max_params), MinParams(min_params), name(sname)
+Command::Command(module *m, const Flux::string &sname, CommandType t, size_t min_params, size_t max_params): type(t), MaxParams(max_params), MinParams(min_params), name(sname), mod(m)
 {
   for(unsigned i=0; i < sname.size(); ++i) //commands with spaces can screw up the command handler
     if(isspace(sname[i]))
       throw ModuleException("Commands cannot contain spaces!");
-  this->mod = NULL;
+
+    if(!this->type)
+      throw ModuleException("Commands MUST have a command type!");
+
+    std::pair<CommandMap::iterator, bool> it;
+    switch(this->type)
+    {
+      case C_PRIVATE:
+	it = Commandsmap.insert(std::make_pair(this->name, this));
+	break;
+      case C_CHANNEL:
+	it = ChanCommandMap.insert(std::make_pair(this->name, this));
+	break;
+    }
+    
+    if(it.second != true)
+      throw ModuleException("Command "+this->name+" already loaded!");
 }
+
 Command::~Command()
 {
-  if(this->mod){
-    auto it = ChanCommandMap.find(this->name);
-   if(it->second != NULL)
-     this->mod->DelChanCommand(this);
-   else
-     this->mod->DelCommand(this);
+  switch(this->type)
+  {
+    case C_PRIVATE:
+      Commandsmap.erase(this->name);
+      break;
+    case C_CHANNEL:
+      ChanCommandMap.erase(this->name);
+      break;
   }
 }
 /**
@@ -119,7 +144,7 @@ void Command::SendSyntax(CommandSource &source)
 /** \overload void Command::SendSyntax(CommandSource &source, const Flux::string &syn) */
 void Command::SendSyntax(CommandSource &source, const Flux::string &syn){
   source.Reply("Syntax: \2%s %s\2", this->name.c_str(), syn.c_str());
-  source.Reply("\002/msg %s HELP %s\002 for more information.", "FIXME: this.", this->name.c_str());
+  source.Reply("\002/msg %s HELP %s\002 for more information.", source.b->nick.c_str(), this->name.c_str());
 }
 /**
  * \brief Returns a flux::string with the commands description
@@ -149,5 +174,5 @@ void Command::OnSyntaxError(CommandSource &source, const Flux::string &subcomman
  this->SendSyntax(source);
  auto it = ChanCommandMap.find(this->name);
  if((it->second != NULL)){}else
-    source.Reply("\002/msg %s HELP %s\002 for more information.", "FIXME: this.", source.command.c_str());
+   source.Reply("\002/msg %s HELP %s\002 for more information.", source.b->nick.c_str(), source.command.c_str());
 }

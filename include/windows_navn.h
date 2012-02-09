@@ -106,7 +106,7 @@ class module;
 	#define Delete unlink
 	#define MODULE_HOOK(x) \
 	 extern "C" module *ModInit(const Flux::string &name) { return new x(name); } \
-	 extern "C" void ModunInit(x *m) { if(m) delete m; }
+	 extern "C" int ModunInit(x *m) { if(m) {delete m; return 0; } m = nullptr; return 1; }
 #endif // _WIN32
 
 #endif // WINDOWS_H

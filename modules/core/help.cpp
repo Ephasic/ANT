@@ -32,7 +32,7 @@
 class CommandHelp : public Command
 {
 public:
-  CommandHelp():Command("HELP", 0, 1)
+  CommandHelp(module *m):Command(m, "HELP", C_PRIVATE, 0, 1)
   {
    this->SetDesc("Displays help messages");
   }
@@ -40,7 +40,7 @@ public:
   {
     int c=0;
     if(!params.empty()){
-      Command *com = FindCommand(params[1], COMMAND_PRIVATE);
+      Command *com = FindCommand(params[1], C_PRIVATE);
       if(com && !com->OnHelp(source, ""))
 	source.Reply("No help available for \2%s\2", params[1].c_str());
       else if(!com)
@@ -61,7 +61,7 @@ public:
 class CommandCHelp : public Command
 {
 public:
-  CommandCHelp():Command("!HELP", 0,1)
+  CommandCHelp(module *m):Command(m, "!HELP", C_CHANNEL, 0,1)
   {
    this->SetDesc("Displays Channel help messages");
   }
@@ -69,7 +69,7 @@ public:
   {
     Flux::string cmds;
     if(!params.empty()){
-      Command *c = FindCommand(params[1], COMMAND_CHANNEL);
+      Command *c = FindCommand(params[1], C_CHANNEL);
       if(c && !c->OnHelp(source, ""))
 	source.Reply("No help available for \2%s\2", params[1].c_str());
       else if(!c)
@@ -86,14 +86,13 @@ public:
     }
   }
 };
+
 class help_m:public module
 {
   CommandHelp help;
   CommandCHelp chelp;
 public:
-  help_m(const Flux::string &Name):module(Name){ 
-    this->AddCommand(&help);
-    this->AddChanCommand(&chelp);
+  help_m(const Flux::string &Name):module(Name), help(this), chelp(this){
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);
     this->SetAuthor("Justasic");

@@ -67,13 +67,13 @@ class CoreExport Command : public Base
 {
   Flux::string desc;
   std::vector<Flux::string> syntax;
+  CommandType type;
 public:
   size_t MaxParams;
   size_t MinParams;
   Flux::string name;
-  CommandType type;
   module *mod;
-  Command(const Flux::string &sname, size_t min_params=0, size_t max_params=0);
+  Command(module *m, const Flux::string &sname, CommandType, size_t min_params=0, size_t max_params=0);
   virtual ~Command();
 protected:
   void SetDesc(const Flux::string&);
@@ -82,6 +82,7 @@ protected:
   void SendSyntax(CommandSource&, const Flux::string&);
 public:
   const Flux::string &GetDesc() const;
+  const CommandType GetType() const;
   virtual void Run(CommandSource&, const std::vector<Flux::string> &params);
   virtual bool OnHelp(CommandSource&, const Flux::string&);
   virtual void OnList(User *u);
