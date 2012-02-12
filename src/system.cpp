@@ -37,55 +37,6 @@ Flux::string getprogdir(const Flux::string &dir){
 }
 
 /**
- * \fn Flux::string urlify(Flux::string raw_searchstring)
- * \brief Replaces special chars in a Flux::string with url compliant codes.
- * \param raw_searchstring
- * Goes through each character in a Flux::string and if it finds a special character,
- * it replaces it with what would be in a url for that character.
- * \return A Flux::string without any special characters other than %
- */
-Flux::string urlify(const Flux::string &received){
-  Flux::string string;
-  for(unsigned i=0; i < received.size(); ++i){
-    switch(received[i]){
-      case '%': string = string+"%25"; break;
-      case ' ': string = string+"%20"; break;
-      case '+': string = string+"%2B"; break;
-      case '$': string = string+"%24"; break;
-      case '&': string = string+"%26"; break;
-      case ',': string = string+"%2C"; break;
-      case '/': string = string+"%2F"; break;
-      case ':': string = string+"%3A"; break;
-      case ';': string = string+"%3B"; break;
-      case '=': string = string+"%3D"; break;
-      case '?': string = string+"%3F"; break;
-      case '@': string = string+"%40"; break;
-      case '#': string = string+"%23"; break;
-      case '>': string = string+"%3E"; break;
-      case '<': string = string+"%3C"; break;
-      case '{': string = string+"%7B"; break;
-      case '}': string = string+"%7D"; break;
-      case '|': string = string+"%7C"; break;
-      case '\\':string = string+"%5C"; break;
-      case '^': string = string+"%5E"; break;
-      case '~': string = string+"%7E"; break;
-      case '[': string = string+"%5B"; break;
-      case ']': string = string+"%5D"; break;
-      case '`': string = string+"%60"; break;
-      case '*': string = string+"%2A"; break;
-      case '(': string = string+"%28"; break;
-      case ')': string = string+"%29"; break;
-      case '\'':string = string+"%27"; break;
-      case '"': string = string+"%22"; break;
-      case '.': string = string+"%2E"; break;
-      case '-': string = string+"%2D"; break;
-      default:
-	string = string+received[i];
-    }
-  }
-  return string;
-}
-/**
  * \fn Flux::string execute(const char *cmd)
  * \brief Sends a command to the OS
  * \param cmd A command
