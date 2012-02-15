@@ -28,10 +28,10 @@ int randint(int x, int y)
  */
 IsoHost::IsoHost(const Flux::string &fullhost)
 {
-  nick = isolate(':','!',fullhost);
+  nick = fullhost.isolate(':','!');
   raw = fullhost;
-  host = isolate('@',' ',fullhost);
-  ident = isolate('!','@',fullhost);
+  host = fullhost.isolate('@',' ');
+  ident = fullhost.isolate('!','@');
 }
 
 void Fork()
