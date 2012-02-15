@@ -124,27 +124,6 @@ Flux::string printfify(const char *fmt, ...)
 }
 
 /**
-  * \fn Flux::string isolate(char begin, char end, Flux::string msg)
-  * \brief Isolates a Flux::string between two characters
-  * Finds the first character, then begins to add every consecutive character from there to a Flux::string
-  *  until it reaches the end character.
-  * \param begin The character saying where the cut should begin.
-  * \param end The character saying where the cut should end.
-  * \param msg The Flux::string you are wanting to isolate from.
-  */
-Flux::string isolate(char begin, char end, const Flux::string &msg){
-  Flux::string to_find;
-  size_t pos = msg.find(begin);
-  pos += 1;
-  for (unsigned i = pos; i < msg.length(); i++){
-    if (msg.at(i) == end){
-      break;
-    }else{to_find = to_find+msg.at(i);}
-  }
-  return to_find;
-}
-
-/**
  * \fn std::vector<Flux::string> StringVector(const Flux::string &src, char delim)
  * \brief creates a vector that breaks down a string word-by-word using the delim as the seperater
  * \param src The source string for it to break down
