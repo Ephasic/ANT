@@ -470,6 +470,24 @@ namespace Flux {
     inline std::allocator<char> get_allocator() const { return this->_string.get_allocator(); }
     inline char &operator[](size_type n) { return this->_string[n]; }
     inline const char &operator[](size_type n) const { return this->_string[n]; }
+    
+    inline string isolate(char b, char e) const
+    {
+     string to_find;
+     size_t pos = _string.find(b);
+     pos += 1;
+     for (unsigned i = pos; i < _string.length(); i++){
+       if (_string[i] == e)
+       {
+         break;
+       }else
+       {
+        to_find = to_find+_string[i];
+       }
+     }
+     return to_find;
+    }
+
 
     /* Strip Return chars */
     inline string strip()
