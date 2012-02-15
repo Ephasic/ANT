@@ -52,30 +52,6 @@ bool sepstream::StreamEnd()
 		return n == tokens.end();
 }
 
-Flux::string Flux::RandomNickString(size_t length)
-{
-  Flux::string randomchars;
-  srand(time(NULL));
-  for(unsigned i=0; i < length; ++i)
-  {
-    top:
-    char c = (char) (rand() % ('z' - '0' + 1) + '0');
-    if(isalphibeticnum(c))
-      randomchars += c;
-    else
-      goto top;
-  }
-  return randomchars;
-}
-
-Flux::string Flux::RandomString(size_t length)
-{
-  Flux::string randomchars;
-  srand((unsigned)time(NULL));
-  for(unsigned i=0; i < length; ++i)
-    randomchars += (char) (rand() % ('z' - '0' + 1) + '0');
-  return randomchars;
-}
 /******************************************************************************/
 
 /* The following code was ported from anope, all credits goes to the Anope Team

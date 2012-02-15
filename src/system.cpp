@@ -143,29 +143,36 @@ void startup(int argc, char** argv, char *envp[]) {
   my_av = argv;
   my_envp = envp;
   starttime = time(NULL); //for bot uptime
+  
   binary_dir = getprogdir(argv[0]);
   if(binary_dir[binary_dir.length() - 1] == '.')
     binary_dir = binary_dir.substr(0, binary_dir.length() - 2);
+  
   Config = new BotConfig(binary_dir);
   if(!Config)
     throw CoreException("Config Error.");
+  
   Flux::string dir = argv[0];
   Flux::string::size_type n = dir.rfind('/');
   dir = "." + dir.substr(n);
   //gets the command line paramitors if any.
-  if (!(argc < 1) || argv[1] != NULL){
-    for(int Arg=1; Arg < argc; ++Arg){
+  if (!(argc < 1) || argv[1] != NULL)
+  {
+    for(int Arg=1; Arg < argc; ++Arg)
+    {
       Flux::string arg = argv[Arg];
       if((arg.equals_ci("--developer")) ^ (arg.equals_ci("--dev")) ^ (arg == "-d"))
       {
 	dev = nofork = true;
 	Log(LOG_DEBUG) << "ANT Commit System is started in Developer mode. (" << arg << ")";
       }
-      else if ((arg.equals_ci("--nofork")) ^ (arg == "-n")){
+      else if ((arg.equals_ci("--nofork")) ^ (arg == "-n"))
+      {
 	nofork = true;
 	Log(LOG_DEBUG) << "ANT Commit System is started With No Forking enabled. (" << arg << ")";
       }
-      else if ((arg.equals_ci("--help")) ^ (arg == "-h")){
+      else if ((arg.equals_ci("--help")) ^ (arg == "-h"))
+      {
 	Log(LOG_TERMINAL) << "ANT Internet Relay Chat Commit Bot system v" << VERSION;
 	Log(LOG_TERMINAL) << "Usage: " << dir << " [options]";
 	Log(LOG_TERMINAL) << "-h, --help";
@@ -178,7 +185,8 @@ void startup(int argc, char** argv, char *envp[]) {
 	Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
 	exit(0);
       }
-      else if ((arg.equals_ci("--version")) ^ (arg == "-v")){
+      else if ((arg.equals_ci("--version")) ^ (arg == "-v"))
+      {
 	Log(LOG_TERMINAL) << "Arbitrary Navn Tool IRC Commit System C++ Bot Version " << VERSION_FULL;
 	Log(LOG_TERMINAL) << "This bot was programmed from scratch by Justasic and Lordofsraam.";
 	Log(LOG_TERMINAL) << "";
@@ -191,11 +199,13 @@ void startup(int argc, char** argv, char *envp[]) {
 	Log(LOG_TERMINAL) << "Type " << dir << " --help for help on how to use navn, or read the readme.";
 	exit(0);
       }
-      else if((arg.equals_ci("--protocoldebug")) ^ (arg == "-p")){
+      else if((arg.equals_ci("--protocoldebug")) ^ (arg == "-p"))
+      {
 	protocoldebug = true;
 	Log(LOG_RAWIO) << "ANT Commit System is started in Protocol Debug mode. (" << arg << ")";
       }
-      else if((arg.equals_ci("--nocolor")) ^ (arg == "-c")){
+      else if((arg.equals_ci("--nocolor")) ^ (arg == "-c"))
+      {
 	nocolor = true;
 	Log() << "ANT Commit System is started in No Colors mode. (" << arg << ")\033[0m"; //reset terminal colors
       }
@@ -206,7 +216,10 @@ void startup(int argc, char** argv, char *envp[]) {
       }
     }
   }
-  if(!nocolor) Log(LOG_TERMINAL) << "\033[22;36m";
+  
+  if(!nocolor)
+    Log(LOG_TERMINAL) << "\033[22;36m";
+  
   ModuleHandler::SanitizeRuntime();
   ReadConfig(); //load modules
   WritePID(); //Write the pid file
