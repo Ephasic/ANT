@@ -234,10 +234,7 @@ bool ModuleHandler::DeleteModule(module *m)
   if(handle)
     if(dlclose(handle))
       Log() << "[" << m->name << ".so] " << dlerror();
-    
-  if (!filepath.empty())
-    Delete(filepath.c_str());
-  
+      
   return true;
 }
 
@@ -274,25 +271,16 @@ void ModuleHandler::SanitizeRuntime()
   Log(LOG_DEBUG) << "Cleaning up runtime directory.";
   Flux::string dirbuf = Config->Binary_Dir+"/runtime/";
   if(!TextFile::IsDirectory(dirbuf))
+  {
     if(mkdir(dirbuf.c_str(), getuid()) != 0)
-      Log() << "Error making new runtime directory: " << strerror(errno);
-      
-  DIR *dirp = opendir(dirbuf.c_str());
-  if (!dirp)
-  {
-	  Log(LOG_DEBUG) << "Cannot open directory (" << dirbuf << ')';
-	  return;
+      throw CoreException(printfify("Error making new runtime directory: %s", strerror(errno)));
   }
-  for(dirent *dp; (dp = readdir(dirp));)
+  else
   {
-	  if (!dp->d_ino)
-		  continue;
-	  if (Flux::string(dp->d_name).equals_cs(".") || Flux::string(dp->d_name).equals_cs(".."))
-		  continue;
-	  Flux::string filebuf = dirbuf + "/" + dp->d_name;
-	  Delete(filebuf.c_str());
+    Flux::vector files = TextFile::DirectoryListing(dirbuf);
+    for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
+       Delete(Flux::string(dirbuf+(*it)).c_str());
   }
-  closedir(dirp);
 }
 /******************Configuration variables***********************/
 /**Rehash void
