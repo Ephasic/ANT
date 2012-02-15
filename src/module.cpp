@@ -274,8 +274,9 @@ void ModuleHandler::SanitizeRuntime()
   Log(LOG_DEBUG) << "Cleaning up runtime directory.";
   Flux::string dirbuf = Config->Binary_Dir+"/runtime/";
   if(!TextFile::IsDirectory(dirbuf))
-    if(mkdir(dirbuf.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1)
+    if(mkdir(dirbuf.c_str(), getuid()) != 0)
       Log() << "Error making new runtime directory: " << strerror(errno);
+      
   DIR *dirp = opendir(dirbuf.c_str());
   if (!dirp)
   {
