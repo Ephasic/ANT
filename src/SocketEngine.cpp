@@ -122,7 +122,7 @@ void SocketEngine::Process()
       if (!s->Process())
 	continue;
 
-      Log(LOG_TERMINAL) << "Processing Socket " << s->GetFD() << " (" << GetPeerIP(s->GetFD()) << ") for Read/Write.";
+      //Log(LOG_TERMINAL) << "Processing Socket " << s->GetFD() << " (" << GetPeerIP(s->GetFD()) << ") for Read/Write.";
       if (has_read && !s->ProcessRead())
  	s->SetDead(true);
 

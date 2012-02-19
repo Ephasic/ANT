@@ -63,7 +63,7 @@ int main (int argcx, char** argvx, char *envp[])
     time_t last_check = time(NULL);
 
     new DBSave(); //Start the Database Save timer.
-//     GProto = new GlobalProto();
+     GProto = new GlobalProto();
     
     TimerManager::TickTimers(time(NULL)); //Call timers to tick to start sockets instantly.
     while(!quitting)

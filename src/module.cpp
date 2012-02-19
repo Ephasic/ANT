@@ -288,7 +288,8 @@ void ModuleHandler::SanitizeRuntime()
  * \fn void ReadConfig()
  * This will re-read the config file values when told to do so
  */
-void ReadConfig(){
+void ReadConfig()
+{
   sepstream sep(Config->Modules, ',');
   Flux::string tok;
   while(sep.GetToken(tok))
