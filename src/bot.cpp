@@ -164,7 +164,7 @@ void Bot::SendUser()
 
 void RenameTimer::Tick(time_t)
 {
-  Log(LOG_TERMINAL) << "RenameTimer Tick.";
+//   Log(LOG_TERMINAL) << "RenameTimer Tick.";
   if(b->n->s && b->n->s->GetStatus(SF_CONNECTED))
     b->CheckNickName();
 }

@@ -42,7 +42,16 @@ public:
   }
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
-    source.Reply("YAY!");
+    std::map<std::string, std::shared_ptr<std::stringstream> > stream_map;
+    std::stringstream ss;
+    ss << 42;
+    stream_map["Blah"] = ss;
+
+    int erp;
+    std::stringstream sm;
+    sm = stream_map["Blah"];
+    sm >> erp;
+    source.Reply("YAY! %i", erp);
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {

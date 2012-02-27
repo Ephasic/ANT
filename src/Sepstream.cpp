@@ -129,3 +129,10 @@ Base::~Base()
 }
 void Base::AddReference(dynamic_reference_base *r) { this->References.insert(r); }
 void Base::DelReference(dynamic_reference_base *r) { this->References.erase(r); }
+
+/**********************************************************************************************************/
+
+
+
+
+

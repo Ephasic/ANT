@@ -12,6 +12,7 @@
 #define EXTERN_H
 #include "flux.h"
 #include <list> //for std::list
+#include <new>
 /* Prototypes and external variable declarations only */
 
 #include "windows_navn.h" //Include windows crap

@@ -14,6 +14,7 @@
  */
 #include "modules.h"
 #include "module.h"
+#include "rapidxml/rapidxml.hpp"
 // Convert the XML data to something parsable.
 Flux::string SanitizeXML(const Flux::string &str)
 {
@@ -179,35 +180,54 @@ void xmlrpcclient::HandleMessage()
     return;
   Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
   Log(LOG_TERMINAL) << "COMMIT!!!!! \"" << this->RawCommitXML << "\"";
-  XMLFile xf(this->RawCommitXML, 1);
+
+  try
+  {
+    rapidxml::xml_document<> doc;
+    char *buffer = const_cast<char*>(this->RawCommitXML.c_str());
+    doc.parse<0>(buffer);
+
+    for(rapidxml::xml_node<>* n = doc.first_node("message")->first_node(); n; n = n->next_sibling())
+    {
+      Flux::string val = value_cast<Flux::string>(n->value());
+      if(!val.empty())
+	Log(LOG_TERMINAL) << n->name() << ": " << val;
+    }
+  }
+  catch(std::exception &ex)
+  {
+    Log(LOG_TERMINAL) << "XML Exception Caught: " << ex.what();
+  }
   
-  /* This code was based off the commit in this script: http://cia.vc/clients/git/ciabot.bash */
-  /* Script Info (if available) */
-  Flux::string ScriptName = xf.Tags["message"].Tags["generator"].Attributes["name"].Value;
-  Flux::string ScriptVersion = xf.Tags["message"].Tags["generator"].Attributes["version"].Value;
-  Flux::string ScriptURL = xf.Tags["message"].Tags["generator"].Attributes["url"].Value;
-  
-  /* Commit Body */
-  Flux::string timestamp = xf.Tags["message"].Attributes["timestamp"].Value;
-  Flux::string author = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["author"].Value;
-  Flux::string revision = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["revision"].Value;
-  Flux::string log = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["log"].Value;
-  Flux::string url = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["url"].Value;
-  auto files = xf.Tags["message"].Tags["body"].Tags["commit"].Tags["files"].Tags;
-  
-  /* Source info */
-  Flux::string project = xf.Tags["message"].Tags["source"].Attributes["project"].Value;
-  Flux::string branch = xf.Tags["message"].Tags["source"].Attributes["branch"].Value;
-  Flux::string module = xf.Tags["message"].Tags["source"].Attributes["module"].Value;
-  
-//   sepstream sep(files, ' ');
-//   Flux::string tok;
-//   Flux::vector Files;
-//   while(sep.GetToken(tok))
-//     Files.push_back(tok);
-  Flux::vector Files; //Parse the file list.
-  for(auto it : files)
-    Files.push_back(it.second.Attributes["file"].Value);
+//   XMLFile xf(this->RawCommitXML, 1);
+//   
+//   /* This code was based off the commit in this script: http://cia.vc/clients/git/ciabot.bash */
+//   /* Script Info (if available) */
+//   Flux::string ScriptName = xf.Tags["message"].Tags["generator"].Attributes["name"].Value;
+//   Flux::string ScriptVersion = xf.Tags["message"].Tags["generator"].Attributes["version"].Value;
+//   Flux::string ScriptURL = xf.Tags["message"].Tags["generator"].Attributes["url"].Value;
+//   
+//   /* Commit Body */
+//   Flux::string timestamp = xf.Tags["message"].Attributes["timestamp"].Value;
+//   Flux::string author = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["author"].Value;
+//   Flux::string revision = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["revision"].Value;
+//   Flux::string log = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["log"].Value;
+//   Flux::string url = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["url"].Value;
+//   auto files = xf.Tags["message"].Tags["body"].Tags["commit"].Tags["files"].Tags;
+//   
+//   /* Source info */
+//   Flux::string project = xf.Tags["message"].Tags["source"].Attributes["project"].Value;
+//   Flux::string branch = xf.Tags["message"].Tags["source"].Attributes["branch"].Value;
+//   Flux::string module = xf.Tags["message"].Tags["source"].Attributes["module"].Value;
+//   
+// //   sepstream sep(files, ' ');
+// //   Flux::string tok;
+// //   Flux::vector Files;
+// //   while(sep.GetToken(tok))
+// //     Files.push_back(tok);
+//   Flux::vector Files; //Parse the file list.
+//   for(auto it : files)
+//     Files.push_back(it.second.Attributes["file"].Value);
   
   /* This is seperated now to keep
    * the differences in how stuff is
@@ -215,32 +235,32 @@ void xmlrpcclient::HandleMessage()
    * the data in more ways than one
    */
 
-  Log(LOG_TERMINAL) << "***Commit****\nScriptName: " << ScriptName << "\nScriptVersion: " << ScriptVersion << "\nScriptURL: " << ScriptURL << "\nTimestamp: " << timestamp << "\nAuthor: " << author << "\nRevision: " << revision << "\nLog: " << log << "\nURL: " << url << "\nProject: " << project << "\nBranch: " << branch << "\nModule: " << module << "\n***End Of Commit***";
-  
-  CommitMessage msg;
-  /* Script info */
-  msg.ScriptName = ScriptName;
-  msg.ScriptVersion = ScriptVersion;
-  msg.ScriptURL = ScriptURL;
-  
-  /* commit body */
-  msg.timestamp = timestamp;
-  msg.author = author;
-  msg.revision = revision;
-  msg.log = log;
-  msg.url = url;
-  msg.Files = Files;
-  
-  /* Source info */
-  msg.project = project;
-  msg.branch = branch;
-  msg.module = module;
-
-  for(auto IT : Networks) for(auto it : IT.second->ChanMap)
-      msg.Channels.push_back(it.second);
-  
-  /* Announce to other modules for commit announcement */
-  FOREACH_MOD(I_OnCommit, OnCommit(msg));
+//   Log(LOG_TERMINAL) << "***Commit****\nScriptName: " << ScriptName << "\nScriptVersion: " << ScriptVersion << "\nScriptURL: " << ScriptURL << "\nTimestamp: " << timestamp << "\nAuthor: " << author << "\nRevision: " << revision << "\nLog: " << log << "\nURL: " << url << "\nProject: " << project << "\nBranch: " << branch << "\nModule: " << module << "\n***End Of Commit***";
+//   
+//   CommitMessage msg;
+//   /* Script info */
+//   msg.ScriptName = ScriptName;
+//   msg.ScriptVersion = ScriptVersion;
+//   msg.ScriptURL = ScriptURL;
+//   
+//   /* commit body */
+//   msg.timestamp = timestamp;
+//   msg.author = author;
+//   msg.revision = revision;
+//   msg.log = log;
+//   msg.url = url;
+//   msg.Files = Files;
+//   
+//   /* Source info */
+//   msg.project = project;
+//   msg.branch = branch;
+//   msg.module = module;
+// 
+//   for(auto IT : Networks) for(auto it : IT.second->ChanMap)
+//       msg.Channels.push_back(it.second);
+//   
+//   /* Announce to other modules for commit announcement */
+//   FOREACH_MOD(I_OnCommit, OnCommit(msg));
 }
 
 class SocketStart : public Timer //Weird socket glitch where we need to use a timer to start the socket correctly.
