@@ -366,6 +366,8 @@ namespace Flux {
 
     inline string tolower() { std::transform(_string.begin(), _string.end(), _string.begin(), ::tolower); return *this; }
     inline string toupper() { std::transform(_string.begin(), _string.end(), _string.begin(), ::toupper); return *this; }
+    inline string tolower() const { base_string tmp = this->_string; std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::tolower); return tmp; }
+    inline string toupper() const { base_string tmp = this->_string; std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper); return tmp; }
     inline void clear() { this->_string.clear(); }
     inline bool search(const string &_str) { if(_string.find(_str._string) != base_string::npos) return true; return false; }
     inline bool search(const string &_str) const { if(_string.find(_str._string) != base_string::npos) return true; return false; }

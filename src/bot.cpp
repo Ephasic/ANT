@@ -81,15 +81,16 @@ void Bot::AnnounceCommit(CommitMessage &msg)
   for(auto it : msg.Channels)
   {
     Channel *c = it;
-    Flux::string files = CondenseVector(msg.Files);
+//     Flux::string files = CondenseVector(msg.Files);
+    Log(LOG_TERMINAL) << "Announcing in " << c->name << " (" << c->n->name << ')';
     
     std::stringstream ss;
-    ss << RED << BOLD << msg.project << " " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << files;
+    ss << RED << BOLD << msg.project << ": " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << 'r' <<  msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << ": " << NORMAL << msg.log; //<< files;
     Log(LOG_DEBUG) << "BLAH! " << ss.str();
 
     Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
 
-    Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
+    //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
     c->SendMessage(formattedmessgae);
 //     c->SendMessage(RED+BOLD+"%s: "+NORMAL+ORANGE+"%s * "+NORMAL+YELLOW+"%s "+NORMAL+BOLD+"| "+NORMAL+LIGHT_BLUE+"%s"+NORMAL+": %s", msg.project.c_str(), msg.author.c_str(), msg.revision.c_str(), files.c_str());
   }

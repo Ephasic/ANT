@@ -84,6 +84,7 @@ public:
 class xmlrpcclient : public ClientSocket, public BufferedSocket
 {
   Flux::string RawCommitXML;
+  Flux::vector XML_VEC;
   bool in_query, in_header, IsXML;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), IsXML(false) {}
@@ -123,11 +124,13 @@ public:
     else if(this->in_query)
     {
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
-      if(!message.search_ci("</message>"))
+      if(!message.search_ci("</message>")){
 	this->RawCommitXML += message.strip();
-      else{
+	this->XML_VEC.push_back(message.strip());
+      }else{
 	this->in_query = false;
 	this->RawCommitXML += message.strip();
+	this->XML_VEC.push_back(message.strip());
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
 	this->Write("HTTP/1.1 200 OK");
 	this->Write("CONNECTION: CLOSE");
@@ -172,6 +175,38 @@ ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
   return c;
 }
 
+Flux::string GetXMLValue(const Flux::vector &XML_VEC, const Flux::string &v)
+{
+  //FIXME: this is all lower case!
+  Flux::string value = v.tolower();
+  for(unsigned i = 0; i < XML_VEC.size(); ++i)
+  {
+    try
+    {
+      rapidxml::xml_document<> doc;
+      char *buffer = XML_VEC[i].tolower().cc_str();
+      doc.parse<0>(buffer);
+      
+      //       for(rapidxml::xml_node<>* n = doc.first_node("message"); n; n = n->next_sibling())
+      //       {
+	// 	Flux::string val = value_cast<Flux::string>(n->value());
+      // 	if(!val.empty())
+      // 	  Log(LOG_TERMINAL) << n->name() << ": " << val;
+      //       }
+      if(doc.first_node(value.c_str()) && !Flux::string(doc.first_node(value.c_str())->value()).empty()){
+	Flux::string author = doc.first_node(value.c_str())->value();
+	Log(LOG_TERMINAL) << value << "! " << author;
+	return author;
+      }
+    }
+    catch(std::exception &ex)
+    {
+      Log(LOG_TERMINAL) << "XML Exception Caught: " << ex.what();
+    }
+  }
+  return "";
+}
+
 class module;
 /* This is down here so we don't make a huge mess in the middle of the file */
 void xmlrpcclient::HandleMessage()
@@ -181,23 +216,20 @@ void xmlrpcclient::HandleMessage()
   Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
   Log(LOG_TERMINAL) << "COMMIT!!!!! \"" << this->RawCommitXML << "\"";
 
-  try
-  {
-    rapidxml::xml_document<> doc;
-    char *buffer = this->RawCommitXML.cc_str();
-    doc.parse<0>(buffer);
+  Flux::string ScriptName = "herp"; //GetXMLValue(XML_VEC, "project");
+  Flux::string ScriptVersion = "1.0";
+  Flux::string ScriptURL = "derp";
 
-    for(rapidxml::xml_node<>* n = doc.first_node("message")->first_node(); n; n = n->next_sibling())
-    {
-      Flux::string val = value_cast<Flux::string>(n->value());
-      if(!val.empty())
-	Log(LOG_TERMINAL) << n->name() << ": " << val;
-    }
-  }
-  catch(std::exception &ex)
-  {
-    Log(LOG_TERMINAL) << "XML Exception Caught: " << ex.what();
-  }
+  Flux::string timestamp = value_cast<Flux::string>(time(NULL)); //GetXMLValue(XML_VEC, "")
+  Flux::string author = GetXMLValue(XML_VEC, "author");
+  Flux::string revision = GetXMLValue(XML_VEC, "revision");
+  Flux::string log = GetXMLValue(XML_VEC, "log");
+  Flux::string url = "herp.com";
+
+  Flux::string project = GetXMLValue(XML_VEC, "project");
+  Flux::string branch = GetXMLValue(XML_VEC, "branch");
+
+  Flux::string module = "";
   
 //   XMLFile xf(this->RawCommitXML, 1);
 //   
@@ -229,38 +261,39 @@ void xmlrpcclient::HandleMessage()
 //   for(auto it : files)
 //     Files.push_back(it.second.Attributes["file"].Value);
   
-  /* This is seperated now to keep
+  /* This is separated now to keep
    * the differences in how stuff is
    * processed apart so we can possibly
    * the data in more ways than one
    */
 
-//   Log(LOG_TERMINAL) << "***Commit****\nScriptName: " << ScriptName << "\nScriptVersion: " << ScriptVersion << "\nScriptURL: " << ScriptURL << "\nTimestamp: " << timestamp << "\nAuthor: " << author << "\nRevision: " << revision << "\nLog: " << log << "\nURL: " << url << "\nProject: " << project << "\nBranch: " << branch << "\nModule: " << module << "\n***End Of Commit***";
-//   
-//   CommitMessage msg;
-//   /* Script info */
-//   msg.ScriptName = ScriptName;
-//   msg.ScriptVersion = ScriptVersion;
-//   msg.ScriptURL = ScriptURL;
-//   
-//   /* commit body */
-//   msg.timestamp = timestamp;
-//   msg.author = author;
-//   msg.revision = revision;
-//   msg.log = log;
-//   msg.url = url;
+  Log(LOG_TERMINAL) << "***Commit****\nScriptName: " << ScriptName << "\nScriptVersion: " << ScriptVersion << "\nScriptURL: " << ScriptURL << "\nTimestamp: " << timestamp << "\nAuthor: " << author << "\nRevision: " << revision << "\nLog: " << log << "\nURL: " << url << "\nProject: " << project << "\nBranch: " << branch << "\nModule: " << module << "\n***End Of Commit***";
+
+  // FIXME: This should be in a map to make invalid XML just announce a blank instead of crashing.
+  CommitMessage msg;
+  /* Script info */
+  msg.ScriptName = ScriptName;
+  msg.ScriptVersion = ScriptVersion;
+  msg.ScriptURL = ScriptURL;
+
+  /* commit body */
+  msg.timestamp = timestamp;
+  msg.author = author;
+  msg.revision = revision;
+  msg.log = log;
+  msg.url = url;
 //   msg.Files = Files;
-//   
-//   /* Source info */
-//   msg.project = project;
-//   msg.branch = branch;
+
+  /* Source info */
+  msg.project = project;
+  msg.branch = branch;
 //   msg.module = module;
-// 
-//   for(auto IT : Networks) for(auto it : IT.second->ChanMap)
-//       msg.Channels.push_back(it.second);
-//   
-//   /* Announce to other modules for commit announcement */
-//   FOREACH_MOD(I_OnCommit, OnCommit(msg));
+
+  for(auto IT : Networks) for(auto it : IT.second->ChanMap)
+      msg.Channels.push_back(it.second);
+
+  /* Announce to other modules for commit announcement */
+  FOREACH_MOD(I_OnCommit, OnCommit(msg));
 }
 
 class SocketStart : public Timer //Weird socket glitch where we need to use a timer to start the socket correctly.
