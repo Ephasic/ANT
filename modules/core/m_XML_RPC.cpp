@@ -184,7 +184,7 @@ void xmlrpcclient::HandleMessage()
   try
   {
     rapidxml::xml_document<> doc;
-    char *buffer = const_cast<char*>(this->RawCommitXML.c_str());
+    char *buffer = this->RawCommitXML.cc_str();
     doc.parse<0>(buffer);
 
     for(rapidxml::xml_node<>* n = doc.first_node("message")->first_node(); n; n = n->next_sibling())
