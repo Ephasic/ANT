@@ -35,10 +35,42 @@
 #define WHITE "\00316"
 
 //Other formatting
-#define NORMAL "\15\15"
+#define NORMAL "\15"
 #define BOLD "\2\2"
 #define REVERSE ""
 #define UNDERLINE "\13\13"
+
+// enum IRCColors
+// {
+//   // Colors
+//   BLACK_,
+//   WHITE_,
+//   DARK_BLUE_,
+//   DARK_GREEN_,
+//   DARK_RED_,
+//   LIGHT_BLUE_,
+//   LIGHT_GRAY_,
+//   LIGHT_GREEN_,
+//   LIGHT_GREY_,
+//   LIGHT_RED_,
+//   GREEN_,
+//   RED_,
+//   PURPLE_,
+//   YELLOW_,
+//   GRAY_,
+//   GREY_,
+//   BROWN_,
+//   ORANGE_,
+//   AQUA_,
+//   BLUE_,
+//   VIOLET_,
+// 
+//   // Other formatting
+//   NORMAL_,
+//   BOLD_,
+//   REVERSE_,
+//   UNDERLINE_,
+// }
 
 class RenameTimer : public Timer
 {
@@ -75,26 +107,26 @@ Bot::~Bot()
   Log(LOG_DEBUG) << "Bot " << this->nick << " for network " << this->n->name << " deleted!";
 }
 
-void Bot::AnnounceCommit(CommitMessage &msg)
-{
-  Log(LOG_DEBUG) << "AnnounceCommit Called.";
-  for(auto it : msg.Channels)
-  {
-    Channel *c = it;
-//     Flux::string files = CondenseVector(msg.Files);
-    Log(LOG_TERMINAL) << "Announcing in " << c->name << " (" << c->n->name << ')';
-    
-    std::stringstream ss;
-    ss << RED << BOLD << msg.project << ": " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << 'r' <<  msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << ": " << NORMAL << msg.log; //<< files;
-    Log(LOG_DEBUG) << "BLAH! " << ss.str();
-
-    Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
-
-    //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
-    c->SendMessage(formattedmessgae);
-//     c->SendMessage(RED+BOLD+"%s: "+NORMAL+ORANGE+"%s * "+NORMAL+YELLOW+"%s "+NORMAL+BOLD+"| "+NORMAL+LIGHT_BLUE+"%s"+NORMAL+": %s", msg.project.c_str(), msg.author.c_str(), msg.revision.c_str(), files.c_str());
-  }
-}
+// void Bot::AnnounceCommit(CommitMessage &msg)
+// {
+//   Log(LOG_DEBUG) << "AnnounceCommit Called.";
+//   for(auto it : msg.Channels)
+//   {
+//     Channel *c = it;
+// //     Flux::string files = CondenseVector(msg.Files);
+//     Log(LOG_TERMINAL) << "Announcing in " << c->name << " (" << c->n->name << ')';
+//     
+//     std::stringstream ss;
+//     ss << RED << BOLD << msg.project << ": " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << 'r' <<  msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << ":\15 " << << msg.log; //<< files;
+//     Log(LOG_DEBUG) << "BLAH! " << ss.str();
+// 
+//     Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
+// 
+//     //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
+//     c->SendMessage(formattedmessgae);
+// //     c->SendMessage(RED+BOLD+"%s: "+NORMAL+ORANGE+"%s * "+NORMAL+YELLOW+"%s "+NORMAL+BOLD+"| "+NORMAL+LIGHT_BLUE+"%s"+NORMAL+": %s", msg.project.c_str(), msg.author.c_str(), msg.revision.c_str(), files.c_str());
+//   }
+// }
 
 void Bot::Join(Channel *c)
 {

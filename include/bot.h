@@ -25,7 +25,7 @@ public:
   /* IRCProto class for the network */
   IRCProto *ircproto;
   /* Announce a commit that has been made */
-  void AnnounceCommit(CommitMessage&);
+//   void AnnounceCommit(CommitMessage&);
   /* Join a channel */
   void Join(Channel*);
   void Join(const Flux::string&);
