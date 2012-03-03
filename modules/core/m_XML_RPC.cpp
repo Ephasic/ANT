@@ -51,7 +51,8 @@ class WaitTimer : public Timer
 {
   Socket *s;
 public:
-  WaitTimer(Socket *ss):Timer(Config->xmlrpctimeout, time(NULL)), s(ss) { Log(LOG_TERMINAL) << "WAIT TIMER!"; }
+  WaitTimer(Socket *ss, time_t timeout = Config->xmlrpctimeout):Timer(timeout, time(NULL)), s(ss)
+  { Log(LOG_TERMINAL) << "WAIT TIMER!"; }
   void Tick(time_t) { s->SetDead(true); }
 };
 
@@ -120,6 +121,8 @@ public:
     {
       this->in_query = this->IsXML = true;
       this->in_header = false;
+      this->RawCommitXML += message.strip();
+      this->XML_VEC.push_back(message.strip());
     }
     else if(this->in_query)
     {
@@ -132,13 +135,16 @@ public:
 	this->RawCommitXML += message.strip();
 	this->XML_VEC.push_back(message.strip());
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
-	this->Write("HTTP/1.1 200 OK");
+	this->Write("HTTP/1.0 200 OK");
+	this->Write("SERVER: ANT Commit System version " + systemver);
+	this->Write("CONTENT-LENGTH: 0");
 	this->Write("CONNECTION: CLOSE");
 	this->Write("DATE: "+do_strftime(time(NULL), true));
-	this->Write("SERVER: ANT Commit System version " + systemver);
+	this->Write("");
 	this->HandleMessage();
 	this->ProcessWrite();
-	return false; //Close the connection.
+	//return false; //Close the connection.
+	new WaitTimer(this, 5);
       }
     }
     else if(!this->in_query && !this->in_header && !this->IsXML)
@@ -213,9 +219,43 @@ void xmlrpcclient::HandleMessage()
 {
   if(this->RawCommitXML.empty())
     return;
+  
   Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
   Log(LOG_TERMINAL) << "COMMIT!!!!! \"" << this->RawCommitXML << "\"";
 
+  Flux::string blah = this->RawCommitXML.cc_str();
+  // Strip out all the XML garbage we don't need since RapidXML will crash if we don't
+  size_t pos1 = blah.find("<?");
+  size_t pos2 = blah.find("<message>");
+
+  blah = blah.erase(pos1, pos2).replace_all_cs("  ", " ");
+  Log(LOG_TERMINAL) << "\nBLAH! " << blah;
+
+  try
+  {
+    rapidxml::xml_document<> doc;
+    doc.parse<0>(blah.cc_str());
+    rapidxml::xml_node<> *node = doc.first_node("message");
+    //Log(LOG_TERMINAL) << "NODE!! " << node->next_sibling()->name();
+
+    for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    {
+      Log(LOG_TERMINAL) << "Node foobar has attribute " << attr->name() << " ";
+      Log(LOG_TERMINAL) << "with value " << attr->value();
+    }
+    
+//     for(rapidxml::xml_node<>* n = doc.first_node("message"); n; n = n->next_sibling())
+//     {
+//       Flux::string val = n->value();
+//       if(!val.empty())
+// 	Log(LOG_TERMINAL) << n->name() << ": " << val;
+//     }
+  }
+  catch (std::exception &ex)
+  {
+    Log(LOG_TERMINAL) << ":::: XML Exception Caught: " << ex.what();
+  }
+  
   Flux::string ScriptName = "herp"; //GetXMLValue(XML_VEC, "project");
   Flux::string ScriptVersion = "1.0";
   Flux::string ScriptURL = "derp";
@@ -272,22 +312,22 @@ void xmlrpcclient::HandleMessage()
   // FIXME: This should be in a map to make invalid XML just announce a blank instead of crashing.
   CommitMessage msg;
   /* Script info */
-  msg.ScriptName = ScriptName;
-  msg.ScriptVersion = ScriptVersion;
-  msg.ScriptURL = ScriptURL;
+  msg.info["ScriptName"] = ScriptName;
+  msg.info["ScriptVersion"] = ScriptVersion;
+  msg.info["ScriptURL"] = ScriptURL;
 
-  /* commit body */
-  msg.timestamp = timestamp;
-  msg.author = author;
-  msg.revision = revision;
-  msg.log = log;
-  msg.url = url;
-//   msg.Files = Files;
+  /* Commit body */
+  msg.info["timestamp"] = timestamp;
+  msg.info["author"] = author;
+  msg.info["revision"] = revision;
+  msg.info["log"] = log;
+  msg.info["url"] = url;
+  msg.info["module"] = module;
 
   /* Source info */
-  msg.project = project;
-  msg.branch = branch;
-//   msg.module = module;
+  msg.info["project"] = project;
+  msg.info["branch"] = branch;
+//   msg.Files = Files;
 
   for(auto IT : Networks){
     for(auto it : IT.second->ChanMap)
@@ -343,7 +383,6 @@ public:
 #define REVERSE ""
 #define UNDERLINE "\13"
 
-
 class xmlrpcmod : public module
 {
 public:
@@ -376,9 +415,24 @@ public:
     for(auto it : listen_sockets)
       delete (it);
   }
-  
+
+private:
+  CommitMessage Message;
+  Flux::string GetCommitData(const Flux::string &n)
+  {
+    CommitMessage msg = this->Message;
+    for(auto it : msg.info)
+    {
+      if(it.first.equals_ci(n))
+	return it.second;
+    }
+    return "";
+  }
+
+public:
   void OnCommit(CommitMessage &msg)
   {
+    this->Message = msg;
     //FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
     for(auto it : msg.Channels)
@@ -389,9 +443,9 @@ public:
 
       // Build the commit message with stringstream
       std::stringstream ss;
-      ss << RED << BOLD << msg.project << ": " << NORMAL << ORANGE << msg.author << " * ";
-      ss << NORMAL << YELLOW << 'r' <<  msg.revision << NORMAL << BOLD << " | " << NORMAL;
-      ss << LIGHT_BLUE << "(files here..) " << NORMAL << ": " << msg.log; //<< files;
+      ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
+      ss << NORMAL << YELLOW << 'r' <<  this->GetCommitData("revision") << NORMAL << BOLD << " | " << NORMAL;
+      ss << LIGHT_BLUE << "(files here..) " << NORMAL << ": " << this->GetCommitData("log"); //<< files;
       
       Log(LOG_DEBUG) << "BLAH! " << ss.str();
       

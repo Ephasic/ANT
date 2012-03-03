@@ -15,19 +15,10 @@
 
 class Bot;
 class NetworkSocket;
+
 struct CommitMessage
 {
-  Flux::string project;
-  Flux::string branch;
-  Flux::string ScriptVersion;
-  Flux::string ScriptName;
-  Flux::string ScriptURL;
-  Flux::string module;
-  Flux::string timestamp;
-  Flux::string author;
-  Flux::string revision;
-  Flux::string log;
-  Flux::string url;
+  Flux::map<Flux::string> info;
   Flux::vector Files;
   std::vector<Channel*> Channels;
   std::vector<Bot*> Bots;

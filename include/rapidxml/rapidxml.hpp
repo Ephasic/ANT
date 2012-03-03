@@ -853,14 +853,14 @@ namespace rapidxml
         //! \param name_size Size of name, in characters, or 0 to have size calculated automatically from string
         //! \param case_sensitive Should name comparison be case-sensitive; non case-sensitive comparison works properly only for ASCII characters
         //! \return Pointer to found attribute, or 0 if not found.
-        xml_attribute<Ch> *next_attribute(const Ch *name = 0, std::size_t name_size = 0, bool case_sensitive = true) const
+        xml_attribute<Ch> *next_attribute(const Ch *_name = 0, std::size_t _name_size = 0, bool case_sensitive = true) const
         {
-            if (name)
+            if (_name)
             {
-                if (name_size == 0)
-                    name_size = internal::measure(name);
+                if (_name_size == 0)
+                    _name_size = internal::measure(_name);
                 for (xml_attribute<Ch> *attribute = m_next_attribute; attribute; attribute = attribute->m_next_attribute)
-                    if (internal::compare(attribute->name(), attribute->name_size(), name, name_size, case_sensitive))
+                    if (internal::compare(attribute->name(), attribute->name_size(), _name, _name_size, case_sensitive))
                         return attribute;
                 return 0;
             }
