@@ -2,18 +2,19 @@ Legend:
 	x = done
 	? = unsure
 	+ = in progress
-	- = not happening
+	# = not happening in this version
+	- = sub-section
 	$ = half completed
 
 
 ANT 1.0.0
 ----------
-[ ] Fix Glibc crash
+[-] Fix Glibc crash
   [ ] Fix derpiness in starting sockets from modules?
 
 [X] Multisocket the socket engine
   [X] Multi-Network handling
-  [-] Multi-bot handling
+  [X] Multi-bot handling
   [X] Network class for handling network information
 
 [+] Add Database/User accounts type system for metadata
@@ -22,22 +23,22 @@ ANT 1.0.0
   [ ] BLAKE-512+Skein-512+Tiger2 password hashing
   [ ] Add E-Mail handling
   [ ] Add lists of networks, channels, etc.
-  [+] Add Commit processing system
-  [+] Add Commit metadata processing
+  [X] Add Commit processing system
+  [X] Add Commit metadata processing
 
-[ ] Add Web Front end
-  [ ] Use CPPCMS
+[-] Add Web Front end
+  [X] Use CPPCMS
   [ ] Add IRC event notifications (ie, kick, nick changes, etc)
   [ ] Add accounts that should sync with Database backend.
   [ ] Add blog like CIA.vc
   [ ] Add Documentation
-  [ ] Seperate C++ script/binary to handle Web Front end
+  [ ] Separate C++ script/binary to handle Web Front end
   [ ] Instant Search
   [ ] Add better front page than CIA.vc (should have: Critical Announcements, themes, user themes, commit averages, last commit, etc.)
   [ ] Site Navigation that is understandable
   [ ] Buttons and designs for 'master' page should look like ubuntu-tweak.com in a way.
 
-[ ] Add Network Oper handling similar to SearchIRC's Oper handling
+[-] Add Network Oper handling similar to SearchIRC's Oper handling
   [ ] Add Channel Ops?
 
 [+] Add more event handlers (FOREACH_MOD)
@@ -45,14 +46,14 @@ ANT 1.0.0
 [ ] Wtf is this Module Priority system? fix that
 [ ] Add buffer limiter (so freenode does not kill the bot)
 [ ] Better config format
-[+] Better startup switch management
+[X] Better startup switch management
 [ ] Better terminal Commands Parsing
-[ ] Administrative override of certian functions
+[ ] Administrative override of certain functions
 
 
 Future
 ------
-[$] Add Windows support (Fearure request: http://flux-net.net/bugs/view.php?id=9)
+[#] Add Windows support (Feature request: http://flux-net.net/bugs/view.php?id=9)
 
 Optional
 --------
