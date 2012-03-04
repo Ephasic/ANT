@@ -54,6 +54,7 @@ private:
     // Parse the INI file
     int Parse(const Flux::string &filename);
 };
+
 class CoreExport BotConfig
 {
 public:

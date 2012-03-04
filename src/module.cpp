@@ -82,8 +82,10 @@ void ModuleHandler::Attach(Implementation *i, module *mod, size_t sz)
    Attach(i[n], mod);
 }
 
-Flux::string DecodeModErr(ModErr err){
- switch(err){
+Flux::string DecodeModErr(ModErr err)
+{
+ switch(err)
+ {
    case MOD_ERR_OK:
      return "No error (MOD_ERR_OK)";
    case MOD_ERR_MEMORY:
@@ -117,13 +119,15 @@ template<class TYPE> TYPE class_cast(void *symbol)
     cast.symbol = symbol;
     return cast.function;
 }
+
 /** 
  * \fn bool ModuleHandler::Detach(Implementation i, module *mod)
  * \brief Unhook for the module hook ModuleHandler::Attach()
  * \param Implementation The Implementation of the call list you want your module to detach
  * \param Module the module the Implementation is on
  */
-bool ModuleHandler::Detach(Implementation i, module *mod){
+bool ModuleHandler::Detach(Implementation i, module *mod)
+{
   auto x = std::find(EventHandlers[i].begin(), EventHandlers[i].end(), mod);
   if(x == EventHandlers[i].end())
     return false;
@@ -238,14 +242,16 @@ bool ModuleHandler::DeleteModule(module *m)
   return true;
 }
 
-bool ModuleHandler::Unload(module *m){
+bool ModuleHandler::Unload(module *m)
+{
   if(!m)
     return false;
   FOREACH_MOD(I_OnModuleUnload, OnModuleUnload(m));
   return DeleteModule(m);
 }
 
-void ModuleHandler::UnloadAll(){
+void ModuleHandler::UnloadAll()
+{
   for(auto var : Modules)
     Unload(var.second);
 }

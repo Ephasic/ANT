@@ -36,13 +36,15 @@ IsoHost::IsoHost(const Flux::string &fullhost)
 
 void Fork()
 {
-  if (!nofork && InTerm()){
+  if (!nofork && InTerm())
+  {
     int i = fork();
-    if(i > 0){
-	    Log(LOG_TERMINAL) << "ANT Commit System v" << VERSION << " Started";
-	    Log(LOG_TERMINAL) << "Forking to background. PID: " << i << "\033[22;37m";
-	    FOREACH_MOD(I_OnFork, OnFork(i));
-	    exit(0);
+    if(i > 0)
+    {
+      Log(LOG_TERMINAL) << "ANT Commit System v" << VERSION << " Started";
+      Log(LOG_TERMINAL) << "Forking to background. PID: " << i << "\033[22;37m";
+      FOREACH_MOD(I_OnFork, OnFork(i));
+      exit(0);
     }
     if(isatty(fileno(stdout)))
       fclose(stdout);
@@ -51,7 +53,7 @@ void Fork()
     if(isatty(fileno(stderr)))
       fclose(stderr);
     if(setpgid(0, 0) < 0)
-	    throw CoreException("Unable to setpgid()");
+      throw CoreException("Unable to setpgid()");
     else if(i == -1)
       Log() << "Error, unable to fork: " << strerror(errno);
   }else
@@ -128,7 +130,8 @@ Flux::string Flux::Sanitize(const Flux::string &string)
  * \param nerp Channel sring to be tested.
  * \return True if the Flux::string is a valid channel, false otherwise.
  */
-bool IsValidChannel(const Flux::string &chan){
+bool IsValidChannel(const Flux::string &chan)
+{
  if (chan[0] != '#')
     return false;
  return true;

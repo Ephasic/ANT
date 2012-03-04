@@ -11,7 +11,6 @@
 // This cannot include modules.h because it will multi-define stuff and make g++ shit bricks
 #include "module.h"
 #include "INIReader.h"
-#include "xmlfile.h"
 #include "network.h" //We'll solve includes later
 #include "bot.h"
 
@@ -19,17 +18,21 @@
  * This will get the bots runtime directory
  * @param getprogdir(const Flux::string dir)
  */
-Flux::string getprogdir(const Flux::string &dir){
+Flux::string getprogdir(const Flux::string &dir)
+{
   char buffer[FILENAME_MAX];
-  if (GetCurrentDir(buffer, sizeof(buffer))) {
+  if (GetCurrentDir(buffer, sizeof(buffer)))
+  {
     Flux::string remainder = dir;
     bot_bin = remainder;
     Flux::string::size_type n = bot_bin.rfind("/");
     Flux::string fullpath;
+    
     if (bot_bin[0] == '/')
       fullpath = bot_bin.substr(0, n);
     else
       fullpath = Flux::string(buffer) + "/" + bot_bin.substr(0, n);
+    
     bot_bin = bot_bin.substr(n + 1, remainder.length());
     return fullpath;
   }
@@ -42,7 +45,8 @@ Flux::string getprogdir(const Flux::string &dir){
  * \param cmd A command
  * \return A Flux::string containing the response from the OS.
  */
-Flux::string execute(const char *cmd) {
+Flux::string execute(const char *cmd)
+{
   /*
    * Roses are red,
    * Violets are blue,
@@ -50,13 +54,19 @@ Flux::string execute(const char *cmd) {
    * And so do you!
    */
   FILE* pipe = popen(cmd, "r");
-  if (!pipe) return "";
-		     char buffer[128];
+  
+  if (!pipe)
+    return "";
+  
+  char buffer[128];
   Flux::string result = "";
-  while(!feof(pipe)) {
+  
+  while(!feof(pipe))
+  {
     if(fgets(buffer, 128, pipe) != NULL)
       result += buffer;
   }
+  
   pclose(pipe);
   return result;
 }
@@ -65,27 +75,33 @@ Flux::string execute(const char *cmd) {
  * \brief Restart the bot process
  * \param reason The reason for the restart
  */
-void restart(const Flux::string &reason){
+void restart(const Flux::string &reason)
+{
   char CurrentPath[FILENAME_MAX];
   GetCurrentDir(CurrentPath, sizeof(CurrentPath));
   FOREACH_MOD(I_OnRestart, OnRestart(reason));
+  
   for(auto it : Networks)
   {
     Network *n = it.second;
-    if(reason.empty()){
+    if(reason.empty())
+    {
       Log() << "Restarting: No Reason";
       if(n->b->ircproto)
 	n->b->ircproto->quit("Restarting: No Reason");
-    }else{
+    } else {
       Log() << "Restarting: " << reason;
       if(n->b->ircproto)
 	n->b->ircproto->quit("Restarting: %s", reason.c_str());
     }
   }
+  
   chdir(CurrentPath);
   int execvpret = execvp(my_av[0], my_av);
+  
   if(execvpret > 0)
     throw CoreException("Restart Failed, Exiting");
+  
   Delete(Config->PidFile.c_str());
   exit(1);
 }
@@ -95,9 +111,11 @@ void restart(const Flux::string &reason){
  * \brief Reload the bot config file
  * \param boolean this boolean tells rehash if we are starting from start or not
  */
-void Rehash(){
+void Rehash()
+{
   Log() << "Rehashing Configuration File";
-  try{
+  try
+  {
     const Flux::string bi_dir = Config->Binary_Dir;
     BotConfig *configtmp = Config;
     Config = new BotConfig(bi_dir);
@@ -124,8 +142,10 @@ static void WritePID(){
   //logging to a text file and making the PID file.
   if(Config->PidFile.empty())
     throw CoreException("Cannot write PID file, no PID file specified.");
+  
   FILE *pidfile = fopen(Config->PidFile.c_str(), "w");
-  if(pidfile){
+  if(pidfile)
+  {
     fprintf(pidfile, "%d\n", static_cast<int>(getpid()));
     fclose(pidfile);
     atexit(remove_pidfile);
@@ -136,7 +156,8 @@ static void WritePID(){
 /**This is the startup sequence that starts at the top to the try loop
  * @param startup(int, char)
  */
-void startup(int argc, char** argv, char *envp[]) {
+void startup(int argc, char** argv, char *envp[])
+{
   SET_SEGV_LOCATION();
   InitSignals();
   Config = NULL;

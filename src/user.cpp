@@ -27,21 +27,26 @@ User::User(Network *net, const Flux::string &snick, const Flux::string &sident, 
  this->server = sserver;
  this->fullhost = snick+"!"+sident+"@"+shost;
  this->n->UserNickList[snick] = this;
+ 
  Log(LOG_RAWIO) << "New user! " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
+ 
  ++usercnt;
- if(usercnt > maxusercnt){
+ if(usercnt > maxusercnt)
+ {
   maxusercnt = usercnt;
   Log(LOG_TERMINAL) << "New maximum user count: " << maxusercnt;
  }
 }
-User::~User(){
+User::~User()
+{
   Log() << "Deleting user " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
   this->n->UserNickList.erase(this->nick);
 }
 
 void User::SendWho(){ this->n->b->ircproto->who(this->nick); }
 
-void User::SendMessage(const char *fmt, ...){
+void User::SendMessage(const char *fmt, ...)
+{
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
@@ -50,17 +55,14 @@ void User::SendMessage(const char *fmt, ...){
   va_end(args);
 }
 
-void User::SendPrivmsg(const char *fmt, ...){
+void User::SendPrivmsg(const char *fmt, ...)
+{
  char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
   this->SendPrivmsg(Flux::string(buffer));
   va_end(args); 
-}
-
-bool User::IsOwner(){
-   return true; //FIXME: remove this.
 }
 
 void User::SetNewNick(const Flux::string &newnick)
@@ -96,7 +98,8 @@ Channel *User::findchannel(const Flux::string &name)
 void User::SendMessage(const Flux::string &message){ this->n->b->ircproto->notice(this->nick, message); }
 void User::SendPrivmsg(const Flux::string &message){ this->n->b->ircproto->privmsg(this->nick, message); }
 
-User *FindUser(Network *n, const Flux::string &fnick){
+User *FindUser(Network *n, const Flux::string &fnick)
+{
   auto it = n->UserNickList.find(fnick);
   if(it != n->UserNickList.end())
     return it->second;

@@ -159,14 +159,17 @@ FileIOErrors TextFile::Copy(const Flux::string &dest)
  * \return the randomly generated string for the filename
  * NOTE: THIS _MUST_ HAVE 6 X's (XXXXXX) to work properly.
  */
-Flux::string TextFile::TempFile(const Flux::string &file){
+Flux::string TextFile::TempFile(const Flux::string &file)
+{
   char *tmp_output = strdup(file.c_str());
   int target_fd = mkstemp(tmp_output);
+  
   if (target_fd == -1 || close(target_fd) == -1)
   {
     free(tmp_output);
     return "";
   }
+  
   Flux::string filestring = tmp_output;
   free(tmp_output);
   return filestring;
@@ -243,6 +246,7 @@ bool TextFile::WriteToDisk(const Flux::string &FileName)
 	f << lines[i].strip() << "\n";
       }
     }
+    
     f.close();
     this->lasterror = FILE_IO_OK;
     return true;

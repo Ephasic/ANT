@@ -19,7 +19,8 @@
  * \param source CommandSource struct used to find all the information needed to make new users
  * \param chan The channel we're processing
  */
-void ProcessJoin(CommandSource &source, const Flux::string &chan){
+void ProcessJoin(CommandSource &source, const Flux::string &chan)
+{
     Flux::vector &params = source.params;
     if(params.size() < 7)
       return;
@@ -33,12 +34,14 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan){
     Flux::string realname = params[7].erase(0,2);
     /*******************************************************/
     User *u = FindUser(source.n, Nickname);
-    if(!u){
+    if(!u)
+    {
       if((!Host.empty() || !Nickname.empty() || !Ident.empty()) && source.n)
 	u = new User(source.n, Nickname, Ident, Host, realname, Server);
     }
     Channel *c = FindChannel(source.n, channel);
-    if(!c){
+    if(!c)
+    {
       if(!channel.empty() && source.n)
        c = new Channel(source.n, channel);
     }
@@ -66,60 +69,70 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
   {
     if(!protocoldebug)
       Log(LOG_TERMINAL) << '<' << u->nick << '-' << receiver << "> " << Source.params[1];
-    if(!IsValidChannel(receiver)){
+    
+    if(!IsValidChannel(receiver))
+    {
       Source.Reply("Unknown command \2%s\2", Flux::Sanitize(params2[0]).c_str());
       FOREACH_MOD(I_OnPrivmsg, OnPrivmsg(u, params2));
-    }
-    else{
+    } else {
       Command *ccom = FindCommand(params2[0], C_CHANNEL);
-      if(ccom){
+      if(ccom)
+      {
 	Source.command = ccom->name;
 	params2.erase(params2.begin());
-	while(ccom->MaxParams > 0 && params2.size() > ccom->MaxParams){
+	
+	while(ccom->MaxParams > 0 && params2.size() > ccom->MaxParams)
+	{
 	 params2[ccom->MaxParams - 1] += " " + params2[ccom->MaxParams];
 	 params2.erase(params2.begin() + ccom->MaxParams);
 	}
+	
 	if(params2.size() < ccom->MinParams) { ccom->OnSyntaxError(Source, !params2.empty() ? params2[params2.size() - 1] : ""); return; }
 #ifdef HAVE_SETJMP_H
-	if(setjmp(sigbuf) == 0){
+	if(setjmp(sigbuf) == 0)
+	{
 #endif
 	LastRunModule = ccom->mod;
 	ccom->Run(Source, params2);
 #ifdef HAVE_SETJMP_H
-	}else{
+	} else {
 	  Log() << "Command " << ccom->name << " failed to execute. Stack Restored.";
 	  Source.Reply("An internal error has occured, please contact the bots administrator in Flux-net");
 	}
 #endif
 	LastRunModule = NULL;
-      }else{
+      } else {
 	FOREACH_MOD(I_OnPrivmsg, OnPrivmsg(u, c, params2)); //This will one day be a actual function for channel only messages..
       }
     }
-  }
-  else{
+  } else {
     Command *com = FindCommand(params2[0], C_PRIVATE);
-    if(com && !IsValidChannel(receiver) && command == "PRIVMSG"){
+    if(com && !IsValidChannel(receiver) && command == "PRIVMSG")
+    {
       Source.command = com->name;
       params2.erase(params2.begin());
-      while(com->MaxParams > 0 && params2.size() > com->MaxParams){
+      
+      while(com->MaxParams > 0 && params2.size() > com->MaxParams)
+      {
 	 params2[com->MaxParams - 1] += " " + params2[com->MaxParams];
 	 params2.erase(params2.begin() + com->MaxParams);
       }
+      
       if(params2.size() < com->MinParams) { com->OnSyntaxError(Source, !params2.empty() ? params2[params2.size() - 1] : ""); return; }
 #ifdef HAVE_SETJMP_H
-	if(setjmp(sigbuf) == 0){
+	if(setjmp(sigbuf) == 0)
+	{
 #endif
 	LastRunModule = com->mod;
 	com->Run(Source, params2);
 #ifdef HAVE_SETJMP_H
-	}else{
+	} else {
 	  Log() << "Command " << com->name << " failed to execute. Stack Restored.";
 	  Source.Reply("An internal error has occured, please contact the administrator in Flux-Net");
 	}
 #endif
 	LastRunModule = NULL;
-    }else{
+    } else {
       if(!protocoldebug)
 	Log(LOG_DEBUG) << Flux::Sanitize(Source.raw); //This receives ALL server commands sent to the bot..
     }
@@ -211,11 +224,13 @@ void process(Network *n, const Flux::string &buffer){
     if(!nickname.search('.') && n)
       u = new User(n, nickname, uident, uhost);
   }
-  if(command == "QUIT"){
+  if(command == "QUIT")
+  {
     FOREACH_MOD(I_OnQuit, OnQuit(u, params[0]));
     QuitUser(n, u);
   }
-  if(command == "PART"){
+  if(command == "PART")
+  {
     FOREACH_MOD(I_OnPart, OnPart(u, c, params[0]));
     if(IsValidChannel(receiver) && c && u && u == n->b)
      delete c; //This should remove the channel from all users if the bot is parting..
@@ -224,28 +239,41 @@ void process(Network *n, const Flux::string &buffer){
        u->DelChan(c);
      if(c)
        c->DelUser(u);
-     if(u && c && !u->findchannel(c->name)){
+     if(u && c && !u->findchannel(c->name))
+     {
        Log(LOG_TERMINAL) << "Deleted " << u->nick << '|' << c->name << '|' << u->findchannel(c->name);
        delete u; 
-      }
+     }
     }
   }
   if(command.is_pos_number_only()) { FOREACH_MOD(I_OnNumeric, OnNumeric((int)command, n, params)); }
-  if(command.equals_cs("PING")){ FOREACH_MOD(I_OnPing, OnPing(params, n)); }
-  if(command.equals_cs("PONG")){ FOREACH_MOD(I_OnPong, OnPong(params, n)); }
-  if(command.equals_cs("KICK")){ FOREACH_MOD(I_OnKick, OnKick(u, FindUser(n, params[1]), FindChannel(n, params[0]), params[2])); }
+  if(command.equals_cs("PING")) { FOREACH_MOD(I_OnPing, OnPing(params, n)); }
+  if(command.equals_cs("PONG")) { FOREACH_MOD(I_OnPong, OnPong(params, n)); }
+  if(command.equals_cs("KICK")) { FOREACH_MOD(I_OnKick, OnKick(u, FindUser(n, params[1]), FindChannel(n, params[0]), params[2])); }
   if(command.equals_ci("ERROR")) { FOREACH_MOD(I_OnConnectionError, OnConnectionError(buffer)); }
   if(command.equals_cs("INVITE")) { FOREACH_MOD(I_OnInvite, OnInvite(u, params[1])); }
-  if(command.equals_cs("NOTICE") && !source.find('.')){
-    if(!IsValidChannel(receiver)) { FOREACH_MOD(I_OnNotice, OnNotice(u, params2)); } 
-    else { FOREACH_MOD(I_OnNotice, OnNotice(u, c, params2)); }
+  if(command.equals_cs("NOTICE") && !source.find('.'))
+  {
+    if(!IsValidChannel(receiver))
+    {
+      FOREACH_MOD(I_OnNotice, OnNotice(u, params2));
+    } else {
+      FOREACH_MOD(I_OnNotice, OnNotice(u, c, params2));
+    }
   }
-  if(command.equals_cs("MODE")) {
-    if(IsValidChannel(params[0]) && params.size() == 2) { FOREACH_MOD(I_OnChannelMode, OnChannelMode(u, c, params[1])); }
-    else if(IsValidChannel(params[0]) && params.size() == 3) { FOREACH_MOD(I_OnChannelOp, OnChannelOp(u, c, params[1], params[2])); }
-    else if(params[0] == n->b->nick) { FOREACH_MOD(I_OnUserMode, OnUserMode(u, params[0], params[1])); }
+  if(command.equals_cs("MODE"))
+  {
+    if(IsValidChannel(params[0]) && params.size() == 2)
+    { FOREACH_MOD(I_OnChannelMode, OnChannelMode(u, c, params[1])); }
+    
+    else if(IsValidChannel(params[0]) && params.size() == 3)
+    { FOREACH_MOD(I_OnChannelOp, OnChannelOp(u, c, params[1], params[2])); }
+    
+    else if(params[0] == n->b->nick)
+    { FOREACH_MOD(I_OnUserMode, OnUserMode(u, params[0], params[1])); }
   }
-  if(command.equals_cs("JOIN")){
+  if(command.equals_cs("JOIN"))
+  {
     if(!u && n && (!nickname.empty() || !uident.empty() || !uhost.empty()))
       u = new User(n, nickname, uident, uhost);
     else if(!c && n && IsValidChannel(receiver))
@@ -254,7 +282,8 @@ void process(Network *n, const Flux::string &buffer){
       u->AddChan(c);
     else if(!c->finduser(n, u->nick))
       c->AddUser(u);
-    else if(u != n->b){
+    else if(u != n->b)
+    {
       FOREACH_MOD(I_OnJoin, OnJoin(u, c));
     }
   }
@@ -270,6 +299,7 @@ void process(Network *n, const Flux::string &buffer){
   if(command == "352"){ ProcessJoin(Source, c->name); }
   if(source.empty() || message.empty() || params2.empty())
     return;
+  
   ProcessCommand(Source, params2, receiver, command);
   command.clear();
 }

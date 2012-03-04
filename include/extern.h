@@ -53,7 +53,6 @@ class BotConfig;
 class IsoHost;
 class Clock;
 class TextFile;
-class XMLFile;
 class Bot;
 class Network;
 class ReconnectTimer;

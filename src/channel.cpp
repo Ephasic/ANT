@@ -11,7 +11,8 @@
 #include "channel.h"
 #include "bot.h"
 
-Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
+Channel::Channel(Network *net, const Flux::string &nname, time_t ts)
+{
   if(nname.empty())
     throw CoreException("I don't like empty channel names in my channel constructor >:d");
   if(!IsValidChannel(nname))
@@ -58,8 +59,10 @@ void Channel::DelUser(User *u)
 }
 
 void Channel::SendPart(const Flux::string &reason) { this->n->b->ircproto->part(this->name, reason); }
-void Channel::SendPart(const char *fmt, ...){
-  if(fmt){
+void Channel::SendPart(const char *fmt, ...)
+{
+  if(fmt)
+  {
     char buffer[BUFSIZE] = "";
     va_list args;
     va_start(args, fmt);
@@ -70,8 +73,10 @@ void Channel::SendPart(const char *fmt, ...){
 }
 
 void Channel::SendMessage(const Flux::string &message){ this->n->b->ircproto->privmsg(this->name, message); }
-void Channel::SendMessage(const char *fmt, ...){
-  if(fmt){
+void Channel::SendMessage(const char *fmt, ...)
+{
+  if(fmt)
+  {
     char buffer[BUFSIZE] = "";
     va_list args;
     va_start(args, fmt);
@@ -82,8 +87,10 @@ void Channel::SendMessage(const char *fmt, ...){
 }
 
 void Channel::SendAction(const Flux::string &message) { this->n->b->ircproto->action(this->name, message); }
-void Channel::SendAction(const char *fmt, ...){
-  if(fmt){
+void Channel::SendAction(const char *fmt, ...)
+{
+  if(fmt)
+  {
     char buffer[BUFSIZE] = "";
     va_list args;
     va_start(args, fmt);
@@ -94,8 +101,10 @@ void Channel::SendAction(const char *fmt, ...){
 }
 
 void Channel::SendNotice(const Flux::string &message){ this->n->b->ircproto->notice(this->name, message); }
-void Channel::SendNotice(const char *fmt, ...){
-  if(fmt){
+void Channel::SendNotice(const char *fmt, ...)
+{
+  if(fmt)
+  {
     char buffer[BUFSIZE] = "";
     va_list args;
     va_start(args, fmt);
@@ -111,10 +120,10 @@ void QuitUser(Network *n, User *u)
 {
   if(!u)
     return;
-    for(auto var : n->ChanMap)
-      for(auto var1 : var.second->UserList)
-	if(var1.first == u)
-	  var1.second->DelUser(u);
+  for(auto var : n->ChanMap)
+    for(auto var1 : var.second->UserList)
+      if(var1.first == u)
+	var1.second->DelUser(u);
     delete u;
 }
 void JoinChansInBuffer(Network *n)
@@ -128,7 +137,8 @@ void JoinChansInBuffer(Network *n)
   }
 }
 
-Channel *FindChannel(Network *n, const Flux::string &channel){
+Channel *FindChannel(Network *n, const Flux::string &channel)
+{
   auto it = n->ChanMap.find(channel);
   if(it != n->ChanMap.end())
     return it->second;

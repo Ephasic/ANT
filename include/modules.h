@@ -13,7 +13,6 @@
 #define MODULES_H
 #include "module.h"
 #include "INIReader.h"
-#include "xmlfile.h"
 #include "network.h" //We'll solve includes later
 #include "bot.h"
 
