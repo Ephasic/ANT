@@ -423,6 +423,39 @@ private:
     return "";
   }
 
+  Flux::string BuildFileString(Flux::vector files)
+  {
+    Flux::string ret;
+    if(files.size() <= 3)
+    {
+      for(auto it : files)
+      {
+        Flux::string file = it;
+        size_t slash = file.rfind("/");
+	if(slash < file.size())
+	{
+	  Log(LOG_TERMINAL) << "File: " << file << " slash: " << slash;
+	  Flux::string f = file.substr(slash);
+	  Flux::string dir = file.substr(0, slash);
+	  Log(LOG_TERMINAL) << "DIR: " << dir;
+	  ret += f + " ";
+	}
+	else
+	  ret += file + " ";
+      }
+      ret.trim();
+    } else {
+//       int dirs = 1;
+//       for(auto it : files)
+// 	for(unsigned i = 0; i < it.size(); ++i)
+// 	  if(file[i] == '/')
+// 	    ++dirs;
+      ret = "(" + value_cast<Flux::string>(files.size()) + " files changed)";
+    }
+
+    return ret;
+  }
+
 public:
   void OnCommit(CommitMessage &msg)
   {
@@ -433,12 +466,13 @@ public:
     // Calculate files to announce.
     // FIXME: This needs to calculate directories as well
     // FIXME: This needs to be handled by the Rulesets system later on.
-    Flux::string files;
-    if(msg.Files.size() <= 2)
-      files = CondenseVector(msg.Files);
-    else
-      files = "(" + value_cast<Flux::string>(msg.Files.size()) + " files changed)";
-    files.trim();
+    
+    Flux::string files = BuildFileString(msg.Files);
+    //if(msg.Files.size() <= 2)
+    //  files = CondenseVector(msg.Files);
+    //else
+    //  files = "(" + value_cast<Flux::string>(msg.Files.size()) + " files changed)";
+    //files.trim();
     
     for(auto it : msg.Channels)
     {
