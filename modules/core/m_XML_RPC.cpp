@@ -15,6 +15,9 @@
 #include "modules.h"
 #include "module.h"
 #include "rapidxml/rapidxml.hpp"
+#include "rapidxml/rapidxml_utils.hpp"
+#include "rapidxml/rapidxml_iterators.hpp"
+#include "rapidxml/rapidxml_print.hpp"
 // Convert the XML data to something parsable.
 Flux::string SanitizeXML(const Flux::string &str)
 {
@@ -197,11 +200,14 @@ void xmlrpcclient::HandleMessage()
 
   try
   {
+    // Our message
     CommitMessage message;
+    // Parse the XML
     rapidxml::xml_document<> doc;
     doc.parse<0>(blah.cc_str());
+    
+    // Attempt to get the first node of the commit.
     rapidxml::xml_node<> *main_node = doc.first_node("message", 0, true);
-
     if(!main_node)
     {
       Log(LOG_TERMINAL) << "Invalid XML data!";
@@ -251,13 +257,15 @@ void xmlrpcclient::HandleMessage()
 	  message.info["revision"] = node->first_node("revision", 0, true)->value();
 	if(node->first_node("log", 0, true))
 	  message.info["log"] = node->first_node("log", 0, true)->value();
+	
 	/* message.body.commit.files section */
 	if(node->first_node("files", 0, true))
 	{
 	  for(rapidxml::xml_node<> *fnode = node->first_node("files", 0, true); fnode; fnode = fnode->next_sibling())
 	  {
-	    if(fnode)
-	      Log(LOG_TERMINAL) << ":FILE NODE: " << fnode->value();
+	    rapidxml::xml_attribute<> *attr = node->first_attribute();
+	    if(attr)
+	      Log(LOG_TERMINAL) << "FILE ATTR: " << attr->name() << ": " << attr->value();
 	    if(fnode->first_node("file", 0, true))
 	      Log(LOG_TERMINAL) << "FILE NODE: " << fnode->first_node()->value();
 	  }
@@ -325,7 +333,6 @@ public:
     }
   }
 };
-
 
 //IRC Colors
 #define BLACK "\0031"
