@@ -423,6 +423,7 @@ private:
     return "";
   }
 
+  // FIXME: This needs some serious fixing! It should calculate directories and files the same as CIA.vc 
   Flux::string BuildFileString(Flux::vector files)
   {
     Flux::string ret;
@@ -435,24 +436,28 @@ private:
 	if(slash < file.size())
 	{
 	  Log(LOG_TERMINAL) << "File: " << file << " slash: " << slash;
-	  Flux::string f = file.substr(slash);
-	  Flux::string dir = file.substr(0, slash);
-	  Log(LOG_TERMINAL) << "DIR: " << dir;
+	  Flux::string f = file.substr(slash+1);
 	  ret += f + " ";
-	}
-	else
+	}else
 	  ret += file + " ";
       }
-      ret.trim();
     } else {
-//       int dirs = 1;
-//       for(auto it : files)
-// 	for(unsigned i = 0; i < it.size(); ++i)
-// 	  if(file[i] == '/')
-// 	    ++dirs;
-      ret = "(" + value_cast<Flux::string>(files.size()) + " files changed)";
+      int dirs = 0;
+      for(auto it : files)
+      {
+	Flux::string file = it;
+	size_t slash = file.rfind("/");
+	if(slash < file.size())
+	{
+	  Flux::string dir = file.substr(0, slash);
+	  Log(LOG_TERMINAL) << "DIR: " << dir;
+	  if(!dir.empty())
+	    dirs++;
+	}
+      }
+      ret = "(" + value_cast<Flux::string>(files.size()) + " files" + (dirs < 0?"":" in "+dirs) + " changed)";
     }
-
+    ret.trim();
     return ret;
   }
 
@@ -460,7 +465,7 @@ public:
   void OnCommit(CommitMessage &msg)
   {
     this->Message = msg;
-    //FIXME: if they're no connections, buffer the message
+    // FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
 
     // Calculate files to announce.
