@@ -35,6 +35,7 @@ public:
   ~Network();
   NetworkSocket *s;
   PingTimeoutTimer *ptt;
+  std::queue<Channel*> JoinQueue;
   Bot *b;
   Flux::insensitive_map<User*> UserNickList;
   Flux::insensitive_map<Channel*> ChanMap;

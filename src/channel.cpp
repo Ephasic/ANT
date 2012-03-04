@@ -10,7 +10,7 @@
  */
 #include "channel.h"
 #include "bot.h"
-std::map<Network*, Channel*> JoinBuffer;
+
 Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   if(nname.empty())
     throw CoreException("I don't like empty channel names in my channel constructor >:d");
@@ -23,7 +23,7 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts){
   this->name = nname;
   this->creation_time = ts;
   this->topic_time = 0;
-  JoinBuffer[net] = this;
+  net->JoinQueue.push(this);
   this->n->ChanMap[this->name] = this;
   Log(LOG_DEBUG) << "Created new channel '" << nname << "' on " << net->name;
 }
@@ -47,6 +47,7 @@ User *Channel::finduser(Network *net, const Flux::string &usr)
     return it->first;
   return NULL;
 }
+
 void Channel::SendJoin(){ this->n->b->ircproto->join(this->name); this->SendWho(); }
 void Channel::AddUser(User *u) { if(u) this->UserList[u] = this; }
 void Channel::DelUser(User *u)
@@ -55,6 +56,7 @@ void Channel::DelUser(User *u)
   if(it != UserList.end())
     UserList.erase(it);
 }
+
 void Channel::SendPart(const Flux::string &reason) { this->n->b->ircproto->part(this->name, reason); }
 void Channel::SendPart(const char *fmt, ...){
   if(fmt){
@@ -103,7 +105,7 @@ void Channel::SendNotice(const char *fmt, ...){
   }
 }
 
-void Channel::SendWho(){ this->n->b->ircproto->who(this->name); }
+void Channel::SendWho() { this->n->b->ircproto->who(this->name); }
 /****************************************************************/
 void QuitUser(Network *n, User *u)
 {
@@ -117,17 +119,15 @@ void QuitUser(Network *n, User *u)
 }
 void JoinChansInBuffer(Network *n)
 {
-  for(auto it : JoinBuffer)
+  while(!n->JoinQueue.empty())
   {
-    Log(LOG_TERMINAL) << "BUFFER: " << it.first->name << " " << it.second->name;
-    if(it.first == n)
-    {
-      Log(LOG_TERMINAL) << "CHANNEL: " << it.second->name << " on " << it.first->name;
-      it.second->SendJoin();
-      JoinBuffer.erase(it.first);
-    }
+    Channel *c = n->JoinQueue.front();
+    n->JoinQueue.pop();
+    Log(LOG_DEBUG) << "Joining " << c->name << " (" << c->n->name << ')';
+    c->SendJoin();
   }
 }
+
 Channel *FindChannel(Network *n, const Flux::string &channel){
   auto it = n->ChanMap.find(channel);
   if(it != n->ChanMap.end())

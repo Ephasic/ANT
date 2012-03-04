@@ -19,7 +19,7 @@ Network::Network(const Flux::string &host, const Flux::string &p, const Flux::st
   if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");
 
-  //If we didnt specifiy the network name, use the hostname.
+  //If we didn't specify the network name, use the hostname.
   this->name = n.empty()?host:n;
   this->hostname = host;
   this->hostnames = ForwardResolution(host);
@@ -44,7 +44,7 @@ bool Network::JoinChannel(const Flux::string &chan)
     if(!c)
       c = new Channel(this, chan);
     if(!this->s || !this->s->GetStatus(SF_CONNECTED))
-      JoinBuffer[this] = c;
+      this->JoinQueue.push(c);
     else
       c->SendJoin();
     return true;
@@ -118,7 +118,7 @@ void ReconnectTimer::Tick(time_t)
   }
   catch (const SocketException &e)
   {
-    n->s = NULL; // Does this memleak?
+    n->s = NULL; // XXX: Does this memleak?
     Log() << "Connection to " << n->name << " [" << n->GetConHost() << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
     new ReconnectTimer(Config->RetryWait, n);
   }

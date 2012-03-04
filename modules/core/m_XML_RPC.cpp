@@ -125,9 +125,9 @@ public:
     else if(this->in_query)
     {
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
-      if(!message.search_ci("</message>")){
-	this->RawCommitXML += message.strip();
-	else{
+      if(!message.search_ci("</message>"))
+	  this->RawCommitXML += message.strip();
+      else{
 	this->in_query = false;
 	this->RawCommitXML += message.strip();
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
@@ -256,8 +256,10 @@ void xmlrpcclient::HandleMessage()
 	{
 	  for(rapidxml::xml_node<> *fnode = node->first_node("files", 0, true); fnode; fnode = fnode->next_sibling())
 	  {
+	    if(fnode)
+	      Log(LOG_TERMINAL) << ":FILE NODE: " << fnode->value();
 	    if(fnode->first_node("file", 0, true))
-	      Log(LOG_TERMINAL) << "FILE NODE: " << fnode->first_node("file", 0, true)->value();
+	      Log(LOG_TERMINAL) << "FILE NODE: " << fnode->first_node()->value();
 	  }
 	}
       }
@@ -417,8 +419,6 @@ public:
       ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
       ss << NORMAL << YELLOW << 'r' <<  this->GetCommitData("revision") << NORMAL << BOLD << " | " << NORMAL;
       ss << LIGHT_BLUE << "(files here..) " << NORMAL << ": " << this->GetCommitData("log"); //<< files;
-      
-      Log(LOG_DEBUG) << "BLAH! " << ss.str();
       
       Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
       

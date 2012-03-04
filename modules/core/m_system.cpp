@@ -122,18 +122,21 @@ class m_system : public module
   CommandQuit cmdquit;
   CommandRestart cmdrestart;
   CommandPID pid;
+  
 public:
   m_system(const Flux::string &Name):module(Name), cmdrehash(this), cmdquit(this), cmdrestart(this), pid(this)
   {
     Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice, I_OnNickChange };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
+    
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
   }
   
   void OnNumeric(int i, Network *n, const Flux::vector &params)
   {
-    if((i == 4)){
+    if((i == 4))
+    {
       /* Numeric 004
        * params[0] = Bots nickname
        * params[1] = servername
@@ -146,6 +149,7 @@ public:
 	n->b->SetMode("+B"); //FIXME: get bot mode?
       if(params[2].search_ci("ircd-seven") && params[3].search('Q'))
 	n->b->SetMode("+Q"); //for freenode to stop those redirects
+	
       sepstream cs(Config->Channel, ',');
       Flux::string tok;
       while(cs.GetToken(tok))
@@ -154,6 +158,7 @@ public:
 	Channel *c = new Channel(n, tok);
 	c->SendJoin();
       }
+      
       n->servername = params[1];
       n->ircdversion = params[2];
       JoinChansInBuffer(n);
@@ -164,7 +169,8 @@ public:
      * params[1] = Attempted nickname
      * params[2] = message
      */
-    if((i == 433)){
+    if((i == 433))
+    {
       n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
     }
   }
