@@ -11,6 +11,7 @@
 
 #include "flux.h"
 #include "extern.h"
+#include "log.h"
 
 /**
  *\file  Sepstream.cpp 
@@ -121,9 +122,10 @@ bool ci::less::operator()(const Flux::string &s1, const Flux::string &s2) const
 	return s1.ci_str().compare(s2.ci_str()) < 0;
 }
 
-Base::Base() {}
+Base::Base() { Log(LOG_TERMINAL) << "Classbase::+ @" << this; }
 Base::~Base()
 {
+  Log(LOG_TERMINAL) << "Classbase::- @" << this;
   for(std::set<dynamic_reference_base*>::iterator it = this->References.begin(); it != this->References.end(); ++it)
     (*it)->Invalidate();
 }

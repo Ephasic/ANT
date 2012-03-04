@@ -25,7 +25,7 @@ struct CommitMessage
   Network *network;
 };
 
-class CoreExport Network
+class CoreExport Network : public Base
 {
 protected:
   bool disconnecting;

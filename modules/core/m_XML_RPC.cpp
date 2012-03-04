@@ -85,7 +85,6 @@ public:
 class xmlrpcclient : public ClientSocket, public BufferedSocket
 {
   Flux::string RawCommitXML;
-  Flux::vector XML_VEC;
   bool in_query, in_header, IsXML;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), IsXML(false) {}
@@ -122,18 +121,15 @@ public:
       this->in_query = this->IsXML = true;
       this->in_header = false;
       this->RawCommitXML += message.strip();
-      this->XML_VEC.push_back(message.strip());
     }
     else if(this->in_query)
     {
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
       if(!message.search_ci("</message>")){
 	this->RawCommitXML += message.strip();
-	this->XML_VEC.push_back(message.strip());
-      }else{
+	else{
 	this->in_query = false;
 	this->RawCommitXML += message.strip();
-	this->XML_VEC.push_back(message.strip());
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
 	this->Write("HTTP/1.0 200 OK");
 	this->Write("SERVER: ANT Commit System version " + systemver);
@@ -181,38 +177,6 @@ ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
   return c;
 }
 
-Flux::string GetXMLValue(const Flux::vector &XML_VEC, const Flux::string &v)
-{
-  //FIXME: this is all lower case!
-  Flux::string value = v.tolower();
-  for(unsigned i = 0; i < XML_VEC.size(); ++i)
-  {
-    try
-    {
-      rapidxml::xml_document<> doc;
-      char *buffer = XML_VEC[i].tolower().cc_str();
-      doc.parse<0>(buffer);
-      
-      //       for(rapidxml::xml_node<>* n = doc.first_node("message"); n; n = n->next_sibling())
-      //       {
-	// 	Flux::string val = value_cast<Flux::string>(n->value());
-      // 	if(!val.empty())
-      // 	  Log(LOG_TERMINAL) << n->name() << ": " << val;
-      //       }
-      if(doc.first_node(value.c_str()) && !Flux::string(doc.first_node(value.c_str())->value()).empty()){
-	Flux::string author = doc.first_node(value.c_str())->value();
-	Log(LOG_TERMINAL) << value << "! " << author;
-	return author;
-      }
-    }
-    catch(std::exception &ex)
-    {
-      Log(LOG_TERMINAL) << "XML Exception Caught: " << ex.what();
-    }
-  }
-  return "";
-}
-
 class module;
 /* This is down here so we don't make a huge mess in the middle of the file */
 void xmlrpcclient::HandleMessage()
@@ -233,44 +197,92 @@ void xmlrpcclient::HandleMessage()
 
   try
   {
+    CommitMessage message;
     rapidxml::xml_document<> doc;
     doc.parse<0>(blah.cc_str());
-    rapidxml::xml_node<> *node = doc.first_node("message");
-    //Log(LOG_TERMINAL) << "NODE!! " << node->next_sibling()->name();
+    rapidxml::xml_node<> *main_node = doc.first_node("message", 0, true);
 
-    for (rapidxml::xml_attribute<> *attr = node->first_attribute(); attr; attr = attr->next_attribute())
+    if(!main_node)
     {
-      Log(LOG_TERMINAL) << "Node foobar has attribute " << attr->name() << " ";
-      Log(LOG_TERMINAL) << "with value " << attr->value();
+      Log(LOG_TERMINAL) << "Invalid XML data!";
+      return;
+    }
+
+    /* message.generator section */
+    rapidxml::xml_node<> *node = main_node->first_node("generator", 0, true);
+    if(node)
+    {
+      if(node->first_node("name", 0, true))
+	message.info["ScriptName"] = node->first_node("name", 0, true)->value();
+      if(node->first_node("version", 0, true))
+	message.info["ScriptVersion"] = node->first_node("version", 0, true)->value();
+      if(node->first_node("url", 0, true))
+	message.info["ScriptURL"] = node->first_node("url", 0, true)->value();
+      if(node->first_node("author", 0, true))
+	message.info["ScriptAuthor"] = node->first_node("author", 0, true)->value();
+    }
+
+    /* message.source section */
+    node = main_node->first_node("source", 0, true);
+    if(node)
+    {
+      if(node->first_node("project", 0, true))
+	message.info["project"] = node->first_node("project", 0, true)->value();
+      if(node->first_node("branch", 0, true))
+	message.info["branch"] = node->first_node("branch", 0, true)->value();
+      if(node->first_node("module", 0, true))
+	message.info["module"] = node->first_node("module", 0, true)->value();
+    }
+
+    /* message.timestamp section */
+    if(main_node->first_node("timestamp", 0, true))
+      message.info["timestamp"] = main_node->first_node("timestamp", 0, true)->value();
+
+    /* message.body.commit section */
+    rapidxml::xml_node<> *mnode = main_node->first_node("body", 0, true);
+    if(mnode)
+    {
+      node = mnode->first_node("commit", 0, true);
+      if(node)
+      {
+	if(node->first_node("author", 0, true))
+	  message.info["author"] = node->first_node("author", 0, true)->value();
+	if(node->first_node("revision", 0, true))
+	  message.info["revision"] = node->first_node("revision", 0, true)->value();
+	if(node->first_node("log", 0, true))
+	  message.info["log"] = node->first_node("log", 0, true)->value();
+	/* message.body.commit.files section */
+	if(node->first_node("files", 0, true))
+	{
+	  for(rapidxml::xml_node<> *fnode = node->first_node("files", 0, true); fnode; fnode = fnode->next_sibling())
+	  {
+	    if(fnode->first_node("file", 0, true))
+	      Log(LOG_TERMINAL) << "FILE NODE: " << fnode->first_node("file", 0, true)->value();
+	  }
+	}
+      }
+    }
+
+    Log(LOG_TERMINAL) << "*** COMMIT INFO! ***";
+    for(auto it : message.info)
+      Log(LOG_TERMINAL) << it.first << ": " << it.second;
+    Log(LOG_TERMINAL) << "*** END COMMIT INFO! ***";
+
+    for(auto IT : Networks){
+      for(auto it : IT.second->ChanMap)
+	message.Channels.push_back(it.second);
     }
     
-//     for(rapidxml::xml_node<>* n = doc.first_node("message"); n; n = n->next_sibling())
-//     {
-//       Flux::string val = n->value();
-//       if(!val.empty())
-// 	Log(LOG_TERMINAL) << n->name() << ": " << val;
-//     }
+    /* Announce to other modules for commit announcement */
+    FOREACH_MOD(I_OnCommit, OnCommit(message));
+
   }
   catch (std::exception &ex)
   {
     Log(LOG_TERMINAL) << ":::: XML Exception Caught: " << ex.what();
   }
-  
-  Flux::string ScriptName = "herp"; //GetXMLValue(XML_VEC, "project");
-  Flux::string ScriptVersion = "1.0";
-  Flux::string ScriptURL = "derp";
 
-  Flux::string timestamp = value_cast<Flux::string>(time(NULL)); //GetXMLValue(XML_VEC, "")
-  Flux::string author = GetXMLValue(XML_VEC, "author");
-  Flux::string revision = GetXMLValue(XML_VEC, "revision");
-  Flux::string log = GetXMLValue(XML_VEC, "log");
-  Flux::string url = "herp.com";
-
-  Flux::string project = GetXMLValue(XML_VEC, "project");
-  Flux::string branch = GetXMLValue(XML_VEC, "branch");
-
-  Flux::string module = "";
-  
+// This crap below is kept as example code for when i need to reference something while i develop the handler
 //   XMLFile xf(this->RawCommitXML, 1);
 //   
 //   /* This code was based off the commit in this script: http://cia.vc/clients/git/ciabot.bash */
@@ -291,51 +303,10 @@ void xmlrpcclient::HandleMessage()
 //   Flux::string project = xf.Tags["message"].Tags["source"].Attributes["project"].Value;
 //   Flux::string branch = xf.Tags["message"].Tags["source"].Attributes["branch"].Value;
 //   Flux::string module = xf.Tags["message"].Tags["source"].Attributes["module"].Value;
-//   
-// //   sepstream sep(files, ' ');
-// //   Flux::string tok;
-// //   Flux::vector Files;
-// //   while(sep.GetToken(tok))
-// //     Files.push_back(tok);
-//   Flux::vector Files; //Parse the file list.
-//   for(auto it : files)
-//     Files.push_back(it.second.Attributes["file"].Value);
-  
-  /* This is separated now to keep
-   * the differences in how stuff is
-   * processed apart so we can possibly
-   * the data in more ways than one
-   */
+ 
+//   Log(LOG_TERMINAL) << "***Commit****\nScriptName: " << ScriptName << "\nScriptVersion: " << ScriptVersion << "\nScriptURL: " << ScriptURL << "\nTimestamp: " << timestamp << "\nAuthor: " << author << "\nRevision: " << revision << "\nLog: " << log << "\nURL: " << url << "\nProject: " << project << "\nBranch: " << branch << "\nModule: " << module << "\n***End Of Commit***";
 
-  Log(LOG_TERMINAL) << "***Commit****\nScriptName: " << ScriptName << "\nScriptVersion: " << ScriptVersion << "\nScriptURL: " << ScriptURL << "\nTimestamp: " << timestamp << "\nAuthor: " << author << "\nRevision: " << revision << "\nLog: " << log << "\nURL: " << url << "\nProject: " << project << "\nBranch: " << branch << "\nModule: " << module << "\n***End Of Commit***";
 
-  // FIXME: This should be in a map to make invalid XML just announce a blank instead of crashing.
-  CommitMessage msg;
-  /* Script info */
-  msg.info["ScriptName"] = ScriptName;
-  msg.info["ScriptVersion"] = ScriptVersion;
-  msg.info["ScriptURL"] = ScriptURL;
-
-  /* Commit body */
-  msg.info["timestamp"] = timestamp;
-  msg.info["author"] = author;
-  msg.info["revision"] = revision;
-  msg.info["log"] = log;
-  msg.info["url"] = url;
-  msg.info["module"] = module;
-
-  /* Source info */
-  msg.info["project"] = project;
-  msg.info["branch"] = branch;
-//   msg.Files = Files;
-
-  for(auto IT : Networks){
-    for(auto it : IT.second->ChanMap)
-      msg.Channels.push_back(it.second);
-  }
-
-  /* Announce to other modules for commit announcement */
-  FOREACH_MOD(I_OnCommit, OnCommit(msg));
 }
 
 class SocketStart : public Timer //Weird socket glitch where we need to use a timer to start the socket correctly.
