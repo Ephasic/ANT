@@ -431,11 +431,11 @@ public:
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
 
     // Calculate files to announce.
+    // FIXME: This needs to calculate directories as well
+    // FIXME: This needs to be handled by the Rulesets system later on.
     Flux::string files;
     if(msg.Files.size() <= 2)
       files = CondenseVector(msg.Files);
-      //for(auto it : msg.Files)
-	//files += it + " ";
     else
       files = "(" + value_cast<Flux::string>(msg.Files.size()) + " files changed)";
     files.trim();
