@@ -66,8 +66,8 @@ public:
     const Flux::string module = params[1];
     if(module.empty())
       this->SendSyntax(source);
-    else if(!source.u->IsOwner())
-      source.Reply(ACCESS_DENIED);
+    //else if(!source.u->IsOwner())
+    //  source.Reply(ACCESS_DENIED);
     else{
       ModErr e = ModuleHandler::LoadModule(module);
       if(e != MOD_ERR_OK)
@@ -104,9 +104,9 @@ public:
   void Run(CommandSource &source, const Flux::vector &params)
   {
     const Flux::string module = params[1];
-    if(!source.u->IsOwner())
+    //if(!source.u->IsOwner())
       source.Reply(ACCESS_DENIED);
-    else{
+    //else{
       if(!ModuleHandler::Unload(FindModule(module)))
       {
 	source.Reply("Failed to unload module %s", module.c_str());
@@ -115,7 +115,7 @@ public:
 	source.Reply("Module \2%s\2 unloaded sucessfuly", module.c_str());
 	Log(source.u, this) << "to unload " << module;
       }
-    }
+   // }
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
@@ -138,9 +138,9 @@ public:
   void Run(CommandSource &source, const Flux::vector &params)
   {
     const Flux::string module = params[1];
-    if(!source.u->IsOwner())
-      source.Reply(ACCESS_DENIED);
-    else{
+    //if(!source.u->IsOwner())
+     // source.Reply(ACCESS_DENIED);
+    //else{
       bool err = ModuleHandler::Unload(FindModule(module));
       ModErr err2 = ModuleHandler::LoadModule(module);
       if(!err || err2 != MOD_ERR_OK)
@@ -151,7 +151,7 @@ public:
 	source.Reply("Module \2%s\2 reloaded sucessfuly", module.c_str());
 	Log(source.u, this) << "to reload " << module;
       }
-    }
+   // }
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {

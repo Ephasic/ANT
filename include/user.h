@@ -26,7 +26,6 @@ public:
   CList ChannelList;
   Flux::string nick, host, realname, ident, fullhost, server;
   Network *n;
-  bool IsOwner();
   void AddChan(Channel*);
   void DelChan(Channel*);
   Channel *findchannel(const Flux::string&);

@@ -46,11 +46,11 @@ public:
   }
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
-    if(source.u->IsOwner()){
+    //if(source.u->IsOwner()){
       restart("Restarting..");
       Log(source.u, this) << " to restart the bot.";
-    }else
-      source.Reply(ACCESS_DENIED);
+    //}else
+      //source.Reply(ACCESS_DENIED);
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {

@@ -41,6 +41,7 @@ Flux::string SanitizeXML(const Flux::string &str)
     ret = ret.replace_all_cs(special[i].character, special[i].replace);
   return ret;
 }
+
 // Simple web page incase a web browser decides to go to the link
 const Flux::string systemver = value_cast<Flux::string>(VERSION_FULL);
 const Flux::string HTTPREQUEST = "<center><h1>ANT Commit system version "+systemver+"</h1></center>\n"
@@ -88,6 +89,7 @@ public:
 class xmlrpcclient : public ClientSocket, public BufferedSocket
 {
   Flux::string RawCommitXML;
+  Flux::vector FilesXML;
   bool in_query, in_header, IsXML;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), IsXML(false) {}
@@ -128,6 +130,12 @@ public:
     else if(this->in_query)
     {
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
+      if(message.search_ci("<file>"))
+      {
+	this->RawCommitXML += message.strip();
+	FilesXML.push_back(message.strip());
+      }
+      
       if(!message.search_ci("</message>"))
 	  this->RawCommitXML += message.strip();
       else{
@@ -165,7 +173,8 @@ public:
   }
   bool ProcessWrite()
   {
-    Log(LOG_TERMINAL) << "Process Write: " << this->WriteBuffer;
+    if(!this->WriteBuffer.empty())
+      Log(LOG_TERMINAL) << "Process Write: " << this->WriteBuffer;
     return BufferedSocket::ProcessWrite() && ClientSocket::ProcessWrite();
   }
   bool GetData(Flux::string&, Flux::string&);
@@ -188,8 +197,6 @@ void xmlrpcclient::HandleMessage()
     return;
   
   Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
-  Log(LOG_TERMINAL) << "COMMIT!!!!! \"" << this->RawCommitXML << "\"";
-
   Flux::string blah = this->RawCommitXML.cc_str();
   // Strip out all the XML garbage we don't need since RapidXML will crash if we don't
   size_t pos1 = blah.find("<?");
@@ -259,26 +266,33 @@ void xmlrpcclient::HandleMessage()
 	  message.info["log"] = node->first_node("log", 0, true)->value();
 	
 	/* message.body.commit.files section */
-	if(node->first_node("files", 0, true))
+	if(node->first_node("files", 0, true) && node->first_node("files", 0, true)->first_node("file", 0, true))
 	{
-	  for(rapidxml::xml_node<> *fnode = node->first_node("files", 0, true); fnode; fnode = fnode->next_sibling())
+	  // Because it seems you cannot parse nodes with same names in RapidXML, we have to make a quick hack
+	  for(auto it : this->FilesXML)
 	  {
-	    rapidxml::xml_attribute<> *attr = node->first_attribute();
-	    if(attr)
-	      Log(LOG_TERMINAL) << "FILE ATTR: " << attr->name() << ": " << attr->value();
-	    if(fnode->first_node("file", 0, true))
-	      Log(LOG_TERMINAL) << "FILE NODE: " << fnode->first_node()->value();
+	    Flux::string FileXML = it;
+	    rapidxml::xml_document<> doc2;
+	    doc2.parse<0>(FileXML.cc_str());
+	    
+	    if(doc2.first_node("file", 0, true))
+	      message.Files.push_back(doc2.first_node()->value());
 	  }
 	}
       }
     }
 
-    Log(LOG_TERMINAL) << "*** COMMIT INFO! ***";
+    Log(LOG_TERMINAL) << "\n*** COMMIT INFO! ***";
     for(auto it : message.info)
       Log(LOG_TERMINAL) << it.first << ": " << it.second;
-    Log(LOG_TERMINAL) << "*** END COMMIT INFO! ***";
+    
+    int i = 0;
+    for(auto it : message.Files)
+      Log(LOG_TERMINAL) << "File[" << ++i << "]: " << it;
+    Log(LOG_TERMINAL) << "*** END COMMIT INFO! ***\n";
 
-    for(auto IT : Networks){
+    for(auto IT : Networks)
+    {
       for(auto it : IT.second->ChanMap)
 	message.Channels.push_back(it.second);
     }
@@ -415,6 +429,17 @@ public:
     this->Message = msg;
     //FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
+
+    // Calculate files to announce.
+    Flux::string files;
+    if(msg.Files.size() <= 2)
+      files = CondenseVector(msg.Files);
+      //for(auto it : msg.Files)
+	//files += it + " ";
+    else
+      files = "(" + value_cast<Flux::string>(msg.Files.size()) + " files changed)";
+    files.trim();
+    
     for(auto it : msg.Channels)
     {
       Channel *c = it;
@@ -425,7 +450,7 @@ public:
       std::stringstream ss;
       ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
       ss << NORMAL << YELLOW << 'r' <<  this->GetCommitData("revision") << NORMAL << BOLD << " | " << NORMAL;
-      ss << LIGHT_BLUE << "(files here..) " << NORMAL << ": " << this->GetCommitData("log"); //<< files;
+      ss << AQUA << files << NORMAL << ": " << this->GetCommitData("log"); //<< files;
       
       Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
       
