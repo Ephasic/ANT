@@ -456,7 +456,10 @@ private:
 	}
       }
       std::stringstream ss;
-      ss << "(" << files.size() << " files" << (dirs < 0?"":" in "+dirs) << " changed)";
+      ss << "(" << files.size() << " files";
+      if(dirs < 0)
+	ss << " in " << dirs;
+      ss << " changed)";
       //ret = "(" + value_cast<Flux::string>(files.size()) + " files" + (dirs < 0?"":" in "+dirs) + " changed)";
       ret = ss.str();
     }
