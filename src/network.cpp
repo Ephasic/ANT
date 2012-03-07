@@ -77,6 +77,9 @@ bool Network::Disconnect(const Flux::string &buf)
 bool Network::Connect()
 {
   this->disconnecting = false;
+  // FIXME: We force the databases to read because ANT doesn't load the channels on a reconnect.
+  FOREACH_MOD(I_OnForceDatabasesRead, OnForceDatabasesRead());
+
   FOREACH_MOD(I_OnPreConnect, OnPreConnect(this));
   if(!this->s)
     new NetworkSocket(this);
@@ -163,7 +166,7 @@ bool NetworkSocket::Read(const Flux::string &buf)
   Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << buf;
   Flux::vector params = StringVector(buf, ' ');
   
-  if(buf.search_ci("ERROR"))
+  if(!params.empty() && params[0].search_ci("ERROR"))
   {
     FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
     Log(LOG_TERMINAL) << "Socket Error, Closing socket!";

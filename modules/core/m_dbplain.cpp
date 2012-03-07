@@ -77,6 +77,7 @@ void Read(module *m = nullptr)
   }
   db.close();
 }
+
 class dbplain : public module
 {
 public:

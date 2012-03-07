@@ -102,7 +102,7 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
 
 Bot::~Bot()
 {
-  this->n->b = NULL;
+  this->n->b = nullptr;
   delete this->ircproto;
   Log(LOG_DEBUG) << "Bot " << this->nick << " for network " << this->n->name << " deleted!";
 }
