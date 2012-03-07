@@ -488,8 +488,8 @@ public:
       // Build the commit message with stringstream
       std::stringstream ss;
       ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
-      ss << NORMAL << YELLOW << 'r' <<  this->GetCommitData("revision") << NORMAL << BOLD << " | " << NORMAL;
-      ss << AQUA << files << NORMAL << ": " << this->GetCommitData("log"); //<< files;
+      ss << NORMAL << BOLD << '[' << this->GetCommitData("branch") << "] " << NORMAL << YELLOW << 'r' << this->GetCommitData("revision");
+      ss << NORMAL << BOLD << " | " << NORMAL << AQUA << files << NORMAL << ": " << this->GetCommitData("log"); //<< files;
       
       Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
       
