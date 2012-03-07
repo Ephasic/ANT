@@ -9,6 +9,10 @@
  * Based on the original code of Services by Andy Church.
  */
 
+// FIXME
+// FIXME
+// FIXME
+// FIXME: THIS SOCKET ENGINE *CANNOT* HANDLE THE COMMITS THAT GO THROUGH THIS BOT!
 #include "Socket.h"
 
 static int MaxFD;

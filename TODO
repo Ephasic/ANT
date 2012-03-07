@@ -12,10 +12,11 @@ ANT 1.0.0
 [-] Fix Glibc crash
   [ ] Fix derpiness in starting sockets from modules?
 
-[X] Multisocket the socket engine
+[-] Multisocket the socket engine
   [X] Multi-Network handling
   [X] Multi-bot handling
   [X] Network class for handling network information
+  [ ] Handle high data through-put (REQUIRED)
 
 [+] Add Database/User accounts type system for metadata
   [+] MySQL Backend.
