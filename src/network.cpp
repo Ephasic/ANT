@@ -77,9 +77,7 @@ bool Network::Disconnect(const Flux::string &buf)
 bool Network::Connect()
 {
   this->disconnecting = false;
-  // FIXME: We force the databases to read because ANT doesn't load the channels on a reconnect.
-  FOREACH_MOD(I_OnForceDatabasesRead, OnForceDatabasesRead());
-
+  // FIXME: ANT doesn't load the channels on a reconnect.
   FOREACH_MOD(I_OnPreConnect, OnPreConnect(this));
   if(!this->s)
     new NetworkSocket(this);
