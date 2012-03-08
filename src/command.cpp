@@ -23,7 +23,8 @@
  * \param char* The message in a c string format
  * \param va_list any other functions, vars to pass to va_list to form the string
  */
-void CommandSource::Reply(const char *fmt, ...){
+void CommandSource::Reply(const char *fmt, ...)
+{
   va_list args;
   char buf[BUFSIZE];
   if(fmt){
@@ -34,7 +35,8 @@ void CommandSource::Reply(const char *fmt, ...){
   }
 }
 /** \overload void CommandSource::Reply(const Flux::string &msg) */
-void CommandSource::Reply(const Flux::string &msg){
+void CommandSource::Reply(const Flux::string &msg)
+{
  sepstream sep(msg, '\n');
  Flux::string tok;
  while(sep.GetToken(tok))
@@ -122,13 +124,13 @@ Command::~Command()
  * \fn void Command::SetDesc(const Flux::string &d)
  * \param Flux::string The description
  */
-void Command::SetDesc(const Flux::string &d){ this->desc = d; }
+void Command::SetDesc(const Flux::string &d) { this->desc = d; }
 /**
  * \brief Sets the syntax of the command
  * \fn void Command::SetSyntax(const Flux::string &s)
  * \param Flux::string The syntax
  */
-void Command::SetSyntax(const Flux::string &s){ this->syntax.push_back(s); }
+void Command::SetSyntax(const Flux::string &s) { this->syntax.push_back(s); }
 /**
  * \brief Sends the syntax ONLY from the module, cannot be executed from outside the module
  * \fn void Command::SendSyntax(CommandSource &source)
@@ -136,7 +138,8 @@ void Command::SetSyntax(const Flux::string &s){ this->syntax.push_back(s); }
  */
 void Command::SendSyntax(CommandSource &source)
 {
- if(!this->syntax.empty()){
+ if(!this->syntax.empty())
+ {
   source.Reply("Syntax: \2%s %s\2", this->name.c_str(), this->syntax[0].c_str());
   for(unsigned i=1, j = this->syntax.size(); i < j; ++i)
     source.Reply("        \002%s %s\002", this->name.c_str(), this->syntax[i].c_str());
@@ -145,7 +148,8 @@ void Command::SendSyntax(CommandSource &source)
  }
 }
 /** \overload void Command::SendSyntax(CommandSource &source, const Flux::string &syn) */
-void Command::SendSyntax(CommandSource &source, const Flux::string &syn){
+void Command::SendSyntax(CommandSource &source, const Flux::string &syn)
+{
   source.Reply("Syntax: \2%s %s\2", this->name.c_str(), syn.c_str());
   source.Reply("\002/msg %s HELP %s\002 for more information.", source.b->nick.c_str(), this->name.c_str());
 }
@@ -154,9 +158,7 @@ void Command::SendSyntax(CommandSource &source, const Flux::string &syn){
  * \fn const Flux::string &Command::GetDesc() const
  * \return Flux::string with the description
  */
-const Flux::string &Command::GetDesc() const{
- return this->desc; 
-}
+const Flux::string &Command::GetDesc() const { return this->desc; }
 bool Command::OnHelp(CommandSource &source, const Flux::string &subcommand) { return false; }
 void Command::OnList(User *u) { }
 /**
