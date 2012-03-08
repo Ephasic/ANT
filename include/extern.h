@@ -77,6 +77,7 @@ enum EventResult
 
 enum CommandType
 {
+  C_NULL,
   C_CHANNEL,
   C_PRIVATE
 };
