@@ -63,6 +63,8 @@ Command *FindCommand(const Flux::string &name, CommandType type){
       if(it != ChanCommandMap.end())
 	return it->second;
       break;
+    case C_NULL:
+      break;
   }
   return NULL;
 }
@@ -85,8 +87,6 @@ Command::Command(module *m, const Flux::string &sname, CommandType t, size_t min
       throw ModuleException("Commands cannot contain spaces!");
 
     if(!this->type)
-      throw ModuleException("Commands MUST have a command type!");
-
     std::pair<CommandMap::iterator, bool> it;
     switch(this->type)
     {
@@ -96,6 +96,8 @@ Command::Command(module *m, const Flux::string &sname, CommandType t, size_t min
       case C_CHANNEL:
 	it = ChanCommandMap.insert(std::make_pair(this->name, this));
 	break;
+      case C_NULL:
+	throw ModuleException("Command \""+this->name+"\" MUST have a command type!");
     }
     
     if(it.second != true)
@@ -111,6 +113,8 @@ Command::~Command()
       break;
     case C_CHANNEL:
       ChanCommandMap.erase(this->name);
+      break;
+    case C_NULL:
       break;
   }
 }

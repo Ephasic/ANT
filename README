@@ -34,6 +34,7 @@ How to start in Protocol Debug mode
 Dependencies:
   Building:
     CMake
+    GCC 4.5 or higher (anything below and it causes C++11 errors)
   Segmentation fault traces:
     for backtrace dumps: C++ include '<execinfo.h>'
     for attempts to restore program before crash, include '<setjmp.h>'
