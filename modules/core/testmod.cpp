@@ -48,7 +48,7 @@ public:
   {
     this->SendSyntax(source);
     source.Reply(" ");
-    source.Reply("This command simply emmits 'YAY!' to the user.\n"
+    source.Reply("This command simply emits 'YAY!' to the user.\n"
 		 "This command is mostly only used to test other core\n"
 		 "functions or modules in the bot");
     return true;

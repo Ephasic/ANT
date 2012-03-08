@@ -86,7 +86,6 @@ Command::Command(module *m, const Flux::string &sname, CommandType t, size_t min
     if(isspace(sname[i]))
       throw ModuleException("Commands cannot contain spaces!");
 
-    if(!this->type)
     std::pair<CommandMap::iterator, bool> it;
     switch(this->type)
     {

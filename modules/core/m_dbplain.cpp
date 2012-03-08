@@ -100,7 +100,7 @@ public:
       {
 	Channel *c = cit.second;
 	Write("NC %s %s", n->name.c_str(), c->name.c_str());
-      } //We dont put realnames in the database as its too hard to catch what the full name is
+      } //We don't put realnames in the database as its too hard to catch what the full name is
     } 
   }
 
