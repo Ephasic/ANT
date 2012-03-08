@@ -44,10 +44,10 @@ void Read(module *m = nullptr)
     if(lineno == 1 && !buf.search_ci("VER 1"))
     {
       if(Config->dbforce)
-	Log() << "[db_plain] Could not determin database version! Reading anyways..";
+	Log() << "[db_plain] Could not determine database version! Reading anyway..";
       else
       {
-	Log() << "[db_plain] Could not determin database version! Canceling read!";
+	Log() << "[db_plain] Could not determine database version! Canceling read!";
 	return;
       }
     }
