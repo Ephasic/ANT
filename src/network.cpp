@@ -22,6 +22,7 @@ Network::Network(const Flux::string &host, const Flux::string &p, const Flux::st
 
   //If we didn't specify the network name, use the hostname.
   this->name = n.empty()?host:n;
+  this->disconnecting = false;
   this->hostname = host;
   this->hostnames = ForwardResolution(host);
   this->port = p;
@@ -41,7 +42,8 @@ Network::~Network()
 
 bool Network::JoinChannel(const Flux::string &chan)
 {
-  if(IsValidChannel(chan)){
+  if(IsValidChannel(chan))
+  {
     Channel *c = FindChannel(this, chan);
     if(!c)
       c = new Channel(this, chan);

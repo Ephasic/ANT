@@ -171,7 +171,10 @@ public:
      */
     if((i == 433))
     {
+      int derp;
       n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
+      if(IsTempNick(params[0], derp))
+	n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++n->b->BotNumber));
     }
   }
 

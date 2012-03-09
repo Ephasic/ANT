@@ -10,13 +10,10 @@
  */
 #ifndef command_h
 #define command_h
-/**
- * \include includes.h
- */
+
+/// \include includes.h
 #include "includes.h"
-/**
- * \include user.h
- */
+/// \include user.h
 #include "user.h"
 /**
  *\file  command.h

@@ -126,6 +126,7 @@ E Flux::string duration(const time_t&);
 E Flux::string printfify(const char*, ...);
 E Flux::string CondenseVector(const Flux::vector&);
 E int randint(int x, int y);
+E bool IsTempNick(const Flux::string&, int &i);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
 E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick;

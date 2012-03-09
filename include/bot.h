@@ -20,6 +20,8 @@ public:
   ~Bot();
   /* The network we're on*/
   Network *network;
+  /* The current bot number used as the nickname */
+  int BotNumber;
   /* List of chans the bot is in */
   Flux::map<Channel*> channels;
   /* IRCProto class for the network */

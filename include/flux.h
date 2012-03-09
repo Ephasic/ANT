@@ -45,13 +45,21 @@ namespace Flux{
   class string;
 }
 extern CoreExport bool protocoldebug;
-template<typename type_name, typename value> inline type_name value_cast(const value &y)
+template<typename type_name, typename value> inline type_name value_cast(const value &y, bool use_reinterpret_cast = true)
 {
   std::stringstream stream; //Try safe casting with a stringstream.
+  type_name nullpointer;
   type_name x;
   if(!(stream << std::setprecision(800) << y)) //we use setprecision so scientific notation does not get in the way.
     throw;
-  if(!(stream >> x)){ //If stringstream fails, force the cast.
+  if(!(stream >> x))
+  { //If stringstream fails, force the cast.
+    if(!use_reinterpret_cast)
+    {
+      if(protocoldebug)
+	printf("Failed to cast \"%s\" to \"%s\"\n", typeid(value).name(), typeid(type_name).name());
+      return nullpointer;
+    }
     if(protocoldebug) 
       printf("Failed to cast \"%s\" to \"%s\", attempting to force with reinterpret_cast\n", typeid(value).name(), typeid(type_name).name());
     x = *reinterpret_cast<type_name*>(const_cast<value*>(&(y)));
@@ -644,15 +652,15 @@ namespace Flux {
       return bin;
     }
     /* Cast into an integer */
-    inline operator int() { return value_cast<int>(this->_string); }
+    inline operator int() { return value_cast<int>(this->_string, false); }
     /* Cast into a float */
-    inline operator float() { return value_cast<float>(this->_string); }
+    inline operator float() { return value_cast<float>(this->_string, false); }
     /* Cast into a double */
-    inline operator double() { return value_cast<double>(this->_string); }
+    inline operator double() { return value_cast<double>(this->_string, false); }
     /* Cast into a long integer */
-    inline operator long() { return value_cast<long>(this->_string); }
+    inline operator long() { return value_cast<long>(this->_string, false); }
     /* Cast into a unsigned integer */
-    inline operator unsigned() { return value_cast<unsigned>(this->_string); }
+    inline operator unsigned() { return value_cast<unsigned>(this->_string, false); }
 
     friend std::ostream &operator<<(std::ostream &os, const string &_str);
     friend std::istream &operator>>(std::istream &os, string &_str);

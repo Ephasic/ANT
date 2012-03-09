@@ -184,6 +184,32 @@ bool IsValidChannel(const Flux::string &chan)
  return true;
 }
 
+bool IsTempNick(const Flux::string &nick, int &botnum)
+{
+  if(nick.empty())
+    return false;
+
+  if(!nick.search(Config->NicknamePrefix))
+    return true; // We return true here because we should have a valid nickname
+    
+  if(nick.size() > Config->NicknamePrefix.size())
+  {
+    Flux::string nums = nick.substr(Config->NicknamePrefix.size());
+    if(nums.empty())
+      return true; // return here for same reason as not having a nickname prefix
+
+    int n = (int)nums;
+
+    Log(LOG_TERMINAL) << "ISTEMPNICK: " << nick << " " << nums << " " << n;
+    
+    if(n < 0)
+      return true;
+    botnum = n;
+  }
+  return false;
+}
+
+
 Flux::string printfify(const char *fmt, ...)
 {
   if(fmt)

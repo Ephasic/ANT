@@ -96,6 +96,7 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
 
   new RenameTimer(30, this);
   this->n->b = this;
+  this->BotNumber = 0;
   new IRCProto(this->n);
   Log(LOG_DEBUG) << "New bot created on " << net->name << ": " << ni << i << ": " << real;
 }
@@ -153,20 +154,28 @@ void Bot::CheckNickName(const Flux::string &ni)
   Flux::string nickname = ni.empty()?this->nick:ni;
   if(this->n->s && this->n->s->GetStatus(SF_CONNECTED))
   {
-    unsigned num = 0;
-    if(nickname.search(Config->NicknamePrefix))
+    int number = -1;
+    if(IsTempNick(nickname, number))
+      this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
+    else
     {
-      //Log(LOG_DEBUG) << "1: " << nickname;
-      Flux::string end = nickname.substr(Config->NicknamePrefix.size());
-      //Log(LOG_DEBUG) << "2: " << end << "|" << end.size();
-      if(end.is_pos_number_only() && end.size() < 10){
-	num = (unsigned)end;
-	//Log(LOG_DEBUG) << "3: " << num;
-      }
+      if(number < 0)
+	this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
     }
-    //Log(LOG_TERMINAL) << num;
-    if((num <= 0))
-      this->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
+//     unsigned num = 0;
+//     if(nickname.search(Config->NicknamePrefix))
+//     {
+//       //Log(LOG_DEBUG) << "1: " << nickname;
+//       Flux::string end = nickname.substr(Config->NicknamePrefix.size());
+//       //Log(LOG_DEBUG) << "2: " << end << "|" << end.size();
+//       if(end.is_pos_number_only() && end.size() < 10){
+// 	num = (unsigned)end;
+// 	//Log(LOG_DEBUG) << "3: " << num;
+//       }
+//     }
+//     //Log(LOG_TERMINAL) << num;
+//     if((num <= 0))
+//       this->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
   }
 }
 
