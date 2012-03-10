@@ -154,7 +154,7 @@ void Bot::CheckNickName(const Flux::string &ni)
   Flux::string nickname = ni.empty()?this->nick:ni;
   if(this->n->s && this->n->s->GetStatus(SF_CONNECTED))
   {
-    int number = -1;
+    int number = 0;
     if(IsTempNick(nickname, number))
       this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
     else

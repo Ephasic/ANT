@@ -189,8 +189,8 @@ bool IsTempNick(const Flux::string &nick, int &botnum)
   if(nick.empty())
     return false;
 
-  if(!nick.search(Config->NicknamePrefix))
-    return true; // We return true here because we should have a valid nickname
+  if(!nick.search(Config->NicknamePrefix) || !nick.search(Config->NicknamePrefix.strip('-')))
+    return false; // not a valid bot nickname, ignore.
     
   if(nick.size() > Config->NicknamePrefix.size())
   {

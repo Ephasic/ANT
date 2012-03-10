@@ -103,14 +103,20 @@ void SocketEngine::Process()
   {
     Log() << "SockEngine::Process(): error: " << strerror(errno);
   }
+  if(sresult < 1)
+    return; // Nothing to do..
   else if (sresult)
   {
+    
     int processed = 0;
     for (auto it = Sockets.begin(), it_end = Sockets.end(); it != it_end && processed != sresult;)
     {
       Socket *s = it->second;
       ++it;
-      bool has_read = FD_ISSET(s->GetFD(), &rfdset), has_write = FD_ISSET(s->GetFD(), &wfdset), has_error = FD_ISSET(s->GetFD(), &efdset);
+      
+      bool has_read = FD_ISSET(s->GetFD(), &rfdset);
+      bool has_write = FD_ISSET(s->GetFD(), &wfdset);
+      bool has_error = FD_ISSET(s->GetFD(), &efdset);
 
       if (has_read || has_write || has_error)
 	++processed;
@@ -119,21 +125,20 @@ void SocketEngine::Process()
       {
 	s->ProcessError();
 	s->SetDead(true);
-	delete s;
 	continue;
       }
 
       if (!s->Process())
 	continue;
 
-      //Log(LOG_TERMINAL) << "Processing Socket " << s->GetFD() << " (" << GetPeerIP(s->GetFD()) << ") for Read/Write.";
       if (has_read && !s->ProcessRead())
  	s->SetDead(true);
 
       if (has_write && !s->ProcessWrite())
 	s->SetDead(true);
 
-      if (s->IsDead()){
+      if (s->IsDead())
+      {
 	Log(LOG_TERMINAL) << "Socket " << s->GetFD() << " died!";
 	delete s;
       }

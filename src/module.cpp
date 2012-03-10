@@ -151,8 +151,8 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
   
   Log() << "Attempting to load module [" << modname << ']';
   
-  Flux::string mdir = Config->Binary_Dir + "/runtime/"+ (modname.search(".so")?modname+".XXXXXX":modname+".so.XXXXXX"),
-  input = Flux::string(Config->Binary_Dir + "/" + (Config->ModuleDir.empty()?modname:Config->ModuleDir+"/"+modname) + ".so").replace_all_cs("//","/");
+  Flux::string mdir = Config->Binary_Dir + "/runtime/"+ (modname.search(".so")?modname+".XXXXXX":modname+".so.XXXXXX");
+  Flux::string input = Flux::string(Config->Binary_Dir + "/" + (Config->ModuleDir.empty()?modname:Config->ModuleDir+"/"+modname) + ".so").replace_all_cs("//","/");
   
   TextFile mod(input);
   Flux::string output = TextFile::TempFile(mdir);

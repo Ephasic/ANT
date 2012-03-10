@@ -192,7 +192,7 @@ else(MSVC)
 		int main() {}"
 		GCC_IS_GCC4)
       if(NOT GCC_IS_GCC4)
-	message(FATAL_ERROR "You MUST use GNU C compiler version 4.5 and above to compile! (or a compiler that supports C++11)")
+	message(FATAL_ERROR "You MUST use GNU C++ compiler version 4.5 and above to compile! (or a compiler that supports C++11)")
       endif(NOT GCC_IS_GCC4)
       set(CXXFLAGS "${CXXFLAGS} -fno-leading-underscore -Wno-uninitialized")
     endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
