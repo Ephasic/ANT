@@ -10,7 +10,7 @@ public:
   }
   void Run(CommandSource &source, const Flux::vector &params)
   {
-    const Flux::string priority = params[1];
+    const Flux::string priority = params.size()<2?"":params[1];
     int c=0;
     if(priority.empty())
     {

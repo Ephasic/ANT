@@ -184,14 +184,19 @@ bool IsValidChannel(const Flux::string &chan)
  return true;
 }
 
+// XXX: this should find the nickname in the nicknames map.
 bool IsTempNick(const Flux::string &nick, int &botnum)
 {
+  Log(LOG_TERMINAL) << "Checking if nickname \"" << nick << "\" is temporary";
   if(nick.empty())
     return false;
 
+  if((nick.search_ci(Config->NicknamePrefix) || nick.search_ci(Config->NicknamePrefix.strip('-'))) && nick.search_ci("tmp"))
+    return true; // we're a temp nick and need to rename
+
   if(!nick.search(Config->NicknamePrefix) || !nick.search(Config->NicknamePrefix.strip('-')))
     return false; // not a valid bot nickname, ignore.
-    
+
   if(nick.size() > Config->NicknamePrefix.size())
   {
     Flux::string nums = nick.substr(Config->NicknamePrefix.size());

@@ -56,7 +56,7 @@ public:
 
 int main (int argcx, char** argvx, char *envp[])
 {
-  SET_SEGV_LOCATION();
+ SET_SEGV_LOCATION();
   try
   {
     startup(argcx, argvx, envp);
