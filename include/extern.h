@@ -105,6 +105,8 @@ E Channel *FindChannel(Network*, const Flux::string&);
 E module *FindModule(const Flux::string&);
 E Command *FindCommand(const Flux::string&, CommandType);
 E Network *FindNetwork(const Flux::string&);
+E Bot *FindBot(const Flux::string&);
+E bool IsBot(User*);
 E Network *FindNetworkByHost(const Flux::string&);
 
 /* extern's */
@@ -126,7 +128,7 @@ E Flux::string duration(const time_t&);
 E Flux::string printfify(const char*, ...);
 E Flux::string CondenseVector(const Flux::vector&);
 E int randint(int x, int y);
-E bool IsTempNick(const Flux::string&, int &i);
+E bool IsTempNick(const Flux::string&);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
 E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick;

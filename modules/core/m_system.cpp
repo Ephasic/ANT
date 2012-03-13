@@ -144,7 +144,7 @@ public:
        * params[3] = user modes
        * params[4] = channel modes
        */
-      n->b->CheckNickName();
+      n->b->CheckNickName(params[0]);
       if(params[3].search('B'))
 	n->b->SetMode("+B"); //FIXME: get bot mode?
       if(params[2].search_ci("ircd-seven") && params[3].search('Q'))
@@ -171,17 +171,19 @@ public:
      */
     if((i == 433))
     {
-      int derp;
+      //int derp;
       n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
-      if(IsTempNick(params[0], derp))
-	n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++n->b->BotNumber));
+      n->b->CheckNickName();
+      //if(IsTempNick(params[0], derp))
+	//n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++n->b->BotNumber));
     }
   }
 
   void OnNickChange(User *u, const Flux::string &msg)
   {
     Log(LOG_TERMINAL) << "Rename: " << u->nick << " " << msg << " " << u->n->b->nick;
-//     if(u == u->n->b)
+//      if(u == u->n->b)
+      u->n->b->CheckNickName(u->nick);
       u->n->b->CheckNickName(msg);
   }
   

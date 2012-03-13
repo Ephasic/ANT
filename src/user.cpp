@@ -69,7 +69,8 @@ void User::SetNewNick(const Flux::string &newnick)
 {
   if(newnick.empty())
     throw CoreException("User::SetNewNick() was called with empty arguement");
-  
+
+  Log(LOG_TERMINAL) << "Setting new nickname: " << this->nick << " -> " << newnick;
   this->n->UserNickList.erase(this->nick);
   this->nick = newnick;
   this->n->UserNickList[this->nick] = this;

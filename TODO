@@ -9,7 +9,8 @@ Legend:
 
 ANT 1.0.0
 ----------
-[-] Fix Glibc crash
+[-] Bugs
+  [+] Fix Glibc crash
   [ ] Fix derpiness in starting sockets from modules?
 
 [-] Multisocket the socket engine
@@ -22,18 +23,18 @@ ANT 1.0.0
   [+] MySQL Backend.
   [X] File based Backend
   [ ] BLAKE-512+Skein-512+Tiger2 password hashing
-  [ ] Add E-Mail handling
+  [X] Add E-Mail handling
   [ ] Add lists of networks, channels, etc.
   [X] Add Commit processing system
   [X] Add Commit metadata processing
 
 [-] Add Web Front end
   [X] Use CPPCMS
-  [ ] Add IRC event notifications (ie, kick, nick changes, etc)
+  [+] Add IRC event notifications (ie, kick, nick changes, etc)
   [ ] Add accounts that should sync with Database backend.
   [ ] Add blog like CIA.vc
   [ ] Add Documentation
-  [ ] Separate C++ script/binary to handle Web Front end
+  [+] Separate C++ script/binary to handle Web Front end
   [ ] Instant Search
   [ ] Add better front page than CIA.vc (should have: Critical Announcements, themes, user themes, commit averages, last commit, etc.)
   [ ] Site Navigation that is understandable
@@ -60,5 +61,5 @@ Future
 Optional
 --------
 [ ] Add Mode Handler
-  [ ] Parse 005 Numeric for modes and server support stuff, take action on it
+  [+] Parse 005 Numeric for modes and server support stuff, take action on it
   [ ] Add u->IsOp()

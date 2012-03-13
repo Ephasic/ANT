@@ -151,17 +151,84 @@ void Bot::SetMode(const Flux::string &modestr)
 
 void Bot::CheckNickName(const Flux::string &ni)
 {
-  Flux::string nickname = ni.empty()?this->nick:ni;
-  if(this->n->s && this->n->s->GetStatus(SF_CONNECTED))
+
+  bool isvalid = true;
+  int numeric = 0;
+  if(ni.empty())
+    return;
+
+  if(IsTempNick(ni))
+    isvalid = false;
+
+  Log(LOG_TERMINAL) << "Bool1: " << (isvalid?"False":"True");
+  
+  if(!ni.search(Config->NicknamePrefix) && FindBot(ni))
+    isvalid = false;
+
+  Log(LOG_TERMINAL) << "Bool2: " << (isvalid?"False":"True");
+  if(isvalid)
   {
-    int number = 0;
-    if(IsTempNick(nickname, number))
-      this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
-    else
+    if(ni.size() >= Config->NicknamePrefix.size()+1)
     {
-      if(number < 0)
-	this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
-    }
+      Flux::string number = ni.substr(Config->NicknamePrefix.size());
+      numeric = atoi(number.c_str());
+
+      Log(LOG_TERMINAL) << "NUM: " << numeric << " | " << number;
+
+      if(numeric <= 0)
+      {
+	Log(LOG_TERMINAL) << "Nickname " << ni << " is invalid! valcheck 1";
+	this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++numeric));
+	return;
+      }
+    }else
+      isvalid = false;
+
+    Log(LOG_TERMINAL) << "Bool3: " << (isvalid?"False":"True");
+  }
+
+  if(!isvalid)
+  {
+    if(numeric < 0)
+      numeric = 0;
+
+    Log(LOG_TERMINAL) << "Nickname " << ni << " is invalid! valcheck 2";
+    this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++numeric));
+
+  }
+//   Bot *b;
+//   if(ni.empty())
+//     b = this;
+//   else
+//     b = FindBot(ni);
+// 
+//   if(!b && !ni.empty() && (ni.search_ci(Config->NicknamePrefix) || ni.search_ci(Config->NicknamePrefix.strip('-'))))
+//   {
+//     Log(LOG_TERMINAL) << "Nickname " << b->nick << " is temporary.";
+//     this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
+//   }else{
+//     Log(LOG_TERMINAL) << "No bot " << ni << " Found!";
+//     return;
+//   }
+//   
+//   //Flux::string nickname = ni.empty()?this->nick:ni;
+//   if(b->n->s && b->n->s->GetStatus(SF_CONNECTED))
+//   {
+//     int number = 0;
+//     if(IsTempNick(b->nick, number)){
+//       Log(LOG_TERMINAL) << "Nickname " << b->nick << " is temporary.";
+//       this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
+//     }
+//     else
+//     {
+//       if(number < 0){
+// 	Log(LOG_TERMINAL) << "Nickname " << b->nick << " is temporary.";
+// 	this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
+//       }
+//       else
+// 	Log(LOG_TERMINAL) << "Nickname " << b->nick << " is NOT temporary.";
+//     }
+/////////////////////////////////////////////////////////////////////////////////////
 //     unsigned num = 0;
 //     if(nickname.search(Config->NicknamePrefix))
 //     {
@@ -176,7 +243,7 @@ void Bot::CheckNickName(const Flux::string &ni)
 //     //Log(LOG_TERMINAL) << num;
 //     if((num <= 0))
 //       this->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
-  }
+//   }
 }
 
 void Bot::Part(Channel *c, const Flux::string &message)
@@ -209,4 +276,29 @@ void RenameTimer::Tick(time_t)
 //   Log(LOG_TERMINAL) << "RenameTimer Tick.";
   if(b->n->s && b->n->s->GetStatus(SF_CONNECTED))
     b->CheckNickName();
+}
+
+Bot *FindBot(const Flux::string &nick)
+{
+  for(auto it : Networks)
+  {
+    Bot *b = it.second->b;
+    if(b != nullptr && b->nick.equals_ci(nick))
+      return b;
+  }
+  return nullptr;
+}
+
+bool IsBot(User *u)
+{
+  if(!u)
+    return false;
+  
+  for(auto it : Networks)
+  {
+    if(it.second->b != nullptr && it.second->b == u)
+      return true;
+  }
+  
+  return false;
 }
