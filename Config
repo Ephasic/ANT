@@ -71,7 +71,7 @@ Run_Build_System () {
 	cmake $GEN_TYPE $WITH_INST $BUILD_TYPE $RUN_CC_PL $P_MODE $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR
 
 	echo ""
-	echo "Now cd build and run make to build Navn."
+	echo "Now cd build and run make to build ANT."
 }
 
 ECHO2SUF=''
@@ -167,7 +167,7 @@ while [ $ok -eq 0 ] ; do
 			fi
 		fi
 	elif exists "$INPUT/include/module.h" ; then
-		echo "You cannot use Navn's source directory as a target directory."
+		echo "You cannot use ANT's source directory as a target directory."
 	else
 		ok=1
 	fi
