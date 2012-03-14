@@ -1,3 +1,7 @@
+
+# Compile our encryptions before we compile anything else
+add_subdirectory(Encryption)
+
 # Find all the *.cpp files within the current source directory, and sort the list
 file(GLOB SRC_SRCS_CPP RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
 set(SRC_SRCS ${SRC_SRCS_C} ${SRC_SRCS_CPP})
@@ -8,6 +12,9 @@ if(WIN32)
 endif(WIN32)
 
 sort_list(SRC_SRCS)
+
+# Add our hashing libs.
+append_to_list(LINK_LIBS tiger)
 
 # Set all the files to use C++ as well as set their compile flags (use the module-specific compile flags, though)
 set_source_files_properties(${SRC_SRCS} PROPERTIES LANGUAGE CXX COMPILE_FLAGS "${CXXFLAGS}")
