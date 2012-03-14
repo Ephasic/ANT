@@ -131,6 +131,7 @@ E int randint(int x, int y);
 E bool IsTempNick(const Flux::string&);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
+E bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
 E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick;
 E Flux::vector StringVector(const Flux::string&, char);
 E Flux::insensitive_map<module*> Modules;

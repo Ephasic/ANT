@@ -35,13 +35,16 @@
 class commanddummy : public Command
 {
 public:
-  commanddummy(module *m) : Command(m, "TEST", C_PRIVATE, 0,1) //The 0's are how many params the command gets, they're not required and can be removed.
+  commanddummy(module *m) : Command(m, "TEST", C_PRIVATE, 1,1) //The 0's are how many params the command gets, they're not required and can be removed.
   {
    this->SetDesc("Test for the modules");
    this->SetSyntax("\37TEST\37");
   }
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
+    Flux::string hash;
+    BlakeHash(hash, params[0], "");
+    source.Reply("Hash: %s\nText: %s", hash.c_str(), params[0].c_str());
     source.Reply("YAY!");
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)

@@ -1,6 +1,19 @@
+/* Arbitrary Navn Tool -- Blake-512 Light Hashing Algorithm
+ *
+ * (C) 2011-2012 Flux-Net
+ * Contact us at Dev@Flux-Net.net
+ *
+ * Please read COPYING and README for further details.
+ *
+ * Based on the original code of CIA.vc by Micah Dowty
+ * Based on the original code of Anope by The Anope Team.
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include "flux.h"
+#include "log.h"
 
 #define U8TO32(p) \
   (((uint32_t)((p)[0]) << 24) | ((uint32_t)((p)[1]) << 16) | \
@@ -9,12 +22,12 @@
   (((uint64_t)U8TO32(p) << 32) | (uint64_t)U8TO32((p) + 4))
 #define U32TO8(p, v) \
     (p)[0] = (uint8_t)((v) >> 24); (p)[1] = (uint8_t)((v) >> 16); \
-    (p)[2] = (uint8_t)((v) >>  8); (p)[3] = (uint8_t)((v)      ); 
+    (p)[2] = (uint8_t)((v) >>  8); (p)[3] = (uint8_t)((v)      );
 #define U64TO8(p, v) \
     U32TO8((p),     (uint32_t)((v) >> 32));	\
-    U32TO8((p) + 4, (uint32_t)((v)      )); 
+    U32TO8((p) + 4, (uint32_t)((v)      ));
 
-typedef struct  { 
+typedef struct  {
   uint64_t h[8], s[4], t[2];
   int buflen, nullt;
   uint8_t buf[128];
@@ -64,7 +77,7 @@ void blake512_compress( state * S, const uint8_t * block ) {
   v[a] += (m[sigma[i][e+1]] ^ cst[sigma[i][e]])+v[b];	\
   v[d] = ROT( v[d] ^ v[a],16);				\
   v[c] += v[d];						\
-  v[b] = ROT( v[b] ^ v[c],11);				
+  v[b] = ROT( v[b] ^ v[c],11);
 
   for(i=0; i<16;++i)  m[i] = U8TO64(block + i*8);
   for(i=0; i< 8;++i)  v[i] = S->h[i];
@@ -76,7 +89,7 @@ void blake512_compress( state * S, const uint8_t * block ) {
   v[13] =  0xBE5466CF34E90C6CULL;
   v[14] =  0xC0AC29B7C97C50DDULL;
   v[15] =  0x3F84D5B5B5470917ULL;
-  if (S->nullt == 0) { 
+  if (S->nullt == 0) {
     v[12] ^= S->t[0];
     v[13] ^= S->t[0];
     v[14] ^= S->t[1];
@@ -88,14 +101,14 @@ void blake512_compress( state * S, const uint8_t * block ) {
     G( 1, 5, 9,13, 2);
     G( 2, 6,10,14, 4);
     G( 3, 7,11,15, 6);
-    G( 3, 4, 9,14,14);   
+    G( 3, 4, 9,14,14);
     G( 2, 7, 8,13,12);
     G( 0, 5,10,15, 8);
     G( 1, 6,11,12,10);
-  } 
+  }
 
-  for(i=0; i<16;++i)  S->h[i%8] ^= v[i]; 
-  for(i=0; i<8 ;++i)  S->h[i] ^= S->s[i%4]; 
+  for(i=0; i<16;++i)  S->h[i%8] ^= v[i];
+  for(i=0; i<8 ;++i)  S->h[i] ^= S->s[i%4];
 }
 
 
@@ -118,7 +131,7 @@ void blake512_init( state * S ) {
 void blake512_update( state * S, const uint8_t * data, uint64_t datalen ) {
 
 
-  int left = (S->buflen >> 3); 
+  int left = (S->buflen >> 3);
   int fill = 128 - left;
 
   if( left && ( ((datalen >> 3) & 0x7F) >= (unsigned)fill ) ) {
@@ -126,11 +139,11 @@ void blake512_update( state * S, const uint8_t * data, uint64_t datalen ) {
     S->t[0] += 1024;
     blake512_compress( S, S->buf );
     data += fill;
-    datalen  -= (fill << 3);       
+    datalen  -= (fill << 3);
     left = 0;
   }
 
-  while( datalen >= 1024 ) {  
+  while( datalen >= 1024 ) {
     S->t[0] += 1024;
     blake512_compress( S, data );
     data += 128;
@@ -154,7 +167,7 @@ void blake512_final( state * S, uint8_t * digest ) {
   U64TO8(  msglen + 8, lo );
 
   if ( S->buflen == 888 ) { /* one padding byte */
-    S->t[0] -= 8; 
+    S->t[0] -= 8;
     blake512_update( S, &oo, 8 );
   }
   else {
@@ -163,8 +176,8 @@ void blake512_final( state * S, uint8_t * digest ) {
       S->t[0] -= 888 - S->buflen;
       blake512_update( S, padding, 888 - S->buflen );
     }
-    else { /* NOT enough space, need 2 compressions */ 
-      S->t[0] -= 1024 - S->buflen; 
+    else { /* NOT enough space, need 2 compressions */
+      S->t[0] -= 1024 - S->buflen;
       blake512_update( S, padding, 1024 - S->buflen );
       S->t[0] -= 888;
       blake512_update( S, padding+1, 888 );
@@ -174,7 +187,7 @@ void blake512_final( state * S, uint8_t * digest ) {
     S->t[0] -= 8;
   }
   S->t[0] -= 128;
-  blake512_update( S, msglen, 128 );    
+  blake512_update( S, msglen, 128 );
 
   U64TO8( digest + 0, S->h[0]);
   U64TO8( digest + 8, S->h[1]);
@@ -195,42 +208,69 @@ void blake512_hash( uint8_t *out, const uint8_t *in, uint64_t inlen ) {
   blake512_final( &S, out );
 }
 
+bool BlakeHash(Flux::string &rethash, const Flux::string &text, const Flux::string &cmphash)
+{
 
-int main() {
+  if(cmphash.size() > 64)
+    {
+      Log(LOG_TERMINAL) << "[Blake-512]: Comparison hash overflow? is this hash valid?";
+      Log(LOG_TERMINAL) << "[Blake-512]: Hash: " << cmphash; 
+      return false;
+    }
+  
+  
+  uint8_t digest[64];
+  uint8_t testdigest[64];
+  uint8_t data[65535]; // does it need to be this big and can it be this big???
+  bool error = false;
+  Flux::string ret;
 
-  int i, v;
-  uint8_t data[144], digest[64];
-  uint8_t test1[]= {0x97, 0x96, 0x15, 0x87, 0xF6, 0xD9, 0x70, 0xFA, 0xBA, 0x6D, 0x24, 0x78, 0x04, 0x5D, 0xE6, 0xD1, 
-	       0xFA, 0xBD, 0x09, 0xB6, 0x1A, 0xE5, 0x09, 0x32, 0x05, 0x4D, 0x52, 0xBC, 0x29, 0xD3, 0x1B, 0xE4, 
-	       0xFF, 0x91, 0x02, 0xB9, 0xF6, 0x9E, 0x2B, 0xBD, 0xB8, 0x3B, 0xE1, 0x3D, 0x4B, 0x9C, 0x06, 0x09, 
-	       0x1E, 0x5F, 0xA0, 0xB4, 0x8B, 0xD0, 0x81, 0xB6, 0x34, 0x05, 0x8B, 0xE0, 0xEC, 0x49, 0xBE, 0xB3};
-  uint8_t test2[]= {0x31, 0x37, 0x17, 0xD6, 0x08, 0xE9, 0xCF, 0x75, 0x8D, 0xCB, 0x1E, 0xB0, 0xF0, 0xC3, 0xCF, 0x9F, 
-	       0xC1, 0x50, 0xB2, 0xD5, 0x00, 0xFB, 0x33, 0xF5, 0x1C, 0x52, 0xAF, 0xC9, 0x9D, 0x35, 0x8A, 0x2F, 
-	       0x13, 0x74, 0xB8, 0xA3, 0x8B, 0xBA, 0x79, 0x74, 0xE7, 0xF6, 0xEF, 0x79, 0xCA, 0xB1, 0x6F, 0x22, 
-	       0xCE, 0x1E, 0x64, 0x9D, 0x6E, 0x01, 0xAD, 0x95, 0x89, 0xC2, 0x13, 0x04, 0x5D, 0x54, 0x5E, 0xDE};
+  for(int i = 0; i < 64; ++i) // clear digest of all data.
+    digest[i] = 0;
 
-  for(i=0; i<144; ++i) data[i]=0;  
-
-  blake512_hash( digest, data, 1 );    
-  v=0;
-  for(i=0; i<64; ++i) {
-    printf("%02X", digest[i]);
-    if ( digest[i] != test1[i]) v=1;
+  if(sizeof(data) < text.size()) // idk??? make sure we don't buffer overflow???
+  {
+    Log(LOG_TERMINAL) << "[Blake-512]: Text.size() bufferoverflow?";
+    Log(LOG_TERMINAL) << "[Blake-512]: uint8_t: " << sizeof(data) << " text: " << text.size();
+    return false;
   }
-  if (v) printf("\nerror\n");
-  else  printf("\nok\n");
+  
+  // Convert the Flux::string to a uint8_t array
+  for(int i = 0; i < text.size(); ++i)
+    data[i] = static_cast<uint8_t>(text[i]);
 
-  for(i=0; i<144; ++i) data[i]=0;  
+  // Hash :)
+  blake512_hash(digest, data, static_cast<uint64_t>(text.size()));
 
-  blake512_hash( digest, data, 144 );    
-  v=0;
-  for(i=0; i<64; ++i) {
-    printf("%02X", digest[i]);
-    if ( digest[i] != test2[i]) v=1;
+  // Check if the comparison hash isnt empty, then make comparison on it
+  if(!cmphash.empty())
+  {
+    // move the cmphash into the testdigest array
+    for(int i = 0; i < cmphash.size() && i < 64; ++i)
+      testdigest[i] = static_cast<uint8_t>(cmphash[i]);
+
+    // compare.
+    for(int i = 0; i < 64; ++i)
+    {
+      if(digest[i] != testdigest[i])
+	error = true;
+    }
   }
-  if (v) printf("\nerror\n");
-  else printf("\nok\n");
 
-  return 0;
+  // put the generated hash into a Flux::string.
+  for(int i = 0; i < 64; ++i)
+    ret += printfify("%02X", digest[i]);
+
+  rethash = ret;
+
+  if(error)
+  {
+    Log(LOG_TERMINAL) << "[Blake-512]: Hashes do not match!";
+    Log(LOG_TERMINAL) << "[Blake-512]: Hash 1: " << cmphash;
+    Log(LOG_TERMINAL) << "[Blake-512]: Hash 2: " << ret;
+    return false;
+  }
+  else
+    return true;
+  return false;
 }
-

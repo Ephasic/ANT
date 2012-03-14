@@ -22,7 +22,7 @@ ANT 1.0.0
 [+] Add Database/User accounts type system for metadata
   [+] MySQL Backend.
   [X] File based Backend
-  [ ] BLAKE-512+Skein-512+Tiger2 password hashing
+  [+] BLAKE-512+Skein-512+Tiger2 password hashing
   [X] Add E-Mail handling
   [ ] Add lists of networks, channels, etc.
   [X] Add Commit processing system

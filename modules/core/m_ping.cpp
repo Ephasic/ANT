@@ -41,7 +41,8 @@ public:
      Flux::string ts = params[1];
      int lag = time(NULL)-(int)ts;
      n->s->SentPing = false;
-     delete n->ptt;
+     if(n->ptt)
+      delete n->ptt;
      n->ptt = nullptr;
      if(protocoldebug)
         Log(LOG_RAWIO) << lag << " sec lag (" << ts << " - " << time(NULL) << ')';

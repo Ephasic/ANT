@@ -22,7 +22,7 @@
 void ProcessJoin(CommandSource &source, const Flux::string &chan)
 {
     Flux::vector &params = source.params;
-    if(params.size() < 7)
+    if(params.size() < 8)
       return;
     Flux::string channel = params[1];
     Flux::string Ident = params[2];
