@@ -213,23 +213,36 @@ int main() {
 
   blake512_hash( digest, data, 1 );    
   v=0;
-  for(i=0; i<64; ++i) {
+
+  for(i=0; i<64; ++i) 
+  {
     printf("%02X", digest[i]);
-    if ( digest[i] != test1[i]) v=1;
+
+    if ( digest[i] != test1[i]) 
+ 	v=1;
   }
-  if (v) printf("\nerror\n");
-  else  printf("\nok\n");
+
+  if (v)
+	printf("\nerror\n");
+  else
+	printf("\nok\n");
 
   for(i=0; i<144; ++i) data[i]=0;  
 
-  blake512_hash( digest, data, 144 );    
+  blake512_hash(digest, data, 144);    
   v=0;
-  for(i=0; i<64; ++i) {
+
+  for(i=0; i<64; ++i)
+  {
     printf("%02X", digest[i]);
-    if ( digest[i] != test2[i]) v=1;
+    if(digest[i] != test2[i])
+	v=1;
   }
-  if (v) printf("\nerror\n");
-  else printf("\nok\n");
+
+  if (v)
+	printf("\nerror\n");
+  else
+	printf("\nok\n");
 
   return 0;
 }

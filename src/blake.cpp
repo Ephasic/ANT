@@ -231,7 +231,7 @@ bool BlakeHash(Flux::string &rethash, const Flux::string &text, const Flux::stri
   if(sizeof(data) < text.size()) // idk??? make sure we don't buffer overflow???
   {
     Log(LOG_TERMINAL) << "[Blake-512]: Text.size() bufferoverflow?";
-    Log(LOG_TERMINAL) << "[Blake-512]: uint8_t: " << sizeof(data) << " text: " << text.size();
+    Log(LOG_TERMINAL) << "[Blake-512]: data array: " << sizeof(data) << " text: " << text.size();
     return false;
   }
   

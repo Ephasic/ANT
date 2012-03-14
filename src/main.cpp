@@ -63,9 +63,9 @@ int main (int argcx, char** argvx, char *envp[])
     time_t last_check = time(NULL);
 
     new DBSave(); //Start the Database Save timer.
-     GProto = new GlobalProto();
+    GProto = new GlobalProto();
     
-    TimerManager::TickTimers(time(NULL)); //Call timers to tick to start sockets instantly.
+    TimerManager::TickTimers(time(NULL)); //Call timers to tick to start pending sockets instantly.
     while(!quitting)
     {
       Log(LOG_RAWIO) << "Top of main loop";
@@ -90,7 +90,8 @@ int main (int argcx, char** argvx, char *envp[])
     ModuleHandler::SanitizeRuntime();
     Log(LOG_TERMINAL) << "\033[0m";
   }//try ends here
-  catch(const CoreException& e){
+  catch(const CoreException& e)
+  {
     /* we reset the terminal colors, this should be removed as it makes more issues than it is cool */
     Log(LOG_TERMINAL) << "\033[0m";
     if(!Config)
