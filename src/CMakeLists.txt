@@ -13,9 +13,6 @@ endif(WIN32)
 
 sort_list(SRC_SRCS)
 
-# Add our hashing libs.
-append_to_list(LINK_LIBS tiger)
-
 # Set all the files to use C++ as well as set their compile flags (use the module-specific compile flags, though)
 set_source_files_properties(${SRC_SRCS} PROPERTIES LANGUAGE CXX COMPILE_FLAGS "${CXXFLAGS}")
 
@@ -72,6 +69,10 @@ endif(MSVC)
 # Generate the Navn executable and set it's linker flags, also set it to export it's symbols even though it's not a module
 add_executable(${PROGRAM_NAME} ${SRC_SRCS})
 set_target_properties(${PROGRAM_NAME} PROPERTIES LINKER_LANGUAGE CXX LINK_FLAGS "${LDFLAGS}" ENABLE_EXPORTS ON)
+
+# Add our hashing libs.
+target_link_libraries(${PROGRAM_NAME} tiger)
+
 # On Windows, also link Navn to the wsock32 and Ws2_32 library, as well as set the version
 if(WIN32)
   target_link_libraries(${PROGRAM_NAME} wsock32 Ws2_32)

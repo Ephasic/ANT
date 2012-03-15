@@ -1,6 +1,6 @@
 /* Arbitrary Navn Tool -- CTCP handling module
  * 
- * (C) 2011-2012 Flux-Net
+ * (C) 2011-2012 Azuru
  * Contact us at Dev@Flux-Net.net
  *
  * Please read COPYING and README for further details.
