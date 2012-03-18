@@ -10,33 +10,16 @@
  */
 #include "modules.h"
 
-Network *netcallback;
-void Timeout()
-{
-  if(netcallback->s && netcallback->s->GetStatus(SF_CONNECTED) && netcallback->s->SentPing)
-    netcallback->s->SetStatus(SF_DEAD, true);
-
-  Log(LOG_TERMINAL) << "Ping timeout on " << netcallback->name;
-}
-
-class PingTimer : public Timer
+class PingTimer:public Timer
 {
 public:
   PingTimer():Timer(60, time(NULL), true) { }
-  void Tick(time_t)
-  {
-    for(auto it : Networks)
-    {
+  void Tick(time_t){
+    for(auto it : Networks){
       Network *n = it.second;
-
-      if(!n->b || !n->b->ircproto)
-	return;
-      
       n->b->ircproto->Raw("PING :%i", static_cast<int>(time(NULL)));
-      n->s->SentPing = true;
-      netcallback = n;
-      //new PingTimeoutTimer(n);
-      new tqueue(Timeout, 121);
+      //Send_Global("PING :%i\n", static_cast<int>(time(NULL)));
+      new PingTimeoutTimer(n);
     }
   }
 };
@@ -53,24 +36,22 @@ public:
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);
   }
-  
   void OnPong(const std::vector<Flux::string> &params, Network *n)
   {
      Flux::string ts = params[1];
      int lag = time(NULL)-(int)ts;
      n->s->SentPing = false;
-//      if(n->ptt)
-//       delete n->ptt;
-//      n->ptt = nullptr;
+     if(n->ptt)
+      delete n->ptt;
+     n->ptt = nullptr;
      if(protocoldebug)
         Log(LOG_RAWIO) << lag << " sec lag (" << ts << " - " << time(NULL) << ')';
   }
-  
   void OnPing(const std::vector<Flux::string> &params, Network *n)
   {
-//     if(n->ptt)
-//       delete n->ptt;
-//     n->ptt = nullptr;
+    if(n->ptt)
+      delete n->ptt;
+    n->ptt = nullptr;
     n->s->SentPing = false;
     n->s->Write("PONG :%s\n", params[0].c_str());
   }

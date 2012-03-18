@@ -44,7 +44,7 @@ ANT 1.0.0
   [ ] Add Channel Ops?
 
 [+] Add more event handlers (FOREACH_MOD)
-[ ] Some kind of timed-queue callback system
+[?] Some kind of timed-queue callback system
 [+] Fix parts of the core that are designed for 1 network only (like events)
 [ ] Wtf is this Module Priority system? fix that
 [ ] Add buffer limiter (so freenode does not kill the bot)
