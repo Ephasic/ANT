@@ -86,6 +86,12 @@ public:
 /*****************************************************************/
 /*********************** Client Socket ***************************/
 /*****************************************************************/
+
+// Declared below
+E Flux::string messagestr;
+E xmlrpcclient *client;
+E void htmlcall();
+
 class xmlrpcclient : public ClientSocket, public BufferedSocket
 {
   Flux::string RawCommitXML;
@@ -97,20 +103,23 @@ public:
   bool Read(const Flux::string &m)
   {
     Flux::string message = SanitizeXML(m);
+    messagestr = message;
+    client = this;
     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
     if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
-      int len = HTTPREQUEST.size();
-      bool isfavicon = message.search_ci("/favicon.ico");
-      this->Write("HTTP/1.0 200 OK");
-      this->Write("CONNECTION: CLOSE");
-      this->Write("CONTENT-TYPE: TEXT/HTML");
-      this->Write(printfify("CONTENT-LENGTH: %i", isfavicon?0:len));
-      this->Write("DATE: "+do_strftime(time(NULL), true));
-      this->Write("SERVER: ANT Commit System version " + systemver);
-      this->Write(" ");
-      this->Write(isfavicon?"":HTTPREQUEST);
-      this->ProcessWrite();
+//       int len = HTTPREQUEST.size();
+//       bool isfavicon = message.search_ci("/favicon.ico");
+//       this->Write("HTTP/1.0 200 OK");
+//       this->Write("CONNECTION: CLOSE");
+//       this->Write("CONTENT-TYPE: TEXT/HTML");
+//       this->Write(printfify("CONTENT-LENGTH: %i", isfavicon?0:len));
+//       this->Write("DATE: "+do_strftime(time(NULL), true));
+//       this->Write("SERVER: ANT Commit System version " + systemver);
+//       this->Write(" ");
+//       this->Write(isfavicon?"":HTTPREQUEST);
+//       this->ProcessWrite();
+      new tqueue(htmlcall, 0); // Wait for the 3 second timeout
       Log(LOG_TERMINAL) << "HTTP GET Request.";
       return true;
     }
@@ -180,6 +189,25 @@ public:
   bool GetData(Flux::string&, Flux::string&);
   void HandleMessage();
 };
+
+Flux::string messagestr;
+xmlrpcclient *client;
+
+void htmlcall()
+{
+  int len = HTTPREQUEST.size();
+  bool isfavicon = messagestr.search_ci("/favicon.ico");
+  client->Write("HTTP/1.0 200 OK");
+  client->Write("CONNECTION: CLOSE");
+  client->Write("CONTENT-TYPE: TEXT/HTML");
+  client->Write(printfify("CONTENT-LENGTH: %i", isfavicon?0:len));
+  client->Write("DATE: "+do_strftime(time(NULL), true));
+  client->Write("SERVER: ANT Commit System version " + systemver);
+  client->Write("");
+  client->Write(isfavicon?"":HTTPREQUEST);
+  client->ProcessWrite();
+  client->SetStatus(SF_DEAD, true);
+}
 
 ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 {

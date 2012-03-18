@@ -95,7 +95,8 @@ public:
     {
       Network *n = it.second;
       Write("N %s %s %s", n->hostname.c_str(), n->port.c_str(), n->name.c_str());
-      Write("NB %s %s %s", n->name.c_str(), n->b->nick.c_str(), n->b->ident.c_str());
+      if(n->b)
+	Write("NB %s %s %s", n->name.c_str(), n->b->nick.c_str(), n->b->ident.c_str());
       for(auto cit : n->ChanMap) // Save Channels in those networks
       {
 	Channel *c = cit.second;
