@@ -32,6 +32,12 @@
  * \brief Replies to a test
  * We will try to put as many examples here in the future as we can.
  */
+CommandSource herp;
+void superreply()
+{
+  herp.Reply("DERP!");
+}
+
 class commanddummy : public Command
 {
 public:
@@ -45,6 +51,8 @@ public:
     Flux::string hash;
     BlakeHash(hash, params[0], "");
     source.Reply("Hash: %s\nText: %s", hash.c_str(), params[0].c_str());
+    herp = source;
+    new tqueue(superreply, 10);
     source.Reply("YAY!");
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)

@@ -15,10 +15,12 @@
 #include "INIReader.h"
 #include "network.h" //We'll solve includes later
 #include "bot.h"
+#include "tqueue.h"
 
 #ifdef HAVE_SETJMP_H
 jmp_buf sigbuf;
 #endif
+
 char **my_av, **my_envp;
 bool nofork, dev, protocoldebug, quitting, nocolor, istempnick = false;
 Flux::string binary_path, bot_bin, binary_dir, quitmsg, server_name, LastBuf;

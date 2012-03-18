@@ -40,6 +40,7 @@ class User;
 class NetworkSocket;
 class BufferedSocket;
 class Socket;
+class tqueue;
 class Commands;
 class Command;
 class Oper;
