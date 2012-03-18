@@ -236,7 +236,7 @@ bool BlakeHash(Flux::string &rethash, const Flux::string &text, const Flux::stri
   }
   
   // Convert the Flux::string to a uint8_t array
-  for(int i = 0; i < text.size(); ++i)
+  for(unsigned i = 0; i < text.size(); ++i)
     data[i] = static_cast<uint8_t>(text[i]);
 
   // Hash :)
@@ -246,7 +246,7 @@ bool BlakeHash(Flux::string &rethash, const Flux::string &text, const Flux::stri
   if(!cmphash.empty())
   {
     // move the cmphash into the testdigest array
-    for(int i = 0; i < cmphash.size() && i < 64; ++i)
+    for(unsigned i = 0; i < cmphash.size() && i < 64; ++i)
       testdigest[i] = static_cast<uint8_t>(cmphash[i]);
 
     // compare.
