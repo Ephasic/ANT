@@ -1,7 +1,7 @@
 /* Arbitrary Navn Tool -- XML-RPC Parser Module
  * 
  * (C) 2011-2012 Azuru
- * Contact us at Dev@Flux-Net.net
+ * Contact us at Development@Azuru.net
  *
  * Please read COPYING and README for further details.
  *
@@ -479,16 +479,10 @@ public:
     // FIXME: This needs to be handled by the Rulesets system later on.
     
     Flux::string files = BuildFileString(msg.Files);
-    //if(msg.Files.size() <= 2)
-    //  files = CondenseVector(msg.Files);
-    //else
-    //  files = "(" + value_cast<Flux::string>(msg.Files.size()) + " files changed)";
-    //files.trim();
     
     for(auto it : msg.Channels)
     {
       Channel *c = it;
-      //     Flux::string files = CondenseVector(msg.Files);
       Log(LOG_TERMINAL) << "Announcing in " << c->name << " (" << c->n->name << ')';
 
       // Build the commit message with stringstream

@@ -1,7 +1,7 @@
 /* Arbitrary Navn Tool -- Primary functions file (This file is old)
  * 
  * (C) 2011-2012 Azuru
- * Contact us at Dev@Flux-Net.net
+ * Contact us at Development@Azuru.net
  *
  * Please read COPYING and README for further details.
  *

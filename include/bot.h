@@ -1,7 +1,7 @@
 /* Arbitrary Navn Tool -- Prototype for Bot Class
  * 
  * (C) 2011-2012 Azuru
- * Contact us at Dev@Flux-Net.net
+ * Contact us at Development@Azuru.net
  *
  * Please read COPYING and README for further details.
  *
@@ -20,8 +20,6 @@ public:
   ~Bot();
   /* The network we're on*/
   Network *network;
-  /* The current bot number used as the nickname */
-  int BotNumber;
   /* List of chans the bot is in */
   Flux::map<Channel*> channels;
   /* IRCProto class for the network */
@@ -39,7 +37,7 @@ public:
   void SetNick(const Flux::string&);
   /* Send the user credentials for connecting */
   void SendUser();
-  /* Check that we still have a valid nick, and fix our nick if it isnt */
+  /* Check that we still have a valid nick, and fix our nick if it isn't */
   void CheckNickName(const Flux::string &nick = "");
   /* Set a mode to the bot, User class does not have this so we do it manually */
   void SetMode(const Flux::string&);

@@ -1,7 +1,7 @@
 /* Arbitrary Navn Tool -- Bot Functions and Commit Parsing.
  * 
  * (C) 2011-2012 Azuru
- * Contact us at Dev@Flux-Net.net
+ * Contact us at Development@Azuru.net
  *
  * Please read COPYING and README for further details.
  *
@@ -96,7 +96,7 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
 
   new RenameTimer(30, this);
   this->n->b = this;
-  this->BotNumber = 0;
+//   this->BotNumber = 0;
   new IRCProto(this->n);
   Log(LOG_DEBUG) << "New bot created on " << net->name << ": " << ni << i << ": " << real;
 }

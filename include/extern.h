@@ -1,7 +1,7 @@
 /* Arbitrary Navn Tool -- Prototypes for ALL global variables and classes
  * 
  * (C) 2011-2012 Azuru
- * Contact us at Dev@Flux-Net.net
+ * Contact us at Development@Azuru.net
  *
  * Please read COPYING and README for further details.
  *
