@@ -172,6 +172,19 @@ public:
     if((i == 433))
     {
       //int derp;
+      // FIXME: Check internally for the nickname and start from there so we don't waste bandwidth
+      if(params[1].search(Config->NicknamePrefix) && !params[1].search_ci("tmp"))
+      {
+	if(params[1].size() >= Config->NicknamePrefix.size())
+	{
+	  Flux::string num = params[1].substr(Config->NicknamePrefix.size());
+	  num.trim();
+	  int number = (int)num;
+	  n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++number));
+	  return;
+	}
+      }
+      
       n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
       n->b->CheckNickName();
       //if(IsTempNick(params[0], derp))
