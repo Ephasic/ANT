@@ -24,7 +24,6 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts)
   this->name = nname;
   this->creation_time = ts;
   this->topic_time = 0;
-  net->JoinQueue.push(this);
   this->n->ChanMap[this->name] = this;
   Log(LOG_DEBUG) << "Created new channel '" << nname << "' on " << net->name;
 }
@@ -126,6 +125,7 @@ void QuitUser(Network *n, User *u)
 	var1.second->DelUser(u);
     delete u;
 }
+
 void JoinChansInBuffer(Network *n)
 {
   while(!n->JoinQueue.empty())

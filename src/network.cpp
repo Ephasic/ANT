@@ -42,6 +42,7 @@ Network::~Network()
 
 bool Network::JoinChannel(const Flux::string &chan)
 {
+  Log(LOG_DEBUG) << "Scheduling Channel " << chan << " for join.";
   if(IsValidChannel(chan))
   {
     Channel *c = FindChannel(this, chan);

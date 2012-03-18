@@ -116,6 +116,8 @@ public:
   }
 };
 
+// This void sends some random junk to the server when its called
+// by a tqueue.
 void SendJunk()
 {
   for(auto it : Networks)
@@ -167,8 +169,7 @@ public:
       while(cs.GetToken(tok))
       {
 	tok.trim();
-	Channel *c = new Channel(n, tok);
-	c->SendJoin();
+	new Channel(n, tok);
       }
       
       n->servername = params[1];
