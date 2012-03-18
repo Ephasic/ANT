@@ -192,20 +192,6 @@ public:
     {
       //int derp;
       // FIXME: Check internally for the nickname and start from there so we don't waste bandwidth
-      // Check if our nickname is temporary, change it if we are
-//       if(params[1].search(Config->NicknamePrefix) && !params[1].search_ci("tmp"))
-//       {
-// 	if(params[1].size() >= Config->NicknamePrefix.size())
-// 	{
-// 	  Flux::string num = params[1].substr(Config->NicknamePrefix.size());
-// 	  num.trim();
-// 	  int number = (int)num;
-// 	  n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++number));
-// 	  return;
-// 	}
-//       }
-//       
-//       n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
 	RenameBot(n, params[1]);
     }
   }
@@ -220,9 +206,6 @@ public:
     {
       Log(LOG_TERMINAL) << "Is bot nickname!";
 //     :Server.test.net 433 ANT-1 ANT-2 :Nickname is already in use.
-      // We call our own numeric handler in this module
-      // so that we can have it handle the renames if we're using a valid nickname
-      // but someone renamed us or something..
       RenameBot(u->n, msg);
       new tqueue(SendJunk, 10);
     }
