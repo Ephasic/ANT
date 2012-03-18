@@ -12,23 +12,27 @@
 #include "tqueue.h"
 #include "log.h"
 
+// Queues :D
 std::vector<tqueue*> QueuedQueues;
 
+// Our constructor where we create our timer and push 
 tqueue::tqueue(void (*func)(), long time_to_tick, time_t now, bool repeating) : Timer(time_to_tick, now, repeating), function(func)
 {
   QueuedQueues.push_back(this);
   Log(LOG_TERMINAL) << "Creating queue: @" << this;
 }
 
+// Destroy our queue
 tqueue::~tqueue()
 {
-  for(std::vector<tqueue*>::iterator it = QueuedQueues.begin(); it != QueuedQueues.end(); ++it)
-    if(*it == this)
+  std::vector<tqueue*>::iterator it = std::find(QueuedQueues.begin(), QueuedQueues.end(), this);
+  if(it != QueuedQueues.end())
       QueuedQueues.erase(it);
       
   Log(LOG_TERMINAL) << "Destroying queue: @" << this;
 }
 
+// Call our callback
 void tqueue::Tick(time_t)
 {
   Log(LOG_TERMINAL) << "Running queue: @" << this;
