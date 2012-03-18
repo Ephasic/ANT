@@ -9,6 +9,7 @@
  * Based on the original code of Anope by The Anope Team.
  */
 #include "module.h"
+#include "bot.h"
 #include "INIReader.h"
 
 //General misc functions
@@ -184,26 +185,6 @@ bool IsValidChannel(const Flux::string &chan)
  return true;
 }
 
-// XXX: this should find the nickname in the nicknames map.
-bool IsTempNick(const Flux::string &nick)
-{
-  Log(LOG_TERMINAL) << "Checking if nickname \"" << nick << "\" is temporary";
-  if(nick.empty())
-    return false;
-
-  if(nick.search_ci(Config->NicknamePrefix))
-    return false;
-
-  if(nick.search_ci("tmp"))
-    return true;
-  
-  if(nick.search_ci(Config->NicknamePrefix.strip('-')))
-    return true; // we're a temp nick and need to rename
-
-  return false;
-}
-
-
 Flux::string printfify(const char *fmt, ...)
 {
   if(fmt)
@@ -239,6 +220,28 @@ std::vector<Flux::string> StringVector(const Flux::string &src, char delim)
  * \return true if the file exists, false if it doens't
  */
 bool InTerm() { return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr))); }
+
+void RenameBot(Network *n, const Flux::string &nick)
+{
+  if(nick.search(Config->NicknamePrefix) && !nick.search_ci("tmp"))
+  {
+    if(nick.size() >= Config->NicknamePrefix.size())
+    {
+      Flux::string num = nick.substr(Config->NicknamePrefix.size());
+      num.trim();
+      int number = (int)num;
+      n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++number));
+      return;
+    }
+  }
+  if(nick.search_ci(Config->NicknamePrefix.strip('-')) && nick.search_ci("tmp"))
+  {
+    n->b->SetNick(printfify("%s1", Config->NicknamePrefix.c_str()));
+    return;
+  }
+  
+  n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
+}
 
 void SaveDatabases()
 {

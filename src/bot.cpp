@@ -72,14 +72,6 @@
 //   UNDERLINE_,
 // }
 
-class RenameTimer : public Timer
-{
-  Bot *b;
-public:
-  RenameTimer(time_t wait, Bot *bot):Timer(wait, time(NULL), true), b(bot) {}
-  void Tick(time_t);
-};
-
 Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net)
 {
   if(!net)
@@ -93,10 +85,8 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
     return; //close the constructor instead of throwing.
 //     throw CoreException("Bot assigned to a network with a bot already assigned??");
   }
-
-  new RenameTimer(30, this);
+  
   this->n->b = this;
-//   this->BotNumber = 0;
   new IRCProto(this->n);
   Log(LOG_DEBUG) << "New bot created on " << net->name << ": " << ni << i << ": " << real;
 }
@@ -107,27 +97,6 @@ Bot::~Bot()
   delete this->ircproto;
   Log(LOG_DEBUG) << "Bot " << this->nick << " for network " << this->n->name << " deleted!";
 }
-
-// void Bot::AnnounceCommit(CommitMessage &msg)
-// {
-//   Log(LOG_DEBUG) << "AnnounceCommit Called.";
-//   for(auto it : msg.Channels)
-//   {
-//     Channel *c = it;
-// //     Flux::string files = CondenseVector(msg.Files);
-//     Log(LOG_TERMINAL) << "Announcing in " << c->name << " (" << c->n->name << ')';
-//     
-//     std::stringstream ss;
-//     ss << RED << BOLD << msg.project << ": " << NORMAL << ORANGE << msg.author << " * " << NORMAL << YELLOW << 'r' <<  msg.revision << NORMAL << BOLD << " | " << NORMAL << LIGHT_BLUE << ":\15 " << << msg.log; //<< files;
-//     Log(LOG_DEBUG) << "BLAH! " << ss.str();
-// 
-//     Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
-// 
-//     //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
-//     c->SendMessage(formattedmessgae);
-// //     c->SendMessage(RED+BOLD+"%s: "+NORMAL+ORANGE+"%s * "+NORMAL+YELLOW+"%s "+NORMAL+BOLD+"| "+NORMAL+LIGHT_BLUE+"%s"+NORMAL+": %s", msg.project.c_str(), msg.author.c_str(), msg.revision.c_str(), files.c_str());
-//   }
-// }
 
 void Bot::Join(Channel *c)
 {
@@ -149,102 +118,6 @@ void Bot::SetMode(const Flux::string &modestr)
     this->ircproto->mode(this->nick, modestr);
 }
 
-void Bot::CheckNickName(const Flux::string &ni)
-{
-
-  bool isvalid = true;
-  int numeric = 0;
-  if(ni.empty())
-    return;
-
-  if(IsTempNick(ni))
-    isvalid = false;
-
-  Log(LOG_TERMINAL) << "Bool1: " << (isvalid?"False":"True");
-  
-  if(!ni.search(Config->NicknamePrefix) && FindBot(ni))
-    isvalid = false;
-
-  Log(LOG_TERMINAL) << "Bool2: " << (isvalid?"False":"True");
-  if(isvalid)
-  {
-    if(ni.size() >= Config->NicknamePrefix.size()+1)
-    {
-      Flux::string number = ni.substr(Config->NicknamePrefix.size());
-      numeric = atoi(number.c_str());
-
-      Log(LOG_TERMINAL) << "NUM: " << numeric << " | " << number;
-
-      if(numeric <= 0)
-      {
-	Log(LOG_TERMINAL) << "Nickname " << ni << " is invalid! valcheck 1";
-	this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++numeric));
-	return;
-      }
-    }else
-      isvalid = false;
-
-    Log(LOG_TERMINAL) << "Bool3: " << (isvalid?"False":"True");
-  }
-
-  if(!isvalid)
-  {
-    if(numeric < 0)
-      numeric = 0;
-
-    Log(LOG_TERMINAL) << "Nickname " << ni << " is invalid! valcheck 2";
-    this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++numeric));
-
-  }
-//   Bot *b;
-//   if(ni.empty())
-//     b = this;
-//   else
-//     b = FindBot(ni);
-// 
-//   if(!b && !ni.empty() && (ni.search_ci(Config->NicknamePrefix) || ni.search_ci(Config->NicknamePrefix.strip('-'))))
-//   {
-//     Log(LOG_TERMINAL) << "Nickname " << b->nick << " is temporary.";
-//     this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
-//   }else{
-//     Log(LOG_TERMINAL) << "No bot " << ni << " Found!";
-//     return;
-//   }
-//   
-//   //Flux::string nickname = ni.empty()?this->nick:ni;
-//   if(b->n->s && b->n->s->GetStatus(SF_CONNECTED))
-//   {
-//     int number = 0;
-//     if(IsTempNick(b->nick, number)){
-//       Log(LOG_TERMINAL) << "Nickname " << b->nick << " is temporary.";
-//       this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
-//     }
-//     else
-//     {
-//       if(number < 0){
-// 	Log(LOG_TERMINAL) << "Nickname " << b->nick << " is temporary.";
-// 	this->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++BotNumber));
-//       }
-//       else
-// 	Log(LOG_TERMINAL) << "Nickname " << b->nick << " is NOT temporary.";
-//     }
-/////////////////////////////////////////////////////////////////////////////////////
-//     unsigned num = 0;
-//     if(nickname.search(Config->NicknamePrefix))
-//     {
-//       //Log(LOG_DEBUG) << "1: " << nickname;
-//       Flux::string end = nickname.substr(Config->NicknamePrefix.size());
-//       //Log(LOG_DEBUG) << "2: " << end << "|" << end.size();
-//       if(end.is_pos_number_only() && end.size() < 10){
-// 	num = (unsigned)end;
-// 	//Log(LOG_DEBUG) << "3: " << num;
-//       }
-//     }
-//     //Log(LOG_TERMINAL) << num;
-//     if((num <= 0))
-//       this->SetNick(Config->NicknamePrefix+value_cast<Flux::string>(++num));
-//   }
-}
 
 void Bot::Part(Channel *c, const Flux::string &message)
 {
@@ -269,13 +142,6 @@ void Bot::SendUser()
 {
   this->ircproto->user(this->ident, this->realname);
   this->ircproto->nick(this->nick);
-}
-
-void RenameTimer::Tick(time_t)
-{
-//   Log(LOG_TERMINAL) << "RenameTimer Tick.";
-  if(b->n->s && b->n->s->GetStatus(SF_CONNECTED))
-    b->CheckNickName();
 }
 
 Bot *FindBot(const Flux::string &nick)

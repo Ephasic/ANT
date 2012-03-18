@@ -37,8 +37,6 @@ public:
   void SetNick(const Flux::string&);
   /* Send the user credentials for connecting */
   void SendUser();
-  /* Check that we still have a valid nick, and fix our nick if it isn't */
-  void CheckNickName(const Flux::string &nick = "");
   /* Set a mode to the bot, User class does not have this so we do it manually */
   void SetMode(const Flux::string&);
 };

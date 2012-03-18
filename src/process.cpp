@@ -39,8 +39,7 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan)
       if((!Host.empty() || !Nickname.empty() || !Ident.empty()) && source.n)
 	u = new User(source.n, Nickname, Ident, Host, realname, Server);
     }
-    if(IsBot(u))
-      static_cast<Bot*>(u)->CheckNickName(params[0]);
+    
     Channel *c = FindChannel(source.n, channel);
     if(!c)
     {
@@ -298,7 +297,7 @@ void process(Network *n, const Flux::string &buffer){
   Source.params = params;
   Source.raw = buffer;
   /**************************************/
-  if(command == "352"){ ProcessJoin(Source, c->name); }
+  if(command == "352") { ProcessJoin(Source, c->name); }
   if(source.empty() || message.empty() || params2.empty())
     return;
   

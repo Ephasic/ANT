@@ -116,6 +116,16 @@ public:
   }
 };
 
+void SendJunk()
+{
+  for(auto it : Networks)
+  {
+    Network *n = it.second;
+    if(n->s && n->s->GetStatus(SF_CONNECTED))
+      n->s->Write("randomjunkcheck");
+  }
+}
+
 class m_system : public module
 {
   CommandRehash cmdrehash;
@@ -144,7 +154,9 @@ public:
        * params[3] = user modes
        * params[4] = channel modes
        */
-      n->b->CheckNickName(params[0]);
+
+      RenameBot(n, params[0]);
+      
       if(params[3].search('B'))
 	n->b->SetMode("+B"); //FIXME: get bot mode?
       if(params[2].search_ci("ircd-seven") && params[3].search('Q'))
@@ -163,41 +175,57 @@ public:
       n->ircdversion = params[2];
       JoinChansInBuffer(n);
     }
+
+    // Send Random garbage occasionally to see if we need to rename
+    if((i == 421))
+    {
+      RenameBot(n, params[0]);
+    }
+    
     /* Nickname is in use numeric
      * Numeric 433
-     * params[0] = *
+     * params[0] = our current nickname
      * params[1] = Attempted nickname
-     * params[2] = message
+     * params[2] = message (useless)
      */
     if((i == 433))
     {
       //int derp;
       // FIXME: Check internally for the nickname and start from there so we don't waste bandwidth
-      if(params[1].search(Config->NicknamePrefix) && !params[1].search_ci("tmp"))
-      {
-	if(params[1].size() >= Config->NicknamePrefix.size())
-	{
-	  Flux::string num = params[1].substr(Config->NicknamePrefix.size());
-	  num.trim();
-	  int number = (int)num;
-	  n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++number));
-	  return;
-	}
-      }
-      
-      n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
-      n->b->CheckNickName();
-      //if(IsTempNick(params[0], derp))
-	//n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++n->b->BotNumber));
+      // Check if our nickname is temporary, change it if we are
+//       if(params[1].search(Config->NicknamePrefix) && !params[1].search_ci("tmp"))
+//       {
+// 	if(params[1].size() >= Config->NicknamePrefix.size())
+// 	{
+// 	  Flux::string num = params[1].substr(Config->NicknamePrefix.size());
+// 	  num.trim();
+// 	  int number = (int)num;
+// 	  n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++number));
+// 	  return;
+// 	}
+//       }
+//       
+//       n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
+	RenameBot(n, params[1]);
     }
   }
 
+  // user!ident@host.com NICK NewNickname
+  // User*			msg
   void OnNickChange(User *u, const Flux::string &msg)
   {
     Log(LOG_TERMINAL) << "Rename: " << u->nick << " " << msg << " " << u->n->b->nick;
-//      if(u == u->n->b)
-      u->n->b->CheckNickName(u->nick);
-      u->n->b->CheckNickName(msg);
+    
+    if(u->nick.search(Config->NicknamePrefix))
+    {
+      Log(LOG_TERMINAL) << "Is bot nickname!";
+//     :Server.test.net 433 ANT-1 ANT-2 :Nickname is already in use.
+      // We call our own numeric handler in this module
+      // so that we can have it handle the renames if we're using a valid nickname
+      // but someone renamed us or something..
+      RenameBot(u->n, msg);
+      new tqueue(SendJunk, 10);
+    }
   }
   
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)

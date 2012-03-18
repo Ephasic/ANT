@@ -129,7 +129,6 @@ E Flux::string duration(const time_t&);
 E Flux::string printfify(const char*, ...);
 E Flux::string CondenseVector(const Flux::vector&);
 E int randint(int x, int y);
-E bool IsTempNick(const Flux::string&);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
 E bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
@@ -142,6 +141,7 @@ E Flux::map<Network*> NetworkHosts;
 
 /* void's */
 E void Rehash();
+E void RenameBot(Network*, const Flux::string&);
 E void Send_Global(const Flux::string&);
 E void Send_Global(const char*, ...);
 E void QuitUser(Network*, User*);
