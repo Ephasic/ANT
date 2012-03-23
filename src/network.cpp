@@ -15,7 +15,7 @@
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
 
-Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): s(NULL), b(NULL), CurHost(0)
+Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): s(nullptr), b(nullptr), CurHost(0)
 {
   if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");
@@ -62,8 +62,8 @@ bool Network::Disconnect()
   Socket *tmp = this->s;
   Bot *bot = this->b;
   this->disconnecting = true;
-  this->s = NULL;
-  this->b = NULL;
+  this->s = nullptr;
+  this->b = nullptr;
   delete bot;
   delete tmp;
   return true;
@@ -92,7 +92,7 @@ Network *FindNetwork(const Flux::string &name)
   auto it = Networks.find(name);
   if(it != Networks.end())
     return it->second;
-  return NULL;
+  return nullptr;
 }
 
 Network *FindNetworkByHost(const Flux::string &name)
@@ -100,7 +100,7 @@ Network *FindNetworkByHost(const Flux::string &name)
   auto it = NetworkHosts.find(name);
   if(it != NetworkHosts.end())
     return it->second;
-  return NULL;
+  return nullptr;
 }
 
 /**********************************************************/
@@ -151,7 +151,7 @@ NetworkSocket::~NetworkSocket()
 {
   this->Write("QUIT :Socket Closed\n");
   this->ProcessWrite();
-  this->net->s = NULL;
+  this->net->s = nullptr;
   
   Log() << "Closing Connection to " << net->name;
   
