@@ -86,14 +86,17 @@ public:
     Flux::string s;
     for(unsigned i=0; i < params.size(); ++i)
       s = params[i]+' ';
+    
     s.trim();
     if(s.search_ci("Blah Blah"))
       u->SendMessage("Derp DERp");
+    
    if(params[0].equals_ci("!userlist"))
    {
      Flux::string users;
      for(auto it : u->n->UserNickList)
       users += it.second->nick+" ";
+     
     u->SendMessage(users);
    }
   }

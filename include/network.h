@@ -47,7 +47,7 @@ public:
   Flux::string servername;
   int CurHost;
   void SetConnectedHostname(const Flux::string &str) { this->usedhostname = str; }
-  Flux::string GetConHost() { return this->usedhostname; }
+  Flux::string GetConHost() const { return this->usedhostname; }
   bool JoinChannel(const Flux::string&);
   bool IsDisconnecting() { return this->disconnecting; }
   bool Disconnect();

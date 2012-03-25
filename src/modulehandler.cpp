@@ -20,6 +20,7 @@ bool ModuleHandler::Attach(Implementation i, module *mod)
 {
   if(std::find(EventHandlers[i].begin(), EventHandlers[i].end(), mod) != EventHandlers[i].end())
     return false;
+  
   EventHandlers[i].push_back(mod);
   return true;
 }
@@ -119,7 +120,7 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
   
   dlerror();
   
-  auto *handle = dlopen(output.c_str(), RTLD_LAZY); //We use auto here so windows code is easier to work with
+  auto *handle = dlopen(output.c_str(), RTLD_LAZY);
   const char *err = dlerror();
   
   if(!handle && err && *err)

@@ -552,9 +552,9 @@ public:
 class NetworkSocket : public ConnectionSocket, public BufferedSocket
 {
 public:
-  NetworkSocket(Network*);
+  NetworkSocket(const Network*);
   ~NetworkSocket();
-  Network *net;
+  const Network *net;
   bool SentPing;
   bool Read(const Flux::string&);
   bool ProcessWrite();

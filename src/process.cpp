@@ -147,7 +147,8 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
  * \brief Main Processing function
  * \param buffer The raw socket buffer
  */
-void process(Network *n, const Flux::string &buffer){
+void process(Network *n, const Flux::string &buffer)
+{
 
   EventResult e;
   FOREACH_RESULT(I_OnPreReceiveMessage, OnPreReceiveMessage(buffer), e);
@@ -160,7 +161,9 @@ void process(Network *n, const Flux::string &buffer){
   if(buf.empty())
     return;
   Flux::string source;
-  if(buf[0] == ':'){
+  
+  if(buf[0] == ':')
+  {
    size_t space = buf.find_first_of(" ");
    if(space == Flux::string::npos)
      return;
@@ -169,6 +172,7 @@ void process(Network *n, const Flux::string &buffer){
    if(source.empty() || buf.empty())
      return;
   }
+  
   sepstream bufferseparator(buf, ' ');
   Flux::string bufferseparator_token;
   Flux::string command = buf;
@@ -188,6 +192,7 @@ void process(Network *n, const Flux::string &buffer){
     else
       params.push_back(bufferseparator_token);
   }
+  
   if(protocoldebug)
   {
     Log(LOG_TERMINAL) << "Source: " << (source.empty()?"No Source":source);
@@ -198,6 +203,7 @@ void process(Network *n, const Flux::string &buffer){
      for(unsigned i =0; i < params.size(); ++i)
        Log(LOG_TERMINAL) << "Params " << i << ": " << Flux::Sanitize(params[i]);
   }
+  
   if(!n)
   {
     Log(LOG_TERMINAL) << "Process() called with no source Network??";
@@ -211,25 +217,29 @@ void process(Network *n, const Flux::string &buffer){
   Flux::string nickname = h.nick, uident = h.ident, uhost = h.host, cmd;
   User *u = FindUser(n, nickname);
   Channel *c = FindChannel(n, receiver);
-  Bot *b =  n->b;
+  Bot *b = n->b;
   Flux::vector params2 = StringVector(message, ' ');
   /***********************************************/
   
   if(command == "004" && source.search('.')) { FOREACH_MOD(I_OnUserRegister, OnUserRegister(n)); }
-  if(message[0] == '\1' && message[message.length() -1] == '\1' && !params2[0].equals_cs("\001ACTION")){
+  if(message[0] == '\1' && message[message.length() -1] == '\1' && !params2[0].equals_cs("\001ACTION"))
+  {
     FOREACH_MOD(I_OnCTCP, OnCTCP(nickname, params2, n));
     return; //Dont allow the rest of the system to process ctcp's as it will be caught by the command handler.
   }
   if(command.equals_cs("NICK") && u) { FOREACH_MOD(I_OnNickChange, OnNickChange(u, params[0])); u->SetNewNick(params[0]); }
-  if(!u && !FindUser(n, nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty())){
+  if(!u && !FindUser(n, nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty()))
+  {
     if(!nickname.search('.') && n)
       u = new User(n, nickname, uident, uhost);
   }
+  
   if(command == "QUIT")
   {
     FOREACH_MOD(I_OnQuit, OnQuit(u, params[0]));
     QuitUser(n, u);
   }
+  
   if(command == "PART")
   {
     FOREACH_MOD(I_OnPart, OnPart(u, c, params[0]));

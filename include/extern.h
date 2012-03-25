@@ -15,8 +15,6 @@
 #include <new>
 /* Prototypes and external variable declarations only */
 
-#include "windows_navn.h" //Include windows crap
-
 /* #define's */
 #define E extern CoreExport
 #define BUFSIZE 65535
@@ -213,5 +211,19 @@ if (true) \
 } \
 else \
   static_cast<void>(0)
+
+
+#ifndef __GXX_EXPERIMENTAL_CXX0X__
+# error Your compiler MUST support C++11 (C++0x) at least gnu C++ version 4.5!
+#endif
+#include <atomic>
+#include <thread>
+
+#define GetCurrentDir getcwd
+#define Delete unlink
+
+#define MODULE_HOOK(x) \
+extern "C" module *ModInit(const Flux::string &name) { return new x(name); } \
+extern "C" void ModunInit(x **m) { if(*m) delete *m; }
       
 #endif

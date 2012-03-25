@@ -119,7 +119,8 @@ class InputThread : public Thread
 {
 public:
   bool exiting;
-  InputThread(Thread *t):Thread(), exiting(false) {
+  InputThread(Thread &*t):Thread(), exiting(false)
+  {
     Log() << "Input Thread Initializing.";
     t = this;
     this->Start();

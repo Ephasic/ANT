@@ -21,28 +21,23 @@ EventsVector ModuleHandler::EventHandlers[I_END];
  * \param activated Wether the module is activated or not
  * \param priority The module priority
  */
-module::module(const Flux::string &n)
+module::module(const Flux::string &n): name(n), handle(nullptr), Priority(PRIORITY_DONTCARE), loadtime(time(NULL))
 {
   SET_SEGV_LOCATION();
-  this->name = n;
-  this->handle = NULL;
-  this->Priority = PRIORITY_DONTCARE;
   if(FindModule(this->name))
     throw ModuleException("Module already exists!");
   
   Modules[this->name] = this;
-  this->loadtime = time(NULL);
   if(!nofork)
     Log() << "Loaded module " << n;
 }
 
 module::~module()
 {
-  Flux::string mname = this->name;
   SET_SEGV_LOCATION();
-  Log(LOG_DEBUG) << "Unloading module " << mname;
+  Log(LOG_DEBUG) << "Unloading module " << this->name;
   ModuleHandler::DetachAll(this);
-  Modules.erase(mname);
+  Modules.erase(this->name);
 }
 
 void module::SetAuthor(const Flux::string &person)

@@ -143,9 +143,8 @@ void Command::SendSyntax(CommandSource &source)
   source.Reply("Syntax: \2%s %s\2", this->name.c_str(), this->syntax[0].c_str());
   for(unsigned i=1, j = this->syntax.size(); i < j; ++i)
     source.Reply("        \002%s %s\002", this->name.c_str(), this->syntax[i].c_str());
- }else{
-   source.Reply("Syntax: \2%s\2", this->name.c_str()); //We dont have syntax's on some commands
- }
+ }else
+   source.Reply("Syntax: \2%s\2", this->name.c_str()); //We don't have syntax's on some commands
 }
 /** \overload void Command::SendSyntax(CommandSource &source, const Flux::string &syn) */
 void Command::SendSyntax(CommandSource &source, const Flux::string &syn)

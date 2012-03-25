@@ -72,7 +72,7 @@
 //   UNDERLINE_,
 // }
 
-Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net)
+Bot::Bot(const Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net)
 {
   if(!net)
     throw CoreException("Bot with no network??");

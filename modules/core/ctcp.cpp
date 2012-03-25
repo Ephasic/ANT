@@ -35,7 +35,8 @@
 class ctcp: public module
 {
 public:
-  ctcp(const Flux::string &Name):module(Name){
+  ctcp(const Flux::string &Name):module(Name)
+  {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);
@@ -46,19 +47,20 @@ public:
     Flux::string cmd = params.empty()?"":params[0];
     Log() << "\033[22;31mRecieved CTCP " << Flux::Sanitize(cmd) << " from " << source << "\033[22;36m";
       
-    if(cmd == "\001VERSION\001"){ // for CTCP VERSION reply
+    if(cmd == "\001VERSION\001")
+    { // for CTCP VERSION reply
       struct utsname uts;
       if(uname(&uts) < 0)
 	      throw CoreException("uname() Error");
 
 	n->b->ircproto->notice(source, "\001VERSION ANT-%s %s %s\001",VERSION_FULL, uts.sysname, uts.machine);
     }
-    if(cmd == "\001TIME\001"){ // for CTCP TIME reply
+    if(cmd == "\001TIME\001")
 	n->b->ircproto->notice(source,"\001TIME %s\001", do_strftime(time(NULL), true).c_str());
-    }
-    if(cmd == "\001SOURCE\001"){
+    
+    if(cmd == "\001SOURCE\001")
       n->b->ircproto->notice(source, "\001SOURCE http://code.google.com/p/arbitrary-navn-tool/\001");
-    }
+    
     if(cmd == "\001DCC")
       n->b->ircproto->notice(source, "I do not accept or support DCC connections.");
   }

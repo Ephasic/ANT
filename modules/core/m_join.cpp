@@ -45,6 +45,7 @@ public:
     return true;
   }
 };
+
 class CommandPart : public Command
 {
 public:
@@ -77,6 +78,7 @@ public:
     return true;
   }
 };
+
 class Join : public module
 {
   CommandJoin cmdjoin;

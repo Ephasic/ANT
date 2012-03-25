@@ -105,9 +105,9 @@ public:
   {
     const Flux::string module = params[1];
     //if(!source.u->IsOwner())
-      source.Reply(ACCESS_DENIED);
+//       source.Reply(ACCESS_DENIED);
     //else{
-      if(!ModuleHandler::Unload(FindModule(module)))
+      if(!ModuleHandler::Unload(&*FindModule(module)))
       {
 	source.Reply("Failed to unload module %s", module.c_str());
 	Log(source.u, this) << "to unload " << module << " and failed";
