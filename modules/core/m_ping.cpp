@@ -17,7 +17,8 @@ public:
   void Tick(time_t){
     for(auto it : Networks){
       Network *n = it.second;
-      n->b->ircproto->Raw("PING :%i", static_cast<int>(time(NULL)));
+      if(n->b && n->b->ircproto)
+	n->b->ircproto->Raw("PING :%i", static_cast<int>(time(NULL)));
       //Send_Global("PING :%i\n", static_cast<int>(time(NULL)));
       new PingTimeoutTimer(n);
     }

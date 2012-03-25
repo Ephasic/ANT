@@ -100,14 +100,14 @@ void sigact(int sig)
   {
     case SIGPIPE:
       signal(sig, SIG_IGN);
-      Log(LOG_RAWIO) << "Recieved SIGPIPE, must be a dead socket somewhere..";
+      Log(LOG_RAWIO) << "Received SIGPIPE, must be a dead socket somewhere..";
       break; //Ignore SIGPIPE
     case SIGHUP:
       signal(sig, SIG_IGN);
       Rehash();
       break;
     case SIGSEGV:
-      Log(LOG_RAWIO) << "Recieved SIGSEGV, Segmentation Fault caught.";
+      Log(LOG_RAWIO) << "Received SIGSEGV, Segmentation Fault caught.";
       /* this is where the module stack needs to be */
       #ifdef HAVE_SETJMP_H
       if(LastRunModule)

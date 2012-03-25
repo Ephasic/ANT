@@ -16,7 +16,7 @@
 class CoreExport Bot : public User
 {
 public:
-  Bot(const Network *net, const Flux::string &n, const Flux::string &i, const Flux::string &real = "ANT Bot (http://ANT.Flux-Net.net/)");
+  Bot(Network *net, const Flux::string &n, const Flux::string &i, const Flux::string &real = "ANT Bot (http://ANT.Flux-Net.net/)");
   ~Bot();
   /* The network we're on*/
   Network *network;

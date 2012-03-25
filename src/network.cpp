@@ -134,7 +134,7 @@ void ReconnectTimer::Tick(time_t)
 /****************** Socket Engine *************************/
 /**********************************************************/
 
-NetworkSocket::NetworkSocket(const Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet), SentPing(false)
+NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet), SentPing(false)
 {
   if(!tnet)
     throw CoreException("Network socket created with no network? lolwut?");
@@ -174,9 +174,10 @@ bool NetworkSocket::Read(const Flux::string &buf)
     return false; //Socket is dead so we'll let the socket engine handle it
   }
   
-  process(const_cast<Network*>(this->net), buf);
+  process(this->net, buf);
   
-  if(!params.empty() && params[0].equals_ci("PING")){
+  if(!params.empty() && params[0].equals_ci("PING"))
+  {
     this->Write("PONG :"+params[1]);
     this->ProcessWrite();
   }

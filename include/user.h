@@ -21,11 +21,11 @@ typedef std::map<Channel*, User*> CList;
 class CoreExport User : public Base
 {
 public:
-  User(const Network*, const Flux::string&, const Flux::string&, const Flux::string&, const Flux::string &realname = "", const Flux::string &server ="");
+  User(Network*, const Flux::string&, const Flux::string&, const Flux::string&, const Flux::string &realname = "", const Flux::string &server ="");
   virtual ~User();
   CList ChannelList;
   Flux::string nick, host, realname, ident, fullhost, server;
-  const Network *n;
+  Network *n;
   void AddChan(Channel*);
   void DelChan(Channel*);
   Channel *findchannel(const Flux::string&);

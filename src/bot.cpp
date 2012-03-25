@@ -72,7 +72,7 @@
 //   UNDERLINE_,
 // }
 
-Bot::Bot(const Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net)
+Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net)
 {
   if(!net)
     throw CoreException("Bot with no network??");
@@ -148,9 +148,8 @@ Bot *FindBot(const Flux::string &nick)
 {
   for(auto it : Networks)
   {
-    Bot *b = it.second->b;
-    if(b != nullptr && b->nick.equals_ci(nick))
-      return b;
+    if(it.second->b != nullptr && it.second->b->nick.equals_ci(nick))
+      return it.second->b;
   }
   return nullptr;
 }

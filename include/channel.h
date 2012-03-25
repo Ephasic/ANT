@@ -48,14 +48,14 @@ typedef std::map<User*, Channel*> UList;
 class CoreExport Channel : public Base
 {
 public:
-  Channel(const Network*, const Flux::string&, time_t ts = time(NULL));
+  Channel(Network*, const Flux::string&, time_t ts = time(NULL));
   ~Channel();
   UList UserList;
-  User *finduser(const Network*, const Flux::string&);
+  User *finduser(Network*, const Flux::string&);
   Flux::string name;
   Flux::string topic;
   Flux::string topic_setter;
-  const Network *n;
+  Network *n;
   Flux::insensitive_map<Bot*> bots;
   time_t topic_time;
   time_t creation_time;

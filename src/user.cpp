@@ -12,7 +12,7 @@
 #include "bot.h"
 
 uint32_t usercnt = 0, maxusercnt = 0;
-User::User(const Network *net, const Flux::string &snick, const Flux::string &sident, const Flux::string &shost, const Flux::string &srealname, const Flux::string &sserver){
+User::User(Network *net, const Flux::string &snick, const Flux::string &sident, const Flux::string &shost, const Flux::string &srealname, const Flux::string &sserver){
  /* check to see if a empty string was passed into the constructor */
  if(snick.empty() || sident.empty() || shost.empty())
    throw CoreException("Bad args sent to User constructor");

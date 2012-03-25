@@ -17,7 +17,8 @@ void ProcessInput(const Flux::string &str)
   if(params.empty())
     return;
 
-  if(params[0].equals_ci("QUIT")){
+  if(params[0].equals_ci("QUIT"))
+  {
 	quitting = true;
 	for(auto it : Networks)
 	{
@@ -28,7 +29,8 @@ void ProcessInput(const Flux::string &str)
 //     send_cmd("PRIVMSG %s\n", str.substr(4).c_str());
 //   else if(params[0].equals_ci("NICK"))
 //     send_cmd("NICK %s\n", str.substr(5).c_str());
-  else if(params[0].equals_ci("MODRELOAD")){
+  else if(params[0].equals_ci("MODRELOAD"))
+  {
     if(params.size() >= 2){
       module *m = FindModule(params[1]);
       if(m)
@@ -47,7 +49,8 @@ void ProcessInput(const Flux::string &str)
     }else
       Log(LOG_TERMINAL) << "Syntax: MODUNLOAD modulename";
   }
-  else if(params[0].equals_ci("MODUNLOAD")){
+  else if(params[0].equals_ci("MODUNLOAD"))
+  {
     if(params.size() >= 2)
     {
       module *m = FindModule(params[1]);
@@ -119,10 +122,10 @@ class InputThread : public Thread
 {
 public:
   bool exiting;
-  InputThread(Thread &*t):Thread(), exiting(false)
+  InputThread(Thread **t):Thread(), exiting(false)
   {
     Log() << "Input Thread Initializing.";
-    t = this;
+    *t = this;
     this->Start();
   }
   ~InputThread() { Log() << "Input Thread Exiting."; exiting = true; }
@@ -154,7 +157,7 @@ public:
   {
     if(nofork && InTerm()){
       if(!t)
-	new InputThread(t);
+	new InputThread(&t);
     }else
       throw ModuleException("Cannot run m_terminal_input when fork'ed");
   }
