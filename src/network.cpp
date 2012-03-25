@@ -83,7 +83,7 @@ bool Network::Connect()
   // FIXME: ANT doesn't load the channels on a reconnect.
   FOREACH_MOD(I_OnPreConnect, OnPreConnect(this));
   if(!this->s)
-    new NetworkSocket(this);
+    this->s = new NetworkSocket(this);
   return true;
 }
 
@@ -139,7 +139,6 @@ NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), Bu
   if(!tnet)
     throw CoreException("Network socket created with no network? lolwut?");
   
-  tnet->s = this;
   this->net->SetConnectedHostname(this->net->hostnames[++this->net->CurHost]);
   
   Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << tnet->GetConHost() << ')';

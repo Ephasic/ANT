@@ -177,7 +177,7 @@ bool ModuleHandler::DeleteModule(module *m)
   
   dlerror();
   
-  void (*df)(module*) = class_cast<void (*)(module*)>(dlsym(m->handle, "ModunInit"));
+  void (*df)(module**) = class_cast<void (*)(module**)>(dlsym(m->handle, "ModunInit"));
   const char *err = dlerror();
   
   if (!df && err && *err)
@@ -191,7 +191,7 @@ bool ModuleHandler::DeleteModule(module *m)
     Log() << "[" << m->name << ".so] Module has no destroy function? (wtf?)";
     return false;
   }else
-    df(m);
+    df(&m);
     
   if(handle)
     if(dlclose(handle))
