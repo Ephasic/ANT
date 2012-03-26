@@ -8,8 +8,8 @@
  * Based on the original code of CIA.vc by Micah Dowty
  * Based on the original code of Anope by The Anope Team.
  */
-#ifndef _NETWORK_H_
-#define _NETWORK_H_
+#ifndef NETWORK_H
+#define NETWORK_H
 #include "module.h"
 #include "timers.h"
 

@@ -8,8 +8,8 @@
  * Based on the original code of CIA.vc by Micah Dowty
  * Based on the original code of Anope by The Anope Team.
  */
-#ifndef _BOT_H
-#define _BOT_H
+#ifndef BOT_H
+#define BOT_H
 #include "user.h"
 #include "network.h"
 

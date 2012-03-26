@@ -12,8 +12,8 @@
  *\file  Socket.h 
  *\brief Socket header for Socket.cpp
  */
-#ifndef _SOCKET_H
-#define _SOCKET_H
+#ifndef SOCKET_H
+#define SOCKET_H
 
 #include <sys/types.h>
 #include <sys/socket.h>

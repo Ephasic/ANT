@@ -8,8 +8,8 @@
  * Based on the original code of CIA.vc by Micah Dowty
  * Based on the original code of Anope by The Anope Team.
  */
-#ifndef _TQUEUE_H_
-#define _TQUEUE_H_
+#ifndef TQUEUE_H
+#define TQUEUE_H
 #include "network.h"
 
 /*
