@@ -119,7 +119,7 @@ E time_t starttime;
 E uint32_t usercnt, maxusercnt;
 E Flux::string binary_path, bot_bin, binary_dir, quitmsg, LastBuf;
 E const Flux::string VERSION_LONG;
-E Flux::string getprogdir(const Flux::string&);
+E Flux::string getprogdir(const Flux::string&, Flux::string &Bot_bin);
 E Flux::string DecodeModErr(ModErr err);
 E Flux::string isolate(char begin, char end, const Flux::string &msg);
 E Flux::string do_strftime(const time_t&, bool short_output = false);

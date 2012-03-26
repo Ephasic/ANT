@@ -14,7 +14,7 @@
  *\file  ircproto.cpp
  *\brief Contains the IRCProto class.
  */
-IRCProto::IRCProto(const Network *n) : net(n) { this->net->b->ircproto = this; } //Because we have multiple networks, we need this to be dynamic with the sockets
+IRCProto::IRCProto(const Network *n) : net(n) { } //Because we have multiple networks, we need this to be dynamic with the sockets
 
 void IRCProto::Raw(const char *fmt, ...)
 {

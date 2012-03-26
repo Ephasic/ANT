@@ -75,20 +75,6 @@ ModulePriority module::GetPriority()
   return this->Priority;
 }
 
-/*******************************************************************/
-/** 
- * \fn module *FindModule(const Flux::string &name)
- * \brief Find a module in the module list
- * \param name A string containing the module name you're looking for
- */
-module *FindModule(const Flux::string &name)
-{
-  auto it = Modules.find(name);
-  if(it != Modules.end())
-    return it->second;
- return nullptr;
-}
-
 /******************Configuration variables***********************/
 /**Rehash void
  * \fn void ReadConfig()

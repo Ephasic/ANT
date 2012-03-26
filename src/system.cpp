@@ -18,22 +18,22 @@
  * This will get the bots runtime directory
  * @param getprogdir(const Flux::string dir)
  */
-Flux::string getprogdir(const Flux::string &dir)
+Flux::string getprogdir(const Flux::string &dir, Flux::string &Bot_bin = bot_bin)
 {
   char buffer[FILENAME_MAX];
   if (GetCurrentDir(buffer, sizeof(buffer)))
   {
     Flux::string remainder = dir;
-    bot_bin = remainder;
-    Flux::string::size_type n = bot_bin.rfind("/");
+    Bot_bin = remainder;
+    Flux::string::size_type n = Bot_bin.rfind("/");
     Flux::string fullpath;
     
-    if (bot_bin[0] == '/')
-      fullpath = bot_bin.substr(0, n);
+    if (Bot_bin[0] == '/')
+      fullpath = Bot_bin.substr(0, n);
     else
       fullpath = Flux::string(buffer) + "/" + bot_bin.substr(0, n);
     
-    bot_bin = bot_bin.substr(n + 1, remainder.length());
+    Bot_bin = Bot_bin.substr(n + 1, remainder.length());
     return fullpath;
   }
   return "/";

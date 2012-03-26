@@ -86,8 +86,11 @@ int main (int argcx, char** argvx, char *envp[])
     FOREACH_MOD(I_OnShutdown, OnShutdown());
     SaveDatabases();
     SocketEngine::Shutdown();
-    ModuleHandler::UnloadAll();
+    //ModuleHandler::UnloadAll();
+    for(auto it : Modules)
+      ModuleHandler::Unload(&it.second);
     ModuleHandler::SanitizeRuntime();
+    Log(LOG_TERMINAL) << "PASSED SANITIZERUNTIME!";
     Log(LOG_TERMINAL) << "\033[0m";
   }//try ends here
   catch(const CoreException& e)

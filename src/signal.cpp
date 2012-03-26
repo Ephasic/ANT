@@ -113,7 +113,7 @@ void sigact(int sig)
       if(LastRunModule)
       {
 	HandleSegfault(LastRunModule);
-	ModuleHandler::Unload(LastRunModule);
+	ModuleHandler::Unload(&LastRunModule);
       	Log() << "Attempting to restore Stack to before Crash";
       	longjmp(sigbuf, -1);
       	Log() << "Finished restoring Stack";

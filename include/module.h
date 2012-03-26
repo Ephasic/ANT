@@ -111,7 +111,7 @@ public:
   static Flux::string DecodePriority(ModulePriority);
   static void SanitizeRuntime();
   static void UnloadAll();
-  static bool Unload(module*);
+  static bool Unload(module**);
   
   static bool Attach(Implementation i, module *mod);
   static void Attach(Implementation *i, module *mod, size_t sz);

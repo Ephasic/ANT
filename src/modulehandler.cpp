@@ -200,19 +200,23 @@ bool ModuleHandler::DeleteModule(module *m)
     return true;
 }
 
-bool ModuleHandler::Unload(module *m)
+bool ModuleHandler::Unload(module **m)
 {
-  if(!m)
+  if(!*m)
     return false;
   
-  FOREACH_MOD(I_OnModuleUnload, OnModuleUnload(m));
-  return DeleteModule(m);
+  FOREACH_MOD(I_OnModuleUnload, OnModuleUnload(*m));
+  return DeleteModule(*m);
 }
 
 void ModuleHandler::UnloadAll()
 {
-  for(auto var : Modules)
-    Unload(var.second);
+  for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it)
+  {
+    module *m = it->second;
+    //Log(LOG_TERMINAL) << "UNLOADING @" << m << ": " << m->name << " (" << var.first << ')';
+    Unload(&m);
+  }
 }
 
 Flux::string ModuleHandler::DecodePriority(ModulePriority p)
@@ -234,7 +238,9 @@ Flux::string ModuleHandler::DecodePriority(ModulePriority p)
 void ModuleHandler::SanitizeRuntime()
 {
   Log(LOG_DEBUG) << "Cleaning up runtime directory.";
+  Log(LOG_TERMINAL) << "CONFIG: @" << Config;
   Flux::string dirbuf = Config->Binary_Dir+"/runtime/";
+  Log(LOG_TERMINAL) << dirbuf;
   
   if(!TextFile::IsDirectory(dirbuf))
   {
@@ -247,4 +253,17 @@ void ModuleHandler::SanitizeRuntime()
     for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
       Delete(Flux::string(dirbuf+(*it)).c_str());
   }
+}
+
+/**
+ * \fn module *FindModule(const Flux::string &name)
+ * \brief Find a module in the module list
+ * \param name A string containing the module name you're looking for
+ */
+module *FindModule(const Flux::string &name)
+{
+  auto it = Modules.find(name);
+  if(it != Modules.end())
+    return it->second;
+  return nullptr;
 }

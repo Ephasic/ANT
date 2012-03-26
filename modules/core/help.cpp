@@ -39,7 +39,8 @@ public:
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
     int c=0;
-    if(!params.empty()){
+    if(!params.empty())
+    {
       Command *com = FindCommand(params[1], C_PRIVATE);
       if(com && !com->OnHelp(source, ""))
 	source.Reply("No help available for \2%s\2", params[1].c_str());
@@ -92,7 +93,8 @@ class help_m:public module
   CommandHelp help;
   CommandCHelp chelp;
 public:
-  help_m(const Flux::string &Name):module(Name), help(this), chelp(this){
+  help_m(const Flux::string &Name):module(Name), help(this), chelp(this)
+  {
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);
     this->SetAuthor("Justasic");

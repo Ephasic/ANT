@@ -1,3 +1,13 @@
+/* Arbitrary Navn Tool -- User Module Handler interface
+ * 
+ * (C) 2011-2012 Azuru
+ * Contact us at Development@Azuru.net
+ *
+ * Please read COPYING and README for further details.
+ *
+ * Based on the original code of CIA.vc by Micah Dowty
+ * Based on the original code of Anope by The Anope Team.
+ */
 #include "modules.h"
 
 class CommandMList : public Command
@@ -103,17 +113,18 @@ public:
   }
   void Run(CommandSource &source, const Flux::vector &params)
   {
-    const Flux::string module = params[1];
+    const Flux::string modd = params[1];
     //if(!source.u->IsOwner())
 //       source.Reply(ACCESS_DENIED);
     //else{
-      if(!ModuleHandler::Unload(&*FindModule(module)))
+      module *mu = FindModule(modd);
+      if(!ModuleHandler::Unload(&mu))
       {
-	source.Reply("Failed to unload module %s", module.c_str());
-	Log(source.u, this) << "to unload " << module << " and failed";
+	source.Reply("Failed to unload module %s", modd.c_str());
+	Log(source.u, this) << "to unload " << modd << " and failed";
       }else{
-	source.Reply("Module \2%s\2 unloaded sucessfuly", module.c_str());
-	Log(source.u, this) << "to unload " << module;
+	source.Reply("Module \2%s\2 unloaded sucessfuly", modd.c_str());
+	Log(source.u, this) << "to unload " << modd;
       }
    // }
   }
@@ -137,19 +148,20 @@ public:
   }
   void Run(CommandSource &source, const Flux::vector &params)
   {
-    const Flux::string module = params[1];
+    const Flux::string modd = params[1];
     //if(!source.u->IsOwner())
      // source.Reply(ACCESS_DENIED);
     //else{
-      bool err = ModuleHandler::Unload(FindModule(module));
-      ModErr err2 = ModuleHandler::LoadModule(module);
+      module *mu = FindModule(modd);
+      bool err = ModuleHandler::Unload(&mu);
+      ModErr err2 = ModuleHandler::LoadModule(modd);
       if(!err || err2 != MOD_ERR_OK)
       {
-	source.Reply("Failed to reload module %s%s", module.c_str(), err2 != MOD_ERR_OK?Flux::string(": "+DecodeModErr(err2)).c_str():"");
-	Log(source.u, this) << "to reload " << module << " and failed";
+	source.Reply("Failed to reload module %s%s", modd.c_str(), err2 != MOD_ERR_OK?Flux::string(": "+DecodeModErr(err2)).c_str():"");
+	Log(source.u, this) << "to reload " << modd << " and failed";
       }else{
-	source.Reply("Module \2%s\2 reloaded sucessfuly", module.c_str());
-	Log(source.u, this) << "to reload " << module;
+	source.Reply("Module \2%s\2 reloaded sucessfuly", modd.c_str());
+	Log(source.u, this) << "to reload " << modd;
       }
    // }
   }

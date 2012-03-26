@@ -214,7 +214,10 @@ void process(Network *n, const Flux::string &buffer)
   const Flux::string &receiver = params.size() > 0 ? params[0] : "";
   Flux::string message = params.size() > 1? params[1] : "";
   IsoHost h(source);
-  Flux::string nickname = h.nick, uident = h.ident, uhost = h.host, cmd;
+  Flux::string nickname = h.nick;
+  Flux::string uident = h.ident;
+  Flux::string uhost = h.host;
+  Flux::string cmd;
   User *u = FindUser(n, nickname);
   Channel *c = FindChannel(n, receiver);
   Bot *b = n->b;
