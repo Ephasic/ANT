@@ -475,11 +475,10 @@ Socket::Socket()
  * @param ipv6 IPv6?
  * @param type The socket type, defaults to SOCK_STREAM
  */
-Socket::Socket(int sock, bool ipv6, int type)
+Socket::Socket(int sock, bool ipv6, int type) : isdead(false), IPv6(ipv6), isconnecting(false), isconnected(false),
+isaccepting(false), isaccepted(false), iswritable(false)
 {
-  this->SetDead(false);
   this->IO = &normalSocketIO;
-  this->IPv6 = ipv6;
   if (sock == -1)
     this->Sock = socket(this->IPv6 ? AF_INET6 : AF_INET, type, 0);
   else

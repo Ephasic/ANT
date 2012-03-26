@@ -114,6 +114,7 @@ public:
       if(!n)
 	n = new Network(params[1], params[2], params[3]);
       if(!n->s)
+	//n->Connect(); // FIXME: Why can't I just call this?
 	new ReconnectTimer(0, n); //Connect to networks.
     }
     if(key.equals_ci("NC"))
