@@ -62,8 +62,7 @@ void SocketEngine::DelSocket(Socket *s)
 
 void SocketEngine::MarkWritable(Socket *s)
 {
-  if (s)
-    if(s->GetStatus(SF_WRITABLE))
+  if (s && s->GetStatus(SF_WRITABLE))
       return;
   FD_SET(s->GetFD(), &WriteFDs);
   s->SetStatus(SF_WRITABLE, true);
