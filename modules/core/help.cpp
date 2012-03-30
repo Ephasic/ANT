@@ -14,7 +14,7 @@
  * \author Lordofsraam. Polished by Justasic.
  */
 
-/**
+/** 
  * \defgroup helpM Help Module
  * This is the module for the help_m function.
  * Returns help information about controlling Navn.
@@ -105,6 +105,7 @@ public:
     this->SetAuthor("Justasic");
   }
 };
+
 MODULE_HOOK(help_m)
 /**
  * @}

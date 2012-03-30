@@ -8,6 +8,7 @@
  * Based on the original code of CIA.vc by Micah Dowty
  * Based on the original code of Anope by The Anope Team.
  */
+#pragma once
 #ifndef FLUX_H
 #define FLUX_H
 #include <cstring>

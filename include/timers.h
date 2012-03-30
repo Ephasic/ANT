@@ -7,7 +7,7 @@
  * Based on the original code of Epona by Lara.
  * Based on the original code of Services by Andy Church.
  */
-
+#pragma once
 #ifndef TIMERS_H
 #define TIMERS_H
 

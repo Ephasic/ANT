@@ -16,7 +16,7 @@
 //
 // http://code.google.com/p/inih/
 // This INIReader has been modified by Justasic, it is NOT the one on google code!
-
+#pragma once
 #ifndef INIREADER_H
 #define INIREADER_H
 #include "flux.h"
