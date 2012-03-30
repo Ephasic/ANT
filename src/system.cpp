@@ -160,16 +160,20 @@ void startup(int argc, char** argv, char *envp[])
 {
   SET_SEGV_LOCATION();
   InitSignals();
-  Config = NULL;
+  Config = nullptr;
   my_av = argv;
   my_envp = envp;
   starttime = time(NULL); //for bot uptime
+
+  Flux::string bindir = getprogdir(argv[0]);
+  if(bindir[bindir.length() - 1] == '.')
+    bindir = bindir.substr(0, bindir.length() - 2);
+
+  Log(LOG_TERMINAL) << "DIR1: " << binary_dir;
+  *const_cast<Flux::string*>(&binary_dir) = bindir;
+  Log(LOG_TERMINAL) << "DIR2: " << binary_dir;
   
-  binary_dir = getprogdir(argv[0]);
-  if(binary_dir[binary_dir.length() - 1] == '.')
-    binary_dir = binary_dir.substr(0, binary_dir.length() - 2);
-  
-  Config = new BotConfig(binary_dir);
+  Config = new BotConfig(bindir);
   if(!Config)
     throw CoreException("Config Error.");
   

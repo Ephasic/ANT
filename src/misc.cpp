@@ -302,5 +302,45 @@ Flux::string do_strftime(const time_t &t, bool short_output)
   else
     return Flux::string(buf) + " " + printfify("(%s from now)", duration(t - time(NULL)).c_str());
 }
+
+// Clean up our pointers so we don't exit with memory leaks..
+void Cleanup()
+{
+  FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
+  // Shutdown the socket engine and close any remaining sockets.
+  SocketEngine::Shutdown();
+
+  // Clean up any network pointers and clear the map
+  for(auto nit : Networks)
+  {
+    Network *n = nit.second;
+    if(n)
+    {
+      // Clean up any user pointers for the network and clear the map
+      if(!n->UserNickList.empty())
+	for(auto uit : n->UserNickList)
+	  delete uit.second;
+      n->UserNickList.clear();
+
+      // Clean up any channel pointers for the network and clear the map
+      if(!n->ChanMap.empty())
+	for(auto cit : n->ChanMap)
+	  delete cit.second;
+      n->ChanMap.clear();
+      
+      delete nit.second;
+    }
+  }
+  Networks.clear();
+
+  // Delete the config parser
+  if(Config)
+    delete Config;
+
+  // Delete our global IRC protocol wrapper
+  if(GProto)
+    delete GProto;
+}
+
 /* butt-plug?
  * http://www.albinoblacksheep.com/flash/plugs */

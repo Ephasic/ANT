@@ -15,17 +15,15 @@
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
 
-Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): s(nullptr), b(nullptr), CurHost(0)
+Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): s(nullptr), b(nullptr), CurHost(0),
+disconnecting(false), hostname(host), port(p)
 {
   if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");
 
   //If we didn't specify the network name, use the hostname.
   this->name = n.empty()?host:n;
-  this->disconnecting = false;
-  this->hostname = host;
   this->hostnames = ForwardResolution(host);
-  this->port = p;
   Networks[this->name] = this;
   NetworkHosts[host] = this;
   

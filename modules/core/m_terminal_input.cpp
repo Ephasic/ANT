@@ -122,10 +122,9 @@ class InputThread : public Thread
 {
 public:
   bool exiting;
-  InputThread(Thread **t):Thread(), exiting(false)
+  InputThread():Thread(), exiting(false)
   {
     Log() << "Input Thread Initializing.";
-    *t = this;
     this->Start();
   }
   ~InputThread() { Log() << "Input Thread Exiting."; exiting = true; }
@@ -157,7 +156,7 @@ public:
   {
     if(nofork && InTerm()){
       if(!t)
-	new InputThread(&t);
+	t = new InputThread();
     }else
       throw ModuleException("Cannot run m_terminal_input when fork'ed");
   }

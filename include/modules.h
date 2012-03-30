@@ -23,12 +23,12 @@ jmp_buf sigbuf;
 
 char **my_av, **my_envp;
 bool nofork, dev, protocoldebug, quitting, nocolor, istempnick = false;
-Flux::string binary_path, bot_bin, binary_dir, quitmsg, server_name, LastBuf;
+Flux::string binary_path, bot_bin, quitmsg, server_name, LastBuf;
+const Flux::string binary_dir;
 char segv_location[255];
 time_t starttime = 0;
 
 BotConfig *Config;
-Network *FluxNet;
 GlobalProto *GProto;
 module *LastRunModule; // For crashes
 

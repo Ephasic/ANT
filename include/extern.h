@@ -117,7 +117,8 @@ E CommandMap Commandsmap;
 E CommandMap ChanCommandMap;
 E time_t starttime;
 E uint32_t usercnt, maxusercnt;
-E Flux::string binary_path, bot_bin, binary_dir, quitmsg, LastBuf;
+E Flux::string binary_path, bot_bin, quitmsg, LastBuf;
+E const Flux::string binary_dir;
 E const Flux::string VERSION_LONG;
 E Flux::string getprogdir(const Flux::string&, Flux::string &Bot_bin);
 E Flux::string DecodeModErr(ModErr err);
@@ -133,11 +134,12 @@ E bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
 E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick;
 E Flux::vector StringVector(const Flux::string&, char);
 E Flux::insensitive_map<module*> Modules;
-E std::map<Network*, Channel*> JoinBuffer;
+// E std::map<Network*, Channel*> JoinBuffer;
 E Flux::insensitive_map<Network*> Networks;
 E Flux::map<Network*> NetworkHosts;
 
 /* void's */
+E void Cleanup();
 E void Rehash();
 E void RenameBot(Network*, const Flux::string&);
 E void Send_Global(const Flux::string&);

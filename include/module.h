@@ -31,7 +31,7 @@ enum Implementation {
 	I_OnChannelOp, I_OnPart, I_OnInvite, I_OnArgument, I_OnFork,
 	I_OnSocketError, I_OnPing, I_OnPong, I_OnCommit, I_OnDatabasesWrite,
 	I_OnSignal, I_OnDatabasesRead, I_OnSaveDatabases, I_OnForceDatabasesRead,
-	I_OnUserRegister, I_OnPreReceiveMessage, 
+	I_OnUserRegister, I_OnPreReceiveMessage, I_OnGarbageCleanup,
   I_END
 };
 
@@ -63,6 +63,7 @@ public:
   virtual EventResult OnPreReceiveMessage(const Flux::string&) { return EVENT_CONTINUE; }
   virtual void OnPrivmsg(User*, const std::vector<Flux::string>&) {}
   virtual void OnCommit(CommitMessage&) {}
+  virtual void OnGarbageCleanup() {}
   virtual void OnSignal(int) {}
   virtual void OnUserRegister(Network*) {}
   virtual void OnPrivmsg(User*, Channel*, const std::vector<Flux::string>&) {}

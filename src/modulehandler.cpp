@@ -94,6 +94,7 @@ void ModuleHandler::DetachAll(module *m)
 
 ModErr ModuleHandler::LoadModule(const Flux::string &modname)
 {
+  Log(LOG_TERMINAL) << "BINDIR LOADMOD: " << (binary_dir.empty()?"(empty)":binary_dir);
   SET_SEGV_LOCATION();
   
   if(modname.empty())
@@ -238,7 +239,7 @@ Flux::string ModuleHandler::DecodePriority(ModulePriority p)
 void ModuleHandler::SanitizeRuntime()
 {
   Log(LOG_DEBUG) << "Cleaning up runtime directory.";
-  Log(LOG_TERMINAL) << "CONFIG: @" << Config;
+  Log(LOG_TERMINAL) << "BINARY_DIR: " << binary_dir;
   Flux::string dirbuf = Config->Binary_Dir+"/runtime/";
   Log(LOG_TERMINAL) << dirbuf;
   

@@ -69,6 +69,7 @@ int main (int argcx, char** argvx, char *envp[])
     while(!quitting)
     {
       Log(LOG_RAWIO) << "Top of main loop";
+      Log(LOG_TERMINAL) << "BINDIR: " << binary_dir;
       //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
       if(++loopcount >= 50) { LastBuf = "50 main loop calls in 3 secs"; raise(SIGSEGV); }
 
@@ -83,14 +84,12 @@ int main (int argcx, char** argvx, char *envp[])
       }
       /***********************************/
     } // while loop ends here
+    // clean up for exit
     FOREACH_MOD(I_OnShutdown, OnShutdown());
     SaveDatabases();
-    SocketEngine::Shutdown();
-    //ModuleHandler::UnloadAll();
-    for(auto it : Modules)
-      ModuleHandler::Unload(&it.second);
+    Cleanup();
+    ModuleHandler::UnloadAll();
     ModuleHandler::SanitizeRuntime();
-    Log(LOG_TERMINAL) << "PASSED SANITIZERUNTIME!";
     Log(LOG_TERMINAL) << "\033[0m";
   }//try ends here
   catch(const CoreException& e)

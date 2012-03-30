@@ -47,7 +47,9 @@ public:
       else if(!com)
 	source.Reply("No help available for \2%s\2", params[1].c_str());
       Log(source.u) << "used help command on " << params[1];
-    }else{
+    }
+    else
+    {
       for(auto val : Commandsmap)
       {
 	source.Reply("\2%-16s\2 %s", val.second->name.c_str(), val.second->GetDesc().c_str());
@@ -69,20 +71,23 @@ public:
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
   {
     Flux::string cmds;
-    if(!params.empty()){
+    if(!params.empty())
+    {
       Command *c = FindCommand(params[1], C_CHANNEL);
       if(c && !c->OnHelp(source, ""))
 	source.Reply("No help available for \2%s\2", params[1].c_str());
       else if(!c)
 	source.Reply("No help available for \2%s\2", params[1].c_str());
       Log(source.u) << "used help command on " << params[1];
-    }else{
-    for(auto val : ChanCommandMap) //As you can see C++11 is MUCH better than C++98
-      cmds += val.second->name+" ";
+    }
+    else
+    {
+      for(auto val : ChanCommandMap) //As you can see C++11 is MUCH better than C++98
+	cmds += val.second->name+" ";
       cmds.trim();
       cmds.tolower();
-      source.c->SendMessage("Local %s Commands:", source.c->name.c_str());
-      source.c->SendMessage(cmds);
+      source.u->SendMessage("Local %s Commands:", source.c->name.c_str());
+      source.u->SendMessage(cmds);
       Log(source.u) << "used help command";
     }
   }
