@@ -69,7 +69,6 @@ int main (int argcx, char** argvx, char *envp[])
     while(!quitting)
     {
       Log(LOG_RAWIO) << "Top of main loop";
-      Log(LOG_TERMINAL) << "BINDIR: " << binary_dir;
       //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
       if(++loopcount >= 50) { LastBuf = "50 main loop calls in 3 secs"; raise(SIGSEGV); }
 
