@@ -15,38 +15,10 @@
 // Queues :D
 std::vector<tqueue*> QueuedQueues;
 
-// // Our constructor where we create our timer and push
-// tqueue::tqueue(void (*func)(), long time_to_tick, time_t now, bool repeating) : Timer(time_to_tick, now, repeating), function(func)
-// {
-//   QueuedQueues.push_back(this);
-//   Log(LOG_TERMINAL) << "Creating queue: @" << this;
-// }
-// 
-// // Our constructor where we create our timer with a pointer
-// tqueue::tqueue(void (*func)(void*), long time_to_tick, time_t now, bool repeating) : Timer(time_to_tick, now, repeating), function(func)
-// {
-//   QueuedQueues.push_back(this);
-//   Log(LOG_TERMINAL) << "Creating queue: @" << this;
-// }
-// 
-// // Our constructor where we create our timer with 2 pointers
-// tqueue::tqueue(void (*func)(void*, void*), long time_to_tick, time_t now, bool repeating) : Timer(time_to_tick, now, repeating), function(func)
-// {
-//   QueuedQueues.push_back(this);
-//   Log(LOG_TERMINAL) << "Creating queue: @" << this;
-// }
-// 
-// // Our constructor where we create our timer with an infinite number of arguments using va_list
-// tqueue::tqueue(void (*func)(...), long time_to_tick, time_t now, bool repeating) : Timer(time_to_tick, now, repeating), function(func)
-// {
-//   QueuedQueues.push_back(this);
-//   Log(LOG_TERMINAL) << "Creating queue: @" << this;
-// }
-template<typename... params2>
-tqueue::tqueue(void (*func)(params2...), long time_to_tick, time_t now, bool repeating) : Timer(time_to_tick, now, repeating), function(func)
+// Our constructor where we create our timer and push 
+tqueue::tqueue(void (*func)(), long time_to_tick, time_t now, bool repeating) : Timer(time_to_tick, now, repeating), function(func)
 {
   QueuedQueues.push_back(this);
-  this->params = &parms;
   Log(LOG_TERMINAL) << "Creating queue: @" << this;
 }
 
@@ -60,17 +32,10 @@ tqueue::~tqueue()
   Log(LOG_TERMINAL) << "Destroying queue: @" << this;
 }
 
+// Call our callback
 void tqueue::Tick(time_t)
 {
   Log(LOG_TERMINAL) << "Running queue: @" << this;
-  template<typename... funcparams> void (*runfunc)(funcparams...) = this->function;
-  runfunc(*this->params);
+  void (*runfunc)() = this->function;
+  runfunc();
 }
-
-// // Call our callback
-// void tqueue::Tick(time_t)
-// {
-//   Log(LOG_TERMINAL) << "Running queue: @" << this;
-//   void (*runfunc)() = this->function;
-//   runfunc();
-// }

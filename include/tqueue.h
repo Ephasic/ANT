@@ -16,7 +16,7 @@
 /*
  * This is some kind of timed callback system, this
  * class will take a void function and store it in a
- * vector, then a timer will call the function after a
+ * map, then a timer will call the function after a
  * certain time and process what that function needed
  *
  * This is useful for temporary timers and gets rid of
@@ -25,27 +25,15 @@
  */
 extern std::vector<tqueue*> QueuedQueues;
 
-class tqueue : public Timer
+class CoreExport tqueue : public Timer
 {
-  auto *params;
-  template<typename... funcparams> void (*function)(funcparams...);
-//   // Function to call.
-//   void (*function)();
-// 
-//   // Function with a pointer.
-//   void (*funcptr)(void*);
-// 
-//   // Function with a double pointer
-//   void (*funcdoubleptr)(void*, void*);
-// 
-//   // Function with an infinite number of arguments
-//   void (*funcinf)(...);
-  
+  // Function to call.
+  void (*function)();
+
   // Timer to call the function
   void Tick(time_t);
 public:
-  template<typename... funcparams> tqueue(void (*func)(funcparams...), long time_to_tick, time_t now = time(NULL), bool repeating = false);
-//   tqueue(void (*func)(), long time_to_tick, time_t now = time(NULL), bool repeating = false);
+  tqueue(void (*func)(), long time_to_tick, time_t now = time(NULL), bool repeating = false);
   virtual ~tqueue();
 };
 
