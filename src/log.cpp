@@ -10,23 +10,32 @@
  */
 #include "log.h"
 
-Flux::string NoTermColor(const Flux::string &ret){
+Flux::string NoTermColor(const Flux::string &ret)
+{
   Flux::string str;
   bool in_term_color = false;
-  for(unsigned i=0; i < ret.length(); ++i){
+  
+  for(unsigned i=0; i < ret.length(); ++i)
+  {
     char c = ret[i];
-    if(in_term_color){
+    
+    if(in_term_color)
+    {
       if(c == 'm')
 	in_term_color = false;
       continue;
     }
-    if(c == '\033'){
+    
+    if(c == '\033')
+    {
       in_term_color = true;
       continue;
     }
+    
     if(!in_term_color)
       str += c;
   }
+  
   return str;
 }
 
@@ -37,6 +46,7 @@ Flux::string Log::TimeStamp()
 
   if (time(&t) < 0)
 	  throw CoreException("time() failed");
+  
   tm tm = *localtime(&t);
 #if HAVE_GETTIMEOFDAY
   if (protocoldebug)
