@@ -39,7 +39,7 @@ class User;
 class NetworkSocket;
 class BufferedSocket;
 class Socket;
-class tqueue;
+template<typename... funcparams> class tqueue;
 class Commands;
 class Command;
 class Oper;

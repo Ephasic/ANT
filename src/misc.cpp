@@ -166,12 +166,12 @@ Flux::string Flux::Sanitize(const Flux::string &string)
   special_chars("\001",""),
   special_chars("","")
  };
-  Flux::string ret = string.c_str();
-  ret = StripColors(ret);
+  Flux::string ret = StripColors(string.c_str());
   for(int i = 0; special[i].character.empty() == false; ++i)
     ret = ret.replace_all_cs(special[i].character, special[i].replace);
   return ret.c_str();
 }
+
 /**
  * \fn bool IsValadChannel(const Flux::string nerp)
  * This function returns if the channel is valid or not.
@@ -214,6 +214,7 @@ std::vector<Flux::string> StringVector(const Flux::string &src, char delim)
    ret.push_back(token);
  return ret;
 }
+
 /** Check if a file exists
  * \fn bool InTerm()
  * \brief returns if the 
