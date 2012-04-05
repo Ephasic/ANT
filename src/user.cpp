@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- User Routines.
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -18,7 +18,7 @@ User::User(Network *net, const Flux::string &snick, const Flux::string &sident, 
    throw CoreException("Bad args sent to User constructor");
  if(!net)
    throw CoreException("User created with no network??");
- 
+
  this->nick = snick;
  this->n = net;
  this->ident = sident;
@@ -27,9 +27,9 @@ User::User(Network *net, const Flux::string &snick, const Flux::string &sident, 
  this->server = sserver;
  this->fullhost = snick+"!"+sident+"@"+shost;
  this->n->UserNickList[snick] = this;
- 
+
  Log(LOG_RAWIO) << "New user! " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
- 
+
  ++usercnt;
  if(usercnt > maxusercnt)
  {
@@ -62,7 +62,7 @@ void User::SendPrivmsg(const char *fmt, ...)
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
   this->SendPrivmsg(Flux::string(buffer));
-  va_end(args); 
+  va_end(args);
 }
 
 void User::SetNewNick(const Flux::string &newnick)

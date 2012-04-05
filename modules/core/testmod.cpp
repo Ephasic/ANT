@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Example Module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -70,11 +70,11 @@ class dummy : public module
   commanddummy cmddmy; //Declare our command
 public:
   dummy(const Flux::string &Name):module(Name), cmddmy(this) //Add our command to teh bot
-  { 
+  {
     this->SetAuthor("Lordofsraam"); //Set the author
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_LAST);
-    
+
     //Implementation i[] = {  }; //Add that we have a module hook, this can be done in 2 ways
     ModuleHandler::Attach(I_OnPrivmsg, this);
     /*or you can do the easy way
@@ -86,17 +86,17 @@ public:
     Flux::string s;
     for(unsigned i=0; i < params.size(); ++i)
       s = params[i]+' ';
-    
+
     s.trim();
     if(s.search_ci("Blah Blah"))
       u->SendMessage("Derp DERp");
-    
+
    if(params[0].equals_ci("!userlist"))
    {
      Flux::string users;
      for(auto it : u->n->UserNickList)
       users += it.second->nick+" ";
-     
+
     u->SendMessage(users);
    }
   }

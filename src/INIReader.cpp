@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Configuration Parser.
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -33,7 +33,7 @@ int INIReader::Parse(const Flux::string &filename)
     linenum++;
     line.trim();
     //printf("UNPARSED: %s\n", line.c_str());
-    
+
     if(line[0] == ';' || line[0] == '#' || line.empty())
       continue;  // Do nothing if any of this is true
     /********************************************/
@@ -74,7 +74,7 @@ int INIReader::Parse(const Flux::string &filename)
     {
       line = line.erase(0,1);
       section = line.erase(line.size()-1,line.size());
-      section.trim(); 
+      section.trim();
     }
     else if((line[0] == '[' && line[line.size()-1] != ']') || (line[0] != '[' && line[line.size() -1] == ']'))
       error = linenum;

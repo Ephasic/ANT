@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Primary functions file (This file is old)
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -27,12 +27,12 @@ Flux::string getprogdir(const Flux::string &dir, Flux::string &Bot_bin = bot_bin
     Bot_bin = remainder;
     Flux::string::size_type n = Bot_bin.rfind("/");
     Flux::string fullpath;
-    
+
     if (Bot_bin[0] == '/')
       fullpath = Bot_bin.substr(0, n);
     else
       fullpath = Flux::string(buffer) + "/" + bot_bin.substr(0, n);
-    
+
     Bot_bin = Bot_bin.substr(n + 1, remainder.length());
     return fullpath;
   }
@@ -54,19 +54,19 @@ Flux::string execute(const char *cmd)
    * And so do you!
    */
   FILE* pipe = popen(cmd, "r");
-  
+
   if (!pipe)
     return "";
-  
+
   char buffer[128];
   Flux::string result = "";
-  
+
   while(!feof(pipe))
   {
     if(fgets(buffer, 128, pipe) != NULL)
       result += buffer;
   }
-  
+
   pclose(pipe);
   return result;
 }
@@ -80,7 +80,7 @@ void restart(const Flux::string &reason)
   char CurrentPath[FILENAME_MAX];
   GetCurrentDir(CurrentPath, sizeof(CurrentPath));
   FOREACH_MOD(I_OnRestart, OnRestart(reason));
-  
+
   for(auto it : Networks)
   {
     Network *n = it.second;
@@ -95,13 +95,13 @@ void restart(const Flux::string &reason)
 	n->b->ircproto->quit("Restarting: %s", reason.c_str());
     }
   }
-  
+
   chdir(CurrentPath);
   int execvpret = execvp(my_av[0], my_av);
-  
+
   if(execvpret > 0)
     throw CoreException("Restart Failed, Exiting");
-  
+
   Delete(Config->PidFile.c_str());
   exit(1);
 }
@@ -142,7 +142,7 @@ static void WritePID(){
   //logging to a text file and making the PID file.
   if(Config->PidFile.empty())
     throw CoreException("Cannot write PID file, no PID file specified.");
-  
+
   FILE *pidfile = fopen(Config->PidFile.c_str(), "w");
   if(pidfile)
   {
@@ -172,11 +172,11 @@ void startup(int argc, char** argv, char *envp[])
   Log(LOG_TERMINAL) << "DIR1: " << binary_dir;
   *const_cast<Flux::string*>(&binary_dir) = bindir;
   Log(LOG_TERMINAL) << "DIR2: " << binary_dir;
-  
+
   Config = new BotConfig(bindir);
   if(!Config)
     throw CoreException("Config Error.");
-  
+
   Flux::string dir = argv[0];
   Flux::string::size_type n = dir.rfind('/');
   dir = "." + dir.substr(n);
@@ -241,10 +241,10 @@ void startup(int argc, char** argv, char *envp[])
       }
     }
   }
-  
+
   if(!nocolor)
     Log(LOG_TERMINAL) << "\033[22;36m";
-  
+
   ModuleHandler::SanitizeRuntime();
   ReadConfig(); //load modules
   WritePID(); //Write the pid file

@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Routines for reading files.
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -163,13 +163,13 @@ Flux::string TextFile::TempFile(const Flux::string &file)
 {
   char *tmp_output = strdup(file.c_str());
   int target_fd = mkstemp(tmp_output);
-  
+
   if (target_fd == -1 || close(target_fd) == -1)
   {
     free(tmp_output);
     return "";
   }
-  
+
   Flux::string filestring = tmp_output;
   free(tmp_output);
   return filestring;
@@ -188,30 +188,30 @@ bool TextFile::IsFile(const Flux::string &filename)
   return false;
 }
 
-Flux::vector TextFile::DirectoryListing(const Flux::string &directory) 
-{ 
-   Flux::vector nil; 
-   if(!TextFile::IsDirectory(directory)) 
-     return nil; 
-    
-   DIR *dp; 
-   struct dirent *drip; 
-   if((dp = opendir(directory.c_str())) == NULL) 
-     return nil; 
-    
-   Flux::vector files; 
-   while ((drip = readdir(dp)) != NULL) 
-   { 
-     if(!drip->d_ino) 
-       continue; 
-     if(Flux::string(drip->d_name).equals_cs(".") || Flux::string(drip->d_name).equals_cs("..")) 
-       continue; 
-     files.push_back(Flux::string(drip->d_name)); 
-   } 
-    
-   closedir(dp); 
-   return files; 
-} 
+Flux::vector TextFile::DirectoryListing(const Flux::string &directory)
+{
+   Flux::vector nil;
+   if(!TextFile::IsDirectory(directory))
+     return nil;
+
+   DIR *dp;
+   struct dirent *drip;
+   if((dp = opendir(directory.c_str())) == NULL)
+     return nil;
+
+   Flux::vector files;
+   while ((drip = readdir(dp)) != NULL)
+   {
+     if(!drip->d_ino)
+       continue;
+     if(Flux::string(drip->d_name).equals_cs(".") || Flux::string(drip->d_name).equals_cs(".."))
+       continue;
+     files.push_back(Flux::string(drip->d_name));
+   }
+
+   closedir(dp);
+   return files;
+}
 
 bool TextFile::IsDirectory(const Flux::string &dirname)
 {
@@ -246,7 +246,7 @@ bool TextFile::WriteToDisk(const Flux::string &FileName)
 	f << lines[i].strip() << "\n";
       }
     }
-    
+
     f.close();
     this->lasterror = FILE_IO_OK;
     return true;

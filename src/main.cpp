@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- main source file.
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -23,14 +23,14 @@
  * Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 /**
- *\file  main.cpp 
+ *\file  main.cpp
  *\brief Contains the main() function.
  *\mainpage Documentation for Navn - The C++ IRC Sockets bot by Flux-net
  *\section history Navn's History
  * Navn was started by Lordofsraam because he didn't like depending
- *  on an IRC client to run his scripts for the IRC channel. It really staterted 
+ *  on an IRC client to run his scripts for the IRC channel. It really staterted
  * out as a hunt to be able to tell the time in the IRC channel because
- * Justasic lived in a different timezone. From there it evolved to what you see today 
+ * Justasic lived in a different timezone. From there it evolved to what you see today
  * with the help of Justasic coming in to help with the code and debugging.
  * If you want a really detailed history go look at our svn commit log in googlecode.
  * \section dev Further Development
@@ -64,7 +64,7 @@ int main (int argcx, char** argvx, char *envp[])
 
     new DBSave(); //Start the Database Save timer.
     GProto = new GlobalProto();
-    
+
     TimerManager::TickTimers(time(NULL)); //Call timers to tick to start pending sockets instantly.
     while(!quitting)
     {

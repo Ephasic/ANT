@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- IRC System Module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -134,17 +134,17 @@ class m_system : public module
   CommandQuit cmdquit;
   CommandRestart cmdrestart;
   CommandPID pid;
-  
+
 public:
   m_system(const Flux::string &Name):module(Name), cmdrehash(this), cmdquit(this), cmdrestart(this), pid(this)
   {
-    Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice, I_OnNickChange };
+    Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice, I_OnNickChange, I_OnPrivmsg };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
-    
+
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
   }
-  
+
   void OnNumeric(int i, Network *n, const Flux::vector &params)
   {
     if((i == 4))
@@ -158,12 +158,12 @@ public:
        */
 
       RenameBot(n, params[0]);
-      
+
       if(params[3].search('B'))
 	n->b->SetMode("+B"); //FIXME: get bot mode?
       if(params[2].search_ci("ircd-seven") && params[3].search('Q'))
 	n->b->SetMode("+Q"); //for freenode to stop those redirects
-	
+
       sepstream cs(Config->Channel, ',');
       Flux::string tok;
       while(cs.GetToken(tok))
@@ -171,7 +171,7 @@ public:
 	tok.trim();
 	new Channel(n, tok);
       }
-      
+
       n->servername = params[1];
       n->ircdversion = params[2];
       JoinChansInBuffer(n);
@@ -182,7 +182,7 @@ public:
     {
       RenameBot(n, params[0]);
     }
-    
+
     /* Nickname is in use numeric
      * Numeric 433
      * params[0] = our current nickname
@@ -202,7 +202,7 @@ public:
   void OnNickChange(User *u, const Flux::string &msg)
   {
     Log(LOG_TERMINAL) << "Rename: " << u->nick << " " << msg << " " << u->n->b->nick;
-    
+
     if(u->nick.search(Config->NicknamePrefix))
     {
       Log(LOG_TERMINAL) << "Is bot nickname!";
@@ -211,7 +211,7 @@ public:
       new tqueue(SendJunk, 10);
     }
   }
-  
+
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
   {
      if(kickee && kickee == c->n->b)

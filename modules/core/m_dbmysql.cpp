@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- MySQL Database Sync Module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -45,30 +45,30 @@ public:
     Log() << "[MySQL] Loading Databases.";
     Read();
   }
-  
+
   void OnDatabasesWrite(void (*Write)(const char*, ...))
   {
-    
+
   }
-  
+
   void OnDatabasesRead(const Flux::vector &params)
   {
     Log() << "[MySQL] Reading Databases.";
   }
-  
+
   void OnModuleLoad(module *m)
   {
     if(m != this)
       Read(m);
   }
-  
+
   void OnSaveDatabases()
   {
     Log() << "[MySQL] Saving Databases..." ;
     FOREACH_MOD(I_OnDatabasesWrite, OnDatabasesWrite(Write));
-    
+
   }
-  
+
   void OnForceDatabasesRead()
   {
     Log() << "[MySQL] Reading Databases.";

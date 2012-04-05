@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- CTCP handling module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -46,7 +46,7 @@ public:
   {
     Flux::string cmd = params.empty()?"":params[0];
     Log() << "\033[22;31mRecieved CTCP " << Flux::Sanitize(cmd) << " from " << source << "\033[22;36m";
-      
+
     if(cmd == "\001VERSION\001")
     { // for CTCP VERSION reply
       struct utsname uts;
@@ -57,10 +57,10 @@ public:
     }
     if(cmd == "\001TIME\001")
 	n->b->ircproto->notice(source,"\001TIME %s\001", do_strftime(time(NULL), true).c_str());
-    
+
     if(cmd == "\001SOURCE\001")
       n->b->ircproto->notice(source, "\001SOURCE http://code.google.com/p/arbitrary-navn-tool/\001");
-    
+
     if(cmd == "\001DCC")
       n->b->ircproto->notice(source, "I do not accept or support DCC connections.");
   }

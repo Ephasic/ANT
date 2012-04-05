@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Basic Terminal Input Module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -118,7 +118,7 @@ void ProcessInput(const Flux::string &str)
 /** \class InputThread
  * This thread allows for user input to be possible, this is activated when the nofork option is specified.
  */
-class InputThread : public Thread 
+class InputThread : public Thread
 {
 public:
   bool exiting;

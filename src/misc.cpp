@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Miscellaneous functions and routines.
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -125,7 +125,7 @@ Flux::string StripColors(const Flux::string &input)
     }
     else
       seq = 0;
-    
+
     if (seq || ((*i == 2) || (*i == 15) || (*i == 22) || (*i == 21) || (*i == 31)))
     {
       if (i != sentence.begin())
@@ -216,7 +216,7 @@ std::vector<Flux::string> StringVector(const Flux::string &src, char delim)
 }
 /** Check if a file exists
  * \fn bool InTerm()
- * \brief returns if the 
+ * \brief returns if the
  * \return true if the file exists, false if it doens't
  */
 bool InTerm() { return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr))); }
@@ -239,7 +239,7 @@ void RenameBot(Network *n, const Flux::string &nick)
     n->b->SetNick(printfify("%s1", Config->NicknamePrefix.c_str()));
     return;
   }
-  
+
   n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
 }
 
@@ -263,7 +263,7 @@ Flux::string duration(const time_t &t)
   time_t hours = (t / 3600) % 24;
   time_t minutes = (t / 60) % 60;
   time_t seconds = (t) % 60;
-  
+
   if (!days && !hours && !minutes)
     return value_cast<Flux::string>(seconds) + " " + (seconds != 1 ? "seconds" : "second");
   else
@@ -327,7 +327,7 @@ void Cleanup()
 	for(auto cit : n->ChanMap)
 	  delete cit.second;
       n->ChanMap.clear();
-      
+
       delete nit.second;
     }
   }

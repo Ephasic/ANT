@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Bot Functions and Commit Parsing.
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -64,7 +64,7 @@
 //   AQUA_,
 //   BLUE_,
 //   VIOLET_,
-// 
+//
 //   // Other formatting
 //   NORMAL_,
 //   BOLD_,
@@ -85,7 +85,7 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
     return; //close the constructor instead of throwing.
 //     throw CoreException("Bot assigned to a network with a bot already assigned??");
   }
-  
+
   this->n->b = this;
   this->ircproto = new IRCProto(this->n);
   Log(LOG_DEBUG) << "New bot created on " << net->name << ": " << ni << i << ": " << real;
@@ -158,12 +158,12 @@ bool IsBot(User *u)
 {
   if(!u)
     return false;
-  
+
   for(auto it : Networks)
   {
     if(it.second->b != nullptr && it.second->b == u)
       return true;
   }
-  
+
   return false;
 }

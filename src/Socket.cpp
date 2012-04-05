@@ -1,5 +1,5 @@
 /* Routines for sending stuff to a network.
- * 
+ *
  * (C) 2003-2010 Anope Team
  * Contact us at team@anope.org
  *
@@ -9,7 +9,7 @@
  * Based on the original code of Services by Andy Church.
  */
 /**
- *\file  Socket.cpp 
+ *\file  Socket.cpp
  *\brief Contains the Socket engine.
  */
 #include "SocketException.h"
@@ -52,7 +52,7 @@ size_t sockaddrs::size() const
     default:
       break;
   }
-  
+
   return 0;
 }
 
@@ -70,7 +70,7 @@ int sockaddrs::port() const
     default:
       break;
   }
-  
+
   return -1;
 }
 
@@ -80,7 +80,7 @@ int sockaddrs::port() const
 Flux::string sockaddrs::addr() const
 {
   char address[INET6_ADDRSTRLEN + 1] = "";
-  
+
   switch (sa.sa_family)
   {
     case AF_INET:
@@ -94,7 +94,7 @@ Flux::string sockaddrs::addr() const
     default:
       break;
   }
-  
+
   return address;
 }
 
@@ -121,7 +121,7 @@ bool sockaddrs::operator==(const sockaddrs &other) const
     default:
       return !memcmp(this, &other, sizeof(*this));
   }
-  
+
   return false;
 }
 
@@ -160,7 +160,7 @@ void sockaddrs::pton(int type, const Flux::string &address, int pport)
     default:
       break;
   }
-  
+
   throw CoreException("Invalid socket type");
 }
 
@@ -184,7 +184,7 @@ void sockaddrs::ntop(int type, const void *src)
     default:
       break;
   }
-  
+
   throw CoreException("Invalid socket type");
 }
 
@@ -193,7 +193,7 @@ Flux::string GetPeerIP(int fd)
   socklen_t len;
   struct sockaddr_storage addr;
   char ipstr[INET6_ADDRSTRLEN] = "";
-  
+
   len = sizeof addr;
   int err = getpeername(fd, reinterpret_cast<struct sockaddr*>(&(addr)), &len);
   if(err < -1)
@@ -264,7 +264,7 @@ cidr::cidr(const Flux::string &ip)
 {
   if (ip.find_first_not_of("01234567890:./") != Flux::string::npos)
     throw SocketException("Invalid IP");
-  
+
   bool ipv6 = ip.search(':');
   size_t sl = ip.find_last_of('/');
   if (sl == Flux::string::npos)
@@ -279,7 +279,7 @@ cidr::cidr(const Flux::string &ip)
     Flux::string cidr_range = ip.substr(sl + 1);
     if (!cidr_range.is_pos_number_only())
       throw SocketException("Invalid CIDR range");
-    
+
     this->cidr_ip = real_ip;
     this->cidr_len = value_cast<unsigned int>(cidr_range);
     this->addr.pton(ipv6 ? AF_INET6 : AF_INET, real_ip);
@@ -303,9 +303,9 @@ bool cidr::match(sockaddrs &other)
 {
   if (this->addr.sa.sa_family != other.sa.sa_family)
     return false;
-  
+
   unsigned char *ip, *their_ip, byte;
-  
+
   switch (this->addr.sa.sa_family)
   {
     case AF_INET:
@@ -321,16 +321,16 @@ bool cidr::match(sockaddrs &other)
     default:
       throw SocketException("Invalid address type");
   }
-  
+
   if (memcmp(ip, their_ip, byte))
     return false;
-  
+
   ip += byte;
   their_ip += byte;
   byte = this->cidr_len % 8;
   if ((*ip & byte) != (*their_ip & byte))
     return false;
-  
+
   return true;
 }
 
@@ -370,10 +370,10 @@ int SocketIO::Send(Socket *s, const Flux::string &buf)
 ClientSocket *SocketIO::Accept(ListenSocket *s)
 {
   sockaddrs conaddr;
-  
+
   socklen_t size = sizeof(conaddr);
   int newsock = accept(s->GetFD(), &conaddr.sa, &size);
-  
+
   if (newsock >= 0)
   {
     ClientSocket *ns = s->OnAccept(newsock, conaddr);
@@ -444,7 +444,7 @@ SocketFlag SocketIO::FinishConnect(ConnectionSocket *s)
     return SF_CONNECTED;
   else if (!s->GetStatus(SF_CONNECTING))
     throw SocketException("SocketIO::FinishConnect called for a socket not connected nor connecting?");
-  
+
   int optval = 0;
   socklen_t optlen = sizeof(optval);
   if (!getsockopt(s->GetFD(), SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&optval), &optlen) && !optval)
@@ -643,13 +643,13 @@ void Socket::ProcessError()
 ListenSocket::ListenSocket(const Flux::string &bindip, int port, bool ipv6) : Socket(-1, ipv6)
 {
   this->SetNonBlocking();
-  
+
   const char op = 1;
   setsockopt(this->GetFD(), SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op));
-  
+
   this->bindaddr.pton(IPv6 ? AF_INET6 : AF_INET, bindip, port);
   this->IO->Bind(this, bindip, port);
-  
+
   if (listen(Sock, SOMAXCONN) == -1)
     throw SocketException(printfify("Unable to listen: %s", strerror(errno)));
 }
@@ -688,14 +688,14 @@ bool BufferedSocket::ProcessRead()
 {
   char tbuffer[NET_BUFSIZE];
   this->RecvLen = 0;
-  
+
   int len = this->IO->Recv(this, tbuffer, sizeof(tbuffer) - 1);
   if (len <= 0)
     return false;
-  
+
   tbuffer[len] = 0;
   this->RecvLen = len;
-  
+
   Flux::string sbuffer = this->extrabuf;
   sbuffer += tbuffer;
   this->extrabuf.clear();
@@ -711,9 +711,9 @@ bool BufferedSocket::ProcessRead()
     this->extrabuf.trim();
     sbuffer = sbuffer.substr(0, lastnewline);
   }
-  
+
   sepstream stream(sbuffer, '\n');
-  
+
   Flux::string tbuf;
   while (stream.GetToken(tbuf))
   {
@@ -732,7 +732,7 @@ bool BufferedSocket::ProcessWrite()
   this->WriteBuffer = this->WriteBuffer.substr(count);
   if (this->WriteBuffer.empty())
     SocketEngine::ClearWritable(this);
-  
+
   return true;
 }
 bool BufferedSocket::Read(const Flux::string &buf)
@@ -744,10 +744,10 @@ void BufferedSocket::Write(const char *message, ...)
 {
   va_list vi;
   char tbuffer[BUFSIZE];
-  
+
   if (!message)
     return;
-  
+
   va_start(vi, message);
   vsnprintf(tbuffer, sizeof(tbuffer), message, vi);
   va_end(vi);
@@ -791,11 +791,11 @@ BinarySocket::~BinarySocket(){}
 bool BinarySocket::ProcessRead()
 {
   char tbuffer[NET_BUFSIZE];
-  
+
   int len = this->IO->Recv(this, tbuffer, sizeof(tbuffer));
   if (len <= 0)
     return false;
-  
+
   return this->Read(tbuffer, len);
 }
 
@@ -806,9 +806,9 @@ bool BinarySocket::ProcessWrite()
     SocketEngine::ClearWritable(this);
     return true;
   }
-  
+
   DataBlock *d = this->WriteBuffer.front();
-  
+
   int len = this->IO->Send(this, d->buf, d->len);
   if (len <= -1)
     return false;
@@ -822,10 +822,10 @@ bool BinarySocket::ProcessWrite()
     d->buf += len;
     d->len -= len;
   }
-  
+
   if (this->WriteBuffer.empty())
     SocketEngine::ClearWritable(this);
-  
+
   return true;
 }
 

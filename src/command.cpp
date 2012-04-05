@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Various Command Functions
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -13,7 +13,7 @@
 #include "module.h"
 #include "bot.h"
 /**
- *\file  command.cpp 
+ *\file  command.cpp
  *\brief Contains the command class.
  */
 
@@ -100,7 +100,7 @@ Command::Command(module *m, const Flux::string &sname, CommandType t, size_t min
       case C_NULL:
 	throw ModuleException("Command \""+this->name+"\" MUST have a command type!");
     }
-    
+
     if(it.second != true)
       throw ModuleException("Command "+this->name+" already loaded!");
 }

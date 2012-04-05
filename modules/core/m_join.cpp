@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- IRC Join Management Module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -85,7 +85,7 @@ class Join : public module
   CommandPart cmdpart;
 public:
   Join(const Flux::string &Name):module(Name), cmdjoin(this), cmdpart(this)
-  { 
+  {
     this->SetVersion(VERSION);
     this->SetAuthor("Justasic");
   }

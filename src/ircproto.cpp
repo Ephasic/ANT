@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- IRC Protocol Classes
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -33,7 +33,7 @@ void IRCProto::Raw(const char *fmt, ...)
 /**
  * \brief Sends a IRC private message to the user or channel
  * \param Destination Where the message will go
- * \param Message The message to send to Destination 
+ * \param Message The message to send to Destination
  */
 void IRCProto::privmsg(const Flux::string &where, const char *fmt, ...){
   va_list args;
@@ -59,7 +59,7 @@ void IRCProto::privmsg(const Flux::string &where, const Flux::string &msg){
 /**
  * \brief Sends a IRC notice to the user or channel
  * \param Destination Where the message will go
- * \param Message The message to send to Destination 
+ * \param Message The message to send to Destination
  */
 void IRCProto::notice(const Flux::string &where, const char *fmt, ...){
   va_list args;
@@ -85,7 +85,7 @@ void IRCProto::notice(const Flux::string &where, const Flux::string &msg){
 /**
  * \brief Sends a IRC action (/me) to the user or channel
  * \param Destination Where the message will go
- * \param Message The message to send to Destination 
+ * \param Message The message to send to Destination
  */
 void IRCProto::action(const Flux::string &where, const char *fmt, ...){
   if(fmt)
@@ -559,6 +559,6 @@ void Send_Global(const char *fmt, ...)
     va_start(args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
     Send_Global(Flux::string(buffer));
-    va_end(args); 
+    va_end(args);
   }
 }

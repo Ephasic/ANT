@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- IRC help module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -14,7 +14,7 @@
  * \author Lordofsraam. Polished by Justasic.
  */
 
-/** 
+/**
  * \defgroup helpM Help Module
  * This is the module for the help_m function.
  * Returns help information about controlling Navn.

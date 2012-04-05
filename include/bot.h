@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Prototype for Bot Class
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *

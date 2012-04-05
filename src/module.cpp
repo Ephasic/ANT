@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Module Routines.
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -10,11 +10,11 @@
  */
 
 #include "module.h"
-// This code sucks, you know it and I know it. 
+// This code sucks, you know it and I know it.
 // Move on and call me an idiot later.
 Flux::insensitive_map<module*> Modules;
 EventsVector ModuleHandler::EventHandlers[I_END];
-/** 
+/**
  * \fn module::module(Flux::string n)
  * \brief Module Constructor
  * \param name Name of the module
@@ -26,7 +26,7 @@ module::module(const Flux::string &n): name(n), handle(nullptr), Priority(PRIORI
   SET_SEGV_LOCATION();
   if(FindModule(this->name))
     throw ModuleException("Module already exists!");
-  
+
   Modules[this->name] = this;
   if(!nofork)
     Log() << "Loaded module " << n;

@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- XML-RPC Parser Module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -99,7 +99,7 @@ class xmlrpcclient : public ClientSocket, public BufferedSocket
   bool in_query, in_header, IsXML;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), IsXML(false) {}
-  
+
   bool Read(const Flux::string &m)
   {
     Flux::string message = SanitizeXML(m);
@@ -123,7 +123,7 @@ public:
       Log(LOG_TERMINAL) << "HTTP GET Request.";
       return true;
     }
-    else if((message.search_ci("POST") && message.search_ci("HTTP/1."))) 
+    else if((message.search_ci("POST") && message.search_ci("HTTP/1.")))
     { //This is a commit
       this->in_header = true;
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
@@ -144,7 +144,7 @@ public:
 	this->RawCommitXML += message.strip();
 	FilesXML.push_back(message.strip());
       }
-      
+
       if(!message.search_ci("</message>"))
 	  this->RawCommitXML += message.strip();
       else{
@@ -223,7 +223,7 @@ void xmlrpcclient::HandleMessage()
 {
   if(this->RawCommitXML.empty())
     return;
-  
+
   Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
   Flux::string blah = this->RawCommitXML.cc_str();
   // Strip out all the XML garbage we don't need since RapidXML will crash if we don't
@@ -240,7 +240,7 @@ void xmlrpcclient::HandleMessage()
     // Parse the XML
     rapidxml::xml_document<> doc;
     doc.parse<0>(blah.cc_str());
-    
+
     // Attempt to get the first node of the commit.
     rapidxml::xml_node<> *main_node = doc.first_node("message", 0, true);
     if(!main_node)
@@ -292,7 +292,7 @@ void xmlrpcclient::HandleMessage()
 	  message.info["revision"] = node->first_node("revision", 0, true)->value();
 	if(node->first_node("log", 0, true))
 	  message.info["log"] = node->first_node("log", 0, true)->value();
-	
+
 	/* message.body.commit.files section */
 	if(node->first_node("files", 0, true) && node->first_node("files", 0, true)->first_node("file", 0, true))
 	{
@@ -302,7 +302,7 @@ void xmlrpcclient::HandleMessage()
 	    Flux::string FileXML = it;
 	    rapidxml::xml_document<> doc2;
 	    doc2.parse<0>(FileXML.cc_str());
-	    
+
 	    if(doc2.first_node("file", 0, true))
 	      message.Files.push_back(doc2.first_node()->value());
 	  }
@@ -313,7 +313,7 @@ void xmlrpcclient::HandleMessage()
     Log(LOG_TERMINAL) << "\n*** COMMIT INFO! ***";
     for(auto it : message.info)
       Log(LOG_TERMINAL) << it.first << ": " << it.second;
-    
+
     int i = 0;
     for(auto it : message.Files)
       Log(LOG_TERMINAL) << "File[" << ++i << "]: " << it;
@@ -324,7 +324,7 @@ void xmlrpcclient::HandleMessage()
       for(auto it : IT.second->ChanMap)
 	message.Channels.push_back(it.second);
     }
-    
+
     /* Announce to other modules for commit announcement */
     FOREACH_MOD(I_OnCommit, OnCommit(message));
 
@@ -336,13 +336,13 @@ void xmlrpcclient::HandleMessage()
 
 // This crap below is kept as example code for when i need to reference something while i develop the handler
 //   XMLFile xf(this->RawCommitXML, 1);
-//   
+//
 //   /* This code was based off the commit in this script: http://cia.vc/clients/git/ciabot.bash */
 //   /* Script Info (if available) */
 //   Flux::string ScriptName = xf.Tags["message"].Tags["generator"].Attributes["name"].Value;
 //   Flux::string ScriptVersion = xf.Tags["message"].Tags["generator"].Attributes["version"].Value;
 //   Flux::string ScriptURL = xf.Tags["message"].Tags["generator"].Attributes["url"].Value;
-//   
+//
 //   /* Commit Body */
 //   Flux::string timestamp = xf.Tags["message"].Attributes["timestamp"].Value;
 //   Flux::string author = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["author"].Value;
@@ -350,12 +350,12 @@ void xmlrpcclient::HandleMessage()
 //   Flux::string log = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["log"].Value;
 //   Flux::string url = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["url"].Value;
 //   auto files = xf.Tags["message"].Tags["body"].Tags["commit"].Tags["files"].Tags;
-//   
+//
 //   /* Source info */
 //   Flux::string project = xf.Tags["message"].Tags["source"].Attributes["project"].Value;
 //   Flux::string branch = xf.Tags["message"].Tags["source"].Attributes["branch"].Value;
 //   Flux::string module = xf.Tags["message"].Tags["source"].Attributes["module"].Value;
- 
+
 //   Log(LOG_TERMINAL) << "***Commit****\nScriptName: " << ScriptName << "\nScriptVersion: " << ScriptVersion << "\nScriptURL: " << ScriptURL << "\nTimestamp: " << timestamp << "\nAuthor: " << author << "\nRevision: " << revision << "\nLog: " << log << "\nURL: " << url << "\nProject: " << project << "\nBranch: " << branch << "\nModule: " << module << "\n***End Of Commit***";
 
 
@@ -416,7 +416,7 @@ public:
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
     new SocketStart();
   }
-  
+
   ~xmlrpcmod()
   {
     for(auto it : SocketEngine::Sockets)
@@ -451,7 +451,7 @@ private:
     return "";
   }
 
-  // FIXME: This needs some serious fixing! It should calculate directories and files the same as CIA.vc 
+  // FIXME: This needs some serious fixing! It should calculate directories and files the same as CIA.vc
   Flux::string BuildFileString(Flux::vector files)
   {
     Flux::string ret;
@@ -505,9 +505,9 @@ public:
     // Calculate files to announce.
     // FIXME: This needs to calculate directories as well
     // FIXME: This needs to be handled by the Rulesets system later on.
-    
+
     Flux::string files = BuildFileString(msg.Files);
-    
+
     for(auto it : msg.Channels)
     {
       Channel *c = it;
@@ -518,9 +518,9 @@ public:
       ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
       ss << NORMAL << BOLD << '[' << this->GetCommitData("branch") << "] " << NORMAL << YELLOW << 'r' << this->GetCommitData("revision");
       ss << NORMAL << BOLD << " | " << NORMAL << AQUA << files << NORMAL << ": " << this->GetCommitData("log"); //<< files;
-      
+
       Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
-      
+
       //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
       c->SendMessage(formattedmessgae);
     }

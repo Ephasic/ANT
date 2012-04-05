@@ -21,7 +21,7 @@ sort_list(SRC_SRCS)
       #message(${TMPL_CPP})
       set(${MODULES_SRCS} TMPL_CPP)
     endforeach(TMPL ${SRC_SRCS})
-    
+
     # Set all the files to use C++ as well as set their compile flags (use the module-specific compile flags, though)
     set_source_files_properties(${MODULES_SRCS} PROPERTIES LANGUAGE CXX COMPILE_FLAGS "${CXXFLAGS}")
 
@@ -95,10 +95,10 @@ sort_list(SRC_SRCS)
 #       if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${SUBDIR}")
 #         file(GLOB MODULES_SUBDIR_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
 #         sort_list(MODULES_SUBDIR_SRCS)
-# 
+#
 #         # Set all the files to use C++ as well as set their compile flags (use the module-specific compile flags, though)
 #         set_source_files_properties(${MODULES_SUBDIR_SRCS} PROPERTIES LANGUAGE CXX COMPILE_FLAGS "${CXXFLAGS}")
-# 
+#
 #         # Get the length of this subdir
 #         string(LENGTH ${SUBDIR} SUBDIR_LEN)
 #         # Calculate the length of the folder
@@ -107,7 +107,7 @@ sort_list(SRC_SRCS)
 #         string(SUBSTRING ${SUBDIR} ${FOLDER_LEN} ${FILE_LEN} SUBDIR_REALNAME)
 #         # Add .so to the end of the directory name, this will be the module's name
 #         set(SO "${SUBDIR_REALNAME}.so")
-# 
+#
 #         # Temporary linker flags for this subdirectory
 #         set(SUBDIR_LDFLAGS "${LDFLAGS}")
 #         # Temporary extra dependencies for this subdirectory
@@ -118,7 +118,7 @@ sort_list(SRC_SRCS)
 #         set(SKIP_LIBRARIES)
 #         # Reset has_function
 #         set(HAS_FUNCTION TRUE)
-# 
+#
 #         # Iterate through the source files in the subdirectory
 #         foreach(SRC ${MODULES_SUBDIR_SRCS})
 #           if(NOT SKIP_DEPENDS AND NOT SKIP_LIBRARIES AND HAS_FUNCTION)
@@ -138,14 +138,14 @@ sort_list(SRC_SRCS)
 #             calculate_libraries(${SRC} SKIP_LIBRARIES TEMP_LDFLAGS TEMP_DEPENDENCIES)
 #             # Check the function dependencies for the given source file
 #             check_functions(${SRC} HAS_FUNCTION)
-# 
+#
 #             # Append this source file's linker flags to the subdirectoy's linker flags, if there are any to append
 #             if(TEMP_DEPENDENCIES)
 #               append_to_list(SUBDIR_EXTRA_DEPENDS ${TEMP_DEPDENCIES})
 #             endif(TEMP_DEPENDENCIES)
 #           endif(NOT SKIP_DEPENDS AND NOT SKIP_LIBRARIES AND HAS_FUNCTION)
 #         endforeach(SRC)
-# 
+#
 #         # Continue if library and function requirements are met
 #         if(NOT SKIP AND HAS_FUNCTION)
 #           # Remove duplicates from the linker flags
@@ -156,8 +156,8 @@ sort_list(SRC_SRCS)
 #           if(SUBDIR_EXTRA_DEPENDS)
 #             remove_list_duplicates(SUBDIR_EXTRA_DEPENDS)
 #           endif(SUBDIR_EXTRA_DEPENDS)
-# 
-# 
+#
+#
 #           # Generate the module and set it's linker flags, also set it to depend on the main Navn executable to be built beforehand
 #           add_library(${SO} MODULE ${MODULES_SUBDIR_SRCS})
 #           set_target_properties(${SO} PROPERTIES LINKER_LANGUAGE CXX PREFIX "" SUFFIX "" LINK_FLAGS "${SUBDIR_LDFLAGS}")
