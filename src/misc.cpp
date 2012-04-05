@@ -166,8 +166,7 @@ Flux::string Flux::Sanitize(const Flux::string &string)
   special_chars("\001",""),
   special_chars("","")
  };
-  Flux::string ret = string.c_str();
-  ret = StripColors(ret);
+  Flux::string ret = StripColors(string.c_str());
   for(int i = 0; special[i].character.empty() == false; ++i)
     ret = ret.replace_all_cs(special[i].character, special[i].replace);
   return ret.c_str();
@@ -182,6 +181,7 @@ bool IsValidChannel(const Flux::string &chan)
 {
  if (chan[0] != '#')
     return false;
+
  return true;
 }
 
@@ -195,7 +195,8 @@ Flux::string printfify(const char *fmt, ...)
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
     return buf;
-  }else
+  }
+  else
     return fmt;
 }
 
@@ -210,16 +211,22 @@ std::vector<Flux::string> StringVector(const Flux::string &src, char delim)
  sepstream tok(src, delim);
  Flux::string token;
  std::vector<Flux::string> ret;
+
  while(tok.GetToken(token))
    ret.push_back(token);
+
  return ret;
 }
+
 /** Check if a file exists
  * \fn bool InTerm()
  * \brief returns if the
  * \return true if the file exists, false if it doens't
  */
-bool InTerm() { return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr))); }
+bool InTerm()
+{
+  return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr)));
+}
 
 void RenameBot(Network *n, const Flux::string &nick)
 {

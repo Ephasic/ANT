@@ -13,6 +13,8 @@
 #include "bot.h"
 #include "module.h"
 
+// I_OnPrivmsg I_OnAction, I_OnChanmsg, I_OnChannelAction
+
 /**
  * \fn void ProcessJoin(CommandSource &source, const Flux::string &chan)
  * \brief Processes the /who numeric (352), this should only be used in Process() unless its for something special
@@ -130,7 +132,7 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
       }
       else
       {
-	FOREACH_MOD(I_OnPrivmsg, OnPrivmsg(u, c, params2)); //This will one day be a actual function for channel only messages..
+	FOREACH_MOD(I_OnChanmsg, OnChanmsg(u, c, params2)); //This will one day be a actual function for channel only messages..
       }
     }
   }
@@ -275,8 +277,21 @@ void process(Network *n, const Flux::string &buffer)
 
   if(message[0] == '\1' && message[message.length() -1] == '\1' && !params2[0].equals_cs("\001ACTION"))
   {
+    //Dont allow the rest of the system to process ctcp's as it will be caught by the command handler.
     FOREACH_MOD(I_OnCTCP, OnCTCP(nickname, params2, n));
-    return; //Dont allow the rest of the system to process ctcp's as it will be caught by the command handler.
+    return;
+  }
+  // Handle Actions (ie. /me's )
+  else if(message[0] == '\1' && message[message.length() - 1] == '\1' && params2[0].equals_ci("\001ACTION"))
+  {
+    if(c)
+    {
+      FOREACH_MOD(I_OnChannelAction, OnChannelAction(u, c, params2));
+    }
+    else
+    {
+      FOREACH_MOD(I_OnAction, OnAction(u, params2));
+    }
   }
 
   if(command.equals_cs("NICK") && u)
@@ -305,8 +320,10 @@ void process(Network *n, const Flux::string &buffer)
     {
      if(u)
        u->DelChan(c);
+
      if(c)
        c->DelUser(u);
+
      if(u && c && !u->findchannel(c->name))
      {
        Log(LOG_TERMINAL) << "Deleted " << u->nick << '|' << c->name << '|' << u->findchannel(c->name);
@@ -331,11 +348,11 @@ void process(Network *n, const Flux::string &buffer)
     }
     else
     {
-      FOREACH_MOD(I_OnNotice, OnNotice(u, c, params2));
+      FOREACH_MOD(I_OnNotice, OnChannelNotice(u, c, params2));
     }
   }
 
-  if(command.equals_cs("MODE"))
+  if(command.equals_ci("MODE"))
   {
     if(IsValidChannel(params[0]) && params.size() == 2)
     {
@@ -353,7 +370,7 @@ void process(Network *n, const Flux::string &buffer)
     }
   }
 
-  if(command.equals_cs("JOIN"))
+  if(command.equals_ci("JOIN"))
   {
     if(!u && n && (!nickname.empty() || !uident.empty() || !uhost.empty()))
       u = new User(n, nickname, uident, uhost);

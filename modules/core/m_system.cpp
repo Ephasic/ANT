@@ -138,11 +138,37 @@ class m_system : public module
 public:
   m_system(const Flux::string &Name):module(Name), cmdrehash(this), cmdquit(this), cmdrestart(this), pid(this)
   {
-    Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice, I_OnNickChange, I_OnPrivmsg };
+    Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice, I_OnNickChange, I_OnChannelAction };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
 
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
+  }
+
+  void OnChannelAction(User *u, Channel *c, const std::vector<Flux::string> &params)
+  {
+    Flux::string msg = CondenseVector(params);
+    Bot *b = u->n->b;
+
+    // Imported from CIA.vc c:
+    if(msg.search_ci("rubs "+b->nick+"'s tummy"))
+      c->SendMessage("*purr*");
+    if(msg.search_ci("hugs "+b->nick))
+      c->SendAction("hugs %s", u->nick.c_str());
+    if(msg.search_ci("eats "+b->nick))
+      c->SendAction("tastes crunchy");
+    if(msg.search_ci("kicks "+b->nick))
+      c->SendMessage("ow");
+
+    // Justasic's additions
+    if(msg.search_ci("smashes "+b->nick))
+      c->SendAction("is flattened");
+    if(msg.search_ci("burns "+b->nick) || msg.search_ci("sets "+b->nick+" on fire"))
+      c->SendAction("runs around");
+    if(msg.search_ci("punches "+b->nick))
+      c->SendAction("cries");
+    if(msg.search_ci("slaps "+b->nick))
+      c->SendAction("slaps %s", u->nick.c_str());
   }
 
   void OnNumeric(int i, Network *n, const Flux::vector &params)
