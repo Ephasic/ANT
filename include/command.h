@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Prototype for Command Routines
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -50,7 +50,7 @@ struct CoreExport CommandSource
   Flux::string command;
   Flux::string raw;
   std::vector<Flux::string> params;
-  
+
   void Reply(const char *fmt, ...);
   void Reply(const Flux::string&);
 };

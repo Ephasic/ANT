@@ -1,6 +1,6 @@
 #include "includes.h"
 /* Arbitrary Navn Tool -- Signal Processing
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -27,7 +27,7 @@ void HandleSegfault(module *m)
  Flux::string mbuf;
  size_t size;
  time_t now = time(NULL);
- 
+
  size = backtrace(array, 10);
  if(TextFile::IsFile("SEGFAULT.log"))
    Delete("SEGFAULT.log");
@@ -38,7 +38,7 @@ void HandleSegfault(module *m)
    struct utsname uts;
    if(uname(&uts) < 0)
      throw CoreException("uname() Error");
-      
+
    strftime(tbuf, sizeof(tbuf), "[%b %d %H:%M:%S %Y]", localtime(&now));
    slog << "====================== Segmentation Fault ======================" << std::endl;
    slog << "Please report this bug to http://flux-net.net/bugs/ and submit a bug report." << std::endl;
@@ -50,24 +50,24 @@ void HandleSegfault(module *m)
    slog << "C++ Version: " << __VERSION__ << std::endl;
    slog << "Socket Buffer: " << LastBuf << std::endl;
    slog << "Location: " << segv_location << std::endl;
-   
+
    if(m)
    {
      slog << "Module: " << m->name << std::endl;
      slog << "Module Version: " << m->GetVersion() << std::endl;
      slog << "Module Author: " << m->GetAuthor() << std::endl;
    }
-   
+
    for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it)
      mbuf += it->second->name+" ";
-   
+
    mbuf.trim();
    slog << "Modules Loaded: " << (mbuf.empty()?"None":mbuf) << std::endl;
    strings = backtrace_symbols(array, size);
-   
+
    for(unsigned i=1; i < size; i++)
      slog << "BackTrace(" << (i - 1) << "): " << strings[i] << std::endl;
-   
+
    free(strings);
    slog << "======================== END OF REPORT ==========================" << std::endl;
    sslog << slog.str() << std::endl; //Write to SEGFAULT.log
@@ -130,7 +130,7 @@ void sigact(int sig)
       signal(SIGHUP, SIG_IGN);
       quitmsg = "Recieved Signal SIGTERM, exiting..";
       Log(LOG_RAWIO) << quitmsg;
-      for(auto it : Networks) 
+      for(auto it : Networks)
         it.second->b->ircproto->quit(quitmsg);
       quitting = true;
       break;

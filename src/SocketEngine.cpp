@@ -1,5 +1,5 @@
 /* Routines for managing sockets
- * 
+ *
  * (C) 2003-2010 Anope Team
  * Contact us at team@anope.org
  *
@@ -107,20 +107,20 @@ void SocketEngine::Process()
     return; // Nothing to do..
   else if (sresult)
   {
-    
+
     int processed = 0;
     for (auto it = Sockets.begin(), it_end = Sockets.end(); it != it_end && processed != sresult;)
     {
       Socket *s = it->second;
       ++it;
-      
+
       bool has_read = FD_ISSET(s->GetFD(), &rfdset);
       bool has_write = FD_ISSET(s->GetFD(), &wfdset);
       bool has_error = FD_ISSET(s->GetFD(), &efdset);
 
       if (has_read || has_write || has_error)
 	++processed;
-      
+
       if (has_error)
       {
 	s->ProcessError();

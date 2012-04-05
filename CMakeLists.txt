@@ -1,4 +1,4 @@
-  
+
 #
 # CMake config
 #
@@ -272,7 +272,7 @@ if(NOT MSVC)
       message("-- Looking for CPPDB library - not found")
       message(FATAL_ERROR "CPPDB is required for compile! look in libraries directory for library package")
     endif(CPPDB_FOUND)
-    
+
     # Check if inet_addr is within the nsl library (if the library exists), and add it to the linker flags if needed
     check_library_exists(nsl inet_addr "" HAVE_NSL_LIB)
     if(HAVE_NSL_LIB)

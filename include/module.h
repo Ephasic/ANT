@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Module Class Prototypes
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -24,7 +24,7 @@
 
 enum Implementation {
   I_BEGIN,
-	I_OnPrivmsg, I_OnModuleLoad, I_OnModuleUnload,
+	I_OnPrivmsg, I_OnChanmsg, I_OnModuleLoad, I_OnModuleUnload,
 	I_OnRestart, I_OnShutdown, I_OnReload, I_OnCommand,
 	I_OnStart, I_OnNumeric, I_OnPreConnect, I_OnPostConnect,
 	I_OnCTCP, I_OnQuit, I_OnJoin, I_OnKick, I_OnConnectionError,
@@ -32,11 +32,13 @@ enum Implementation {
 	I_OnChannelOp, I_OnPart, I_OnInvite, I_OnArgument, I_OnFork,
 	I_OnSocketError, I_OnPing, I_OnPong, I_OnCommit, I_OnDatabasesWrite,
 	I_OnSignal, I_OnDatabasesRead, I_OnSaveDatabases, I_OnForceDatabasesRead,
-	I_OnUserRegister, I_OnPreReceiveMessage, I_OnGarbageCleanup,
+	I_OnUserRegister, I_OnPreReceiveMessage, I_OnGarbageCleanup, I_OnAction,
+	I_OnChannelAction, I_OnChannelNotice,
   I_END
 };
 
-enum ModulePriority{
+enum ModulePriority
+{
   PRIORITY_FIRST,
   PRIORITY_DONTCARE,
   PRIORITY_LAST
@@ -59,21 +61,23 @@ public:
   ModulePriority GetPriority();
   time_t GetLoadTime();
   module(const Flux::string&);
-  
+
   virtual ~module();
   virtual EventResult OnPreReceiveMessage(const Flux::string&) { return EVENT_CONTINUE; }
-  virtual void OnPrivmsg(User*, const std::vector<Flux::string>&) {}
+  virtual void OnPrivmsg(User*, const Flux::vector&) {}
+  virtual void OnChannelAction(User*, Channel*, const Flux::vector&) {}
+  virtual void OnAction(User*, const Flux::vector&) {}
+  virtual void OnChanmsg(User*, Channel*, const std::vector<Flux::string>&) {}
   virtual void OnCommit(CommitMessage&) {}
   virtual void OnGarbageCleanup() {}
   virtual void OnSignal(int) {}
   virtual void OnUserRegister(Network*) {}
-  virtual void OnPrivmsg(User*, Channel*, const std::vector<Flux::string>&) {}
   virtual void OnDatabasesWrite(void (*)(const char*, ...)) {}
   virtual void OnDatabasesRead(const Flux::vector&) {}
   virtual void OnSaveDatabases() {}
   virtual void OnForceDatabasesRead() {}
   virtual void OnNotice(User*, const std::vector<Flux::string>&) {}
-  virtual void OnNotice(User*, Channel*, const std::vector<Flux::string>&) {}
+  virtual void OnChannelNotice(User*, Channel*, const std::vector<Flux::string>&) {}
   virtual void OnCTCP(const Flux::string&, const std::vector<Flux::string>&, Network*) {}
   virtual void OnPing(const std::vector<Flux::string>&, Network*) {}
   virtual void OnPong(const std::vector<Flux::string>&, Network*) {}
@@ -114,7 +118,7 @@ public:
   static void SanitizeRuntime();
   static void UnloadAll();
   static bool Unload(module**);
-  
+
   static bool Attach(Implementation i, module *mod);
   static void Attach(Implementation *i, module *mod, size_t sz);
   static bool Detach(Implementation i, module *mod);

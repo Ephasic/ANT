@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- String Wrapper
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -61,7 +61,7 @@ template<typename type_name, typename value> inline type_name value_cast(const v
 	printf("Failed to cast \"%s\" to \"%s\"\n", typeid(value).name(), typeid(type_name).name());
       return nullpointer;
     }
-    if(protocoldebug) 
+    if(protocoldebug)
       printf("Failed to cast \"%s\" to \"%s\", attempting to force with reinterpret_cast\n", typeid(value).name(), typeid(type_name).name());
     x = *reinterpret_cast<type_name*>(const_cast<value*>(&(y)));
   }
@@ -382,7 +382,7 @@ namespace Flux {
     inline bool search(const string &_str) const { if(_string.find(_str._string) != base_string::npos) return true; return false; }
     inline bool search_ci(const string &_str) { if(ci::string(this->_string.c_str()).find(ci::string(_str.c_str())) != ci::string::npos) return true; return false; }
     inline bool search_ci(const string &_str) const { if(ci::string(this->_string.c_str()).find(ci::string(_str.c_str())) != ci::string::npos) return true; return false; }
-    
+
     inline size_type find(const string &_str, size_type pos = 0) const { return this->_string.find(_str._string, pos); }
     inline size_type find(char chr, size_type pos = 0) const { return this->_string.find(chr, pos); }
     inline size_type find_ci(const string &_str, size_type pos = 0) const { return ci::string(this->_string.c_str()).find(ci::string(_str._string.c_str()), pos); }
@@ -482,7 +482,7 @@ namespace Flux {
     inline std::allocator<char> get_allocator() const { return this->_string.get_allocator(); }
     inline char &operator[](size_type n) { return this->_string[n]; }
     inline const char &operator[](size_type n) const { return this->_string[n]; }
-    
+
     inline string isolate(char b, char e) const
     {
      string to_find;
@@ -509,7 +509,7 @@ namespace Flux {
 	new_buf = new_buf.replace_all_cs("\r", "");
 	return new_buf;
     }
-    
+
     inline string strip() const
     {
       string new_buf = *this;
@@ -524,7 +524,7 @@ namespace Flux {
 	new_buf = new_buf.replace_all_cs(_delim, "");
 	return new_buf;
     }
-    
+
     inline string strip(const char &_delim) const
     {
       string new_buf = *this;

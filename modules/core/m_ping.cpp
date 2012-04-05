@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- IRC Ping Handler Module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *

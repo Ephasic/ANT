@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Plain Text File Database Module
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -40,7 +40,7 @@ void Read(module *m = nullptr)
     lineno++;
     if(buf.empty())
       continue;
-    
+
     if(lineno == 1 && !buf.search_ci("VER 1"))
     {
       if(Config->dbforce)
@@ -51,7 +51,7 @@ void Read(module *m = nullptr)
 	return;
       }
     }
-    
+
     sepstream sep(buf, ' ');
     Flux::vector params;
     while(sep.GetToken(buf))
@@ -88,7 +88,7 @@ public:
     Implementation i[] = { I_OnDatabasesWrite, I_OnDatabasesRead, I_OnModuleLoad, I_OnSaveDatabases, I_OnForceDatabasesRead };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
   }
-  
+
   void OnDatabasesWrite(void (*Write)(const char*, ...))
   {
     for(auto it : Networks) // Save networks
@@ -102,7 +102,7 @@ public:
 	Channel *c = cit.second;
 	Write("NC %s %s", n->name.c_str(), c->name.c_str());
       } //We don't put realnames in the database as its too hard to catch what the full name is
-    } 
+    }
   }
 
   void OnDatabasesRead(const Flux::vector &params)
@@ -133,7 +133,7 @@ public:
 //       }
 //     }
   }
-  
+
   void OnModuleLoad(module *m)
   {
     if(m != this)
@@ -145,13 +145,13 @@ public:
     Log() << "[db_plain] Reading Database.";
     Read();
   }
-  
+
   void OnLoad()
   {
     Log() << "[db_plain] Loading Database.";
     Read(); // Load the databases
   }
-  
+
   void OnSaveDatabases()
   {
     std::fstream db;

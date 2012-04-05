@@ -8,7 +8,7 @@ Bot Daemom:
   gets the 1st available nickname on the network. The bot daemon needs a MySQL backend module and needs better live updates,
   this makes the current code already out-dated, Justasic and possibly lordofsraam will be working on it from time to time to
   setup the database and get it working with MySQL and possibly PostgreSQL.
-  
+
 Web Front:
   The web front needs a lot of development, the whole front needs to use CPPDB and CPPCMS to keep the codebase in C++.
   Keeping the codebase in C++ makes web page programming difficult because c++ was not designed for such a task but it
@@ -16,7 +16,7 @@ Web Front:
   web front that has code or compile but the front must implement some kind of reStructuredText format. The front must
   also be similar to CIA.vc in that it will have daily stats on the front page, it will have a statistics page for each
   project, it will have graphing capabilities and an API to allow other users to use the page data in their own website.
-  
+
   The site must also be simple to use for basic users, but advanced for hard core developers (such as KDE or Gnome developers),
   Their should be a simple ruleset editor which allows you to interactivly edit the way a message looks in IRC which would
   include test commits which do not log to the versioning history but announces in the channel (which allows for bot admins to

@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Logging Functions.
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -14,28 +14,28 @@ Flux::string NoTermColor(const Flux::string &ret)
 {
   Flux::string str;
   bool in_term_color = false;
-  
+
   for(unsigned i=0; i < ret.length(); ++i)
   {
     char c = ret[i];
-    
+
     if(in_term_color)
     {
       if(c == 'm')
 	in_term_color = false;
       continue;
     }
-    
+
     if(c == '\033')
     {
       in_term_color = true;
       continue;
     }
-    
+
     if(!in_term_color)
       str += c;
   }
-  
+
   return str;
 }
 
@@ -46,7 +46,7 @@ Flux::string Log::TimeStamp()
 
   if (time(&t) < 0)
 	  throw CoreException("time() failed");
-  
+
   tm tm = *localtime(&t);
 #if HAVE_GETTIMEOFDAY
   if (protocoldebug)
@@ -62,7 +62,7 @@ Flux::string Log::TimeStamp()
   else
 #endif
     strftime(tbuf, sizeof(tbuf) - 1, "[%b %d %H:%M:%S %Y]", &tm);
-    
+
   return Flux::Sanitize(tbuf);
 }
 
@@ -76,8 +76,8 @@ Log::Log(User *user, Command *command):type(LOG_NORMAL), u(user), c(command)
 }
 
 Log::Log(LogType t, User *user, Command *command): type(t), u(user), c(command)
-{ 
-  if(!u) throw CoreException("No user argument in Log()"); 
+{
+  if(!u) throw CoreException("No user argument in Log()");
   if(!c) throw CoreException("No command argument in Log()");
 }
 
@@ -88,7 +88,7 @@ Log::~Log()
    message = this->u->nick + " " + message;
   if(this->u && this->c)
     message = this->u->nick + " used " + this->c->name + " " + message;
-  
+
   if((type == LOG_RAWIO || type == LOG_DEBUG) && protocoldebug && InTerm())
     std::cout << TimeStamp() << " " << (nocolor?NoTermColor(message):message) << std::endl;
   else if(type == LOG_NORMAL && nofork && InTerm())
@@ -99,14 +99,14 @@ Log::~Log()
     std::cout << (nocolor?NoTermColor(raw):raw) << std::endl;
     return;
   }else if(type == LOG_SILENT){} // ignore the terminal if its log silent
-  
+
   try
     {
       log.open(Config->LogFile.c_str(), std::fstream::out | std::fstream::app);
       if(!log.is_open())
 	throw LogException(Config->LogFile.empty()?Flux::string("Cannot fild Log File.").c_str():
 			    Flux::string("Failed to open Log File"+Config->LogFile+": "+strerror(errno)).c_str());
-	
+
       log << TimeStamp() << " " << NoTermColor(message) << std::endl;
       if(log.is_open())
 	log.close();

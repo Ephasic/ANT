@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- Prototypes for ALL global variables and classes
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -228,5 +228,5 @@ else \
 #define MODULE_HOOK(x) \
 extern "C" module *ModInit(const Flux::string &name) { return new x(name); } \
 extern "C" void ModunInit(x **m) { if(*m) delete *m; }
-      
+
 #endif
