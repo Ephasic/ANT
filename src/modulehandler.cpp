@@ -201,13 +201,13 @@ bool ModuleHandler::DeleteModule(module *m)
     return true;
 }
 
-bool ModuleHandler::Unload(module **m)
+bool ModuleHandler::Unload(module *m)
 {
-  if(!*m)
+  if(!m || m->GetPermanent())
     return false;
   
-  FOREACH_MOD(I_OnModuleUnload, OnModuleUnload(*m));
-  return DeleteModule(*m);
+  FOREACH_MOD(I_OnModuleUnload, OnModuleUnload(m));
+  return DeleteModule(m);
 }
 
 void ModuleHandler::UnloadAll()
@@ -216,7 +216,7 @@ void ModuleHandler::UnloadAll()
   {
     module *m = it->second;
     //Log(LOG_TERMINAL) << "UNLOADING @" << m << ": " << m->name << " (" << var.first << ')';
-    Unload(&m);
+    Unload(m);
   }
 }
 

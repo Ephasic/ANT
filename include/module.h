@@ -49,16 +49,19 @@ class CoreExport module : public Base
   Flux::string author, version;
   time_t loadtime;
   ModulePriority Priority;
+  bool permanent;
 protected:
   void SetAuthor(const Flux::string&);
   void SetVersion(const Flux::string&);
   void SetPriority(ModulePriority);
+  void SetPermanent(bool);
 public:
   void *handle;
   Flux::string name, filename, filepath;
   Flux::string GetAuthor();
   Flux::string GetVersion();
   ModulePriority GetPriority();
+  bool GetPermanent();
   time_t GetLoadTime();
   module(const Flux::string&);
 
@@ -117,7 +120,7 @@ public:
   static Flux::string DecodePriority(ModulePriority);
   static void SanitizeRuntime();
   static void UnloadAll();
-  static bool Unload(module**);
+  static bool Unload(module*);
 
   static bool Attach(Implementation i, module *mod);
   static void Attach(Implementation *i, module *mod, size_t sz);

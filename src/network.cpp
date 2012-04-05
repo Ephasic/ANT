@@ -15,8 +15,7 @@
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
 
-Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): s(nullptr), b(nullptr), CurHost(0),
-disconnecting(false), hostname(host), port(p)
+Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): disconnecting(false), s(nullptr), b(nullptr), hostname(host), port(p), CurHost(0)
 {
   if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");

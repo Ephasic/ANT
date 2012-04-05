@@ -21,7 +21,8 @@ EventsVector ModuleHandler::EventHandlers[I_END];
  * \param activated Wether the module is activated or not
  * \param priority The module priority
  */
-module::module(const Flux::string &n): name(n), handle(nullptr), Priority(PRIORITY_DONTCARE), loadtime(time(NULL))
+
+module::module(const Flux::string &n): author(""), version(""), loadtime(time(NULL)), Priority(PRIORITY_DONTCARE), permanent(false), handle(nullptr), name(n), filename(""), filepath("")
 {
   SET_SEGV_LOCATION();
   if(FindModule(this->name))
@@ -55,6 +56,11 @@ void module::SetPriority(ModulePriority p)
   this->Priority = p;
 }
 
+void module::SetPermanent(bool state)
+{
+  this->permanent = state;
+}
+
 Flux::string module::GetVersion()
 {
   return this->version;
@@ -73,6 +79,11 @@ Flux::string module::GetAuthor()
 ModulePriority module::GetPriority()
 {
   return this->Priority;
+}
+
+bool module::GetPermanent()
+{
+  return this->permanent;
 }
 
 /******************Configuration variables***********************/

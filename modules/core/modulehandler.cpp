@@ -118,7 +118,7 @@ public:
 //       source.Reply(ACCESS_DENIED);
     //else{
       module *mu = FindModule(modd);
-      if(!ModuleHandler::Unload(&mu))
+      if(!ModuleHandler::Unload(mu))
       {
 	source.Reply("Failed to unload module %s", modd.c_str());
 	Log(source.u, this) << "to unload " << modd << " and failed";
@@ -153,7 +153,7 @@ public:
      // source.Reply(ACCESS_DENIED);
     //else{
       module *mu = FindModule(modd);
-      bool err = ModuleHandler::Unload(&mu);
+      bool err = ModuleHandler::Unload(mu);
       ModErr err2 = ModuleHandler::LoadModule(modd);
       if(!err || err2 != MOD_ERR_OK)
       {

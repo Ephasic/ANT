@@ -36,7 +36,7 @@ void ProcessInput(const Flux::string &str)
       if(m)
       {
 	Log(LOG_TERMINAL) << "Reloading module " << params[1];
-	if(!ModuleHandler::Unload(&m))
+	if(!ModuleHandler::Unload(m))
 	  Log(LOG_TERMINAL) << "Failed to unload module " << params[1];
 	ModErr e = ModuleHandler::LoadModule(params[1]);
 	if(e != MOD_ERR_OK)
@@ -56,7 +56,7 @@ void ProcessInput(const Flux::string &str)
       module *m = FindModule(params[1]);
       if(m)
       {
-	if(!ModuleHandler::Unload(&m))
+	if(!ModuleHandler::Unload(m))
 	  Log(LOG_TERMINAL) << "Failed to unload module " << params[1];
       }else
 	Log(LOG_TERMINAL) << "Module " << params[1] << " does not exist!";
