@@ -59,6 +59,11 @@ ANT 1.0.0
 Future
 ------
 [#] Add Windows support (Feature request: http://flux-net.net/bugs/view.php?id=9)
+[ ] Check how many users are in each joined channel, if the bot is the only one then leave the channel and send /who's to the
+    channel instead. This makes it so we're not holding open dead channels. If the bot is the only bot on the network, then it
+    shouldnt matter whether we stay in the channel or not so we'll just keep the bot there.
+[ ] Fix bot logic if we get locked by nickserv or something
+[ ] Add NickServ support
 
 Optional
 --------

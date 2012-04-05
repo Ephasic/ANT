@@ -317,6 +317,7 @@ void xmlrpcclient::HandleMessage()
     int i = 0;
     for(auto it : message.Files)
       Log(LOG_TERMINAL) << "File[" << ++i << "]: " << it;
+    
     Log(LOG_TERMINAL) << "*** END COMMIT INFO! ***\n";
 
     for(auto IT : Networks)
@@ -367,9 +368,12 @@ public:
   SocketStart():Timer(1, time(NULL), false) {}
   void Tick(time_t)
   {
-    try{
+    try
+    {
       new xmlrpclistensocket(Config->xmlrpcbindip, Config->xmlrpcport, Config->xmlrpcipv6);
-    }catch(const SocketException &ex){
+    }
+    catch(const SocketException &ex)
+    {
       Log() << "[XML-RPC] " << ex.GetReason();
       new SocketStart();
     }
@@ -405,6 +409,36 @@ public:
 #define REVERSE ""
 #define UNDERLINE "\13"
 
+// Someone just please clean this up?
+std::queue<std::pair<Flux::string, CommitMessage>> throttledmessages;
+class ThrottleTimer : public Timer
+{
+  void CleanQueue()
+  {
+    while(!throttledmessages.empty() && ++throttlecount <= 5)
+    {
+      std::pair<Flux::string, CommitMessage> msgdata = throttledmessages.front();
+      throttledmessages.pop();
+      
+      for(auto it : msgdata.second.Channels)
+	it->SendMessage(msgdata.first);
+    }
+  }
+public:
+  int throttlecount;
+  ThrottleTimer():Timer(5), throttlecount(0)
+  {
+    // something here?
+  }
+
+  void Tick(time_t)
+  {
+    this->throttlecount = 0;
+    this->CleanQueue();
+    Log(LOG_TERMINAL) << "Throttle reset!";
+  }
+};
+
 class xmlrpcmod : public module
 {
 public:
@@ -426,11 +460,11 @@ public:
       if(cs)
       {
 	for(unsigned i=0; i < listen_sockets.size(); ++i)
-	if(cs->LS == listen_sockets[i])
-	{
-	  delete cs;
-	  break;
-	}
+	  if(cs->LS == listen_sockets[i])
+	  {
+	    delete cs;
+	    break;
+	  }
       }
     }
 
@@ -466,15 +500,19 @@ private:
 	  Log(LOG_TERMINAL) << "File: " << file << " slash: " << slash;
 	  Flux::string f = file.substr(slash+1);
 	  ret += f + " ";
-	}else
+	}
+	else
 	  ret += file + " ";
       }
-    } else {
+    }
+    else
+    {
       int dirs = 0;
       for(auto it : files)
       {
 	Flux::string file = it;
 	size_t slash = file.rfind("/");
+	
 	if(slash < file.size())
 	{
 	  Flux::string dir = file.substr(0, slash);
@@ -483,10 +521,13 @@ private:
 	    dirs++;
 	}
       }
+      
       std::stringstream ss;
       ss << "(" << files.size() << " files";
+      
       if(dirs < 0)
 	ss << " in " << dirs;
+      
       ss << " changed)";
       //ret = "(" + value_cast<Flux::string>(files.size()) + " files" + (dirs < 0?"":" in "+dirs) + " changed)";
       ret = ss.str();
@@ -516,13 +557,18 @@ public:
       // Build the commit message with stringstream
       std::stringstream ss;
       ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
-      ss << NORMAL << BOLD << '[' << this->GetCommitData("branch") << "] " << NORMAL << YELLOW << 'r' << this->GetCommitData("revision");
+      ss << NORMAL << BOLD << '[' << this->GetCommitData("branch") << "] " << NORMAL << YELLOW << 'r'
+      << this->GetCommitData("revision");
       ss << NORMAL << BOLD << " | " << NORMAL << AQUA << files << NORMAL << ": " << this->GetCommitData("log"); //<< files;
 
       Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
 
       //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
-      c->SendMessage(formattedmessgae);
+      ThrottleTimer *tt = new ThrottleTimer();
+      if(++tt->throttlecount <= 5)
+	c->SendMessage(formattedmessgae);
+      else
+	throttledmessages.push(std::make_pair(formattedmessgae, msg));
     }
   }
 };
