@@ -134,8 +134,7 @@ E bool InTerm();
 E bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
 E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick;
 E Flux::vector StringVector(const Flux::string&, char);
-E Flux::insensitive_map<module*> Modules;
-// E std::map<Network*, Channel*> JoinBuffer;
+E std::list<module*> Modules;
 E Flux::insensitive_map<Network*> Networks;
 E Flux::map<Network*> NetworkHosts;
 

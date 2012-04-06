@@ -48,9 +48,11 @@ void ProcessInput(const Flux::string &str)
 	  Log(LOG_TERMINAL) << "Failed to reload module " << params[1] << ": " << DecodeModErr(e);
 	}
 	Log(LOG_TERMINAL) << "Successfuly reloaded " << params[1];
-      }else
+      }
+      else
 	Log(LOG_TERMINAL) << "Module " << params[1] << " does not exist!";
-    }else
+    }
+    else
       Log(LOG_TERMINAL) << "Syntax: MODUNLOAD modulename";
   }
   else if(params[0].equals_ci("MODUNLOAD"))
@@ -62,9 +64,11 @@ void ProcessInput(const Flux::string &str)
       {
 	if(!ModuleHandler::Unload(m))
 	  Log(LOG_TERMINAL) << "Failed to unload module " << params[1];
-      }else
+      }
+      else
 	Log(LOG_TERMINAL) << "Module " << params[1] << " does not exist!";
-    }else
+    }
+    else
       Log(LOG_TERMINAL) << "Syntax: MODUNLOAD modulename";
   }
   else if(params[0].equals_ci("MODLOAD"))
@@ -84,26 +88,30 @@ void ProcessInput(const Flux::string &str)
     int c=0;
     if(priority.empty())
     {
-      for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it){
-	printf("%-16s %s [%s]\n", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-	  ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
+      for(auto it : Modules)
+      {
+	printf("%-16s %s [%s]\n", it->name.c_str(), it->GetAuthor().c_str(),
+	  ModuleHandler::DecodePriority(it->GetPriority()).c_str());
 	  ++c;
       }
-    }else{ // There is probably a WAY easier way of doing this but whatever
-      for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it){
+    }
+    else
+    { // There is probably a WAY easier way of doing this but whatever
+    for(auto it : Modules)
+      {
 	if(priority.equals_ci("LAST") || priority == '1'){
-	  printf("%-16s %s [%s]\n", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-		      ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
+	  printf("%-16s %s [%s]\n", it->name.c_str(), it->GetAuthor().c_str(),
+		      ModuleHandler::DecodePriority(it->GetPriority()).c_str());
 	  ++c;
 	}else if(priority.equals_ci("NORMAL") || priority == '2')
 	{
-	  printf("%-16s %s [%s]\n", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-		      ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
+	  printf("%-16s %s [%s]\n", it->name.c_str(), it->GetAuthor().c_str(),
+		      ModuleHandler::DecodePriority(it->GetPriority()).c_str());
 	  ++c;
 	}else if(priority.equals_ci("FIRST") || priority == '3')
 	{
-	  printf("%-16s %s [%s]\n", it->second->name.c_str(), it->second->GetAuthor().c_str(),
-		      ModuleHandler::DecodePriority(it->second->GetPriority()).c_str());
+	  printf("%-16s %s [%s]\n", it->name.c_str(), it->GetAuthor().c_str(),
+		      ModuleHandler::DecodePriority(it->GetPriority()).c_str());
 	  ++c;
 	}
       }
@@ -158,10 +166,12 @@ public:
   ~ModTerminalInput() { if(t) delete t; }
   void OnLoad() //This virtual is called when the module is loaded.
   {
-    if(nofork && InTerm()){
+    if(nofork && InTerm())
+    {
       if(!t)
 	t = new InputThread();
-    }else
+    }
+    else
       throw ModuleException("Cannot run m_terminal_input when fork'ed");
   }
 };

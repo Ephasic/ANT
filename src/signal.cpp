@@ -58,8 +58,8 @@ void HandleSegfault(module *m)
      slog << "Module Author: " << m->GetAuthor() << std::endl;
    }
 
-   for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it)
-     mbuf += it->second->name+" ";
+   for(auto it : Modules)
+     mbuf += it->name+" ";
 
    mbuf.trim();
    slog << "Modules Loaded: " << (mbuf.empty()?"None":mbuf) << std::endl;

@@ -11,27 +11,25 @@
 #include "channel.h"
 #include "bot.h"
 
-Channel::Channel(Network *net, const Flux::string &nname, time_t ts)
+Channel::Channel(Network *net, const Flux::string &nname, time_t ts): n(net), name(nname), creation_time(ts), topic_time(0)
 {
   if(nname.empty())
     throw CoreException("I don't like empty channel names in my channel constructor >:d");
   if(!IsValidChannel(nname))
     throw CoreException("An Invalid channel was passed into the Channel constructor :<");
   if(!net)
-    throw CoreException("Channel created with no network! "+net->name);
+    throw CoreException("Channel \""+nname+"\" created with no network!");
 
-  this->n = net;
-  this->name = nname;
-  this->creation_time = ts;
-  this->topic_time = 0;
   this->n->ChanMap[this->name] = this;
   Log(LOG_DEBUG) << "Created new channel '" << nname << "' on " << net->name;
 }
 
 Channel::~Channel()
 {
-  for(auto it : this->bots)
-    it.second->Part(this);
+  for(auto it : this->UserList)
+    it.first->DelChan(this);
+  
+  this->UserList.clear();
   Log(LOG_DEBUG) << "Deleted channel " << this->name;
   this->n->ChanMap.erase(this->name);
 }

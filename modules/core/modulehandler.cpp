@@ -24,27 +24,33 @@ public:
     int c=0;
     if(priority.empty())
     {
-      for(auto it : Modules){
-	source.Reply("\2%-16s\2 %s [%s]", it.second->name.c_str(), it.second->GetAuthor().c_str(),
-		     ModuleHandler::DecodePriority(it.second->GetPriority()).c_str());
+      for(auto it : Modules)
+      {
+	source.Reply("\2%-16s\2 %s [%s]", it->name.c_str(), it->GetAuthor().c_str(),
+		     ModuleHandler::DecodePriority(it->GetPriority()).c_str());
 	++c;
       }
-    }else
+    }
+    else
     { // There is probably a WAY easier way of doing this but whatever
-    for(auto it : Modules){
-	if(priority.equals_ci("LAST") || priority == '1'){
-	  source.Reply("\2%-16s\2 %s [%s]", it.second->name.c_str(), it.second->GetAuthor().c_str(),
-			ModuleHandler::DecodePriority(it.second->GetPriority()).c_str());
-	  ++c;
-	}else if(priority.equals_ci("NORMAL") || priority == '2')
+      for(auto it : Modules)
+      {
+	if(priority.equals_ci("LAST") || priority == '1')
 	{
-	  source.Reply("\2%-16s\2 %s [%s]", it.second->name.c_str(), it.second->GetAuthor().c_str(),
-		     ModuleHandler::DecodePriority(it.second->GetPriority()).c_str());
+	  source.Reply("\2%-16s\2 %s [%s]", it->name.c_str(), it->GetAuthor().c_str(),
+			ModuleHandler::DecodePriority(it->GetPriority()).c_str());
 	  ++c;
-	}else if(priority.equals_ci("FIRST") || priority == '3')
+	}
+	else if(priority.equals_ci("NORMAL") || priority == '2')
 	{
-	  source.Reply("\2%-16s\2 %s [%s]", it.second->name.c_str(), it.second->GetAuthor().c_str(),
-		     ModuleHandler::DecodePriority(it.second->GetPriority()).c_str());
+	  source.Reply("\2%-16s\2 %s [%s]", it->name.c_str(), it->GetAuthor().c_str(),
+		     ModuleHandler::DecodePriority(it->GetPriority()).c_str());
+	  ++c;
+	}
+	else if(priority.equals_ci("FIRST") || priority == '3')
+	{
+	  source.Reply("\2%-16s\2 %s [%s]", it->name.c_str(), it->GetAuthor().c_str(),
+		     ModuleHandler::DecodePriority(it->GetPriority()).c_str());
 	  ++c;
 	}
       }
@@ -78,13 +84,16 @@ public:
       this->SendSyntax(source);
     //else if(!source.u->IsOwner())
     //  source.Reply(ACCESS_DENIED);
-    else{
+    else
+    {
       ModErr e = ModuleHandler::LoadModule(module);
       if(e != MOD_ERR_OK)
       {
 	source.Reply("Failed to load module %s: %s", module.c_str(), DecodeModErr(e).c_str());
 	Log(source.u, this) << "to load " << module << " and failed: " << DecodeModErr(e);
-      }else{
+      }
+      else
+      {
 	source.Reply("Module \2%s\2 loaded sucessfuly", module.c_str());
 	Log(source.u, this) << "to load " << module;
       }
@@ -187,12 +196,14 @@ public:
   void Run(CommandSource &source, const Flux::vector &params)
   {
     const Flux::string modd = params[1];
-    if(modd.empty()){
+    if(modd.empty())
+    {
       this->SendSyntax(source);
       return;
     }
       module *mo = FindModule(modd);
-      if(!mo){
+      if(!mo)
+      {
 	source.Reply("Module \2%s\2 is not loaded", modd.c_str());
 	return;
       }
@@ -200,12 +211,14 @@ public:
       source.Reply("Module: \2%s\2 Version: \2%s\2 Author: \2%s\2\nLoaded: \2%s\2", mo->filename.c_str(), mo->GetVersion().c_str(), mo->GetAuthor().c_str(), do_strftime(mo->GetLoadTime()).c_str());
       Flux::string cmds;
       for(auto it : Commandsmap)
-	if((it.second->mod == mo)){ //For /msg commands
+	if((it.second->mod == mo))
+	{ //For /msg commands
 	  cmds += it.second->name+" ";
 	}
 	cmds.trim();
       for(auto it : ChanCommandMap)
-	if((it.second->mod == mo)){ //For Channel Commands
+	if((it.second->mod == mo))
+	{ //For Channel Commands
 	  cmds += it.second->name+" ";
 	}
       cmds.trim();
@@ -250,7 +263,8 @@ public:
     {
       Flux::string mname = it;
       mname.trim();
-      if(!FindModule(mname)){
+      if(!FindModule(mname))
+      {
 	Log() << "Rehash loaded module " << mname;
 	ModuleHandler::LoadModule(mname);
       }

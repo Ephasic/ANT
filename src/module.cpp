@@ -12,7 +12,7 @@
 #include "module.h"
 // This code sucks, you know it and I know it.
 // Move on and call me an idiot later.
-Flux::insensitive_map<module*> Modules;
+std::list<module*> Modules;
 EventsVector ModuleHandler::EventHandlers[I_END];
 /**
  * \fn module::module(Flux::string n)
@@ -28,7 +28,7 @@ module::module(const Flux::string &n): author(""), version(""), loadtime(time(NU
   if(FindModule(this->name))
     throw ModuleException("Module already exists!");
 
-  Modules[this->name] = this;
+  Modules.push_back(this);
   if(!nofork)
     Log() << "Loaded module " << n;
 }
@@ -38,7 +38,10 @@ module::~module()
   SET_SEGV_LOCATION();
   Log(LOG_DEBUG) << "Unloading module " << this->name;
   ModuleHandler::DetachAll(this);
-  Modules.erase(this->name);
+
+  std::list<module*>::iterator it = std::find(Modules.begin(), Modules.end(), this);
+  if(it != Modules.end())
+    Modules.erase(it);
 }
 
 void module::SetAuthor(const Flux::string &person)

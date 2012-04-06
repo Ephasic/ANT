@@ -325,19 +325,19 @@ void Cleanup()
     Network *n = nit.second;
     if(n)
     {
-      // Clean up any user pointers for the network and clear the map
-      if(!n->UserNickList.empty())
-	for(auto uit : n->UserNickList)
-	  if(uit.second)
-	    ptrstodelete.push(uit.second);
-      n->UserNickList.clear();
-
       // Clean up any channel pointers for the network and clear the map
       if(!n->ChanMap.empty())
 	for(auto cit : n->ChanMap)
 	  if(cit.second)
 	    ptrstodelete.push(cit.second);
       n->ChanMap.clear();
+
+      // Clean up any user pointers for the network and clear the map
+      if(!n->UserNickList.empty())
+	for(auto uit : n->UserNickList)
+	  if(uit.second)
+	    ptrstodelete.push(uit.second);
+      n->UserNickList.clear();
 
       ptrstodelete.push(n);
     }
@@ -347,13 +347,10 @@ void Cleanup()
   while(!ptrstodelete.empty())
   {
     void *ptr = ptrstodelete.front();
-    Log(LOG_TERMINAL) << "Deleting @" << ptr;
+//     Log(LOG_TERMINAL) << "Deleting @" << ptr;
     delete ptr;
     ptrstodelete.pop();
   }
-  // Delete the config parser
-  if(Config)
-    delete Config;
 
   // Delete our global IRC protocol wrapper
   if(GProto)

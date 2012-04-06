@@ -120,11 +120,15 @@ void Rehash()
     BotConfig *configtmp = Config;
     Config = new BotConfig(bi_dir);
     delete configtmp;
+    
     if(!Config)
       throw ConfigException("Could not read config.");
+    
     FOREACH_MOD(I_OnReload, OnReload());
     ReadConfig();
-  }catch(const ConfigException &ex){
+  }
+  catch(const ConfigException &ex)
+  {
     Log() << "Configuration Exception Caught: " << ex.GetReason();
   }
 }
@@ -133,12 +137,18 @@ void Rehash()
  * \fn static void remove_pidfile()
  * \brief Removes the PID file on exit
  */
-static void remove_pidfile() { Delete(Config->PidFile.c_str()); }
+static void remove_pidfile()
+{
+  Delete(Config->PidFile.c_str());
+  if(Config)
+    delete Config;
+}
 /**
  * \fn static void WritePID()
  * \brief Write the bots PID file
  */
-static void WritePID(){
+static void WritePID()
+{
   //logging to a text file and making the PID file.
   if(Config->PidFile.empty())
     throw CoreException("Cannot write PID file, no PID file specified.");

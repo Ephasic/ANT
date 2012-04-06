@@ -57,7 +57,6 @@ public:
   Flux::string topic;
   Flux::string topic_setter;
   Network *n;
-  Flux::insensitive_map<Bot*> bots;
   time_t topic_time;
   time_t creation_time;
   void AddUser(User*);

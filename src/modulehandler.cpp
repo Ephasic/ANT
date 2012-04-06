@@ -216,7 +216,8 @@ void ModuleHandler::UnloadAll()
   // XXX: For some weird reason we require a FIFO queue to work around some memory leakage.
   std::queue<module*> scheduled_for_deletion;
   for(auto it : Modules)
-    scheduled_for_deletion.push(it.second);
+//     Unload(it);
+    scheduled_for_deletion.push(it);
 
   while(!scheduled_for_deletion.empty())
   {
@@ -255,8 +256,8 @@ void ModuleHandler::SanitizeRuntime()
   else
   {
     Flux::vector files = TextFile::DirectoryListing(dirbuf);
-    for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
-      Delete(Flux::string(dirbuf+(*it)).c_str());
+    for(auto it : files)
+      Delete(Flux::string(dirbuf+it).c_str());
   }
 }
 
@@ -267,8 +268,12 @@ void ModuleHandler::SanitizeRuntime()
  */
 module *FindModule(const Flux::string &name)
 {
-  auto it = Modules.find(name);
-  if(it != Modules.end())
-    return it->second;
+  for(auto it : Modules)
+  {
+    module *m = it;
+    if(m->name.equals_ci(name))
+      return m;
+  }
+  
   return nullptr;
 }
