@@ -347,9 +347,17 @@ void Cleanup()
   while(!ptrstodelete.empty())
   {
     void *ptr = ptrstodelete.front();
-    Log(LOG_MEMORY) << "Deleting @" << ptr;
-    delete ptr;
     ptrstodelete.pop();
+    Log(LOG_MEMORY) << "Deleting @" << ptr;
+    
+    if(typeid(ptr) == typeid(User*))
+      delete static_cast<User*>(ptr);
+
+    if(typeid(ptr) == typeid(Channel*))
+      delete static_cast<Channel*>(ptr);
+    
+    if(typeid(ptr) == typeid(Network*))
+      delete static_cast<Network*>(ptr);
   }
 
   // Delete our global IRC protocol wrapper

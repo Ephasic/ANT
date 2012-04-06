@@ -10,8 +10,8 @@
  */
 #include "channel.h"
 #include "bot.h"
-
-Channel::Channel(Network *net, const Flux::string &nname, time_t ts): n(net), name(nname), creation_time(ts), topic_time(0)
+// name, topic, topic_setter, n, topic_time, creation_time
+Channel::Channel(Network *net, const Flux::string &nname, time_t ts): name(nname), n(net), topic_time(0), creation_time(ts)
 {
   if(nname.empty())
     throw CoreException("I don't like empty channel names in my channel constructor >:d");
@@ -39,11 +39,11 @@ User *Channel::finduser(Network *net, const Flux::string &usr)
   auto it1 = net->UserNickList.find(usr);
   User *u = it1->second;
   if(!u)
-    return NULL;
+    return nullptr;
   UList::iterator it = UserList.find(u);
   if(it != UserList.end())
     return it->first;
-  return NULL;
+  return nullptr;
 }
 
 void Channel::SendJoin(){ this->n->b->ircproto->join(this->name); this->SendWho(); }
