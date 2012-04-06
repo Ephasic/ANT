@@ -10,7 +10,7 @@ Legend:
 ANT 1.0.0
 ----------
 [-] Bugs
-  [+] Fix Glibc crash
+  [X] Fix Glibc crash
   [ ] Fix derpiness in starting sockets from modules?
   [ ] Fix slowness in the socket engine
   [ ] Make resolving hostnames in their own threads. (or not block the whole program while waiting for something to resolve)

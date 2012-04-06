@@ -178,10 +178,8 @@ void startup(int argc, char** argv, char *envp[])
   Flux::string bindir = getprogdir(argv[0]);
   if(bindir[bindir.length() - 1] == '.')
     bindir = bindir.substr(0, bindir.length() - 2);
-
-  Log(LOG_TERMINAL) << "DIR1: " << binary_dir;
+  
   *const_cast<Flux::string*>(&binary_dir) = bindir;
-  Log(LOG_TERMINAL) << "DIR2: " << binary_dir;
 
   Config = new BotConfig(bindir);
   if(!Config)
@@ -206,6 +204,11 @@ void startup(int argc, char** argv, char *envp[])
 	nofork = true;
 	Log(LOG_DEBUG) << "ANT Commit System is started With No Forking enabled. (" << arg << ")";
       }
+      else if (arg.equals_ci("--memorydebug") || arg.equals_ci("-m"))
+      {
+	memdebug = true;
+	Log(LOG_DEBUG) << "ANT Commit System is started With memory debug enabled. (" << arg << ")";
+      }
       else if ((arg.equals_ci("--help")) ^ (arg == "-h"))
       {
 	Log(LOG_TERMINAL) << "ANT Internet Relay Chat Commit Bot system v" << VERSION;
@@ -215,6 +218,7 @@ void startup(int argc, char** argv, char *envp[])
 	Log(LOG_TERMINAL) << "-n, --nofork";
 	Log(LOG_TERMINAL) << "-p, --protocoldebug";
 	Log(LOG_TERMINAL) << "-c, --nocolor";
+	Log(LOG_TERMINAL) << "-m, --memorydebug";
 	Log(LOG_TERMINAL) << "-v, --version";
 	Log(LOG_TERMINAL) << "See --version for full version information";
 	Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
@@ -225,10 +229,10 @@ void startup(int argc, char** argv, char *envp[])
 	Log(LOG_TERMINAL) << "Arbitrary Navn Tool IRC Commit System C++ Bot Version " << VERSION_FULL;
 	Log(LOG_TERMINAL) << "This bot was programmed from scratch by Justasic and Lordofsraam.";
 	Log(LOG_TERMINAL) << "";
-	Log(LOG_TERMINAL) << "IRC: IRC.Flux-Net.net #Computers";
-	Log(LOG_TERMINAL) << "WWW: http://www.Flux-Net.net";
-	Log(LOG_TERMINAL) << "Email: Staff@Flux-Net.net";
-	Log(LOG_TERMINAL) << "Git: git://gitorious.org:navn/navn.git";
+	Log(LOG_TERMINAL) << "IRC: irc.Azuru.net #Computers";
+	Log(LOG_TERMINAL) << "WWW: http://www.Azuru.net";
+	Log(LOG_TERMINAL) << "Email: Development@Azuru.net";
+	Log(LOG_TERMINAL) << "Git: arbitrary-navn-tool.googlecode.com";
 	Log(LOG_TERMINAL) << "";
 	Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
 	Log(LOG_TERMINAL) << "Type " << dir << " --help for help on how to use navn, or read the readme.";

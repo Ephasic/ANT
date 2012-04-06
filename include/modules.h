@@ -21,8 +21,11 @@
 jmp_buf sigbuf;
 #endif
 
+// This is kind of a junk variable file more or less..
+
 char **my_av, **my_envp;
-bool nofork, dev, protocoldebug, quitting, nocolor, istempnick = false;
+bool nofork = false, dev = false, protocoldebug = false, quitting = false, nocolor = false, istempnick = false;
+bool memdebug = false;
 Flux::string binary_path, bot_bin, quitmsg, server_name, LastBuf;
 const Flux::string binary_dir;
 char segv_location[255];

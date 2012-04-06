@@ -91,6 +91,11 @@ Log::~Log()
 
   if((type == LOG_RAWIO || type == LOG_DEBUG) && protocoldebug && InTerm())
     std::cout << TimeStamp() << " " << (nocolor?NoTermColor(message):message) << std::endl;
+  if(type == LOG_MEMORY && memdebug)
+  {
+    std::cout << TimeStamp() << " [Memory] " << (nocolor?NoTermColor(message):message) << std::endl;
+    return;
+  }
   else if(type == LOG_NORMAL && nofork && InTerm())
     std::cout << TimeStamp() << " " << (nocolor?NoTermColor(message):message) << std::endl;
   else if(type == LOG_DEBUG && dev && nofork && InTerm())
@@ -98,7 +103,8 @@ Log::~Log()
   else if(type == LOG_TERMINAL && InTerm()){
     std::cout << (nocolor?NoTermColor(raw):raw) << std::endl;
     return;
-  }else if(type == LOG_SILENT){} // ignore the terminal if its log silent
+  }
+  else if(type == LOG_SILENT){} // ignore the terminal if its log silent
 
   try
     {

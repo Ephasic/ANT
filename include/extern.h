@@ -63,6 +63,7 @@ struct CommandSource;
 enum LogType
 {
   LOG_DEBUG,
+  LOG_MEMORY,
   LOG_NORMAL,
   LOG_RAWIO,
   LOG_TERMINAL,
@@ -132,7 +133,7 @@ E int randint(int x, int y);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
 E bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
-E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick;
+E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick, memdebug;
 E Flux::vector StringVector(const Flux::string&, char);
 E std::list<module*> Modules;
 E Flux::insensitive_map<Network*> Networks;

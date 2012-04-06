@@ -161,7 +161,7 @@ public:
       c->SendMessage("ow");
 
     // Justasic's additions
-    if(msg.search_ci("smashes "+b->nick))
+    if(msg.search_ci("smashes "+b->nick) || msg.search_ci("steps on "+b->nick))
       c->SendAction("is flattened");
     if(msg.search_ci("burns "+b->nick) || msg.search_ci("sets "+b->nick+" on fire"))
       c->SendAction("runs around");

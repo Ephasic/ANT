@@ -347,7 +347,7 @@ void Cleanup()
   while(!ptrstodelete.empty())
   {
     void *ptr = ptrstodelete.front();
-//     Log(LOG_TERMINAL) << "Deleting @" << ptr;
+    Log(LOG_MEMORY) << "Deleting @" << ptr;
     delete ptr;
     ptrstodelete.pop();
   }
