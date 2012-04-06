@@ -141,7 +141,8 @@ void IRCProto::topic(const Flux::string &channel, const char *fmt, ...){
  * \brief Handles quitting of irc
  * \param message Quit message
  */
-void IRCProto::quit(const char *fmt, ...){
+void IRCProto::quit(const char *fmt, ...)
+{
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
@@ -181,8 +182,12 @@ void IRCProto::kick(const Flux::string &chan, const Flux::string &userstr, const
 /**
  * \overload void IRCProto::quit(Flux::string message)
  */
-void IRCProto::quit(const Flux::string &message){
-  this->Raw("QUIT :%s\n", message.c_str());
+void IRCProto::quit(const Flux::string &message)
+{
+  if(!message.empty())
+    this->Raw("QUIT :%s\n", message.c_str());
+  else
+    this->Raw("QUIT\n");
 }
 /**
  * \overload void IRCProto::part(Flux::string channel, Flux::string msg)

@@ -17,13 +17,17 @@ void ProcessInput(const Flux::string &str)
   if(params.empty())
     return;
 
-  if(params[0].equals_ci("QUIT"))
+  if(params[0].equals_ci("QUIT") || params[0].equals_ci("EXIT"))
   {
 	quitting = true;
+	
+	Flux::string message;
+	for(unsigned i = 1; i < params.size(); ++i)
+	  message += params[i] + " ";
+	message.trim();
+	
 	for(auto it : Networks)
-	{
-	  it.second->b->ircproto->quit(str);
-	}
+	    it.second->b->Quit(message);
   }
 //   else if(params[0].equals_ci("MSG"))
 //     send_cmd("PRIVMSG %s\n", str.substr(4).c_str());

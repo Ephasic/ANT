@@ -313,9 +313,11 @@ Flux::string do_strftime(const time_t &t, bool short_output)
 // Clean up our pointers so we don't exit with memory leaks..
 void Cleanup()
 {
-  FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
   // Shutdown the socket engine and close any remaining sockets.
   SocketEngine::Shutdown();
+
+  // a FIFO queue for all the pointers we need to delete.
+  std::queue<void*> ptrstodelete;
 
   // Clean up any network pointers and clear the map
   for(auto nit : Networks)
@@ -326,20 +328,29 @@ void Cleanup()
       // Clean up any user pointers for the network and clear the map
       if(!n->UserNickList.empty())
 	for(auto uit : n->UserNickList)
-	  delete uit.second;
+	  if(uit.second)
+	    ptrstodelete.push(uit.second);
       n->UserNickList.clear();
 
       // Clean up any channel pointers for the network and clear the map
       if(!n->ChanMap.empty())
 	for(auto cit : n->ChanMap)
-	  delete cit.second;
+	  if(cit.second)
+	    ptrstodelete.push(cit.second);
       n->ChanMap.clear();
 
-      delete nit.second;
+      ptrstodelete.push(n);
     }
   }
   Networks.clear();
 
+  while(!ptrstodelete.empty())
+  {
+    void *ptr = ptrstodelete.front();
+    Log(LOG_TERMINAL) << "Deleting @" << ptr;
+    delete ptr;
+    ptrstodelete.pop();
+  }
   // Delete the config parser
   if(Config)
     delete Config;

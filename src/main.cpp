@@ -78,6 +78,7 @@ int main (int argcx, char** argvx, char *envp[])
       if(time(NULL) - last_check >= 3)
       {
 	loopcount = 0;
+	FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
 	TimerManager::TickTimers(time(NULL));
 	last_check = time(NULL);
       }
@@ -86,9 +87,10 @@ int main (int argcx, char** argvx, char *envp[])
     // clean up for exit
     FOREACH_MOD(I_OnShutdown, OnShutdown());
     SaveDatabases();
-    Cleanup();
+    FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
     ModuleHandler::UnloadAll();
     ModuleHandler::SanitizeRuntime();
+    Cleanup();
     Log(LOG_TERMINAL) << "\033[0m";
   }//try ends here
   catch(const CoreException& e)

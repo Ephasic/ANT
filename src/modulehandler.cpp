@@ -94,7 +94,6 @@ void ModuleHandler::DetachAll(module *m)
 
 ModErr ModuleHandler::LoadModule(const Flux::string &modname)
 {
-  Log(LOG_TERMINAL) << "BINDIR LOADMOD: " << (binary_dir.empty()?"(empty)":binary_dir);
   SET_SEGV_LOCATION();
   
   if(modname.empty())
@@ -120,8 +119,9 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
   }
   
   dlerror();
-  
-  auto *handle = dlopen(output.c_str(), RTLD_LAZY);
+
+  // FIXME: Somehow the binary_dir variable is lost when this executes >:|
+  void *handle = dlopen(output.c_str(), RTLD_LAZY);
   const char *err = dlerror();
   
   if(!handle && err && *err)
@@ -191,7 +191,8 @@ bool ModuleHandler::DeleteModule(module *m)
   {
     Log() << "[" << m->name << ".so] Module has no destroy function? (wtf?)";
     return false;
-  }else
+  }
+  else
     df(&m);
     
   if(handle)
@@ -212,12 +213,17 @@ bool ModuleHandler::Unload(module *m)
 
 void ModuleHandler::UnloadAll()
 {
-  for(Flux::insensitive_map<module*>::iterator it = Modules.begin(); it != Modules.end(); ++it)
+  // XXX: For some weird reason we require a FIFO queue to work around some memory leakage.
+  std::queue<module*> scheduled_for_deletion;
+  for(auto it : Modules)
+    scheduled_for_deletion.push(it.second);
+
+  while(!scheduled_for_deletion.empty())
   {
-    module *m = it->second;
-    //Log(LOG_TERMINAL) << "UNLOADING @" << m << ": " << m->name << " (" << var.first << ')';
-    Unload(m);
+    Unload(scheduled_for_deletion.front());
+    scheduled_for_deletion.pop();
   }
+    //Log(LOG_TERMINAL) << "UNLOADING @" << m << ": " << m->name << " (" << var.first << ')';
 }
 
 Flux::string ModuleHandler::DecodePriority(ModulePriority p)
@@ -239,9 +245,7 @@ Flux::string ModuleHandler::DecodePriority(ModulePriority p)
 void ModuleHandler::SanitizeRuntime()
 {
   Log(LOG_DEBUG) << "Cleaning up runtime directory.";
-  Log(LOG_TERMINAL) << "BINARY_DIR: " << binary_dir;
   Flux::string dirbuf = Config->Binary_Dir+"/runtime/";
-  Log(LOG_TERMINAL) << dirbuf;
   
   if(!TextFile::IsDirectory(dirbuf))
   {
