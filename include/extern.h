@@ -122,6 +122,9 @@ E uint32_t usercnt, maxusercnt;
 E Flux::string binary_path, bot_bin, quitmsg, LastBuf;
 E const Flux::string binary_dir;
 E const Flux::string VERSION_LONG;
+E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick, memdebug;
+
+/* function extern's */
 E Flux::string getprogdir(const Flux::string&, Flux::string &Bot_bin);
 E Flux::string DecodeModErr(ModErr err);
 E Flux::string isolate(char begin, char end, const Flux::string &msg);
@@ -133,8 +136,9 @@ E int randint(int x, int y);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
 E bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
-E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick, memdebug;
 E Flux::vector StringVector(const Flux::string&, char);
+
+/* maps, lists, vectors, etc. */
 E std::list<module*> Modules;
 E Flux::insensitive_map<Network*> Networks;
 E Flux::map<Network*> NetworkHosts;

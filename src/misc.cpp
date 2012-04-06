@@ -344,6 +344,9 @@ void Cleanup()
   }
   Networks.clear();
 
+  // Deallocate our map pointers and such.
+  // This would've deleted the void pointer but
+  // GCC doesn't like that and neither did valgrind
   while(!ptrstodelete.empty())
   {
     void *ptr = ptrstodelete.front();

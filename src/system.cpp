@@ -89,7 +89,9 @@ void restart(const Flux::string &reason)
       Log() << "Restarting: No Reason";
       if(n->b->ircproto)
 	n->b->ircproto->quit("Restarting: No Reason");
-    } else {
+    }
+    else
+    {
       Log() << "Restarting: " << reason;
       if(n->b->ircproto)
 	n->b->ircproto->quit("Restarting: %s", reason.c_str());
@@ -140,6 +142,9 @@ void Rehash()
 static void remove_pidfile()
 {
   Delete(Config->PidFile.c_str());
+
+  // We delete our config pointer here because this is the
+  // last function called before we actually exit.
   if(Config)
     delete Config;
 }
