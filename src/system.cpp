@@ -168,6 +168,57 @@ static void WritePID()
   else
     throw CoreException("Can not write to PID file "+Config->PidFile);
 }
+
+class CommandLineArguments
+{
+protected:
+  Flux::map<Flux::string> Arguments;
+public:
+  CommandLineArguments(int ac, char **av)
+  {
+    for(int i = 1; i < ac; ++i)
+    {
+      Flux::string argsarg = av[i];
+      Flux::string param;
+      while(!argsarg.empty() && argsarg[0] == '-')
+	argsarg.erase(argsarg.begin());
+      
+      size_t t = argsarg.find('=');
+      if(t != Flux::string::npos)
+      {
+	param = argsarg.substr(t+1);
+	argsarg.erase(t);
+      }
+      
+      if(argsarg.empty())
+	continue;
+      
+      Arguments[argsarg] = param;
+    }
+  }
+  
+  bool HasArg(const Flux::string &name, char shortname = '\0')
+  {
+    Flux::string Cppisstupidrighthere;
+    return this->HasArg(name, shortname, Cppisstupidrighthere);
+  }
+  
+  bool HasArg(const Flux::string &name, char shortname, Flux::string &args)
+  {
+    args.clear();
+    
+    for(Flux::map<Flux::string>::iterator it = this->Arguments.begin(); it != this->Arguments.end(); ++it)
+    {
+      if(it->first.equals_ci(name) || it->first[0] == shortname)
+      {
+	args = it->second;
+	return true;
+      }
+    }
+    return false;
+  }
+};
+
 /**This is the startup sequence that starts at the top to the try loop
  * @param startup(int, char)
  */
@@ -193,72 +244,69 @@ void startup(int argc, char** argv, char *envp[])
   Flux::string dir = argv[0];
   Flux::string::size_type n = dir.rfind('/');
   dir = "." + dir.substr(n);
-  //gets the command line paramitors if any.
-  if (!(argc < 1) || argv[1] != NULL)
+  
+  //gets the command line parameters if any.
+  CommandLineArguments args(argc, argv);
+
+  if(args.HasArg("developer", 'd'))
   {
-    for(int Arg=1; Arg < argc; ++Arg)
-    {
-      Flux::string arg = argv[Arg];
-      if((arg.equals_ci("--developer")) ^ (arg.equals_ci("--dev")) ^ (arg == "-d"))
-      {
-	dev = nofork = true;
-	Log(LOG_DEBUG) << "ANT Commit System is started in Developer mode. (" << arg << ")";
-      }
-      else if ((arg.equals_ci("--nofork")) ^ (arg == "-n"))
-      {
-	nofork = true;
-	Log(LOG_DEBUG) << "ANT Commit System is started With No Forking enabled. (" << arg << ")";
-      }
-      else if (arg.equals_ci("--memorydebug") || arg.equals_ci("-m"))
-      {
-	memdebug = true;
-	Log(LOG_DEBUG) << "ANT Commit System is started With memory debug enabled. (" << arg << ")";
-      }
-      else if ((arg.equals_ci("--help")) ^ (arg == "-h"))
-      {
-	Log(LOG_TERMINAL) << "ANT Internet Relay Chat Commit Bot system v" << VERSION;
-	Log(LOG_TERMINAL) << "Usage: " << dir << " [options]";
-	Log(LOG_TERMINAL) << "-h, --help";
-	Log(LOG_TERMINAL) << "-d, --developer";
-	Log(LOG_TERMINAL) << "-n, --nofork";
-	Log(LOG_TERMINAL) << "-p, --protocoldebug";
-	Log(LOG_TERMINAL) << "-c, --nocolor";
-	Log(LOG_TERMINAL) << "-m, --memorydebug";
-	Log(LOG_TERMINAL) << "-v, --version";
-	Log(LOG_TERMINAL) << "See --version for full version information";
-	Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
-	exit(0);
-      }
-      else if ((arg.equals_ci("--version")) ^ (arg == "-v"))
-      {
-	Log(LOG_TERMINAL) << "Arbitrary Navn Tool IRC Commit System C++ Bot Version " << VERSION_FULL;
-	Log(LOG_TERMINAL) << "This bot was programmed from scratch by Justasic and Lordofsraam.";
-	Log(LOG_TERMINAL) << "";
-	Log(LOG_TERMINAL) << "IRC: irc.Azuru.net #Computers";
-	Log(LOG_TERMINAL) << "WWW: http://www.Azuru.net";
-	Log(LOG_TERMINAL) << "Email: Development@Azuru.net";
-	Log(LOG_TERMINAL) << "Git: arbitrary-navn-tool.googlecode.com";
-	Log(LOG_TERMINAL) << "";
-	Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
-	Log(LOG_TERMINAL) << "Type " << dir << " --help for help on how to use navn, or read the readme.";
-	exit(0);
-      }
-      else if((arg.equals_ci("--protocoldebug")) ^ (arg == "-p"))
-      {
-	protocoldebug = true;
-	Log(LOG_RAWIO) << "ANT Commit System is started in Protocol Debug mode. (" << arg << ")";
-      }
-      else if((arg.equals_ci("--nocolor")) ^ (arg == "-c"))
-      {
-	nocolor = true;
-	Log() << "ANT Commit System is started in No Colors mode. (" << arg << ")\033[0m"; //reset terminal colors
-      }
-      else
-      {
-	Log(LOG_TERMINAL) << "Unknown option " << arg;
-	exit(0);
-      }
-    }
+    dev = nofork = true;
+    Log(LOG_DEBUG) << "ANT Commit System is started in Developer mode.";
+  }
+
+  if(args.HasArg("nofork", 'n'))
+  {
+    nofork = true;
+    Log(LOG_DEBUG) << "ANT Commit System is started With No Forking enabled.";
+  }
+
+  if(args.HasArg("memorydebug", 'm'))
+  {
+    memdebug = true;
+    Log(LOG_DEBUG) << "ANT Commit System is started With memory debug enabled.";
+  }
+
+  if(args.HasArg("help", 'h'))
+  {
+    Log(LOG_TERMINAL) << "ANT Internet Relay Chat Commit Bot system v" << VERSION;
+    Log(LOG_TERMINAL) << "Usage: " << dir << " [options]";
+    Log(LOG_TERMINAL) << "-h, --help";
+    Log(LOG_TERMINAL) << "-d, --developer";
+    Log(LOG_TERMINAL) << "-n, --nofork";
+    Log(LOG_TERMINAL) << "-p, --protocoldebug";
+    Log(LOG_TERMINAL) << "-c, --nocolor";
+    Log(LOG_TERMINAL) << "-m, --memorydebug";
+    Log(LOG_TERMINAL) << "-v, --version";
+    Log(LOG_TERMINAL) << "See --version for full version information";
+    Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
+    exit(0);
+  }
+
+  if(args.HasArg("version", 'v'))
+  {
+    Log(LOG_TERMINAL) << "Arbitrary Navn Tool IRC Commit System C++ Bot Version " << VERSION_FULL;
+    Log(LOG_TERMINAL) << "This bot was programmed from scratch by Justasic and Lordofsraam.";
+    Log(LOG_TERMINAL) << "";
+    Log(LOG_TERMINAL) << "IRC: irc.Azuru.net #Computers";
+    Log(LOG_TERMINAL) << "WWW: http://www.Azuru.net";
+    Log(LOG_TERMINAL) << "Email: Development@Azuru.net";
+    Log(LOG_TERMINAL) << "Git: arbitrary-navn-tool.googlecode.com";
+    Log(LOG_TERMINAL) << "";
+    Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
+    Log(LOG_TERMINAL) << "Type " << dir << " --help for help on how to use navn, or read the readme.";
+    exit(0);
+  }
+
+  if(args.HasArg("protocoldebug", 'p'))
+  {
+    protocoldebug = true;
+    Log(LOG_RAWIO) << "ANT Commit System is started in Protocol Debug mode.";
+  }
+
+  if(args.HasArg("nocolor", 'c'))
+  {
+    nocolor = true;
+    Log() << "ANT Commit System is started in No Colors mode.\033[0m"; //reset terminal colors
   }
 
   if(!nocolor)
