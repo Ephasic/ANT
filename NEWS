@@ -22,3 +22,5 @@ Web Front:
   include test commits which do not log to the versioning history but announces in the channel (which allows for bot admins to
   not need to make a mess of their versioning history)
 
+Stage one is almost complete.
+Stage two will start shortly once the bugs and kinks are worked out in the IRC backend.
