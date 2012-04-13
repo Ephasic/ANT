@@ -35,6 +35,8 @@ Dependencies:
   Building:
     CMake
     GCC 4.5 or higher (anything below and it causes C++11 errors)
+    CPPCMS 1.0.1 or higher (included)
+    Discount 2.1.3 or higher (included, download: http://www.pell.portland.or.us/~orc/Code/discount/)
   Segmentation fault traces:
     for backtrace dumps: C++ include '<execinfo.h>'
     for attempts to restore program before crash, include '<setjmp.h>'
