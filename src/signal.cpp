@@ -12,6 +12,7 @@
 
 #include "module.h"
 #include "bot.h"
+#include <cassert>
 
 /** Segmentation Fault Handler
  * \fn void HandleSegfault(module *m)
@@ -41,8 +42,8 @@ void HandleSegfault(module *m)
 
    strftime(tbuf, sizeof(tbuf), "[%b %d %H:%M:%S %Y]", localtime(&now));
    slog << "====================== Segmentation Fault ======================" << std::endl;
-   slog << "Please report this bug to http://flux-net.net/bugs/ and submit a bug report." << std::endl;
-   slog << "Please note that the Flux-Net developers may ask you to re-run this under gdb!" << std::endl;
+   slog << "Please report this bug to http://bugs.Azuru.net/ and submit a bug report." << std::endl;
+   slog << "Please note that the Azuru developers may ask you to re-run this under gdb!" << std::endl;
    slog << "Time of crash: " << tbuf << std::endl;
    slog << Flux::string(COMPILED_NAME).toupper() << " version: " << VERSION_FULL << std::endl;
    slog << "System info: " << uts.sysname << " " << uts.nodename << " " <<  uts.release << " " << uts.machine << std::endl;
@@ -121,21 +122,25 @@ void sigact(int sig)
       }
       #endif
       HandleSegfault(NULL);
-      raise(SIGABRT); //Force exit.
+      signal(sig, SIG_DFL);
+      for(auto it : Networks) // wouldn't hurt to try and exit saying we segfaulted.
+	it.second->b->Quit("Segmentation Fault");
+      exit(SIGSEGV);
       break;
     case SIGINT:
     case SIGKILL:
     case SIGTERM:
       signal(sig, SIG_IGN);
       signal(SIGHUP, SIG_IGN);
-      quitmsg = "Recieved Signal SIGTERM, exiting..";
+      quitmsg = "Received Signal SIGTERM, exiting..";
       Log(LOG_RAWIO) << quitmsg;
       for(auto it : Networks)
-        it.second->b->ircproto->quit(quitmsg);
+        it.second->b->Quit(quitmsg);
       quitting = true;
       break;
     default:
-      Log() << "Recieved weird signal from terminal. Sig Number: " << sig;
+      Log() << "Received weird signal from terminal. Sig Number: " << sig;
+      signal(sig, SIG_IGN);
   }
 }
 /** Signal Initializer

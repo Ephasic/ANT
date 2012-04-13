@@ -128,7 +128,7 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
 	  Source.Reply("An internal error has occured, please contact the bots administrator in Flux-net");
 	}
 #endif
-	LastRunModule = NULL;
+	LastRunModule = nullptr;
       }
       else
       {
@@ -169,7 +169,7 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
 	  Source.Reply("An internal error has occured, please contact the administrator in Flux-Net");
 	}
 #endif
-	LastRunModule = NULL;
+	LastRunModule = nullptr;
     }
     else
     {

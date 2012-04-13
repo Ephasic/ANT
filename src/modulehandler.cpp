@@ -216,7 +216,6 @@ void ModuleHandler::UnloadAll()
   // XXX: For some weird reason we require a FIFO queue to work around some memory leakage.
   std::queue<module*> scheduled_for_deletion;
   for(auto it : Modules)
-//     Unload(it);
     scheduled_for_deletion.push(it);
 
   while(!scheduled_for_deletion.empty())
@@ -224,7 +223,6 @@ void ModuleHandler::UnloadAll()
     Unload(scheduled_for_deletion.front());
     scheduled_for_deletion.pop();
   }
-    //Log(LOG_TERMINAL) << "UNLOADING @" << m << ": " << m->name << " (" << var.first << ')';
 }
 
 Flux::string ModuleHandler::DecodePriority(ModulePriority p)
