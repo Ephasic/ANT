@@ -169,7 +169,7 @@ public:
       c->SendAction("cries");
     if(msg.search_ci("slaps "+b->nick))
       c->SendAction("slaps %s", u->nick.c_str());
-    if(msg.search_ci("fries"+b->nick))
+    if(msg.search_ci("fries "+b->nick))
       c->SendAction("sizzles");
   }
 
