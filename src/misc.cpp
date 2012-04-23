@@ -311,7 +311,7 @@ Flux::string do_strftime(const time_t &t, bool short_output)
 }
 
 // Clean up our pointers so we don't exit with memory leaks..
-void Cleanup()
+void GarbageCollect()
 {
   // Shutdown the socket engine and close any remaining sockets.
   SocketEngine::Shutdown();

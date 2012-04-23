@@ -144,7 +144,7 @@ E Flux::insensitive_map<Network*> Networks;
 E Flux::map<Network*> NetworkHosts;
 
 /* void's */
-E void Cleanup();
+E void GarbageCollect();
 E void Rehash();
 E void RenameBot(Network*, const Flux::string&);
 E void Send_Global(const Flux::string&);

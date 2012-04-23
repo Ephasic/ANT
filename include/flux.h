@@ -33,18 +33,15 @@
 # pragma message("WARNING: You need to implement DEPRECATED for this compiler")
 # define DEPRECATED(func) func
 #endif
-/* stupid windows class crap for the modules */
-#ifdef _WIN32
-# define CoreExport __declspec(dllimport)
-# define DllExport __declspec(dllexport)
-#else
-# define CoreExport
-# define DllExport
-#endif
+/* Someone remove this */
+#define CoreExport
+#define DllExport
 typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > base_string;
-namespace Flux{
+namespace Flux
+{
   class string;
 }
+
 extern CoreExport bool protocoldebug;
 template<typename type_name, typename value> inline type_name value_cast(const value &y, bool use_reinterpret_cast = true)
 {
