@@ -258,7 +258,7 @@ public:
   }
   void OnReload()
   { //TODO: Solve on module unload.
-    Flux::vector updatedmodlist = StringVector(Config->Modules, ',');
+  Flux::vector updatedmodlist = ParametizeString(Config->Modules, ',');
     for(auto it : updatedmodlist) // Find any newly loaded modules.
     {
       Flux::string mname = it;

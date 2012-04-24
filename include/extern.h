@@ -138,7 +138,7 @@ E int randint(int x, int y);
 E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
 E bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
-E Flux::vector StringVector(const Flux::string&, char);
+E Flux::vector ParametizeString(const Flux::string&, char);
 E std::map<int, Flux::string> ForwardResolution(const Flux::string&);
 
 /* maps, lists, vectors, etc. */

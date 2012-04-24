@@ -267,7 +267,7 @@ void process(Network *n, const Flux::string &buffer)
   User *u = FindUser(n, nickname);
   Channel *c = FindChannel(n, receiver);
   Bot *b = n->b;
-  Flux::vector params2 = StringVector(message, ' ');
+  Flux::vector params2 = ParametizeString(message, ' ');
   /***********************************************/
 
   if(command == "004" && source.search('.'))

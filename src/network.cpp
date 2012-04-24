@@ -166,7 +166,7 @@ NetworkSocket::~NetworkSocket()
 bool NetworkSocket::Read(const Flux::string &buf)
 {
   Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << buf;
-  Flux::vector params = StringVector(buf, ' ');
+  Flux::vector params = ParametizeString(buf, ' ');
 
   if(!params.empty() && params[0].search_ci("ERROR"))
   {
