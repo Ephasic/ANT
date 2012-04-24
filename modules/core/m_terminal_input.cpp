@@ -136,16 +136,16 @@ public:
   bool exiting;
   InputThread():Thread(), exiting(false)
   {
-    Log() << "Input Thread Initializing.";
+    Log(LOG_THREAD) << "Input Thread Initializing.";
     this->Start();
   }
-  ~InputThread() { Log() << "Input Thread Exiting."; exiting = true; }
+  ~InputThread() { Log(LOG_THREAD) << "Input Thread Exiting."; exiting = true; }
   void ToRun()
   {
     base_string buf;
     while(!exiting)
     {
-      Log(LOG_RAWIO) << "Top of Input Loop";
+      Log(LOG_THREAD) << "Top of Input Loop";
       std::getline(std::cin, buf);
       if(!buf.empty())
 	ProcessInput(buf);

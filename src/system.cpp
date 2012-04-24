@@ -87,13 +87,13 @@ void restart(const Flux::string &reason)
     if(reason.empty())
     {
       Log() << "Restarting: No Reason";
-      if(n->b->ircproto)
+      if(n->b && n->b->ircproto)
 	n->b->ircproto->quit("Restarting: No Reason");
     }
     else
     {
       Log() << "Restarting: " << reason;
-      if(n->b->ircproto)
+      if(n->b && n->b->ircproto)
 	n->b->ircproto->quit("Restarting: %s", reason.c_str());
     }
   }

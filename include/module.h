@@ -33,7 +33,7 @@ enum Implementation {
 	I_OnSocketError, I_OnPing, I_OnPong, I_OnCommit, I_OnDatabasesWrite,
 	I_OnSignal, I_OnDatabasesRead, I_OnSaveDatabases, I_OnForceDatabasesRead,
 	I_OnUserRegister, I_OnPreReceiveMessage, I_OnGarbageCleanup, I_OnAction,
-	I_OnChannelAction, I_OnChannelNotice,
+	I_OnChannelAction, I_OnChannelNotice, I_OnLog,
   I_END
 };
 
@@ -74,6 +74,7 @@ public:
   virtual void OnCommit(CommitMessage&) {}
   virtual void OnGarbageCleanup() {}
   virtual void OnSignal(int) {}
+  virtual EventResult OnLog(Log*) { return EVENT_CONTINUE; }
   virtual void OnUserRegister(Network*) {}
   virtual void OnDatabasesWrite(void (*)(const char*, ...)) {}
   virtual void OnDatabasesRead(const Flux::vector&) {}

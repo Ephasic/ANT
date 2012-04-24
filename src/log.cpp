@@ -39,6 +39,76 @@ Flux::string NoTermColor(const Flux::string &ret)
   return str;
 }
 
+/**
+ * \fn static Flux::string GetLogDate(time_t t = time(NULL))
+ * \brief Get the date for the log files that is user readable
+ * \param time time to use on the log files
+ * \return returns a string containing the human-readable date format
+ */
+static Flux::string GetLogDate(time_t t = time(NULL))
+{
+  char timestamp[32];
+  
+  time(&t);
+  struct tm *tm = localtime(&t);
+  
+  strftime(timestamp, sizeof(timestamp), "%Y%m%d", tm);
+  
+  return timestamp;
+}
+
+/**
+ * \fn static inline Flux::string CreateLogName(const Flux::string &file, time_t t = time(NULL))
+ * \brief Returns a filename for the logs
+ * \param file string containing the filename
+ * \param time time to use on the filename
+ * \return the filename that has been generated
+ */
+static inline Flux::string CreateLogName(const Flux::string &file, time_t t = time(NULL))
+{
+  return "logs/" + file + "." + GetLogDate(t) + "-" + value_cast<Flux::string>(t);
+}
+
+/**
+ * \fn void CheckLogDelete(Log *log)
+ * \brief Check to see if logs need to be removed due to old age
+ * \param log A log class variable
+ */
+void CheckLogDelete(Log *log)
+{
+  Flux::string dir = Config->Binary_Dir+"/logs/";
+  if(!TextFile::IsDirectory(dir))
+  {
+    Log(LOG_TERMINAL) << "Directory " << dir << " does not exist, making new directory.";
+    if(mkdir(Flux::string(dir).c_str(), getuid()) != 0)
+      throw LogException("Failed to create directory "+dir+": "+Flux::string(strerror(errno)));
+  }
+  
+  Flux::vector files = TextFile::DirectoryListing(dir);
+  if(log)
+    files.push_back(log->filename);
+  
+  if(files.empty())
+    Log(LOG_TERMINAL) << "No Logs!";
+  
+  for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
+  {
+    Flux::string file = dir+(*it);
+    
+    if(TextFile::IsFile(file))
+    {
+      Flux::string t = file.isolate('-', ' ').strip('-');
+      int timestamp = (int)t;
+      
+      if(timestamp > (time(NULL) - 86400 * Config->LogAge) && timestamp != starttime)
+      {
+	Delete(file.c_str());
+	Log(LOG_DEBUG) << "Deleted old logfile " << file;
+      }
+    }
+  }
+}
+
 Flux::string Log::TimeStamp()
 {
  char tbuf[256];
@@ -83,39 +153,92 @@ Log::Log(LogType t, User *user, Command *command): type(t), u(user), c(command)
 
 Log::~Log()
 {
+  if(Config)
+    this->filename = CreateLogName(Config->LogFile, starttime);
+  else
+    this->filename = "";
+  
   Flux::string message = Flux::Sanitize(this->buffer.str()), raw = this->buffer.str();
+  std::stringstream logstream;
+  
   if(this->u && !this->c)
-   message = this->u->nick + " " + message;
+    message = this->u->nick + " " + message;
   if(this->u && this->c)
     message = this->u->nick + " used " + this->c->name + " " + message;
-
-  if((type == LOG_RAWIO || type == LOG_DEBUG) && protocoldebug && InTerm())
-    std::cout << TimeStamp() << " " << (nocolor?NoTermColor(message):message) << std::endl;
-  if(type == LOG_MEMORY && memdebug)
+  
+  switch(type)
   {
-    std::cout << TimeStamp() << " [Memory] " << (nocolor?NoTermColor(message):message) << std::endl;
-    return;
+    case LOG_SILENT:
+    case LOG_NORMAL:
+      logstream << TimeStamp() << " " << (nocolor?NoTermColor(message):message);
+      break;
+    case LOG_THREAD:
+      if(protocoldebug)
+	logstream << TimeStamp() << " [THREAD] " << (nocolor?NoTermColor(message):message);
+      break;
+    case LOG_DEBUG:
+      if(dev || protocoldebug)
+	logstream << TimeStamp() << " " << (nocolor?NoTermColor(message):message);
+      break;
+    case LOG_RAWIO:
+      if(protocoldebug)
+	logstream << TimeStamp() << " " << (nocolor?NoTermColor(message):message);
+      break;
+    case LOG_CRITICAL:
+      logstream << "\033[22;31m" << TimeStamp() << " [CRITICAL] " << (nocolor?NoTermColor(message):message) << "\033[22;36m";
+      break;
+    case LOG_MEMORY:
+      if(memdebug)
+	std::cout << TimeStamp() << " [MEMORY] " << (nocolor?NoTermColor(message):message) << std::endl;
+      return; // ignore everything else, it doesn't matter
+    case LOG_TERMINAL:
+      if(InTerm())
+	std::cout << (nocolor?NoTermColor(raw):raw) << std::endl;
+      return;
+    default:
+      Log(LOG_CRITICAL) << "Wtf log case is this?";
+      Log(LOG_TERMINAL) << " [NOTYPE] " << message;
   }
-  else if(type == LOG_NORMAL && nofork && InTerm())
-    std::cout << TimeStamp() << " " << (nocolor?NoTermColor(message):message) << std::endl;
-  else if(type == LOG_DEBUG && dev && nofork && InTerm())
-    std::cout << TimeStamp() << " " << (nocolor?NoTermColor(message):message) << std::endl;
-  else if(type == LOG_TERMINAL && InTerm()){
-    std::cout << (nocolor?NoTermColor(raw):raw) << std::endl;
+  
+  EventResult result;
+  FOREACH_RESULT(I_OnLog, OnLog(this), result);
+  if(result != EVENT_CONTINUE)
     return;
+  
+  if(type != LOG_SILENT || type != LOG_CRITICAL)
+    std::cout << logstream.str() << std::endl;
+  
+  if(type == LOG_CRITICAL) // Log to stderr instead of stdout
+    std::cerr << logstream.str() << std::endl;
+  
+  if(this->filename.empty())
+  {
+    std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!\033[22;36m" << std::endl;
+    return; // Exit if there's no file to log to
   }
-  else if(type == LOG_SILENT){} // ignore the terminal if its log silent
-
+  
   try
+  {
+    CheckLogDelete(this);
+    log.open(this->filename.c_str(), std::fstream::out | std::fstream::app);
+    
+    if(!log.is_open())
     {
-      log.open(Config->LogFile.c_str(), std::fstream::out | std::fstream::app);
-      if(!log.is_open())
-	throw LogException(Config->LogFile.empty()?Flux::string("Cannot fild Log File.").c_str():
-			    Flux::string("Failed to open Log File"+Config->LogFile+": "+strerror(errno)).c_str());
-
-      log << TimeStamp() << " " << NoTermColor(message) << std::endl;
-      if(log.is_open())
-	log.close();
+      if(!Config)
+	throw LogException("Cannot read log file from config! (is there a bot.conf?)");
+      else
+	throw LogException(Config->LogFile.empty()?"Cannot open Log File.":
+	Flux::string("Failed to open Log File "+this->filename+": "+strerror(errno)).c_str());
     }
-    catch (LogException &e) { if(!InTerm()) std::cerr << "Log Exception Caught: " << e.GetReason() << std::endl; }
+    
+    log << NoTermColor(logstream.str()) << std::endl;
+    
+    if(log.is_open())
+      log.close();
+  }
+  catch (LogException &e)
+  {
+    if(InTerm())
+      std::cerr << "Log Exception Caught: " << e.GetReason() << std::endl;
+  }
 }

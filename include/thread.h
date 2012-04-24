@@ -11,10 +11,12 @@
 #pragma once
 #ifndef THREAD_H
 #define THREAD_H
-#include "includes.h"
+#include "flux.h"
+#include "SocketException.h"
+#include <errno.h>
 #include <pthread.h>
 
-class CoreExport Thread : public Base
+class Thread : public Base
 {
   pthread_t Handle;
   bool exit;

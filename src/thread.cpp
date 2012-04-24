@@ -21,9 +21,13 @@ static inline pthread_attr_t *GetAttr()
 
   return &attr;
 }
+
 Thread::Thread():exit(false) {}
-Thread::~Thread() {}
+
+Thread::~Thread() { }
+
 void Thread::Notify() {}
+
 void *EntryPoint(void *parameter)
 {
   Thread *thread = static_cast<Thread*>(parameter);

@@ -67,6 +67,8 @@ enum LogType
   LOG_NORMAL,
   LOG_RAWIO,
   LOG_TERMINAL,
+  LOG_CRITICAL,
+  LOG_THREAD,
   LOG_SILENT
 };
 
@@ -137,6 +139,7 @@ E bool IsValidChannel(const Flux::string&);
 E bool InTerm();
 E bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
 E Flux::vector StringVector(const Flux::string&, char);
+E std::map<int, Flux::string> ForwardResolution(const Flux::string&);
 
 /* maps, lists, vectors, etc. */
 E std::list<module*> Modules;

@@ -203,11 +203,16 @@ BotConfig::BotConfig(const Flux::string &dir)
   this->Parser = new INIReader(conffile);
   this->Binary_Dir = dir;
   this->Read();
+  
   if(this->Parser->ParseError() == -1)
     throw ConfigException("Cannot open '"+conffile+"'");
+  
   if(this->Parser->ParseError() != 0)
     throw ConfigException(printfify("Error on line %i", this->Parser->ParseError()));
- }catch(const ConfigException &e){
+  
+ }
+ catch(const ConfigException &e)
+ {
    if (starttime == time(NULL))
      throw; //Let CoreExcepion catch it since its OnStart
    else
@@ -215,29 +220,34 @@ BotConfig::BotConfig(const Flux::string &dir)
    return;
  }
 }
-BotConfig::~BotConfig() { if(Parser) delete Parser; }
-void BotConfig::Read(){
-  SET_SEGV_LOCATION();
-  this->LogFile = this->Parser->Get("Log","Log_File","navn.log");
 
-  this->Realname = this->Parser->Get("Connect","Realname",Flux::string("ANT bot "+value_cast<Flux::string>(VERSION)+" (http://ANT.Flux-Net.net/)"));
-  this->Ident = this->Parser->Get("Connect","Ident","ANT");
-  this->dbpass = this->Parser->Get("MySQL", "password", "").std_str();
-  this->dbname = this->Parser->Get("MySQL", "database", "").std_str();
-  this->dbuser = this->Parser->Get("MySQL", "user", "").std_str();
-  this->Channel = this->Parser->Get("Connect","Channel","#Test");
-  this->NicknamePrefix = this->Parser->Get("Bot", "Nickname Prefix", "ANT-");
-  this->LogChannel = this->Parser->Get("Modules", "LogChannel","");
-  this->PidFile = this->Parser->Get("Bot","PID File","navn.pid");
-  this->ModuleDir = Parser->Get("Modules", "ModuleDir", "");
-  this->Modules = Parser->Get("Modules", "Modules", "");
-  this->xmlrpcbindip = Parser->Get("XML-RPC", "BindAddress", "0.0.0.0");
-  this->xmlrpcport = Parser->GetInteger("XML-RPC", "Port", 12345);
-  this->xmlrpcipv6 = Parser->GetBoolean("XML-RPC", "IPv6", false);
-  this->xmlrpctimeout = Parser->GetInteger("XML-RPC", "Timeout", 30);
-  this->UseIPv6 = Parser->GetBoolean("Connect", "UseIPv6", false);
-  this->SockWait = Parser->GetInteger("Socket","Socket Timeout",5);
-  this->RetryWait = Parser->GetInteger("Socket", "Retry Wait", 30);
-  this->dbforce = Parser->GetBoolean("Bot", "Force Database Read", false);
+BotConfig::~BotConfig() { if(Parser) delete Parser; }
+
+void BotConfig::Read()
+{
+  SET_SEGV_LOCATION();
+  this->LogFile 	= this->Parser->Get("Log","Log_File","navn.log");
+
+  this->Realname 	= this->Parser->Get("Connect","Realname",Flux::string("ANT bot "+value_cast<Flux::string>(VERSION)+" (http://ANT.Flux-Net.net/)"));
+  this->Ident 		= this->Parser->Get("Connect","Ident","ANT");
+  this->dbpass 		= this->Parser->Get("MySQL", "password", "").std_str();
+  this->dbname 		= this->Parser->Get("MySQL", "database", "").std_str();
+  this->dbuser 		= this->Parser->Get("MySQL", "user", "").std_str();
+  this->Channel 	= this->Parser->Get("Connect","Channel","#Test");
+  this->NicknamePrefix 	= this->Parser->Get("Bot", "Nickname Prefix", "ANT-");
+  this->LogChannel 	= this->Parser->Get("Modules", "LogChannel","");
+  this->PidFile 	= this->Parser->Get("Bot","PID File","navn.pid");
+  this->ModuleDir 	= this->Parser->Get("Modules", "ModuleDir", "");
+  this->Modules 	= this->Parser->Get("Modules", "Modules", "");
+  this->xmlrpcbindip 	= this->Parser->Get("XML-RPC", "BindAddress", "0.0.0.0");
+  this->LogTime 	= this->Parser->GetInteger("Log", "Log Time", 0);
+  this->xmlrpcport 	= this->Parser->GetInteger("XML-RPC", "Port", 12345);
+  this->xmlrpcipv6 	= this->Parser->GetBoolean("XML-RPC", "IPv6", false);
+  this->xmlrpctimeout 	= this->Parser->GetInteger("XML-RPC", "Timeout", 30);
+  this->UseIPv6 	= this->Parser->GetBoolean("Connect", "UseIPv6", false);
+  this->SockWait 	= this->Parser->GetInteger("Socket","Socket Timeout",5);
+  this->RetryWait 	= this->Parser->GetInteger("Socket", "Retry Wait", 30);
+  this->dbforce 	= this->Parser->GetBoolean("Bot", "Force Database Read", false);
+  this->LogAge 		= this->Parser->GetInteger("Log", "Log Age", 2);
 }
 

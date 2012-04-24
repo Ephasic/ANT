@@ -198,11 +198,12 @@ Flux::string GetPeerIP(int fd)
   int err = getpeername(fd, reinterpret_cast<struct sockaddr*>(&(addr)), &len);
   if(err < -1)
   {
-    Log(LOG_DEBUG) << "Could not retrive ip address for socket " << fd;
+    Log(LOG_DEBUG) << "Could not retrieve ip address for socket " << fd;
     return "";
   }
   // deal with both IPv4 and IPv6:
-  switch(addr.ss_family){
+  switch(addr.ss_family)
+  {
     case AF_INET:
       struct sockaddr_in *s4;
       s4 = reinterpret_cast<struct sockaddr_in*>(&(addr));
@@ -215,50 +216,119 @@ Flux::string GetPeerIP(int fd)
   return ipstr;
 }
 
+// TODO: Do something with this!
+// DNSThread::DNSThread(const Flux::string &h):Thread(), hostname(h), exiting(false)
+// {
+//   Log(LOG_THREAD) << "DNS Thread Initializing.";
+//   this->Start();
+// }
+// 
+// DNSThread::~DNSThread() { Log(LOG_THREAD) << "DNS Thread Exiting."; exiting = true; }
+// std::map<int, Flux::string> DNSThread::GetHostnames() { return this->hostnames; }
+// void DNSThread::ToRun()
+// {
+//   struct addrinfo *result, *res;
+//   int err = getaddrinfo(this->hostname.c_str(), NULL, NULL, &result);
+//   if(err != 0)
+//   {
+//     Log(LOG_TERMINAL) << "Failed to resolve " << this->hostname << ": " << gai_strerror(err);
+//     return;
+//   }
+// 
+//   Flux::string ret = hostname;
+//   int i = 0;
+// 
+//   for(res = result; res != NULL; res = res->ai_next)
+//   {
+//     struct sockaddr *haddr;
+//     haddr = res->ai_addr;
+//     char address[INET6_ADDRSTRLEN + 1] = "";
+// 
+//     switch(haddr->sa_family)
+//     {
+//       case AF_INET:
+// 	struct sockaddr_in *v4;
+// 	v4 = reinterpret_cast<struct sockaddr_in*>(haddr);
+// 	if (!inet_ntop(AF_INET, &v4->sin_addr, address, sizeof(address)))
+// 	{
+// 	  Log(LOG_DEBUG) << "DNS: " << strerror(errno);
+// 	  continue;
+// 	}
+// 	break;
+//       case AF_INET6:
+// 	struct sockaddr_in6 *v6 = reinterpret_cast<struct sockaddr_in6*>(haddr);
+// 	if (!inet_ntop(AF_INET6, &v6->sin6_addr, address, sizeof(address)))
+// 	{
+// 	  Log(LOG_DEBUG) << "DNS6: " << strerror(errno);
+// 	  continue;
+// 	}
+// 	break;
+//     }
+//     ret = address;
+// 
+//     if(!Config->UseIPv6 && ret.search(':'))
+//       continue;
+// 
+//     this->hostnames[++i] = ret;
+//   }
+// 
+//   freeaddrinfo(result);
+// }
+
 std::map<int, Flux::string> ForwardResolution(const Flux::string &hostname)
 {
   struct addrinfo *result, *res;
-  std::map<int, Flux::string> null; // empty map used for errors
+  std::map<int, Flux::string> null, rmap; // null is an empty map used for errors
   int err = getaddrinfo(hostname.c_str(), NULL, NULL, &result);
+  
   if(err != 0)
   {
     Log(LOG_TERMINAL) << "Failed to resolve " << hostname << ": " << gai_strerror(err);
     return null;
   }
+  
   Flux::string ret = hostname;
-  std::map<int, Flux::string> rmap;
   int i = 0;
+  
   for(res = result; res != NULL; res = res->ai_next)
   {
     struct sockaddr *haddr;
     haddr = res->ai_addr;
     char address[INET6_ADDRSTRLEN + 1] = "";
+    
     switch(haddr->sa_family)
     {
       case AF_INET:
 	struct sockaddr_in *v4;
 	v4 = reinterpret_cast<struct sockaddr_in*>(haddr);
-	if (!inet_ntop(AF_INET, &v4->sin_addr, address, sizeof(address))){
+	if (!inet_ntop(AF_INET, &v4->sin_addr, address, sizeof(address)))
+	{
 	  Log(LOG_DEBUG) << "DNS: " << strerror(errno);
 	  continue;
 	}
 	break;
       case AF_INET6:
 	struct sockaddr_in6 *v6 = reinterpret_cast<struct sockaddr_in6*>(haddr);
-	if (!inet_ntop(AF_INET6, &v6->sin6_addr, address, sizeof(address))){
+	if (!inet_ntop(AF_INET6, &v6->sin6_addr, address, sizeof(address)))
+	{
 	  Log(LOG_DEBUG) << "DNS6: " << strerror(errno);
 	  continue;
 	}
 	break;
     }
+    
     ret = address;
+    
     if(!Config->UseIPv6 && ret.search(':'))
       continue;
+    
     rmap[++i] = ret;
   }
+  
   freeaddrinfo(result);
   return rmap;
 }
+
 
 cidr::cidr(const Flux::string &ip)
 {

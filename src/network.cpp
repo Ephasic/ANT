@@ -22,6 +22,11 @@ Network::Network(const Flux::string &host, const Flux::string &p, const Flux::st
 
   //If we didn't specify the network name, use the hostname.
   this->name = n.empty()?host:n;
+
+//   // XXX: Memleak?
+//   DNSThread *dns = new DNSThread(host);
+//   this->hostnames = dns->GetHostnames();
+//   delete dns;
   this->hostnames = ForwardResolution(host);
   Networks[this->name] = this;
   NetworkHosts[host] = this;

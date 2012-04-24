@@ -135,7 +135,8 @@ void sigact(int sig)
       quitmsg = "Received Signal SIGTERM, exiting..";
       Log(LOG_RAWIO) << quitmsg;
       for(auto it : Networks)
-        it.second->b->Quit(quitmsg);
+	if(it.second->b)
+	  it.second->b->Quit(quitmsg);
       quitting = true;
       break;
     default:

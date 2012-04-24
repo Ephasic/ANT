@@ -83,6 +83,8 @@ public:
   bool dbforce;
   size_t SockWait;
   int RetryWait;
+  int LogAge;
+  size_t LogTime;
 private:
   void Read();
 };
