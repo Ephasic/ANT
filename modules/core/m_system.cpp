@@ -171,6 +171,8 @@ public:
       c->SendAction("slaps %s", u->nick.c_str());
     if(msg.search_ci("fries "+b->nick))
       c->SendAction("sizzles");
+    if(msg.search_ci("pets "+b->nick))
+      c->SendMessage("*purr*");
   }
 
   void OnNumeric(int i, Network *n, const Flux::vector &params)
