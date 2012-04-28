@@ -31,6 +31,8 @@
 #include <dirent.h>
 #include <csignal>
 #include <unistd.h>
+#include <wchar.h>
+#include <stdarg.h>
 #include <cstdlib>
 #include <sys/sysinfo.h>
 #include <sys/utsname.h>

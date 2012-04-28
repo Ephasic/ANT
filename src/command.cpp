@@ -34,6 +34,20 @@ void CommandSource::Reply(const char *fmt, ...)
     va_end(args);
   }
 }
+
+void CommandSource::Reply(const wchar_t *fmt, ...)
+{
+  va_list args;
+  wchar_t buf[BUFSIZE];
+  if(fmt)
+  {
+    va_start(args, fmt);
+    vswprintf(buf, sizeof(buf), fmt, args);
+    this->Reply(Flux::string(buf));
+    va_end(args);
+  }
+}
+
 /** \overload void CommandSource::Reply(const Flux::string &msg) */
 void CommandSource::Reply(const Flux::string &msg)
 {

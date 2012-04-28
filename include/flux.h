@@ -272,6 +272,8 @@ namespace Flux {
     string(char chr) : _string() { _string = chr; }
     string(size_type n, char chr) : _string(n, chr) { }
     string(const char *_str) : _string(_str) { }
+    string(wchar_t chr) : _string() { _string = chr; }
+    string(const wchar_t *_str) : _string() { _string = value_cast<std::string>(_str); }
     string(const base_string &_str) : _string(_str) { }
     string(const ci::string &_str) : _string(_str.c_str()) { }
     string(const string &_str, size_type pos = 0, size_type n = npos) : _string(_str._string, pos, n) { }

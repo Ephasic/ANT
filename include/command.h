@@ -52,6 +52,7 @@ struct CoreExport CommandSource
   std::vector<Flux::string> params;
 
   void Reply(const char *fmt, ...);
+  void Reply(const wchar_t *fmt, ...);
   void Reply(const Flux::string&);
 };
 

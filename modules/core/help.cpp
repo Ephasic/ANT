@@ -43,7 +43,7 @@ public:
     {
       Command *com = FindCommand(params[1], C_PRIVATE);
       if(com && !com->OnHelp(source, ""))
-	source.Reply("No help available for \2%s\2", params[1].c_str());
+	source.Reply(L"No help available for \2%s\2", params[1].c_str());
       else if(!com)
 	source.Reply("No help available for \2%s\2", params[1].c_str());
       Log(source.u) << "used help command on " << params[1];

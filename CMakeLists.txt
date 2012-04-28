@@ -270,7 +270,7 @@ if(NOT MSVC)
       append_to_list(LINK_LIBS cppdb)
     else(CPPDB_FOUND)
       message("-- Looking for CPPDB library - not found")
-      message(FATAL_ERROR "CPPDB is required for compile! look in libraries directory for library package")
+      message("CPPDB is required for future compile! look in libraries directory for library package")
     endif(CPPDB_FOUND)
 
     # Check if inet_addr is within the nsl library (if the library exists), and add it to the linker flags if needed
