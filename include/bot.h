@@ -37,7 +37,7 @@ public:
   /* Change a nickname */
   void SetNick(const Flux::string&);
   /* Send the user credentials for connecting */
-  void SendUser();
+  void introduce();
   /* Set a mode to the bot, User class does not have this so we do it manually */
   void SetMode(const Flux::string&);
 };

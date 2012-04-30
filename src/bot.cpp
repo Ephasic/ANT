@@ -138,10 +138,9 @@ void Bot::SetNick(const Flux::string &nickname)
   this->ircproto->nick(nickname);
 }
 
-void Bot::SendUser()
+void Bot::introduce()
 {
-  this->ircproto->user(this->ident, this->realname);
-  this->ircproto->nick(this->nick);
+  this->ircproto->introduce_client(this->nick, this->ident, this->realname);
 }
 
 Bot *FindBot(const Flux::string &nick)

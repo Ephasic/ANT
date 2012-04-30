@@ -269,15 +269,6 @@ void IRCProto::mode(const Flux::string &chan, const Flux::string &usermode, cons
   this->Raw("MODE %s %s %s\n", chan.c_str(), usermode.c_str(), usernick.c_str());
 }
 /**
- * \fn void IRCProto::user(Flux::string ident, Flux::string realname)
- * \brief Sends the user gecos to the server
- * \param ident The ident at the beginning of the IRC host.
- * \param realname The real name gecos used in irc.
- */
-void IRCProto::user(const Flux::string &ident, const Flux::string &realname){
-  this->Raw("USER %s * * :%s\n", ident.c_str(), realname.c_str());
-}
-/**
  * \overload void command::mode(Flux:;string dest, Flux::string mode)
  * \brief Sends a mode to the server
  * @param dest where to set the mode
@@ -285,6 +276,27 @@ void IRCProto::user(const Flux::string &ident, const Flux::string &realname){
  */
 void IRCProto::mode(const Flux::string &dest, const Flux::string &chanmode){
   this->Raw("MODE %s %s\n", dest.c_str(), chanmode.c_str());
+}
+
+/**
+ * \fn void IRCProto::introduce_client(const Flux::string &nick, const Flux::string &ident, const Flux::string &realname)
+ * \brief Sends the user gecos to the server on connect
+ * \param nick The nickname to set on connect
+ * \param ident The ident at the beginning of the IRC host.
+ * \param realname The real name gecos used in irc.
+ */
+void IRCProto::introduce_client(const Flux::string &nickname, const Flux::string &ident, const Flux::string &realname)
+{
+  // Get our hostname of our system
+  char hostname[256];
+  gethostname(hostname, 256);
+  
+  this->Raw("NICK %s\n", nickname.c_str());
+  this->Raw("USER %s %s %s :%s\n", ident.c_str(), hostname, net->hostname.c_str(), realname.c_str());
+
+  // FIXME: this.
+//   if(!Config->ServerPassword.empty())
+//     this->Raw("PASS %s\n", Config->ServerPassword.c_str());
 }
 
 void IRCProto::invite(const Flux::string &nickname, const Flux::string &channel)

@@ -191,7 +191,7 @@ void NetworkSocket::OnConnect()
 
   new Bot(this->net, printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)), Config->Ident, Config->Realname);
 
-  this->net->b->SendUser();
+  this->net->b->introduce();
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
   this->ProcessWrite();
 }
