@@ -35,6 +35,13 @@ void CommandSource::Reply(const char *fmt, ...)
   }
 }
 
+/**
+ * \brief This portion of the struct is used for long, unicode char arrays
+ * \fn void CommandSource::Reply(const wchar_t *fmt, ...)
+ * \param wchar_t* The message in a c string format
+ * \param va_list any other functions, vars to pass to va_list to form the string
+ */
+
 void CommandSource::Reply(const wchar_t *fmt, ...)
 {
   va_list args;
