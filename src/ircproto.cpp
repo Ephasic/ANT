@@ -286,6 +286,87 @@ void IRCProto::user(const Flux::string &ident, const Flux::string &realname){
 void IRCProto::mode(const Flux::string &dest, const Flux::string &chanmode){
   this->Raw("MODE %s %s\n", dest.c_str(), chanmode.c_str());
 }
+
+void IRCProto::invite(const Flux::string &nickname, const Flux::string &channel)
+{
+  this->Raw("INVITE %s %s\n", nickname.c_str(), channel.c_str());
+}
+
+void IRCProto::version(const Flux::string &server)
+{
+  if(server.empty())
+    this->Raw("VERSION\n");
+  else
+    this->Raw("VERSION %s\n", server.c_str());
+}
+
+void IRCProto::stats(const Flux::string &query, const Flux::string &server)
+{
+  if(server.empty())
+    this->Raw("STATS %s\n", query.c_str());
+  else
+    this->Raw("STATS %s %s\n", query.c_str(), server.c_str());
+}
+
+void IRCProto::links(const Flux::string &remote, const Flux::string &mask)
+{
+  if(remote.empty() && mask.empty())
+    this->Raw("LINKS\n");
+  else if (!remote.empty() && mask.empty())
+    this->Raw("LINKS %s\n", remote.c_str());
+  else if (!remote.empty() && !mask.empty())
+    this->Raw("LINKS %s %s\n", remote.c_str(), mask.c_str());
+}
+
+void IRCProto::time(const Flux::string &server)
+{
+  if(server.empty())
+    this->Raw("TIME\n");
+  else
+    this->Raw("TIME %s\n", server.c_str());
+}
+
+void IRCProto::admin(const Flux::string &server)
+{
+  if(server.empty())
+    this->Raw("ADMIN\n");
+  else
+    this->Raw("ADMIN %s\n", server.c_str());
+}
+
+void IRCProto::info(const Flux::string &server)
+{
+  if(server.empty())
+    this->Raw("INFO\n");
+  else
+    this->Raw("INFO %s\n", server.c_str());
+}
+
+void IRCProto::whowas(const Flux::string &nickname, int count, const Flux::string &server)
+{
+  if(count != 0 && !server.empty())
+    this->Raw("WHOWAS %s %d %s\n", nickname.c_str(), count, server.c_str());
+  else if (count != 0 && server.empty())
+    this->Raw("WHOWAS %s %d\n", nickname.c_str());
+  else if (count == 0 && !server.empty())
+    this->Raw("WHOWAS %s %s\n", nickname.c_str(), server.c_str());
+  else
+    this->Raw("WHOWAS %s\n", nickname.c_str());
+}
+
+void IRCProto::users(const Flux::string &server)
+{
+  if(server.empty())
+    this->Raw("USERS\n");
+  else
+    this->Raw("USERS %s\n", server.c_str());
+}
+
+void IRCProto::userhost(const Flux::string &nickname)
+{
+  this->Raw("USERHOST %s\n", nickname.c_str());
+}
+
 /*********************************************************************************/
 /**************************** Global Protocol Class ******************************/
 /*********************************************************************************/

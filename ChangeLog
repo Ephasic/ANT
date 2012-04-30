@@ -1,6 +1,9 @@
 Code by Justasic
 Changes For ANT
 
+ANT 1.0.1
+==========
+
 ANT 1.0.0
 ==========
 Forked from Navn's (version 2.0.1) repository.
@@ -41,4 +44,4 @@ Fixed throwing CoreExceptions in the socket engine when we reconnect to a networ
 Added ping timeout function for multiple networks
 Removed Clock.h
 Added m_dbmysql module
-
+Too much has changed in this, just read the git history.
