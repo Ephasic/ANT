@@ -20,6 +20,7 @@ ANT 1.0.0
   [X] Multi-bot handling
   [X] Network class for handling network information
   [ ] Handle high data through-put (REQUIRED)
+  [ ] Announcement throttling PER-NETWORK (CIA does not handle per-network throttles, freezing the daemon until the rest of a commit is announced!)
 
 [+] Add Database/User accounts type system for metadata
   [+] MySQL Backend.
