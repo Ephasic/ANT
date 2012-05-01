@@ -554,6 +554,7 @@ public:
     // Calculate files to announce.
     // FIXME: This needs to calculate directories as well
     // FIXME: This needs to be handled by the Rulesets system later on.
+    // link to CIA file formatter: http://code.google.com/p/cia-vc/source/browse/trunk/cia/LibCIA/Formatters/Commit.py
 
     Flux::string files = BuildFileString(msg.Files);
 
