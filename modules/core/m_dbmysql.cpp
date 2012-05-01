@@ -13,6 +13,8 @@
 // Since we use CPPCMS as the frontend (which is required), we can use its features here as well :P
 #include <cppdb/frontend.h>
 
+// FIXME: TODO: ugh this is such a mess, clean this up and make it actually work!
+
 cppdb::session sql("mysql:database="+Config->dbname+";user="+Config->dbuser+";password='"+Config->dbpass+"'");
 void Read(module *m = nullptr)
 {

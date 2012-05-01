@@ -187,7 +187,7 @@ bool NetworkSocket::Read(const Flux::string &buf)
 
 void NetworkSocket::OnConnect()
 {
-  Log(LOG_TERMINAL) << "Successfuly connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << "] (" << this->net->GetConHost() << ")";
+  Log(LOG_TERMINAL) << "Successfully connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << "] (" << this->net->GetConHost() << ")";
 
   new Bot(this->net, printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)), Config->Ident, Config->Realname);
 

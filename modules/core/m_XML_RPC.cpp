@@ -539,6 +539,14 @@ private:
 public:
   void OnCommit(CommitMessage &msg)
   {
+    EventResult e;
+    FOREACH_RESULT(I_OnPreCommit, OnPreCommit(msg), e);
+    if(e == EVENT_STOP)
+    {
+      Log(LOG_DEBUG) << "Module cancelled commit message!";
+      return;
+    }
+    
     this->Message = msg;
     // FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";

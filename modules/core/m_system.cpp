@@ -173,6 +173,14 @@ public:
       c->SendAction("sizzles");
     if(msg.search_ci("pets "+b->nick))
       c->SendMessage("*purr*");
+    if(msg.search_ci("pokes "+b->nick))
+      c->SendAction("farts");
+    if(msg.search_ci("slaps "+b->nick))
+      c->SendAction("punches %s in the esophagus!", u->nick.c_str());
+    if(msg.search_ci("adopts "+b->nick))
+      c->SendAction("runs away in 4 years");
+    if(msg.search_ci("murders "+b->nick))
+      c->SendAction("dies");
   }
 
   void OnNumeric(int i, Network *n, const Flux::vector &params)
