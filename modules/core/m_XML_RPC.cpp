@@ -98,27 +98,19 @@ class xmlrpcclient : public ClientSocket, public BufferedSocket
   Flux::vector FilesXML;
   bool in_query, in_header, IsXML;
 public:
-  xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), IsXML(false) {}
+  xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()),
+  ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), IsXML(false) {}
 
   bool Read(const Flux::string &m)
   {
     Flux::string message = SanitizeXML(m);
     messagestr = message;
     client = this;
+    
     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
+    
     if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
-//       int len = HTTPREQUEST.size();
-//       bool isfavicon = message.search_ci("/favicon.ico");
-//       this->Write("HTTP/1.0 200 OK");
-//       this->Write("CONNECTION: CLOSE");
-//       this->Write("CONTENT-TYPE: TEXT/HTML");
-//       this->Write(printfify("CONTENT-LENGTH: %i", isfavicon?0:len));
-//       this->Write("DATE: "+do_strftime(time(NULL), true));
-//       this->Write("SERVER: ANT Commit System version " + systemver);
-//       this->Write(" ");
-//       this->Write(isfavicon?"":HTTPREQUEST);
-//       this->ProcessWrite();
       new tqueue(htmlcall, 0); // Wait for the 3 second timeout
       Log(LOG_TERMINAL) << "HTTP GET Request.";
       return true;
@@ -147,16 +139,19 @@ public:
 
       if(!message.search_ci("</message>"))
 	  this->RawCommitXML += message.strip();
-      else{
+      else
+      {
 	this->in_query = false;
 	this->RawCommitXML += message.strip();
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
+	
 	this->Write("HTTP/1.0 200 OK");
 	this->Write("SERVER: ANT Commit System version " + systemver);
-	this->Write("CONTENT-LENGTH: 0");
+	this->Write("CONTENT-LENGTH: 17");
 	this->Write("CONNECTION: CLOSE");
 	this->Write("DATE: "+do_strftime(time(NULL), true));
 	this->Write("");
+	this->Write("Successful Commit\r");
 	this->HandleMessage();
 	this->ProcessWrite();
 	//return false; //Close the connection.
@@ -180,12 +175,14 @@ public:
     this->ProcessWrite();
     return true;
   }
+  
   bool ProcessWrite()
   {
     if(!this->WriteBuffer.empty())
-      Log(LOG_TERMINAL) << "Process Write: " << this->WriteBuffer;
+      Log(LOG_TERMINAL) << "Process Write:\n " << this->WriteBuffer;
     return BufferedSocket::ProcessWrite() && ClientSocket::ProcessWrite();
   }
+  
   bool GetData(Flux::string&, Flux::string&);
   void HandleMessage();
 };
@@ -219,6 +216,7 @@ ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 
 class module;
 /* This is down here so we don't make a huge mess in the middle of the file */
+// Parse our message then announce it as a commit using the OnCommit event.
 void xmlrpcclient::HandleMessage()
 {
   if(this->RawCommitXML.empty())
@@ -332,34 +330,8 @@ void xmlrpcclient::HandleMessage()
   }
   catch (std::exception &ex)
   {
-    Log(LOG_TERMINAL) << ":::: XML Exception Caught: " << ex.what();
+    Log(LOG_TERMINAL) << "XML Exception Caught: " << ex.what();
   }
-
-// This crap below is kept as example code for when i need to reference something while i develop the handler
-//   XMLFile xf(this->RawCommitXML, 1);
-//
-//   /* This code was based off the commit in this script: http://cia.vc/clients/git/ciabot.bash */
-//   /* Script Info (if available) */
-//   Flux::string ScriptName = xf.Tags["message"].Tags["generator"].Attributes["name"].Value;
-//   Flux::string ScriptVersion = xf.Tags["message"].Tags["generator"].Attributes["version"].Value;
-//   Flux::string ScriptURL = xf.Tags["message"].Tags["generator"].Attributes["url"].Value;
-//
-//   /* Commit Body */
-//   Flux::string timestamp = xf.Tags["message"].Attributes["timestamp"].Value;
-//   Flux::string author = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["author"].Value;
-//   Flux::string revision = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["revision"].Value;
-//   Flux::string log = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["log"].Value;
-//   Flux::string url = xf.Tags["message"].Tags["body"].Tags["commit"].Attributes["url"].Value;
-//   auto files = xf.Tags["message"].Tags["body"].Tags["commit"].Tags["files"].Tags;
-//
-//   /* Source info */
-//   Flux::string project = xf.Tags["message"].Tags["source"].Attributes["project"].Value;
-//   Flux::string branch = xf.Tags["message"].Tags["source"].Attributes["branch"].Value;
-//   Flux::string module = xf.Tags["message"].Tags["source"].Attributes["module"].Value;
-
-//   Log(LOG_TERMINAL) << "***Commit****\nScriptName: " << ScriptName << "\nScriptVersion: " << ScriptVersion << "\nScriptURL: " << ScriptURL << "\nTimestamp: " << timestamp << "\nAuthor: " << author << "\nRevision: " << revision << "\nLog: " << log << "\nURL: " << url << "\nProject: " << project << "\nBranch: " << branch << "\nModule: " << module << "\n***End Of Commit***";
-
-
 }
 
 class SocketStart : public Timer //Weird socket glitch where we need to use a timer to start the socket correctly.
@@ -377,65 +349,6 @@ public:
       Log() << "[XML-RPC] " << ex.GetReason();
       new SocketStart();
     }
-  }
-};
-
-//IRC Colors
-#define BLACK "\0031"
-#define DARK_BLUE "\0032"
-#define DARK_GREEN "\0033"
-#define GREEN "\0033"
-#define RED "\0034"
-#define LIGHT_RED "\0034"
-#define DARK_RED "\0035"
-#define PURPLE "\0036"
-#define BROWN "\0037"
-#define ORANGE "\0037"
-#define YELLOW "\0038"
-#define LIGHT_GREEN "\0039"
-#define AQUA "\00310"
-#define LIGHT_BLUE "\00311"
-#define BLUE "\00312"
-#define VIOLET "\00313"
-#define GREY "\00314"
-#define GRAY "\00314"
-#define LIGHT_GREY "\00315"
-#define LIGHT_GRAY "\00315"
-#define WHITE "\00316"
-
-//Other formatting
-#define NORMAL "\17"
-#define BOLD "\2"
-#define REVERSE ""
-#define UNDERLINE "\13"
-
-// Someone just please clean this up?
-std::queue<std::pair<Flux::string, CommitMessage>> throttledmessages;
-class ThrottleTimer : public Timer
-{
-  void CleanQueue()
-  {
-    while(!throttledmessages.empty() && ++throttlecount <= 5)
-    {
-      std::pair<Flux::string, CommitMessage> msgdata = throttledmessages.front();
-      throttledmessages.pop();
-      
-      for(auto it : msgdata.second.Channels)
-	it->SendMessage(msgdata.first);
-    }
-  }
-public:
-  int throttlecount;
-  ThrottleTimer():Timer(5), throttlecount(0)
-  {
-    // something here?
-  }
-
-  void Tick(time_t)
-  {
-    this->throttlecount = 0;
-    this->CleanQueue();
-    Log(LOG_TERMINAL) << "Throttle reset!";
   }
 };
 
@@ -470,115 +383,6 @@ public:
 
     for(auto it : listen_sockets)
       delete (it);
-  }
-
-private:
-  CommitMessage Message;
-  Flux::string GetCommitData(const Flux::string &n)
-  {
-    CommitMessage msg = this->Message;
-    for(auto it : msg.info)
-    {
-      if(it.first.equals_ci(n))
-	return it.second;
-    }
-    return "";
-  }
-
-  // FIXME: This needs some serious fixing! It should calculate directories and files the same as CIA.vc
-  Flux::string BuildFileString(Flux::vector files)
-  {
-    Flux::string ret;
-    if(files.size() <= 3)
-    {
-      for(auto it : files)
-      {
-        Flux::string file = it;
-        size_t slash = file.rfind("/");
-	if(slash < file.size())
-	{
-	  Log(LOG_TERMINAL) << "File: " << file << " slash: " << slash;
-	  Flux::string f = file.substr(slash+1);
-	  ret += f + " ";
-	}
-	else
-	  ret += file + " ";
-      }
-    }
-    else
-    {
-      int dirs = 0;
-      for(auto it : files)
-      {
-	Flux::string file = it;
-	size_t slash = file.rfind("/");
-	
-	if(slash < file.size())
-	{
-	  Flux::string dir = file.substr(0, slash);
-	  Log(LOG_TERMINAL) << "DIR: " << dir;
-	  if(!dir.empty())
-	    dirs++;
-	}
-      }
-      
-      std::stringstream ss;
-      ss << "(" << files.size() << " files";
-      
-      if(dirs < 0)
-	ss << " in " << dirs;
-      
-      ss << " changed)";
-      //ret = "(" + value_cast<Flux::string>(files.size()) + " files" + (dirs < 0?"":" in "+dirs) + " changed)";
-      ret = ss.str();
-    }
-    ret.trim();
-    return ret;
-  }
-
-public:
-  void OnCommit(CommitMessage &msg)
-  {
-    EventResult e;
-    FOREACH_RESULT(I_OnPreCommit, OnPreCommit(msg), e);
-    if(e == EVENT_STOP)
-    {
-      Log(LOG_DEBUG) << "Module cancelled commit message!";
-      return;
-    }
-    
-    this->Message = msg;
-    // FIXME: if they're no connections, buffer the message
-    Log(LOG_DEBUG) << "AnnounceCommit Called.";
-
-    // Calculate files to announce.
-    // FIXME: This needs to calculate directories as well
-    // FIXME: This needs to be handled by the Rulesets system later on.
-    // link to CIA file formatter: http://code.google.com/p/cia-vc/source/browse/trunk/cia/LibCIA/Formatters/Commit.py
-
-    Flux::string files = BuildFileString(msg.Files);
-
-    for(auto it : msg.Channels)
-    {
-      Channel *c = it;
-      Log(LOG_TERMINAL) << "Announcing in " << c->name << " (" << c->n->name << ')';
-
-      // Build the commit message with stringstream
-      std::stringstream ss;
-      ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
-      ss << NORMAL << BOLD << '[' << this->GetCommitData("branch") << "] " << NORMAL << YELLOW << 'r'
-      << this->GetCommitData("revision");
-      ss << NORMAL << BOLD << " | " << NORMAL << AQUA << files << NORMAL << ": " << this->GetCommitData("log"); //<< files;
-
-      Flux::string formattedmessgae = Flux::string(ss.str()).replace_all_cs("\"", "").replace_all_cs("\n", "").replace_all_cs("\r", "");
-
-      //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
-      ThrottleTimer *tt = new ThrottleTimer();
-      if(++tt->throttlecount <= 5)
-	c->SendMessage(formattedmessgae);
-      else
-	throttledmessages.push(std::make_pair(formattedmessgae, msg));
-    }
   }
 };
 
