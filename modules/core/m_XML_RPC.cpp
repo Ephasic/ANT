@@ -144,14 +144,23 @@ public:
 	this->in_query = false;
 	this->RawCommitXML += message.strip();
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
+
+	// Reply to our XML-RPC request stating that we received the commit.
+	Flux::string reply = "<?xml version=\"1.0\"?>\n"
+	"<methodResponse>\n"
+	"<params>\n"
+	"<param><value><string>Commit Received!</string></value></param>"
+	"</params>\n"
+	"</methodResponse>\n";
 	
 	this->Write("HTTP/1.0 200 OK");
 	this->Write("SERVER: ANT Commit System version " + systemver);
-	this->Write("CONTENT-LENGTH: 17");
+	this->Write("CONTENT-TYPE: TEXT/XML");
+	this->Write(printfify("CONTENT-LENGTH: %i", reply.size()));
 	this->Write("CONNECTION: CLOSE");
 	this->Write("DATE: "+do_strftime(time(NULL), true));
 	this->Write("");
-	this->Write("Successful Commit\r");
+	this->Write(reply);
 	this->HandleMessage();
 	this->ProcessWrite();
 	//return false; //Close the connection.

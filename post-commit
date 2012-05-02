@@ -289,6 +289,10 @@ if ($xml_rpc) {
   my $rpc_response = $rpc_client->send_request($rpc_request);
 
   unless (ref $rpc_response) {
+    print $rpc_request;
+    print "\n";
+    print $rpc_response;
+    print "\n";
     die "XML-RPC Error: $RPC::XML::ERROR\n";
   }
   exit;
