@@ -54,6 +54,8 @@ public:
   }
 };
 
+DBSave *del_on_exit;
+
 int main (int argcx, char** argvx, char *envp[])
 {
  SET_SEGV_LOCATION();
@@ -62,7 +64,7 @@ int main (int argcx, char** argvx, char *envp[])
     startup(argcx, argvx, envp);
     time_t last_check = time(NULL);
 
-    new DBSave(); //Start the Database Save timer.
+    del_on_exit = new DBSave(); //Start the Database Save timer.
     GProto = new GlobalProto();
 
     TimerManager::TickTimers(time(NULL)); //Call timers to tick to start pending sockets instantly.
@@ -91,6 +93,7 @@ int main (int argcx, char** argvx, char *envp[])
     ModuleHandler::UnloadAll();
     ModuleHandler::SanitizeRuntime();
     GarbageCollect();
+    delete del_on_exit;
     Log(LOG_TERMINAL) << "\033[0m";
   }//try ends here
   catch(const CoreException& e)

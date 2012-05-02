@@ -293,7 +293,7 @@ void startup(int argc, char** argv, char *envp[])
     Log(LOG_TERMINAL) << "Git: arbitrary-navn-tool.googlecode.com";
     Log(LOG_TERMINAL) << "";
     Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
-    Log(LOG_TERMINAL) << "Type " << dir << " --help for help on how to use navn, or read the readme.";
+    Log(LOG_TERMINAL) << "Type " << dir << " --help for help on how to use ANT, or read the readme.";
     exit(0);
   }
 
