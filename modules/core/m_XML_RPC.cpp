@@ -96,10 +96,10 @@ class xmlrpcclient : public ClientSocket, public BufferedSocket
 {
   Flux::string RawCommitXML;
   Flux::vector FilesXML;
-  bool in_query, in_header, IsXML;
+  bool in_query, in_header, IsXML, is_httpreq;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()),
-  ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), IsXML(false) {}
+  ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), in_header(false), IsXML(false), is_httpreq(false) {}
 
   bool Read(const Flux::string &m)
   {
@@ -112,6 +112,7 @@ public:
     if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
       new tqueue(htmlcall, 0); // Wait for the 3 second timeout
+      this->is_httpreq = true;
       Log(LOG_TERMINAL) << "HTTP GET Request.";
       return true;
     }
@@ -163,16 +164,15 @@ public:
 	this->Write(reply);
 	this->HandleMessage();
 	this->ProcessWrite();
-	//return false; //Close the connection.
-	new WaitTimer(this, 5);
+	return false; //Close the connection.
       }
     }
-    else if(!this->in_query && !this->in_header && !this->IsXML)
+    else if(!this->in_query && !this->in_header && !this->IsXML && !this->is_httpreq)
     {
       Log(LOG_TERMINAL) << "Invalid HTTP POST.";
       //return false; //Invalid HTTP POST, not XML-RPC
     }
-    else if(this->in_header) //We're still in the header, but don't need the junk.
+    else if(this->in_header || this->is_httpreq) //We're still in the header, but don't need the junk.
       return true;
     else
     {
