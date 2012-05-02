@@ -25,7 +25,7 @@
 enum Implementation {
   I_BEGIN,
 	I_OnPrivmsg, I_OnChanmsg, I_OnModuleLoad, I_OnModuleUnload,
-	I_OnRestart, I_OnShutdown, I_OnReload, I_OnCommand,
+	I_OnRestart, I_OnShutdown, I_OnReload, I_OnCommand, I_OnNetworkSync,
 	I_OnStart, I_OnNumeric, I_OnPreConnect, I_OnPostConnect,
 	I_OnCTCP, I_OnQuit, I_OnJoin, I_OnKick, I_OnConnectionError,
 	I_OnNotice, I_OnNickChange, I_OnChannelMode, I_OnUserMode,
@@ -75,6 +75,7 @@ public:
   virtual void OnGarbageCleanup() {}
   virtual void OnSignal(int) {}
   virtual EventResult OnLog(Log*) { return EVENT_CONTINUE; }
+  virtual void OnNetworkSync(Network*) {}
   virtual EventResult OnPreCommit(CommitMessage&) { return EVENT_CONTINUE; }
   virtual void OnUserRegister(Network*) {}
   virtual void OnDatabasesWrite(void (*)(const char*, ...)) {}

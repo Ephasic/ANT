@@ -128,6 +128,22 @@ void SendJunk()
   }
 }
 
+// This class is so we can sync each network, i would use a tqueue here but
+// tqueue's don't accept arguments yet (if it's even possible) :|
+class SyncTimer : public Timer
+{
+  Network *n;
+public:
+  SyncTimer(Network *net):Timer(5), n(net) {}
+
+  void Tick(time_t)
+  {
+    JoinChansInBuffer(this->n);
+    FOREACH_MOD(I_OnNetworkSync, OnNetworkSync(n));
+    Log(LOG_DEBUG) << "Network " << this->n->name << " is synced!";
+  }
+};
+
 class m_system : public module
 {
   CommandRehash cmdrehash;
@@ -145,6 +161,8 @@ public:
     this->SetVersion(VERSION);
   }
 
+  // Have a little fun with the system, these are useful to see how lagged the system is or if it's
+  // even working properly
   void OnChannelAction(User *u, Channel *c, const std::vector<Flux::string> &params)
   {
     Flux::string msg = CondenseVector(params);
@@ -212,13 +230,15 @@ public:
 
       n->servername = params[1];
       n->ircdversion = params[2];
-      JoinChansInBuffer(n);
     }
 
     // Send Random garbage occasionally to see if we need to rename
     if((i == 421))
-    {
       RenameBot(n, params[0]);
+
+    if((i == 376))
+    {
+      new SyncTimer(n);
     }
 
     /* Nickname is in use numeric
@@ -252,7 +272,7 @@ public:
 
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
   {
-     if(kickee && kickee == c->n->b)
+     if(kickee && kickee->nick.equals_cs(c->n->b->nick))
      {
        Log(u) << "kicked " << kickee->nick << " from " << c->name  << " in network " << c->n->name << ' ' << '(' << reason << ')';
 	c->SendJoin();

@@ -127,7 +127,9 @@ void ReconnectTimer::Tick(time_t)
   catch (const SocketException &e)
   {
     n->s = nullptr; // XXX: Does this memleak?
-    Log() << "Connection to " << n->name << " [" << n->GetConHost() << ':' << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
+    Log() << "Connection to " << n->name << " [" << n->GetConHost() << ':'
+    << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
+    
     new ReconnectTimer(Config->RetryWait, n);
   }
 }
@@ -143,7 +145,8 @@ NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), Bu
 
   this->net->SetConnectedHostname(this->net->hostnames[++this->net->CurHost]);
 
-  Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to " << tnet->hostname << ':' << tnet->port << '(' << tnet->GetConHost() << ')';
+  Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to "
+  << tnet->hostname << ':' << tnet->port << '(' << tnet->GetConHost() << ')';
 
   this->Connect(tnet->GetConHost(), tnet->port);
 }
@@ -158,7 +161,9 @@ NetworkSocket::~NetworkSocket()
 
   if(!this->net->IsDisconnecting())
   {
-    Log() << "Connection to " << net->name << " [" << net->GetConHost() << ':' << net->port << "] Failed! Retrying in " << Config->RetryWait << " seconds.";
+    Log() << "Connection to " << net->name << " [" << net->GetConHost() << ':'
+    << net->port << "] Failed! Retrying in " << Config->RetryWait << " seconds.";
+    
     new ReconnectTimer(Config->RetryWait, this->net);
   }
 }
@@ -187,9 +192,11 @@ bool NetworkSocket::Read(const Flux::string &buf)
 
 void NetworkSocket::OnConnect()
 {
-  Log(LOG_TERMINAL) << "Successfully connected to " << this->net->name << " [" << this->net->hostname << ':' << this->net->port << "] (" << this->net->GetConHost() << ")";
+  Log(LOG_TERMINAL) << "Successfully connected to " << this->net->name << " ["
+  << this->net->hostname << ':' << this->net->port << "] (" << this->net->GetConHost() << ")";
 
-  new Bot(this->net, printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)), Config->Ident, Config->Realname);
+  new Bot(this->net, printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(),
+			       randint(0, 999)), Config->Ident, Config->Realname);
 
   this->net->b->introduce();
   FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
@@ -198,7 +205,8 @@ void NetworkSocket::OnConnect()
 
 void NetworkSocket::OnError(const Flux::string &buf)
 {
-  Log(LOG_TERMINAL) << "Unable to connect to " << this->net->name << " (" << this->net->hostname << ':' << this->net->port << ')' << (!buf.empty()?(": " + buf):"");
+  Log(LOG_TERMINAL) << "Unable to connect to " << this->net->name << " ("
+  << this->net->hostname << ':' << this->net->port << ')' << (!buf.empty()?(": " + buf):"");
 }
 
 bool NetworkSocket::ProcessWrite()
