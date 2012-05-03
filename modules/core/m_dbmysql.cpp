@@ -30,7 +30,7 @@ void Write(const char *fmt, ...)
   sql << buffer << "\n";
   va_end(args);
 }
-
+ 
 
 class modmysql : public module
 {

@@ -73,6 +73,55 @@ Flux::string BuildFileString(Flux::vector files)
   return ret;
 }
 
+Flux::vector PosixCommonPrefix(Flux::vector &files)
+{
+  Flux::map<int> endings;
+  Flux::vector dirs;
+
+  for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
+  {
+    Flux::string path = *it, dir, file;
+    Flux::string::size_type pos = path.rfind("/") + 1;
+
+    file = path.substr(pos);
+    dir = path.erase(pos);
+
+    Log(LOG_TERMINAL) << "DIR: " << dir << " file: " << file << " IT: " << *it;
+
+    bool found = false;
+    for(Flux::map<int>::iterator it2 = endings.begin(); it2 != endings.end(); ++it2)
+    {
+      if(it2->first.equals_cs(dir))
+      {
+	it2->second++;
+	found = true;
+      }
+    }
+
+    if(!found)
+      endings[dir] = 1;
+  }
+
+  for(auto it : endings)
+  {
+    Log(LOG_TERMINAL) << "IT 1: " << it.first << " IT 2: " << it.second;
+  }
+  
+  return dirs;
+}
+
+Flux::vector ConsolidateFiles(const Flux::vector &files)
+{
+  if (files.size() <= 1)
+    return files;
+  return files;
+}
+
+Flux::string CreateFileString(const Flux::vector &files)
+{
+  return "";
+}
+
 /**************** Throttling ******************/
 
 // Someone just please clean this up?
@@ -147,6 +196,9 @@ public:
     this->Message = msg;
     // FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
+
+    Flux::vector Files = msg.Files;
+    PosixCommonPrefix(Files);
     
     Flux::string files = BuildFileString(msg.Files);
     

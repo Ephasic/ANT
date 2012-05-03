@@ -133,7 +133,7 @@ public:
 //       if(n){
 // 	new Bot(n, params[2], params[3], Config->Realname);
 //       }
-//     }
+//     } 
   }
 
   void OnModuleLoad(module *m)
