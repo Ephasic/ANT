@@ -189,7 +189,7 @@ public:
 
   void Tick(time_t)
   {
-    Log(LOG_DEBUG) << "[XML-RPC] Socket Timer Tick for " << this->clientaddr.addr();
+    Log(LOG_DEBUG) << "[XML-RPC] Connection Timeout for " << this->clientaddr.addr() << ", closing connection.";
     this->SetDead(true);
   }
 };
