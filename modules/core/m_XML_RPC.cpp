@@ -357,8 +357,6 @@ public:
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
-    Implementation i[] = { I_OnCommit };
-    ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
 
     // Try and make a socket.
     try
