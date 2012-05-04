@@ -51,15 +51,6 @@ const Flux::string HTTPREQUEST = "<center><h1>ANT Commit system version "+system
 "Channel: <FONT COLOR=\"Green\">#Commits</FONT></br>\n"
 "Channel: <FONT COLOR=\"Green\">#Computers</FONT></br></center>\n";
 
-class WaitTimer : public Timer
-{
-  Socket *s;
-public:
-  WaitTimer(Socket *ss, time_t timeout = Config->xmlrpctimeout):Timer(timeout, time(NULL)), s(ss)
-  { Log(LOG_TERMINAL) << "WAIT TIMER!"; }
-  void Tick(time_t) { s->SetDead(true); }
-};
-
 class xmlrpcclient;
 class xmlrpclistensocket;
 std::vector<xmlrpclistensocket*> listen_sockets;
@@ -92,14 +83,15 @@ E Flux::string messagestr;
 E xmlrpcclient *client;
 E void htmlcall();
 
-class xmlrpcclient : public ClientSocket, public BufferedSocket
+class xmlrpcclient : public ClientSocket, public BufferedSocket, public Timer
 {
   Flux::string RawCommitXML;
   Flux::vector FilesXML;
   bool in_query, in_header, IsXML, is_httpreq;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()),
-  ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), in_query(false), in_header(false), IsXML(false), is_httpreq(false) {}
+  ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), Timer(Config->xmlrpctimeout),
+  in_query(false), in_header(false), IsXML(false), is_httpreq(false) {}
 
   bool Read(const Flux::string &m)
   {
@@ -144,7 +136,7 @@ public:
       {
 	this->in_query = false;
 	this->RawCommitXML += message.strip();
-	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
+	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << this->clientaddr.addr();
 
 	// Reply to our XML-RPC request stating that we received the commit.
 	Flux::string reply = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n"
@@ -176,7 +168,7 @@ public:
       return true;
     else
     {
-      this->Write("ERROR: Unknown connection from "+GetPeerIP(this->GetFD())+"\n");
+      this->Write("ERROR: Unknown connection from "+this->clientaddr.addr()+"\n");
       this->ProcessWrite(); //Write the data
       Log(LOG_TERMINAL) << "Unknown: " << message;
       return false; //Close the connection.
@@ -194,6 +186,12 @@ public:
   
   bool GetData(Flux::string&, Flux::string&);
   void HandleMessage();
+
+  void Tick(time_t)
+  {
+    Log(LOG_DEBUG) << "[XML-RPC] Socket Timer Tick for " << this->clientaddr.addr();
+    this->SetDead(true);
+  }
 };
 
 Flux::string messagestr;
@@ -219,7 +217,6 @@ ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 {
   Log(LOG_DEBUG) << "[XML-RPC] Accepting connection from " << addr.addr();
   ClientSocket *c = new xmlrpcclient(this, fd, addr);
-  new WaitTimer(c);
   return c;
 }
 
