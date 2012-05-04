@@ -113,7 +113,7 @@ public:
       this->in_header = true;
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
     }
-    else if(this->in_header && message.search_ci("Content-Type: text/xml"))
+    else if(this->in_header && (message.search_ci("Content-Type: text/xml") || message.search_ci("Content Type: text/xml")))
       this->IsXML = true;
     else if(message.search_ci("<?xml"))
     {
