@@ -236,7 +236,7 @@ public:
     source.Reply("This command displays module information\n"
 		 "based off the author of the module, its\n"
 		 "priority, how many commands it adds, the\n"
-		 "version of the module and when it was loaded");
+	 	 "version of the module and when it was loaded");
     return true;
   }
 };

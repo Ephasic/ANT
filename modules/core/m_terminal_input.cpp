@@ -28,7 +28,7 @@ void ProcessInput(const Flux::string &str)
 	
 	for(auto it : Networks)
 	    it.second->b->Quit(message);
-  } 
+  }  
 //   else if(params[0].equals_ci("MSG"))
 //     send_cmd("PRIVMSG %s\n", str.substr(4).c_str());
 //   else if(params[0].equals_ci("NICK"))

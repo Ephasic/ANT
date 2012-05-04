@@ -24,7 +24,7 @@ public:
     }
   }
 };
-
+ 
 class Ping_pong : public module
 {
 public:

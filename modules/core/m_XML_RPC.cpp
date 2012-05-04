@@ -36,6 +36,7 @@ Flux::string SanitizeXML(const Flux::string &str)
     chars("&#xA", "\n"),
     chars("", "")
   };
+  
   Flux::string ret = str;
   for(int i = 0; special[i].character.empty() == false; ++i)
     ret = ret.replace_all_cs(special[i].character, special[i].replace);
@@ -95,7 +96,6 @@ public:
   bool Read(const Flux::string &m)
   {
     Flux::string message = SanitizeXML(m);
-
     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
     
     if(message.search_ci("GET") && message.search_ci("HTTP/1."))
@@ -178,9 +178,7 @@ public:
     return BufferedSocket::ProcessWrite() && ClientSocket::ProcessWrite();
   }
   
-  bool GetData(Flux::string&, Flux::string&);
   void HandleMessage();
-
   void Tick(time_t)
   {
     Log(LOG_DEBUG) << "[XML-RPC] Connection Timeout for " << this->clientaddr.addr() << ", closing connection.";
@@ -324,7 +322,6 @@ void xmlrpcclient::HandleMessage()
 
     /* Announce to other modules for commit announcement */
     FOREACH_MOD(I_OnCommit, OnCommit(message));
-
   }
   catch (std::exception &ex)
   {
