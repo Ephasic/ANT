@@ -72,6 +72,9 @@ public:
     auto it = std::find(listen_sockets.begin(), listen_sockets.end(), this);
     if(it != listen_sockets.end())
       listen_sockets.erase(it);
+    
+    Log(LOG_DEBUG) << "[XML-RPC] Deleting listen socket for " << this->bindaddr.addr() << ':' <<
+    this->bindaddr.port() << (this->IsIPv6()?" (IPv6)":" (IPv4)");
   }
   ClientSocket *OnAccept(int fd, const sockaddrs &addr);
 };

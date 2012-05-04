@@ -129,7 +129,7 @@ void SocketEngine::Process()
 	continue;
 
       if (has_read && !s->ProcessRead())
- 	s->SetDead(true);
+ 	s->SetDead(true); 
 
       if (has_write && !s->ProcessWrite())
 	s->SetDead(true);

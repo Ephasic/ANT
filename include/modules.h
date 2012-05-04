@@ -21,7 +21,7 @@
 jmp_buf sigbuf;
 #endif
 
-// This is kind of a junk variable file more or less..
+// This is kind of a junk variable file more or less.. 
 
 char **my_av, **my_envp;
 bool nofork = false, dev = false, protocoldebug = false, quitting = false, nocolor = false, istempnick = false;

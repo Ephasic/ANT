@@ -53,7 +53,7 @@ Flux::string BuildFileString(Flux::vector files)
       if(slash < file.size())
       {
 	Flux::string dir = file.substr(0, slash);
-	Log(LOG_TERMINAL) << "DIR: " << dir;
+// 	Log(LOG_TERMINAL) << "DIR: " << dir;
 	if(!dir.empty())
 	  dirs++;
       }

@@ -244,7 +244,7 @@ bool BlakeHash(Flux::string &rethash, const Flux::string &text, const Flux::stri
 
   // Check if the comparison hash isnt empty, then make comparison on it
   if(!cmphash.empty())
-  {
+  { 
     // move the cmphash into the testdigest array
     for(unsigned i = 0; i < cmphash.size() && i < 64; ++i)
       testdigest[i] = static_cast<uint8_t>(cmphash[i]);

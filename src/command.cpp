@@ -144,7 +144,7 @@ Command::~Command()
  * \brief Sets the command description
  * \fn void Command::SetDesc(const Flux::string &d)
  * \param Flux::string The description
- */
+ */ 
 void Command::SetDesc(const Flux::string &d) { this->desc = d; }
 /**
  * \brief Sets the syntax of the command

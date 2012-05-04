@@ -355,7 +355,7 @@ namespace Flux {
     inline size_type capacity() const { return this->_string.capacity(); }
     inline size_type max_size() const { return this->_string.max_size(); }
     inline void swap(string &_str) { this->_string.swap(_str._string); }
-    inline void push_back(char c) { return this->_string.push_back(c); }
+    inline void push_back(char c) { return this->_string.push_back(c); } 
     inline void push_back(const string &_str) { if (this != &_str) this->_string += _str._string; }
     inline void resize(size_type n) { return this->_string.resize(n); }
 

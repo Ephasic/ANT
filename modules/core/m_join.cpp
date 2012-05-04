@@ -45,7 +45,7 @@ public:
     return true;
   }
 };
- 
+
 class CommandPart : public Command
 {
 public:
