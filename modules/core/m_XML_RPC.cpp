@@ -86,7 +86,6 @@ E void htmlcall();
 class xmlrpcclient : public ClientSocket, public BufferedSocket, public Timer
 {
   Flux::string RawCommitXML;
-  Flux::vector FilesXML;
   bool in_query, in_header, IsXML, is_httpreq;
 public:
   xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()),
@@ -96,13 +95,13 @@ public:
   bool Read(const Flux::string &m)
   {
     Flux::string message = SanitizeXML(m);
-    messagestr = message;
-    client = this;
-    
+
     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
     
     if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
+      messagestr = message;
+      client = this;
       new tqueue(htmlcall, 0); // Wait for the 3 second timeout
       this->is_httpreq = true;
       Log(LOG_TERMINAL) << "HTTP GET Request.";
@@ -124,11 +123,6 @@ public:
     else if(this->in_query)
     {
       Log(LOG_DEBUG) << "[XML-RPC] " << message;
-      if(message.search_ci("<file>"))
-      {
-	this->RawCommitXML += message.strip();
-	FilesXML.push_back(message.strip());
-      }
 
       if(!message.search_ci("</message>"))
 	  this->RawCommitXML += message.strip();
