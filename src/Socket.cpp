@@ -198,7 +198,7 @@ Flux::string GetPeerIP(int fd)
   int err = getpeername(fd, reinterpret_cast<struct sockaddr*>(&(addr)), &len);
   if(err < -1)
   {
-    Log(LOG_DEBUG) << "Could not retrieve ip address for socket " << fd;
+    Log(LOG_DEBUG) << "Could not retrieve ip address for socket " << fd << ": " << strerror(errno);
     return "";
   }
   // deal with both IPv4 and IPv6:

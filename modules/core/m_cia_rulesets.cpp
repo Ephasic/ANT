@@ -82,9 +82,14 @@ Flux::vector PosixCommonPrefix(Flux::vector &files)
   {
     Flux::string path = *it, dir, file;
     Flux::string::size_type pos = path.rfind("/") + 1;
+    if(pos == Flux::string::npos)
+      continue;
 
     file = path.substr(pos);
     dir = path.erase(pos);
+    dirs.push_back(dir);
+
+    *it = file;
 
     Log(LOG_TERMINAL) << "DIR: " << dir << " file: " << file << " IT: " << *it;
 

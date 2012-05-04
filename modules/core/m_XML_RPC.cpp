@@ -147,10 +147,10 @@ public:
 	Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << GetPeerIP(this->GetFD());
 
 	// Reply to our XML-RPC request stating that we received the commit.
-	Flux::string reply = "<?xml version=\"1.0\"?>\n"
+	Flux::string reply = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n"
 	"<methodResponse>\n"
 	"<params>\n"
-	"<param><value><string>Commit Received!</string></value></param>"
+	"<param><value><string>Commit Received!</string></value></param>\n"
 	"</params>\n"
 	"</methodResponse>\n";
 	
@@ -170,7 +170,7 @@ public:
     else if(!this->in_query && !this->in_header && !this->IsXML && !this->is_httpreq)
     {
       Log(LOG_TERMINAL) << "Invalid HTTP POST.";
-      //return false; //Invalid HTTP POST, not XML-RPC
+      return false; //Invalid HTTP POST, not XML-RPC
     }
     else if(this->in_header || this->is_httpreq) //We're still in the header, but don't need the junk.
       return true;
@@ -238,7 +238,7 @@ void xmlrpcclient::HandleMessage()
   size_t pos2 = blah.find("<message>");
 
   blah = blah.erase(pos1, pos2).replace_all_cs("  ", " ");
-  Log(LOG_TERMINAL) << "\nBLAH! " << blah;
+//   Log(LOG_TERMINAL) << "\nBLAH! " << blah;
 
   try
   {
@@ -303,16 +303,14 @@ void xmlrpcclient::HandleMessage()
 	/* message.body.commit.files section */
 	if(node->first_node("files", 0, true) && node->first_node("files", 0, true)->first_node("file", 0, true))
 	{
-	  // Because it seems you cannot parse nodes with same names in RapidXML, we have to make a quick hack
-	  for(auto it : this->FilesXML)
-	  {
-	    Flux::string FileXML = it;
-	    rapidxml::xml_document<> doc2;
-	    doc2.parse<0>(FileXML.cc_str());
+	  // Put our children in a vector, damn kids.. packing into vectors nowadays, i remember when
+	  // it was cool to pack into hashes!
+	  for (rapidxml::xml_node<> *child = node->first_node("files", 0, true)->first_node("file", 0, true); child; child = child->next_sibling())
+	    message.Files.push_back(child->value());
 
-	    if(doc2.first_node("file", 0, true))
-	      message.Files.push_back(doc2.first_node()->value());
-	  }
+	  // Sort our messages and remove any duplicates.
+	  std::sort(message.Files.begin(), message.Files.end());
+	  message.Files.erase(std::unique(message.Files.begin(), message.Files.end()), message.Files.end());
 	}
       }
     }
@@ -343,10 +341,10 @@ void xmlrpcclient::HandleMessage()
   }
 }
 
-class SocketStart : public Timer //Weird socket glitch where we need to use a timer to start the socket correctly.
+class RetryStart : public Timer
 {
 public:
-  SocketStart():Timer(1, time(NULL), false) {}
+  RetryStart():Timer(10, time(NULL), false) {}
   void Tick(time_t)
   {
     try
@@ -356,7 +354,7 @@ public:
     catch(const SocketException &ex)
     {
       Log() << "[XML-RPC] " << ex.GetReason();
-      new SocketStart();
+      new RetryStart();
     }
   }
 };
@@ -370,7 +368,17 @@ public:
     this->SetVersion(VERSION);
     Implementation i[] = { I_OnCommit };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
-    new SocketStart();
+
+    // Try and make a socket.
+    try
+    {
+      new xmlrpclistensocket(Config->xmlrpcbindip, Config->xmlrpcport, Config->xmlrpcipv6);
+    }
+    catch(const SocketException &ex)
+    {
+      Log() << "[XML-RPC] " << ex.GetReason();
+      new RetryStart();
+    }
   }
 
   ~xmlrpcmod()
