@@ -69,7 +69,8 @@ void Bot::Part(Channel *c, const Flux::string &message)
 
 void Bot::Quit(const Flux::string &message)
 {
-  this->ircproto->quit(message);
+  if(this->ircproto)
+    this->ircproto->quit(message);
 }
 
 void Bot::SetNick(const Flux::string &nickname)

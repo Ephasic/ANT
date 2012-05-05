@@ -15,7 +15,7 @@
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
 
-Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): disconnecting(false), s(nullptr), b(nullptr), hostname(host), port(p), CurHost(0)
+Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): Timer(121, time(NULL), true), disconnecting(false), s(nullptr), b(nullptr), hostname(host), port(p), CurHost(0)
 {
   if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");
@@ -105,17 +105,19 @@ Network *FindNetworkByHost(const Flux::string &name)
   return nullptr;
 }
 
+void Network::Tick(time_t)
+{
+  Log(LOG_RAWIO) << this->name << ": Ping Timeout";
+  if(this->s && this->s->GetStatus(SF_CONNECTED) && this->s->SentPing)
+  {
+    this->s->SetDead(true);
+    new ReconnectTimer(Config->RetryWait, this);
+  }
+}
+
 /**********************************************************/
 /************************ Timers **************************/
 /**********************************************************/
-
-PingTimeoutTimer::PingTimeoutTimer(Network *net) : Timer(121, time(NULL)), n(net) { net->ptt = this; }
-void PingTimeoutTimer::Tick(time_t)
-{
-  Log(LOG_RAWIO) << n->name << ": Ping Timeout";
-  if(n->s && n->s->GetStatus(SF_CONNECTED) && n->s->SentPing)
-    n->s->SetDead(true);
-}
 
 ReconnectTimer::ReconnectTimer(int wait, Network *net) : Timer(wait), n(net) {}
 void ReconnectTimer::Tick(time_t)
@@ -129,7 +131,7 @@ void ReconnectTimer::Tick(time_t)
     n->s = nullptr; // XXX: Does this memleak?
     Log() << "Connection to " << n->name << " [" << n->GetConHost() << ':'
     << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
-    
+
     new ReconnectTimer(Config->RetryWait, n);
   }
 }
@@ -163,7 +165,7 @@ NetworkSocket::~NetworkSocket()
   {
     Log() << "Connection to " << net->name << " [" << net->GetConHost() << ':'
     << net->port << "] Failed! Retrying in " << Config->RetryWait << " seconds.";
-    
+
     new ReconnectTimer(Config->RetryWait, this->net);
   }
 }

@@ -45,6 +45,7 @@ void SocketEngine::AddSocket(Socket *s)
   FD_SET(s->GetFD(), &ReadFDs);
   Sockets.insert(std::make_pair(s->GetFD(), s));
   ++FDCount;
+  Log(LOG_TERMINAL) << "SOCKET: " << FDCount << " | FD: " << s->GetFD();
 }
 
 void SocketEngine::DelSocket(Socket *s)
@@ -129,7 +130,7 @@ void SocketEngine::Process()
 	continue;
 
       if (has_read && !s->ProcessRead())
- 	s->SetDead(true); 
+ 	s->SetDead(true);
 
       if (has_write && !s->ProcessWrite())
 	s->SetDead(true);

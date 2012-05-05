@@ -61,7 +61,10 @@ void CommandSource::Reply(const Flux::string &msg)
  sepstream sep(msg, '\n');
  Flux::string tok;
  while(sep.GetToken(tok))
-   this->u->SendMessage(tok);
+   if(this->u)
+      this->u->SendMessage(tok);
+   else
+     Log() << "Cannot send \"" << tok << "\" to server, unknown user!";
 }
 
 /**
@@ -144,7 +147,7 @@ Command::~Command()
  * \brief Sets the command description
  * \fn void Command::SetDesc(const Flux::string &d)
  * \param Flux::string The description
- */ 
+ */
 void Command::SetDesc(const Flux::string &d) { this->desc = d; }
 /**
  * \brief Sets the syntax of the command

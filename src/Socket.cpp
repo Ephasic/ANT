@@ -222,7 +222,7 @@ Flux::string GetPeerIP(int fd)
 //   Log(LOG_THREAD) << "DNS Thread Initializing.";
 //   this->Start();
 // }
-// 
+//
 // DNSThread::~DNSThread() { Log(LOG_THREAD) << "DNS Thread Exiting."; exiting = true; }
 // std::map<int, Flux::string> DNSThread::GetHostnames() { return this->hostnames; }
 // void DNSThread::ToRun()
@@ -234,16 +234,16 @@ Flux::string GetPeerIP(int fd)
 //     Log(LOG_TERMINAL) << "Failed to resolve " << this->hostname << ": " << gai_strerror(err);
 //     return;
 //   }
-// 
+//
 //   Flux::string ret = hostname;
 //   int i = 0;
-// 
+//
 //   for(res = result; res != NULL; res = res->ai_next)
 //   {
 //     struct sockaddr *haddr;
 //     haddr = res->ai_addr;
 //     char address[INET6_ADDRSTRLEN + 1] = "";
-// 
+//
 //     switch(haddr->sa_family)
 //     {
 //       case AF_INET:
@@ -265,13 +265,13 @@ Flux::string GetPeerIP(int fd)
 // 	break;
 //     }
 //     ret = address;
-// 
+//
 //     if(!Config->UseIPv6 && ret.search(':'))
 //       continue;
-// 
+//
 //     this->hostnames[++i] = ret;
 //   }
-// 
+//
 //   freeaddrinfo(result);
 // }
 
@@ -280,22 +280,22 @@ std::map<int, Flux::string> ForwardResolution(const Flux::string &hostname)
   struct addrinfo *result, *res;
   std::map<int, Flux::string> null, rmap; // null is an empty map used for errors
   int err = getaddrinfo(hostname.c_str(), NULL, NULL, &result);
-  
+
   if(err != 0)
   {
     Log(LOG_TERMINAL) << "Failed to resolve " << hostname << ": " << gai_strerror(err);
     return null;
   }
-  
+
   Flux::string ret = hostname;
   int i = 0;
-  
+
   for(res = result; res != NULL; res = res->ai_next)
   {
     struct sockaddr *haddr;
     haddr = res->ai_addr;
     char address[INET6_ADDRSTRLEN + 1] = "";
-    
+
     switch(haddr->sa_family)
     {
       case AF_INET:
@@ -316,15 +316,15 @@ std::map<int, Flux::string> ForwardResolution(const Flux::string &hostname)
 	}
 	break;
     }
-    
+
     ret = address;
-    
+
     if(!Config->UseIPv6 && ret.search(':'))
       continue;
-    
+
     rmap[++i] = ret;
   }
-  
+
   freeaddrinfo(result);
   return rmap;
 }

@@ -26,7 +26,7 @@ struct CommitMessage
   Network *network;
 };
 
-class CoreExport Network : public Base
+class Network : public Timer
 {
 protected:
   bool disconnecting;
@@ -36,8 +36,6 @@ public:
   ~Network();
   // The socket
   NetworkSocket *s;
-  // a timer for when we are supposed to ping timeout
-  PingTimeoutTimer *ptt;
   // When we join a network but aren't synced yet
   std::queue<Channel*> JoinQueue;
   // bot pointer for the network
@@ -59,6 +57,8 @@ public:
   // name of the server we're connected to (ie. pulsar.azuru.net)
   Flux::string servername;
   int CurHost;
+
+  void Tick(time_t);
   void SetConnectedHostname(const Flux::string &str) { this->usedhostname = str; }
   Flux::string GetConHost() const { return this->usedhostname; }
   bool JoinChannel(const Flux::string&);
@@ -66,14 +66,6 @@ public:
   bool Disconnect();
   bool Disconnect(const Flux::string&);
   bool Connect();
-};
-
-class PingTimeoutTimer : public Timer
-{
-  Network *n;
-public:
-  PingTimeoutTimer(Network *net);
-  void Tick(time_t);
 };
 
 class ReconnectTimer : public Timer

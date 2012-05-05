@@ -133,6 +133,7 @@ E Flux::string isolate(char begin, char end, const Flux::string &msg);
 E Flux::string do_strftime(const time_t&, bool short_output = false);
 E Flux::string duration(const time_t&);
 E Flux::string printfify(const char*, ...);
+#define CURR_LOCATION printfify("%s:%s", __FILE__, __PRETTY_FUNCTION__)
 E Flux::string CondenseVector(const Flux::vector&);
 E int randint(int x, int y);
 E bool IsValidChannel(const Flux::string&);

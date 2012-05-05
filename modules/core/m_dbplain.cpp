@@ -110,20 +110,37 @@ public:
   void OnDatabasesRead(const Flux::vector &params)
   {
     Flux::string key = params[0];
+    if(key.empty())
+      return;
+
     if(key.equals_ci("N"))
     {
       Network *n = FindNetwork(params[1]);
       if(!n)
-	n = new Network(params[1], params[2], params[3]);
-      if(!n->s)
-	//n->Connect(); // FIXME: Why can't I just call this?
+      {
+	if(params.size() >= 4)
+	{
+	  // 			host 	port 	    net name
+	  n = new Network(params[1], params[2], params[3]);
+	}
+
+	else
+	  Log(LOG_DEBUG) << "[db_plain] Unable to read network line!";
+      }
+
+      if(n && !n->s)
+      {
+	Log(LOG_TERMINAL) << "Connecting via db_plain!";
 	new ReconnectTimer(0, n); //Connect to networks.
+	//n->Connect(); // FIXME: Why can't I just call this?
+      }
     }
+
     if(key.equals_ci("NC"))
     {
       Network *n = FindNetwork(params[1]);
       if(!n)
-	Log() << "[db_plain] Unable to find network " << params[1] << " for channel creation";
+	Log(LOG_DEBUG) << "[db_plain] Unable to find network " << params[1] << " for channel creation";
       else
 	n->JoinChannel(params[2]);
     }
