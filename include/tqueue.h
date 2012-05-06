@@ -25,7 +25,7 @@
  */
 extern std::vector<tqueue*> QueuedQueues;
 
-class CoreExport tqueue : public Timer
+class tqueue : public Timer
 {
   // Function to call.
   void (*function)();

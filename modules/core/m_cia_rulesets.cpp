@@ -49,7 +49,7 @@ Flux::string BuildFileString(Flux::vector files)
     {
       Flux::string file = it;
       size_t slash = file.rfind("/");
-      
+
       if(slash < file.size())
       {
 	Flux::string dir = file.substr(0, slash);
@@ -58,13 +58,13 @@ Flux::string BuildFileString(Flux::vector files)
 	  dirs++;
       }
     }
-    
+
     std::stringstream ss;
     ss << "(" << files.size() << " files";
-    
+
     if(dirs < 0)
       ss << " in " << dirs;
-    
+
     ss << " changed)";
     //ret = "(" + value_cast<Flux::string>(files.size()) + " files" + (dirs < 0?"":" in "+dirs) + " changed)";
     ret = ss.str();
@@ -111,7 +111,7 @@ Flux::vector PosixCommonPrefix(Flux::vector &files)
   {
     Log(LOG_TERMINAL) << "IT 1: " << it.first << " IT 2: " << it.second;
   }
-  
+
   return dirs;
 }
 
@@ -139,7 +139,7 @@ class ThrottleTimer : public Timer
     {
       std::pair<Flux::string, CommitMessage> msgdata = throttledmessages.front();
       throttledmessages.pop();
-      
+
       for(auto it : msgdata.second.Channels)
 	it->SendMessage(msgdata.first);
     }
@@ -150,7 +150,7 @@ public:
   {
     // something here?
   }
-  
+
   void Tick(time_t)
   {
     this->throttlecount = 0;
@@ -187,7 +187,7 @@ private:
   }
 
 public:
-  
+
   void OnCommit(CommitMessage &msg)
   {
     EventResult e;
@@ -197,30 +197,30 @@ public:
       Log(LOG_DEBUG) << "Module canceled commit message!";
       return;
     }
-    
+
     this->Message = msg;
     // FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
 
     Flux::vector Files = msg.Files;
     PosixCommonPrefix(Files);
-    
+
     Flux::string files = BuildFileString(msg.Files);
-    
+
     for(auto it : msg.Channels)
     {
       Channel *c = it;
       Log(LOG_DEBUG) << "Announcing in " << c->name << " (" << c->n->name << ')';
-      
+
       // Build the commit message with stringstream
       std::stringstream ss;
       ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
       ss << NORMAL << BOLD << '[' << this->GetCommitData("branch") << "] " << NORMAL << YELLOW << 'r'
       << this->GetCommitData("revision");
       ss << NORMAL << BOLD << " | " << NORMAL << AQUA << files << NORMAL << ": " << this->GetCommitData("log"); //<< files;
-      
+
       Flux::string formattedmessgae = Flux::string(ss.str()).strip('\"').strip();
-      
+
       //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
       ThrottleTimer *tt = new ThrottleTimer();
       if(++tt->throttlecount <= 5)

@@ -36,10 +36,10 @@
 #include "log.h"
 
 #define NET_BUFSIZE 65535
-E Flux::string GetPeerIP(int);
+extern Flux::string GetPeerIP(int);
 /** A sockaddr union used to combine IPv4 and IPv6 sockaddrs
  */
-union CoreExport sockaddrs
+union sockaddrs
 {
   sockaddr sa;
   sockaddr_in sa4;
@@ -95,7 +95,7 @@ union CoreExport sockaddrs
   void ntop(int type, const void *src);
 };
 
-class CoreExport cidr
+class cidr
 {
   sockaddrs addr;
   Flux::string cidr_ip;
@@ -136,7 +136,7 @@ class ClientSocket;
 class ListenSocket;
 class ConnectionSocket;
 
-class CoreExport SocketIO
+class SocketIO
 {
 public:
   /** Receive something from the buffer
@@ -192,7 +192,7 @@ public:
   virtual void Destroy() { }
 };
 
-class CoreExport Socket
+class Socket
 {
 protected:
   /* Socket FD */
@@ -282,7 +282,7 @@ public:
   virtual void ProcessError();
 };
 
-class CoreExport BufferedSocket : public virtual Socket
+class BufferedSocket : public virtual Socket
 {
 protected:
   /* Things to be written to the socket */
@@ -334,7 +334,7 @@ public:
   int WriteBufferLen() const;
 };
 
-class CoreExport BinarySocket : public virtual Socket
+class BinarySocket : public virtual Socket
 {
   struct DataBlock
   {
@@ -380,7 +380,7 @@ public:
   virtual bool Read(const char *buffer, size_t l);
 };
 
-class CoreExport ListenSocket : public Socket
+class ListenSocket : public Socket
 {
 public:
   /** Constructor
@@ -407,7 +407,7 @@ public:
   virtual ClientSocket *OnAccept(int fd, const sockaddrs &addr) = 0;
 };
 
-class CoreExport ConnectionSocket : public virtual Socket
+class ConnectionSocket : public virtual Socket
 {
 public:
   /* Sockaddrs for connection ip/port */
@@ -444,7 +444,7 @@ public:
   virtual void OnError(const Flux::string &error);
 };
 
-class CoreExport ClientSocket : public virtual Socket
+class ClientSocket : public virtual Socket
 {
 public:
   /* Listen socket this connection came from */
@@ -478,7 +478,7 @@ public:
   virtual void OnError(const Flux::string &error);
 };
 
-class CoreExport Pipe : public Socket
+class Pipe : public Socket
 {
 public:
   /** The FD of the write pipe (if this isn't evenfd)
@@ -509,7 +509,7 @@ public:
 
 /**********************************************************************/
 
-class CoreExport SocketEngine
+class SocketEngine
 {
 public:
   /* Map of sockets */

@@ -122,10 +122,10 @@ void Rehash()
     BotConfig *configtmp = Config;
     Config = new BotConfig(bi_dir);
     delete configtmp;
-    
+
     if(!Config)
       throw ConfigException("Could not read config.");
-    
+
     FOREACH_MOD(I_OnReload, OnReload());
     ReadConfig();
   }
@@ -182,31 +182,31 @@ public:
       Flux::string param;
       while(!argsarg.empty() && argsarg[0] == '-')
 	argsarg.erase(argsarg.begin());
-      
+
       size_t t = argsarg.find('=');
       if(t != Flux::string::npos)
       {
 	param = argsarg.substr(t+1);
 	argsarg.erase(t);
       }
-      
+
       if(argsarg.empty())
 	continue;
-      
+
       Arguments[argsarg] = param;
     }
   }
-  
+
   bool HasArg(const Flux::string &name, char shortname = '\0')
   {
     Flux::string Cppisstupidrighthere;
     return this->HasArg(name, shortname, Cppisstupidrighthere);
   }
-  
+
   bool HasArg(const Flux::string &name, char shortname, Flux::string &args)
   {
     args.clear();
-    
+
     for(Flux::map<Flux::string>::iterator it = this->Arguments.begin(); it != this->Arguments.end(); ++it)
     {
       if(it->first.equals_ci(name) || it->first[0] == shortname)
@@ -234,7 +234,7 @@ void startup(int argc, char** argv, char *envp[])
   Flux::string bindir = getprogdir(argv[0]);
   if(bindir[bindir.length() - 1] == '.')
     bindir = bindir.substr(0, bindir.length() - 2);
-  
+
   *const_cast<Flux::string*>(&binary_dir) = bindir;
 
   Config = new BotConfig(bindir);
@@ -244,7 +244,7 @@ void startup(int argc, char** argv, char *envp[])
   Flux::string dir = argv[0];
   Flux::string::size_type n = dir.rfind('/');
   dir = "." + dir.substr(n);
-  
+
   //gets the command line parameters if any.
   CommandLineArguments args(argc, argv);
 

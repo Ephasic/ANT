@@ -14,7 +14,7 @@
 #include "command.h"
 #include "user.h"
 
-class CoreExport Log
+class Log
 {
 protected:
   std::fstream log;

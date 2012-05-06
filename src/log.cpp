@@ -48,12 +48,12 @@ Flux::string NoTermColor(const Flux::string &ret)
 static Flux::string GetLogDate(time_t t = time(NULL))
 {
   char timestamp[32];
-  
+
   time(&t);
   struct tm *tm = localtime(&t);
-  
+
   strftime(timestamp, sizeof(timestamp), "%Y%m%d", tm);
-  
+
   return timestamp;
 }
 
@@ -83,23 +83,23 @@ void CheckLogDelete(Log *log)
     if(mkdir(Flux::string(dir).c_str(), getuid()) != 0)
       throw LogException("Failed to create directory "+dir+": "+Flux::string(strerror(errno)));
   }
-  
+
   Flux::vector files = TextFile::DirectoryListing(dir);
   if(log)
     files.push_back(log->filename);
-  
+
   if(files.empty())
     Log(LOG_TERMINAL) << "No Logs!";
-  
+
   for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
   {
     Flux::string file = dir+(*it);
-    
+
     if(TextFile::IsFile(file))
     {
       Flux::string t = file.isolate('-', ' ').strip('-');
       int timestamp = (int)t;
-      
+
       if(timestamp > (time(NULL) - 86400 * Config->LogAge) && timestamp != starttime)
       {
 	Delete(file.c_str());
@@ -157,15 +157,15 @@ Log::~Log()
     this->filename = CreateLogName(Config->LogFile, starttime);
   else
     this->filename = "";
-  
+
   Flux::string message = Flux::Sanitize(this->buffer.str()), raw = this->buffer.str();
   std::stringstream logstream;
-  
+
   if(this->u && !this->c)
     message = this->u->nick + " " + message;
   if(this->u && this->c)
     message = this->u->nick + " used " + this->c->name + " " + message;
-  
+
   switch(type)
   {
     case LOG_SILENT:
@@ -199,29 +199,29 @@ Log::~Log()
       Log(LOG_CRITICAL) << "Wtf log case is this?";
       Log(LOG_TERMINAL) << " [NOTYPE] " << message;
   }
-  
+
   EventResult result;
   FOREACH_RESULT(I_OnLog, OnLog(this), result);
   if(result != EVENT_CONTINUE)
     return;
-  
+
   if(type != LOG_SILENT || type != LOG_CRITICAL)
     std::cout << logstream.str() << std::endl;
-  
+
   if(type == LOG_CRITICAL) // Log to stderr instead of stdout
     std::cerr << logstream.str() << std::endl;
-  
+
   if(this->filename.empty())
   {
     std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!\033[22;36m" << std::endl;
     return; // Exit if there's no file to log to
   }
-  
+
   try
   {
     CheckLogDelete(this);
     log.open(this->filename.c_str(), std::fstream::out | std::fstream::app);
-    
+
     if(!log.is_open())
     {
       if(!Config)
@@ -230,9 +230,9 @@ Log::~Log()
 	throw LogException(Config->LogFile.empty()?"Cannot open Log File.":
 	Flux::string("Failed to open Log File "+this->filename+": "+strerror(errno)).c_str());
     }
-    
+
     log << NoTermColor(logstream.str()) << std::endl;
-    
+
     if(log.is_open())
       log.close();
   }

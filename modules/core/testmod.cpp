@@ -55,7 +55,7 @@ public:
     new tqueue(superreply, 10);
     source.Reply("YAY!");
   }
-  
+
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
     this->SendSyntax(source);
@@ -83,11 +83,11 @@ public:
      * ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
      */
   }
-  
+
   void OnPrivmsg(User *u, Channel *c, const std::vector<Flux::string> &params)
   {
     Flux::string s = CondenseVector(params);
-    
+
     if(s.search_ci("Blah Blah"))
       u->SendMessage("Derp DERp");
 

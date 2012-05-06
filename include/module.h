@@ -44,7 +44,7 @@ enum ModulePriority
   PRIORITY_LAST
 };
 
-class CoreExport module : public Base
+class module : public Base
 {
   Flux::string author, version;
   time_t loadtime;
@@ -106,8 +106,8 @@ public:
   virtual void OnChannelOp(User*, Channel*, const Flux::string&, const Flux::string&) {}
   virtual void OnPart(User*, Channel*, const Flux::string&) {}
   virtual void OnUserMode(User*, const Flux::string&, const Flux::string&) {}
-  virtual void OnPreConnect(const Flux::string&, const Flux::string&) {}
-  virtual void OnPreConnect(Network*) {}
+  virtual EventResult OnPreConnect(const Flux::string&, const Flux::string&) { return EVENT_CONTINUE; }
+  virtual EventResult OnPreConnect(Network*) { return EVENT_CONTINUE; }
   virtual void OnPostConnect(Socket*, Network*) {}
   virtual void OnPostConnect(Socket*) {}
   virtual void OnConnectionError(const Flux::string&) {}
@@ -115,7 +115,7 @@ public:
   virtual void OnLoad() {} // This is NOT to be called by FOREACH_MOD! not that it can be.
 };
 
-class CoreExport ModuleHandler
+class ModuleHandler
 {
 public:
   static EventsVector EventHandlers[I_END];

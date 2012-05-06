@@ -26,7 +26,7 @@
  * \brief Wrapper for an irc host
  * This was written by Justasic to break up the parts of a messages host for easier use.
  */
-class CoreExport IsoHost:Flux::string
+class IsoHost : public Flux::string
 {
 public:
   IsoHost(const Flux::string&);
@@ -41,7 +41,7 @@ public:
  * \brief A wrapper class for the source of the Command
  * Contains information about where the command came from, as well as a Reply() function to quickly send a PrivMessage to the Command sender.
  */
-struct CoreExport CommandSource
+struct CommandSource
 {
   User *u;
   Channel *c; /* Channel name, this will be replaced with channel class */
@@ -62,7 +62,7 @@ struct CoreExport CommandSource
  * Contains methods and properties for handling/getting information from module commands.
  * \note Not to be confused with the Commands class.
  */
-class CoreExport Command : public Base
+class Command : public Base
 {
   Flux::string desc;
   std::vector<Flux::string> syntax;

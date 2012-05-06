@@ -26,7 +26,7 @@
 
 // Read an INI file into easy-to-access name/value pairs. (Note that I've gone
 // for simplicity here rather than speed, but it should be pretty decent.)
-class CoreExport INIReader
+class INIReader
 {
 public:
     // Construct INIReader and parse given filename. See ini.h for more info
@@ -56,7 +56,7 @@ private:
     int Parse(const Flux::string &filename);
 };
 
-class CoreExport BotConfig
+class BotConfig
 {
 public:
   BotConfig(const Flux::string &dir = binary_dir);

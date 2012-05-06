@@ -28,7 +28,7 @@ Channel::~Channel()
 {
   for(auto it : this->UserList)
     it.first->DelChan(this);
-  
+
   this->UserList.clear();
   Log(LOG_DEBUG) << "Deleted channel " << this->name;
   this->n->ChanMap.erase(this->name);

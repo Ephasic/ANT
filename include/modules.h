@@ -21,7 +21,7 @@
 jmp_buf sigbuf;
 #endif
 
-// This is kind of a junk variable file more or less.. 
+// This is kind of a junk variable file more or less..
 
 char **my_av, **my_envp;
 bool nofork = false, dev = false, protocoldebug = false, quitting = false, nocolor = false, istempnick = false;
@@ -35,11 +35,11 @@ BotConfig *Config;
 GlobalProto *GProto;
 module *LastRunModule; // For crashes
 
-E void startup(int argc, char** argv, char *envp[]);
-E void Rehash();
-E Flux::string execute(const char *cmd);
-E Flux::string urlify(const Flux::string &received);
-E Flux::string getprogdir(const Flux::string &dir);
+extern void startup(int argc, char** argv, char *envp[]);
+extern void Rehash();
+extern Flux::string execute(const char *cmd);
+extern Flux::string urlify(const Flux::string &received);
+extern Flux::string getprogdir(const Flux::string &dir);
 
 
 #endif

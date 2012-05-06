@@ -27,7 +27,8 @@ void CommandSource::Reply(const char *fmt, ...)
 {
   va_list args;
   char buf[BUFSIZE];
-  if(fmt){
+  if(fmt)
+  {
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
     this->Reply(Flux::string(buf));
@@ -92,7 +93,7 @@ Command *FindCommand(const Flux::string &name, CommandType type){
     case C_NULL:
       break;
   }
-  return NULL;
+  return nullptr;
 }
 /*******************************************************************************************/
 /* why is this in here with the rest of the commands that send to the server? i dont fucking know lol */

@@ -36,7 +36,7 @@ Flux::string SanitizeXML(const Flux::string &str)
     chars("&#xA", "\n"),
     chars("", "")
   };
-  
+
   Flux::string ret = str;
   for(int i = 0; special[i].character.empty() == false; ++i)
     ret = ret.replace_all_cs(special[i].character, special[i].replace);
@@ -72,7 +72,7 @@ public:
     auto it = std::find(listen_sockets.begin(), listen_sockets.end(), this);
     if(it != listen_sockets.end())
       listen_sockets.erase(it);
-    
+
     Log(LOG_DEBUG) << "[XML-RPC] Deleting listen socket for " << this->bindaddr.addr() << ':' <<
     this->bindaddr.port() << (this->IsIPv6()?" (IPv6)":" (IPv4)");
   }
@@ -83,9 +83,9 @@ public:
 /*****************************************************************/
 
 // Declared below
-E Flux::string messagestr;
-E xmlrpcclient *client;
-E void htmlcall();
+extern Flux::string messagestr;
+extern xmlrpcclient *client;
+extern void htmlcall();
 
 class xmlrpcclient : public ClientSocket, public BufferedSocket, public Timer
 {
@@ -100,7 +100,7 @@ public:
   {
     Flux::string message = SanitizeXML(m);
     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
-    
+
     if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
       messagestr = message;
@@ -142,7 +142,7 @@ public:
 	"<param><value><string>Commit Received!</string></value></param>\n"
 	"</params>\n"
 	"</methodResponse>\n";
-	
+
 	this->Write("HTTP/1.0 200 OK");
 	this->Write("SERVER: ANT Commit System version " + systemver);
 	this->Write("CONTENT-TYPE: TEXT/XML");
@@ -173,14 +173,14 @@ public:
     this->ProcessWrite();
     return true;
   }
-  
+
   bool ProcessWrite()
   {
     if(!this->WriteBuffer.empty())
       Log(LOG_TERMINAL) << "Process Write:\n " << this->WriteBuffer;
     return BufferedSocket::ProcessWrite() && ClientSocket::ProcessWrite();
   }
-  
+
   void HandleMessage();
   void Tick(time_t)
   {
@@ -314,7 +314,7 @@ void xmlrpcclient::HandleMessage()
     int i = 0;
     for(auto it : message.Files)
       Log(LOG_TERMINAL) << "File[" << ++i << "]: " << it;
-    
+
     Log(LOG_TERMINAL) << "*** END COMMIT INFO! ***\n";
 
     for(auto IT : Networks)

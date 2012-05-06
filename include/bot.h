@@ -14,7 +14,7 @@
 #include "user.h"
 #include "network.h"
 
-class CoreExport Bot : public User
+class Bot : public User
 {
 public:
   Bot(Network *net, const Flux::string &n, const Flux::string &i, const Flux::string &real = "ANT Bot (http://ANT.Flux-Net.net/)");

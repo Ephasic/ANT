@@ -17,7 +17,6 @@
 /* Prototypes and external variable declarations only */
 
 /* #define's */
-#define E extern CoreExport
 #define BUFSIZE 65535
 #define CHANNEL_X_INVALID "Channel \2%s\2 is not a valad channel"
 #define isvalidnick(c) (isalnum(c) || ((c) >= '\x5B' && (c) <= '\x60') || ((c) >= '\x7B' && (c) <= '\x7D') || (c) == '-')
@@ -28,7 +27,7 @@
 #define CLEAR_SEGV_LOCATION() segv_location[0]='\0';
 
 #ifdef HAVE_SETJMP_H
-E jmp_buf sigbuf;
+extern jmp_buf sigbuf;
 #endif
 
 /* Classes */
@@ -103,74 +102,74 @@ typedef std::map<Flux::string, Command*, ci::less> CommandMap;
 typedef std::vector<module*> EventsVector; //Gay g++
 
 /*  Class pointer finder definitions */
-E User *FindUser(Network*, const Flux::string&);
-E Channel *FindChannel(Network*, const Flux::string&);
-E module *FindModule(const Flux::string&);
-E Command *FindCommand(const Flux::string&, CommandType);
-E Network *FindNetwork(const Flux::string&);
-E Bot *FindBot(const Flux::string&);
-E bool IsBot(User*);
-E Network *FindNetworkByHost(const Flux::string&);
+extern User *FindUser(Network*, const Flux::string&);
+extern Channel *FindChannel(Network*, const Flux::string&);
+extern module *FindModule(const Flux::string&);
+extern Command *FindCommand(const Flux::string&, CommandType);
+extern Network *FindNetwork(const Flux::string&);
+extern Bot *FindBot(const Flux::string&);
+extern bool IsBot(User*);
+extern Network *FindNetworkByHost(const Flux::string&);
 
 /* extern's */
-E Network *FluxNet;
-E BotConfig *Config;
-E module *LastRunModule;
-E GlobalProto *GProto;
-E CommandMap Commandsmap;
-E CommandMap ChanCommandMap;
-E time_t starttime;
-E uint32_t usercnt, maxusercnt;
-E Flux::string binary_path, bot_bin, quitmsg, LastBuf;
-E const Flux::string binary_dir;
-E const Flux::string VERSION_LONG;
-E bool protocoldebug, dev, nofork, quitting, nocolor, istempnick, memdebug;
+extern Network *FluxNet;
+extern BotConfig *Config;
+extern module *LastRunModule;
+extern GlobalProto *GProto;
+extern CommandMap Commandsmap;
+extern CommandMap ChanCommandMap;
+extern time_t starttime;
+extern uint32_t usercnt, maxusercnt;
+extern Flux::string binary_path, bot_bin, quitmsg, LastBuf;
+extern const Flux::string binary_dir;
+extern const Flux::string VERSION_LONG;
+extern bool protocoldebug, dev, nofork, quitting, nocolor, istempnick, memdebug;
 
 /* function extern's */
-E Flux::string getprogdir(const Flux::string&, Flux::string &Bot_bin);
-E Flux::string DecodeModErr(ModErr err);
-E Flux::string isolate(char begin, char end, const Flux::string &msg);
-E Flux::string do_strftime(const time_t&, bool short_output = false);
-E Flux::string duration(const time_t&);
-E Flux::string printfify(const char*, ...);
+extern Flux::string getprogdir(const Flux::string&, Flux::string &Bot_bin);
+extern Flux::string DecodeModErr(ModErr err);
+extern Flux::string isolate(char begin, char end, const Flux::string &msg);
+extern Flux::string do_strftime(const time_t&, bool short_output = false);
+extern Flux::string duration(const time_t&);
+extern Flux::string printfify(const char*, ...);
 #define CURR_LOCATION printfify("%s:%s", __FILE__, __PRETTY_FUNCTION__)
-E Flux::string CondenseVector(const Flux::vector&);
-E int randint(int x, int y);
-E bool IsValidChannel(const Flux::string&);
-E bool InTerm();
-E bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
-E Flux::vector ParametizeString(const Flux::string&, char);
-E std::map<int, Flux::string> ForwardResolution(const Flux::string&);
+extern Flux::string CondenseVector(const Flux::vector&);
+extern int randint(int x, int y);
+extern bool IsValidChannel(const Flux::string&);
+extern bool InTerm();
+extern bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
+extern Flux::vector ParametizeString(const Flux::string&, char);
+extern std::map<int, Flux::string> ForwardResolution(const Flux::string&);
 
 /* maps, lists, vectors, etc. */
-E std::list<module*> Modules;
-E Flux::insensitive_map<Network*> Networks;
-E Flux::map<Network*> NetworkHosts;
+extern std::list<module*> Modules;
+extern Flux::insensitive_map<Network*> Networks;
+extern Flux::map<Network*> NetworkHosts;
 
 /* void's */
-E void GarbageCollect();
-E void Rehash();
-E void RenameBot(Network*, const Flux::string&);
-E void Send_Global(const Flux::string&);
-E void Send_Global(const char*, ...);
-E void QuitUser(Network*, User*);
-E void Fork();
-E void sigact(int);
-E void SaveDatabases();
-E void JoinChansInBuffer(Network*);
-E void InitSignals();
-E void HandleSegfault(module*);
-E void restart(const Flux::string&);
-E void ListChans(CommandSource &source);
-E void ListUsers(CommandSource &source);
-E void process(Network*, const Flux::string&);
-E void ProcessJoin(CommandSource&, const Flux::string&);
-E void ProcessCommands(CommandSource&, std::vector<Flux::string>&);
-E void ReadConfig();
+extern void GarbageCollect();
+extern void Rehash();
+extern void RenameBot(Network*, const Flux::string&);
+extern void Send_Global(const Flux::string&);
+extern void Send_Global(const char*, ...);
+extern void QuitUser(Network*, User*);
+extern void Fork();
+extern void sigact(int);
+extern void SaveDatabases();
+extern void JoinChansInBuffer(Network*);
+extern void InitSignals();
+extern void HandleSegfault(module*);
+extern void restart(const Flux::string&);
+extern void ListChans(CommandSource &source);
+extern void ListUsers(CommandSource &source);
+extern void process(Network*, const Flux::string&);
+extern void ProcessJoin(CommandSource&, const Flux::string&);
+extern void ProcessCommands(CommandSource&, std::vector<Flux::string>&);
+extern void ReadConfig();
 
 /* Char's */
-E char segv_location[255];
-E char **my_av, **my_envp;
+extern char segv_location[255];
+extern char **my_av, **my_envp;
 
 /**************************************************************/
 /* This is the only #define allowed at the bottom of the file */

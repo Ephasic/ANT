@@ -33,16 +33,13 @@
 # pragma message("WARNING: You need to implement DEPRECATED for this compiler")
 # define DEPRECATED(func) func
 #endif
-/* Someone remove this */
-#define CoreExport
-#define DllExport
 typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > base_string;
 namespace Flux
 {
   class string;
 }
 
-extern CoreExport bool protocoldebug;
+extern bool protocoldebug;
 template<typename type_name, typename value> inline type_name value_cast(const value &y, bool use_reinterpret_cast = true)
 {
   std::stringstream stream; //Try safe casting with a stringstream.
@@ -355,7 +352,7 @@ namespace Flux {
     inline size_type capacity() const { return this->_string.capacity(); }
     inline size_type max_size() const { return this->_string.max_size(); }
     inline void swap(string &_str) { this->_string.swap(_str._string); }
-    inline void push_back(char c) { return this->_string.push_back(c); } 
+    inline void push_back(char c) { return this->_string.push_back(c); }
     inline void push_back(const string &_str) { if (this != &_str) this->_string += _str._string; }
     inline void resize(size_type n) { return this->_string.resize(n); }
 
@@ -666,9 +663,9 @@ namespace Flux {
   template<typename T> class insensitive_map : public std::map<string, T, ci::less> { };
   typedef std::map<string, std::shared_ptr<std::stringstream>> SerializeMap;
   typedef std::vector<string> vector;
-  extern CoreExport Flux::string Sanitize(const Flux::string&);
-  extern CoreExport Flux::string RandomString(size_t);
-  extern CoreExport Flux::string RandomNickString(size_t);
+  extern Flux::string Sanitize(const Flux::string&);
+  extern Flux::string RandomString(size_t);
+  extern Flux::string RandomNickString(size_t);
   inline std::ostream &operator<<(std::ostream &os, const string &_str) { return os << _str._string; }
   inline std::istream &operator>>(std::istream &os, string &_str) { return os >> _str._string; }
   inline const string operator+(char chr, const string &str) { string tmp(chr); tmp += str; return tmp; }
@@ -678,7 +675,7 @@ namespace Flux {
 
 }//end of namespace
 
-class CoreExport sepstream
+class sepstream
 {
  private:
   Flux::string tokens;
@@ -693,7 +690,7 @@ class CoreExport sepstream
 };
 
 class dynamic_reference_base;
-class CoreExport Base
+class Base
 {
   std::set<dynamic_reference_base*> References;
 public:

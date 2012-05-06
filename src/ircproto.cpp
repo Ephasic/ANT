@@ -290,7 +290,7 @@ void IRCProto::introduce_client(const Flux::string &nickname, const Flux::string
   // Get our hostname of our system
   char hostname[256];
   gethostname(hostname, 256);
-  
+
   this->Raw("NICK %s\n", nickname.c_str());
   this->Raw("USER %s %s %s :%s\n", ident.c_str(), hostname, net->hostname.c_str(), realname.c_str());
 

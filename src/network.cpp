@@ -83,7 +83,11 @@ bool Network::Connect()
 {
   this->disconnecting = false;
   // FIXME: ANT doesn't load the channels on a reconnect.
-  FOREACH_MOD(I_OnPreConnect, OnPreConnect(this));
+  EventResult e;
+  FOREACH_RESULT(I_OnPreConnect, OnPreConnect(this), e);
+  if(e != EVENT_CONTINUE)
+    return false;
+
   if(!this->s)
     this->s = new NetworkSocket(this);
   return true;

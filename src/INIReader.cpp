@@ -203,13 +203,13 @@ BotConfig::BotConfig(const Flux::string &dir)
   this->Parser = new INIReader(conffile);
   this->Binary_Dir = dir;
   this->Read();
-  
+
   if(this->Parser->ParseError() == -1)
     throw ConfigException("Cannot open '"+conffile+"'");
-  
+
   if(this->Parser->ParseError() != 0)
     throw ConfigException(printfify("Error on line %i", this->Parser->ParseError()));
-  
+
  }
  catch(const ConfigException &e)
  {

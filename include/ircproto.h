@@ -15,7 +15,7 @@
 #include "command.h"
 
 class Network;
-class CoreExport IRCProto
+class IRCProto
 {
 public:
   const Network *net;
@@ -27,7 +27,7 @@ public:
   void notice(const Flux::string &where, const Flux::string &msg);
   void action(const Flux::string &where, const char *fmt, ...);
   void action(const Flux::string &where, const Flux::string &msg);
-  
+
   void quit(const char*, ...);
   void Raw(const char*, ...);
   void nick(const char*, ...);
@@ -41,7 +41,7 @@ public:
   void whowas(const Flux::string&, int count = 0, const Flux::string &server = "");
   void users(const Flux::string &server = "");
   void userhost(const Flux::string&);
-  
+
   void kick(const Flux::string&, const Flux::string&, const char *fmt, ...);
   void topic(const Flux::string&, const char *fmt, ...);
   void part(const Flux::string&, const char *fmt, ...);
