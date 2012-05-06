@@ -64,6 +64,7 @@ public:
   bool JoinChannel(const Flux::string&);
   bool IsDisconnecting() { return this->disconnecting; }
   bool Disconnect();
+  bool Disconnect(const char *fmt, ...);
   bool Disconnect(const Flux::string&);
   bool Connect();
 };

@@ -88,13 +88,13 @@ void restart(const Flux::string &reason)
     {
       Log() << "Restarting: No Reason";
       if(n->b && n->b->ircproto)
-	n->b->ircproto->quit("Restarting: No Reason");
+	n->Disconnect("Restarting: No Reason");
     }
     else
     {
       Log() << "Restarting: " << reason;
       if(n->b && n->b->ircproto)
-	n->b->ircproto->quit("Restarting: %s", reason.c_str());
+	n->Disconnect("Restarting: %s", reason.c_str());
     }
   }
 
@@ -318,4 +318,65 @@ void startup(int argc, char** argv, char *envp[])
   FOREACH_MOD(I_OnStart, OnStart(argc, argv)); //announce we are starting the bot
   Fork(); //Fork to background
   SocketEngine::Init(); //Initialize the socket engine
+}
+
+// Clean up our pointers so we don't exit with memory leaks..
+void GarbageCollect()
+{
+  SET_SEGV_LOCATION();
+
+  // a FIFO queue for all the pointers we need to delete.
+  std::queue<void*> ptrstodelete;
+
+  // Clean up any network pointers and clear the map
+  for(auto nit : Networks)
+  {
+    Network *n = nit.second;
+    if(n)
+    {
+      n->Disconnect("Shutting down.");
+      // Clean up any channel pointers for the network and clear the map
+      if(!n->ChanMap.empty())
+	for(auto cit : n->ChanMap)
+	  if(cit.second)
+	    ptrstodelete.push(cit.second);
+	  n->ChanMap.clear();
+
+	// Clean up any user pointers for the network and clear the map
+	  if(!n->UserNickList.empty())
+	    for(auto uit : n->UserNickList)
+	      if(uit.second)
+		ptrstodelete.push(uit.second);
+	      n->UserNickList.clear();
+
+	    ptrstodelete.push(n);
+    }
+  }
+  Networks.clear();
+
+  // Deallocate our map pointers and such.
+  // This would've deleted the void pointer but
+  // GCC doesn't like that and neither did valgrind
+  while(!ptrstodelete.empty())
+  {
+    void *ptr = ptrstodelete.front();
+    ptrstodelete.pop();
+    Log(LOG_MEMORY) << "Deleting @" << ptr;
+
+    if(typeid(ptr) == typeid(User*))
+      delete static_cast<User*>(ptr);
+
+    if(typeid(ptr) == typeid(Channel*))
+      delete static_cast<Channel*>(ptr);
+
+    if(typeid(ptr) == typeid(Network*))
+      delete static_cast<Network*>(ptr);
+  }
+
+  // Delete our global IRC protocol wrapper
+  if(GProto)
+    delete GProto;
+
+  // Shutdown the socket engine and close any remaining sockets.
+    SocketEngine::Shutdown();
 }

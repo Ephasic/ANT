@@ -39,9 +39,11 @@ module::~module()
   Log(LOG_DEBUG) << "Unloading module " << this->name;
   ModuleHandler::DetachAll(this);
 
-  std::list<module*>::iterator it = std::find(Modules.begin(), Modules.end(), this);
+  auto it = std::find(Modules.begin(), Modules.end(), this);
   if(it != Modules.end())
     Modules.erase(it);
+  else
+    Log() << "Could not find " << this->name << " in module map!";
 }
 
 void module::SetAuthor(const Flux::string &person)

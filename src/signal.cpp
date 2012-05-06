@@ -1,4 +1,3 @@
-#include "includes.h"
 /* Arbitrary Navn Tool -- Signal Processing
  *
  * (C) 2011-2012 Azuru
@@ -10,9 +9,10 @@
  * Based on the original code of Anope by The Anope Team.
  */
 
+#include "includes.h"
 #include "module.h"
 #include "bot.h"
-#include <cassert>
+// #include <cassert>
 
 /** Segmentation Fault Handler
  * \fn void HandleSegfault(module *m)
@@ -124,7 +124,7 @@ void sigact(int sig)
       HandleSegfault(NULL);
       signal(sig, SIG_DFL);
       for(auto it : Networks) // wouldn't hurt to try and exit saying we segfaulted.
-	it.second->b->Quit("Segmentation Fault");
+	it.second->Disconnect("Segmentation Fault");
       exit(SIGSEGV);
       break;
     case SIGINT:
@@ -136,7 +136,7 @@ void sigact(int sig)
       Log(LOG_RAWIO) << quitmsg;
       for(auto it : Networks)
 	if(it.second->b)
-	  it.second->b->Quit(quitmsg);
+	  it.second->Disconnect(quitmsg);
       quitting = true;
       break;
     default:

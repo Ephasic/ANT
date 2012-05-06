@@ -20,7 +20,7 @@ bool ModuleHandler::Attach(Implementation i, module *mod)
 {
   if(std::find(EventHandlers[i].begin(), EventHandlers[i].end(), mod) != EventHandlers[i].end())
     return false;
-  
+
   EventHandlers[i].push_back(mod);
   return true;
 }
@@ -95,56 +95,56 @@ void ModuleHandler::DetachAll(module *m)
 ModErr ModuleHandler::LoadModule(const Flux::string &modname)
 {
   SET_SEGV_LOCATION();
-  
+
   if(modname.empty())
     return MOD_ERR_PARAMS;
-  
+
   if(FindModule(modname))
     return MOD_ERR_EXISTS;
-  
+
   Log() << "Attempting to load module [" << modname << ']';
-  
+
   Flux::string mdir = Config->Binary_Dir + "/runtime/"+ (modname.search(".so")?modname+".XXXXXX":modname+".so.XXXXXX");
   Flux::string input = Flux::string(Config->Binary_Dir + "/" + (Config->ModuleDir.empty()?modname:Config->ModuleDir+"/"+modname) + ".so").replace_all_cs("//","/");
-  
+
   TextFile mod(input);
   Flux::string output = TextFile::TempFile(mdir);
   Log(LOG_RAWIO) << "Runtime module location: " << output;
-  
+
   mod.Copy(output);
   if(mod.GetLastError() != FILE_IO_OK)
   {
     Log(LOG_RAWIO) << "Runtime Copy Error: " << mod.DecodeLastError();
     return MOD_ERR_FILE_IO;
   }
-  
+
   dlerror();
 
   // FIXME: Somehow the binary_dir variable is lost when this executes >:|
   void *handle = dlopen(output.c_str(), RTLD_LAZY);
   const char *err = dlerror();
-  
+
   if(!handle && err && *err)
   {
     Log() << '[' << modname << "] " << err;
     return MOD_ERR_NOLOAD;
   }
-  
+
   dlerror();
-  
+
   module *(*f)(const Flux::string&) = class_cast<module *(*)(const Flux::string&)>(dlsym(handle, "ModInit"));
   err = dlerror();
-  
+
   if(!f && err && *err)
   {
     Log() << "No module init function, moving on.";
     dlclose(handle);
     return MOD_ERR_NOLOAD;
   }
-  
+
   if(!f)
     throw CoreException("Can't find module constructor, yet no moderr?");
-  
+
   module *m;
   try
   {
@@ -155,15 +155,15 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
     Log() << "Error while loading " << modname << ": " << e.GetReason();
     return MOD_ERR_EXCEPTION;
   }
-  
+
   m->filepath = output;
   m->filename = (modname.search(".so")?modname:modname+".so");
   m->handle = reinterpret_cast<void*>(handle); //we'll convert to auto later, for now reinterpret_cast.
-  
+
   m->OnLoad();
-  
+
   FOREACH_MOD(I_OnModuleLoad, OnModuleLoad(m));
-  
+
   return MOD_ERR_OK;
 }
 
@@ -172,15 +172,16 @@ bool ModuleHandler::DeleteModule(module *m)
   SET_SEGV_LOCATION();
   if (!m || !m->handle)
     return false;
-  
+
   auto *handle = m->handle;
   Flux::string filepath = m->filepath;
-  
+
   dlerror();
-  
+
   void (*df)(module**) = class_cast<void (*)(module**)>(dlsym(m->handle, "ModunInit"));
   const char *err = dlerror();
-  
+
+  SET_SEGV_LOCATION();
   if (!df && err && *err)
   {
     Log(LOG_DEBUG) << "No destroy function found for " << m->name << ", chancing delete...";
@@ -194,10 +195,12 @@ bool ModuleHandler::DeleteModule(module *m)
   }
   else
     df(&m);
-    
+
   if(handle)
     if(dlclose(handle))
       Log() << "[" << m->name << ".so] " << dlerror();
+
+    m = nullptr;
 
     return true;
 }
@@ -206,7 +209,7 @@ bool ModuleHandler::Unload(module *m)
 {
   if(!m || m->GetPermanent())
     return false;
-  
+
   FOREACH_MOD(I_OnModuleUnload, OnModuleUnload(m));
   return DeleteModule(m);
 }
@@ -245,7 +248,7 @@ void ModuleHandler::SanitizeRuntime()
 {
   Log(LOG_DEBUG) << "Cleaning up runtime directory.";
   Flux::string dirbuf = Config->Binary_Dir+"/runtime/";
-  
+
   if(!TextFile::IsDirectory(dirbuf))
   {
     if(mkdir(dirbuf.c_str(), getuid()) != 0)
@@ -272,6 +275,6 @@ module *FindModule(const Flux::string &name)
     if(m->name.equals_ci(name))
       return m;
   }
-  
+
   return nullptr;
 }

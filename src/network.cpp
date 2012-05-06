@@ -61,13 +61,32 @@ bool Network::JoinChannel(const Flux::string &chan)
 
 bool Network::Disconnect()
 {
-  Socket *tmp = this->s;
-  Bot *bot = this->b;
+  // Check if we have a socket to send on
+  if(!this->s)
+    return false;
+  // We'll let the socket engine delete the socket
+  this->s->SetDead(true);
+  // say this network is disconnecting
   this->disconnecting = true;
-  this->s = nullptr;
+  // Delete the bot object
+  delete this->b;
+  // Make sure we dont continue to use the bot object
   this->b = nullptr;
-  delete bot;
-  delete tmp;
+  // return that we did something
+  return true;
+}
+
+bool Network::Disconnect(const char *fmt, ...)
+{
+  va_list args;
+  char buffer[BUFSIZE] = "";
+  if(fmt)
+  {
+    va_start(args, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    this->Disconnect(Flux::string(buffer));
+    va_end(args);
+  }
   return true;
 }
 
@@ -128,7 +147,8 @@ void ReconnectTimer::Tick(time_t)
 {
   try
   {
-    n->Connect();
+    if(!quitting)
+      n->Connect();
   }
   catch (const SocketException &e)
   {
