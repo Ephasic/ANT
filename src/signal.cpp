@@ -133,7 +133,7 @@ void sigact(int sig)
       signal(sig, SIG_IGN);
       signal(SIGHUP, SIG_IGN);
       quitmsg = "Received Signal SIGTERM, exiting..";
-      Log(LOG_RAWIO) << quitmsg;
+      Log(LOG_WARN) << quitmsg;
       for(auto it : Networks)
 	if(it.second->b)
 	  it.second->Disconnect(quitmsg);

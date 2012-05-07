@@ -38,15 +38,26 @@ User *Channel::finduser(Network *net, const Flux::string &usr)
 {
   auto it1 = net->UserNickList.find(usr);
   User *u = it1->second;
+  
   if(!u)
     return nullptr;
+  
   UList::iterator it = UserList.find(u);
+  
   if(it != UserList.end())
     return it->first;
+  
   return nullptr;
 }
 
-void Channel::SendJoin(){ this->n->b->ircproto->join(this->name); this->SendWho(); }
+void Channel::SendJoin()
+{
+  if(!this->n || !this->n->b)
+    return; // incase we have some weird shit
+  
+  this->n->b->ircproto->join(this->name);
+  this->SendWho();
+}
 void Channel::AddUser(User *u) { if(u) this->UserList[u] = this; }
 void Channel::DelUser(User *u)
 {
@@ -111,7 +122,13 @@ void Channel::SendNotice(const char *fmt, ...)
   }
 }
 
-void Channel::SendWho() { this->n->b->ircproto->who(this->name); }
+void Channel::SendWho()
+{
+  if(!this->n || !this->n->b)
+    return; // incase we have some weird shit
+    
+  this->n->b->ircproto->who(this->name);
+}
 /****************************************************************/
 void QuitUser(Network *n, User *u)
 {

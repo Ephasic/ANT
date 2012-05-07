@@ -326,57 +326,49 @@ void GarbageCollect()
 {
   SET_SEGV_LOCATION();
 
-  // a FIFO queue for all the pointers we need to delete.
-  std::queue<void*> ptrstodelete;
-
   // Clean up any network pointers and clear the map
-  for(auto nit : Networks)
+  for(Flux::insensitive_map<Network*>::iterator it = Networks.begin(), it_end = Networks.end(); it != it_end;)
   {
-    Network *n = nit.second;
+    Network *n = it->second;
+    ++it;
     if(n)
     {
       n->Disconnect("Shutting down.");
+      
       // Clean up any channel pointers for the network and clear the map
       if(!n->ChanMap.empty())
-	for(auto cit : n->ChanMap)
-	  if(cit.second)
-	    ptrstodelete.push(cit.second);
-	  n->ChanMap.clear();
+	for(Flux::insensitive_map<Channel*>::iterator cit = n->ChanMap.begin(),
+	  cit_end = n->ChanMap.end(); cit != cit_end;)
+	{
+	  Channel *c = cit->second;
+	  ++cit;
+	  Log(LOG_MEMORY) << "Deleting Channel @" << c;
+	  delete c;
+	}
 
-	// Clean up any user pointers for the network and clear the map
-	  if(!n->UserNickList.empty())
-	    for(auto uit : n->UserNickList)
-	      if(uit.second)
-		ptrstodelete.push(uit.second);
-	      n->UserNickList.clear();
+      // Clean up any user pointers for the network and clear the map
+      if(!n->UserNickList.empty())
+	for(Flux::insensitive_map<User*>::iterator uit = n->UserNickList.begin(),
+	  uit_end = n->UserNickList.end(); uit != uit_end;)
+	{
+	  User *u = uit->second;
+	  ++uit;
+	  Log(LOG_MEMORY) << "Deleting User @" << u;
+	  delete u;
+	}
 
-	    ptrstodelete.push(n);
+	n->ChanMap.clear();
+	n->UserNickList.clear();
+	Log(LOG_MEMORY) << "Deleting Network @" << n;
+	delete n;
     }
   }
   Networks.clear();
 
-  // Deallocate our map pointers and such.
-  // This would've deleted the void pointer but
-  // GCC doesn't like that and neither did valgrind
-  while(!ptrstodelete.empty())
-  {
-    void *ptr = ptrstodelete.front();
-    ptrstodelete.pop();
-    Log(LOG_MEMORY) << "Deleting @" << ptr;
-
-    if(typeid(ptr) == typeid(User*))
-      delete static_cast<User*>(ptr);
-
-    if(typeid(ptr) == typeid(Channel*))
-      delete static_cast<Channel*>(ptr);
-
-    if(typeid(ptr) == typeid(Network*))
-      delete static_cast<Network*>(ptr);
-  }
-
   // Delete our global IRC protocol wrapper
   if(GProto)
     delete GProto;
+  GProto = nullptr;
 
   // Shutdown the socket engine and close any remaining sockets.
     SocketEngine::Shutdown();

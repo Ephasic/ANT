@@ -45,7 +45,6 @@ void SocketEngine::AddSocket(Socket *s)
   FD_SET(s->GetFD(), &ReadFDs);
   Sockets.insert(std::make_pair(s->GetFD(), s));
   ++FDCount;
-  Log(LOG_TERMINAL) << "SOCKET: " << FDCount << " | FD: " << s->GetFD();
 }
 
 void SocketEngine::DelSocket(Socket *s)

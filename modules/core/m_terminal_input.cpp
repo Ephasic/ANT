@@ -22,13 +22,15 @@ void ProcessInput(const Flux::string &str)
 	quitting = true;
 
 	Flux::string message;
+
+	// We manually decode this to remove QUIT/EXIT from the message
 	for(unsigned i = 1; i < params.size(); ++i)
 	  message += params[i] + " ";
 	message.trim();
 
 	for(auto it : Networks)
 	  if(it.second->b)
-	    it.second->b->Quit(message);
+	    it.second->Disconnect(message);
   }
 //   else if(params[0].equals_ci("MSG"))
 //     send_cmd("PRIVMSG %s\n", str.substr(4).c_str());

@@ -156,7 +156,7 @@ Log::~Log()
   Flux::string LogColor;
   if(Config)
   {
-    LogColor = LogColor;
+    LogColor = Config->LogColor;
     this->filename = CreateLogName(Config->LogFile, starttime);
   }
   else

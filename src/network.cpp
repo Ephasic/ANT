@@ -92,7 +92,7 @@ bool Network::Disconnect(const char *fmt, ...)
 
 bool Network::Disconnect(const Flux::string &buf)
 {
-  if(!buf.empty() && this->s)
+  if(!buf.empty() && this->s && this->b)
     this->b->ircproto->quit(buf);
   this->Disconnect();
   return true;

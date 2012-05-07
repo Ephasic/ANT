@@ -91,6 +91,8 @@ int main (int argcx, char** argvx, char *envp[])
     FOREACH_MOD(I_OnShutdown, OnShutdown());
     SaveDatabases();
     FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
+    SocketEngine::Process(); // Read/Write the last bit, close any leftover sockets
+    TimerManager::TickTimers(time(NULL)); // Tick any timers
     ModuleHandler::UnloadAll();
     ModuleHandler::SanitizeRuntime();
     GarbageCollect();

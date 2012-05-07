@@ -80,7 +80,7 @@ int INIReader::Parse(const Flux::string &filename)
 	section.trim();
       }
       else if((line[0] == '[' && line[line.size()-1] != ']') || (line[0] != '[' && line[line.size() -1] == ']'))
-	throw ConfigException(printfify("Brackets not terminated: %i", linenum));
+	throw ConfigException(printfify("Unterminated Bracket: %i", linenum));
       else if(!line.empty() && line.find_first_of('='))
       {
 	name = line;
