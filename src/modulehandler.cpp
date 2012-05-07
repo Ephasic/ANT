@@ -200,8 +200,6 @@ bool ModuleHandler::DeleteModule(module *m)
     if(dlclose(handle))
       Log() << "[" << m->name << ".so] " << dlerror();
 
-    m = nullptr;
-
     return true;
 }
 

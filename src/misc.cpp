@@ -43,7 +43,7 @@ void Fork()
     if(i > 0)
     {
       Log(LOG_TERMINAL) << "ANT Commit System v" << VERSION << " Started";
-      Log(LOG_TERMINAL) << "Forking to background. PID: " << i << "\033[22;37m";
+      Log(LOG_TERMINAL) << "Forking to background. PID: " << i << "\033[0m";
       FOREACH_MOD(I_OnFork, OnFork(i));
       exit(0);
     }
@@ -58,7 +58,7 @@ void Fork()
     else if(i == -1)
       Log() << "Error, unable to fork: " << strerror(errno);
   }else
-    Log() << "ANT Commit System Started, PID: " << getpid() << "\033[22;36m";
+    Log() << "ANT Commit System Started, PID: " << getpid() << Config->LogColor;
 }
 
 Flux::string CondenseVector(const Flux::vector &params)

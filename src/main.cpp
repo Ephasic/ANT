@@ -64,8 +64,8 @@ int main (int argcx, char** argvx, char *envp[])
     startup(argcx, argvx, envp);
     time_t last_check = time(NULL);
 
-    del_on_exit = new DBSave(); //Start the Database Save timer.
-    GProto = new GlobalProto();
+    del_on_exit = new DBSave(); // Start the Database Save timer.
+    GProto = new GlobalProto(); // Global protocol class
 
     TimerManager::TickTimers(time(NULL)); //Call timers to tick to start pending sockets instantly.
     while(!quitting)
@@ -74,6 +74,7 @@ int main (int argcx, char** argvx, char *envp[])
       //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
       if(++loopcount >= 50) { LastBuf = "50 main loop calls in 3 secs"; raise(SIGSEGV); }
 
+      // Process our sockets and whatnot
       SocketEngine::Process();
       /* Process Timers */
       /***********************************/
@@ -99,11 +100,7 @@ int main (int argcx, char** argvx, char *envp[])
   catch(const CoreException& e)
   {
     /* we reset the terminal colors, this should be removed as it makes more issues than it is cool */
-    Log(LOG_TERMINAL) << "\033[0m";
-    if(!Config)
-      Log(LOG_TERMINAL) << "Core Exception Caught: " << e.GetReason();
-    else
-      Log() << "Core Exception Caught: " << e.GetReason();
+    Log() << "\033[0mCore Exception Caught: " << e.GetReason();
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

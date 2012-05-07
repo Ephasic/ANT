@@ -45,7 +45,7 @@ public:
   void OnCTCP(const Flux::string &source, const std::vector<Flux::string> &params, Network *n)
   {
     Flux::string cmd = params.empty()?"":params[0];
-    Log() << "\033[22;31mRecieved CTCP " << Flux::Sanitize(cmd) << " from " << source << "\033[22;36m";
+    Log() << "\033[22;31mRecieved CTCP " << Flux::Sanitize(cmd) << " from " << source << Config->LogColor;
 
     if(cmd == "\001VERSION\001")
     { // for CTCP VERSION reply

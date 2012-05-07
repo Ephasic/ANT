@@ -309,8 +309,9 @@ void startup(int argc, char** argv, char *envp[])
     Log() << "ANT Commit System is started in No Colors mode.\033[0m"; //reset terminal colors
   }
 
+  // Set terminal colors to whatever is in the config
   if(!nocolor)
-    Log(LOG_TERMINAL) << "\033[22;36m";
+    Log(LOG_TERMINAL) << Config->LogColor;
 
   ModuleHandler::SanitizeRuntime();
   ReadConfig(); //load modules

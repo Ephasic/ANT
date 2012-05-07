@@ -169,35 +169,40 @@ Log::~Log()
   switch(type)
   {
     case LOG_SILENT:
+      // Silent logging is handled outside of this.
     case LOG_NORMAL:
       logstream << TimeStamp() << " " << (nocolor?NoTermColor(message):message);
       break;
     case LOG_THREAD:
       if(protocoldebug)
-	logstream << TimeStamp() << " [THREAD] " << (nocolor?NoTermColor(message):message);
+	logstream << TimeStamp() << " [THREAD] " << message;
       break;
     case LOG_DEBUG:
       if(dev || protocoldebug)
-	logstream << TimeStamp() << " " << (nocolor?NoTermColor(message):message);
+	logstream << TimeStamp() << " " << message;
       break;
     case LOG_RAWIO:
       if(protocoldebug)
-	logstream << TimeStamp() << " " << (nocolor?NoTermColor(message):message);
+	logstream << TimeStamp() << " " << message;
       break;
     case LOG_CRITICAL:
-      logstream << "\033[22;31m" << TimeStamp() << " [CRITICAL] " << (nocolor?NoTermColor(message):message) << "\033[22;36m";
+      logstream << "\033[22;31m" << TimeStamp() << " [CRITICAL] " << message << Config->LogColor;
+      break;
+    case LOG_WARN:
+      logstream << TimeStamp() << " \033[22;33m[WARNING]" << Config->LogColor << " " << message;
       break;
     case LOG_MEMORY:
       if(memdebug)
-	std::cout << TimeStamp() << " [MEMORY] " << (nocolor?NoTermColor(message):message) << std::endl;
+	std::cout << TimeStamp() << " [MEMORY] " << message << std::endl;
       return; // ignore everything else, it doesn't matter
     case LOG_TERMINAL:
       if(InTerm())
-	std::cout << (nocolor?NoTermColor(raw):raw) << std::endl;
+	// We allow colors here because it's supposed to be consodered 'raw'
+	std::cout << raw << std::endl;
       return;
     default:
       Log(LOG_CRITICAL) << "Wtf log case is this?";
-      Log(LOG_TERMINAL) << " [NOTYPE] " << message;
+      Log(LOG_TERMINAL) << "\033[22;33m[UNDEFINED]" << Config->LogColor << " " << message;
   }
 
   EventResult result;
@@ -206,14 +211,14 @@ Log::~Log()
     return;
 
   if(type != LOG_SILENT || type != LOG_CRITICAL)
-    std::cout << logstream.str() << std::endl;
+    std::cout << (nocolor?NoTermColor(logstream.str()):logstream.str()) << std::endl;
 
   if(type == LOG_CRITICAL) // Log to stderr instead of stdout
-    std::cerr << logstream.str() << std::endl;
+    std::cerr << (nocolor?NoTermColor(logstream.str()):logstream.str()) << std::endl;
 
   if(this->filename.empty())
   {
-    std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!\033[22;36m" << std::endl;
+    std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!" << Config->LogColor << std::endl;
     return; // Exit if there's no file to log to
   }
 
@@ -231,6 +236,7 @@ Log::~Log()
 	Flux::string("Failed to open Log File "+this->filename+": "+strerror(errno)).c_str());
     }
 
+    // Because we're writing to a file, we remove any color codes
     log << NoTermColor(logstream.str()) << std::endl;
 
     if(log.is_open())

@@ -65,7 +65,7 @@ void CommandSource::Reply(const Flux::string &msg)
    if(this->u)
       this->u->SendMessage(tok);
    else
-     Log() << "Cannot send \"" << tok << "\" to server, unknown user!";
+     Log(LOG_WARN) << "Cannot send \"" << tok << "\" to server, unknown user!";
 }
 
 /**

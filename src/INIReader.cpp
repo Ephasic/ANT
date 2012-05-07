@@ -248,6 +248,7 @@ void BotConfig::Read()
   this->SockWait 	= this->Parser->GetInteger("Socket","Socket Timeout",5);
   this->RetryWait 	= this->Parser->GetInteger("Socket", "Retry Wait", 30);
   this->dbforce 	= this->Parser->GetBoolean("Bot", "Force Database Read", false);
+  this->LogColor	= this->Parser->Get("Log", "Color", "\003[0m").replace_all_cs("\\033", "\033");
   this->LogAge 		= this->Parser->GetInteger("Log", "Log Age", 2);
 }
 
