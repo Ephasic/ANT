@@ -76,6 +76,7 @@ Flux::string BuildFileString(Flux::vector files)
 Flux::vector PosixCommonPrefix(Flux::vector &files)
 {
   Flux::map<int> endings;
+  Flux::map<Flux::vector> endings2;
   Flux::vector dirs;
 
   for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
@@ -103,8 +104,21 @@ Flux::vector PosixCommonPrefix(Flux::vector &files)
       }
     }
 
+    for(Flux::map<Flux::vector>::iterator it2 = endings2.begin(); it2 != endings2.end(); ++it2)
+    {
+      if(it2->first.equals_cs(dir))
+      {
+	it2->second++;
+	found = true;
+      }
+    }
+
     if(!found)
+    {
       endings[dir] = 1;
+      endings[dir] = 
+    }
+
   }
 
   for(auto it : endings)
