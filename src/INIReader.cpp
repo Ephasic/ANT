@@ -22,98 +22,108 @@ int INIReader::Parse(const Flux::string &filename)
 {
   SET_SEGV_LOCATION();
   std::ifstream file(filename.c_str());
-  int linenum = 0, error =0;
+  int linenum = 0;
   Flux::string line, section, name, value;
   if(file.is_open())
   {
-   while(file.good())
-   {
-    bool contin = false;
-    std::getline(file, line.std_str());
-    linenum++;
-    line.trim();
-    //printf("UNPARSED: %s\n", line.c_str());
-
-    if(line[0] == ';' || line[0] == '#' || line.empty())
-      continue;  // Do nothing if any of this is true
-    /********************************************/
-    unsigned c=0, len = line.length();
-    for(; c < len; ++c)
+    while(file.good())
     {
-      char ch = line[c];
-      if(in_comment){
-	if(ch == '*' && c+1 < len && line[c+1] == '/')
-	{
-	  in_comment = false;
-	  line = line.erase(c, c+2);
-	  line.trim();
-	  if((line[0] == '[' && line[line.size() -1] == ']') || (!line.empty() && line.find_first_of('=')))
-	    continue;
-	  else
-	    contin = true;
-	  ++c;
-	}
-	continue;
-      }
-      else if(ch == '/' && c+1 < len && line[c+1] == '*')
-      {
-	in_comment = true;
-	++c;
-	continue;
-      }
-    }
-    if(line.search("/*") && line.search("*/")){
-      in_comment = contin = false;
-      line = line.erase(line.find("/*"), line.find("*/"));
+      bool contin = false;
+      std::getline(file, line.std_str());
+      linenum++;
       line.trim();
-    }
-    if(in_comment || contin)
-      continue;
-    /********************************************/
-    if(line[0] == '[' && line[line.size() -1] == ']')
-    {
-      line = line.erase(0,1);
-      section = line.erase(line.size()-1,line.size());
-      section.trim();
-    }
-    else if((line[0] == '[' && line[line.size()-1] != ']') || (line[0] != '[' && line[line.size() -1] == ']'))
-      error = linenum;
-    else if(!line.empty() && line.find_first_of('=')){
-      name = line;
-      int d = line.find_first_of('=');
-      if(line.find_first_of(';') < (unsigned)d)
-	error = linenum;
-      else if(d > 0){
-	name = name.erase(d, name.size()-d);
-	name.trim();
-      }
-      /************************************/
-      value = line;
-      value = value.erase(0,value.find('=')+1);
-      value.trim();
-      if(value.find_first_of(';')){ //We only erase ';' (semi-colons) if we find them, we cannot erase # signs for
-	int i = value.find_first_of(';'); // channels would look like comments.. maybe we can fix this one day..
-	if(i > 0){
-	  value = value.erase(i, Flux::string::npos);
+      //printf("UNPARSED: %s\n", line.c_str());
+
+      if(line[0] == '#' || line.empty())
+	continue;
+	
+      /********************************************/
+      unsigned c=0, len = line.length();
+      for(; c < len; ++c)
+      {
+	char ch = line[c];
+	if(in_comment)
+	{
+	  if(ch == '*' && c+1 < len && line[c+1] == '/')
+	  {
+	    in_comment = false;
+	    line = line.erase(c, c+2);
+	    line.trim();
+	    if((line[0] == '[' && line[line.size() -1] == ']') || (!line.empty() && line.find_first_of('=')))
+	      continue;
+	    else
+	      contin = true;
+	    ++c;
+	  }
+	  continue;
+	}
+	else if(ch == '/' && c+1 < len && line[c+1] == '*')
+	{
+	  in_comment = true;
+	  ++c;
+	  continue;
 	}
       }
-      value.trim();
-      /************************************/
-      if(error != 0)
-	break;
-      else if(value.empty() || section.empty() || name.empty() || value.search(';'))
-	error = linenum;
+      if(line.search("/*") && line.search("*/"))
+      {
+	in_comment = contin = false;
+	line = line.erase(line.find("/*"), line.find("*/"));
+	line.trim();
+      }
+      if(in_comment || contin)
+	continue;
+      /********************************************/
+      if(line[0] == '[' && line[line.size() -1] == ']')
+      {
+	line = line.erase(0,1);
+	section = line.erase(line.size()-1,line.size());
+	section.trim();
+      }
+      else if((line[0] == '[' && line[line.size()-1] != ']') || (line[0] != '[' && line[line.size() -1] == ']'))
+	throw ConfigException(printfify("Brackets not terminated: %i", linenum));
+      else if(!line.empty() && line.find_first_of('='))
+      {
+	name = line;
+	int d = line.find_first_of('=');
+	if(line.find_first_of(';') < (unsigned)d)
+	  throw ConfigException(printfify("Cannot have semi-colon immediately after assignment: %i", linenum));
+	else if(d > 0)
+	{
+	  name = name.erase(d, name.size()-d);
+	  name.trim();
+	}
+	/************************************/
+	value = line;
+	value = value.erase(0,value.find('=')+1);
+	value.trim();
+	if(value.find_first_of(';'))
+	{ //We only erase ';' (semi-colons) if we find them, we cannot erase # signs for
+	  int i = value.find_first_of(';'); // channels would look like comments.. maybe we can fix this one day..
+	  if(i > 0)
+	  {
+	    if(i+1 <= static_cast<int>(value.size()) && value[i+1] == ';')
+	      value = value.replace_all_cs(";;", ";");
+	    else
+	      value = value.erase(i, Flux::string::npos);
+	  }
+	}
+	value.trim();
+	/************************************/
+	if(value.empty() || section.empty() || name.empty())
+	  throw ConfigException(printfify("Empty value/section/name: %i", linenum));
+	else
+	_values[this->MakeKey(section, name)] = value;
+      }
       else
-      _values[this->MakeKey(section, name)] = value;
-    }else
-      error = linenum;
-   }
-   if(in_comment)
-      error = linenum;
-   file.close();
-  }else
+	throw ConfigException(printfify("Undefined data: %i", linenum));
+    }
+    if(in_comment)
+      throw ConfigException(printfify("Unterminated comment: %i", linenum));
+    file.close();
+  }
+  else
     return -1;
-  return error;
+  return 0;
 }
 /**
  * \class INIReader The config parser class, this parses the INI file for config values
@@ -248,7 +258,7 @@ void BotConfig::Read()
   this->SockWait 	= this->Parser->GetInteger("Socket","Socket Timeout",5);
   this->RetryWait 	= this->Parser->GetInteger("Socket", "Retry Wait", 30);
   this->dbforce 	= this->Parser->GetBoolean("Bot", "Force Database Read", false);
-  this->LogColor	= this->Parser->Get("Log", "Color", "\003[0m").replace_all_cs("\\033", "\033");
+  this->LogColor	= this->Parser->Get("Log", "Color", "\033[0m").replace_all_cs("\\033", "\033");
   this->LogAge 		= this->Parser->GetInteger("Log", "Log Age", 2);
 }
 

@@ -153,10 +153,17 @@ Log::Log(LogType t, User *user, Command *command): type(t), u(user), c(command)
 
 Log::~Log()
 {
+  Flux::string LogColor;
   if(Config)
+  {
+    LogColor = LogColor;
     this->filename = CreateLogName(Config->LogFile, starttime);
+  }
   else
+  {
+    LogColor = "\033[0m";
     this->filename = "";
+  }
 
   Flux::string message = Flux::Sanitize(this->buffer.str()), raw = this->buffer.str();
   std::stringstream logstream;
@@ -186,10 +193,10 @@ Log::~Log()
 	logstream << TimeStamp() << " " << message;
       break;
     case LOG_CRITICAL:
-      logstream << "\033[22;31m" << TimeStamp() << " [CRITICAL] " << message << Config->LogColor;
+      logstream << "\033[22;31m" << TimeStamp() << " [CRITICAL] " << message << LogColor;
       break;
     case LOG_WARN:
-      logstream << TimeStamp() << " \033[22;33m[WARNING]" << Config->LogColor << " " << message;
+      logstream << TimeStamp() << " \033[22;33m[WARNING]" << LogColor << " " << message;
       break;
     case LOG_MEMORY:
       if(memdebug)
@@ -202,7 +209,7 @@ Log::~Log()
       return;
     default:
       Log(LOG_CRITICAL) << "Wtf log case is this?";
-      Log(LOG_TERMINAL) << "\033[22;33m[UNDEFINED]" << Config->LogColor << " " << message;
+      Log(LOG_TERMINAL) << "\033[22;33m[UNDEFINED]" << LogColor << " " << message;
   }
 
   EventResult result;
@@ -218,7 +225,7 @@ Log::~Log()
 
   if(this->filename.empty())
   {
-    std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!" << Config->LogColor << std::endl;
+    std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!" << LogColor << std::endl;
     return; // Exit if there's no file to log to
   }
 

@@ -108,15 +108,16 @@ Flux::vector PosixCommonPrefix(Flux::vector &files)
     {
       if(it2->first.equals_cs(dir))
       {
-	it2->second++;
-	found = true;
+	static_cast<void>(0);
+// 	it2->second;
+// 	found = true;
       }
     }
 
     if(!found)
     {
       endings[dir] = 1;
-      endings[dir] = 
+//       endings[dir] = 
     }
 
   }
