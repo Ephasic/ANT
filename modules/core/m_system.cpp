@@ -159,6 +159,7 @@ public:
 
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
+    this->SetPermanent(true);
   }
 
   // Have a little fun with the system, these are useful to see how lagged the system is or if it's

@@ -218,7 +218,9 @@ void ModuleHandler::UnloadAll()
   {
     module *m = *it;
     ++it;
-    Unload(m);
+    // ignore Unload function because we're forcing a unload regardless of whether it's permanent or not.
+    FOREACH_MOD(I_OnModuleUnload, OnModuleUnload(m));
+    DeleteModule(m);
   }
   Modules.clear();
 }
@@ -246,7 +248,7 @@ void ModuleHandler::SanitizeRuntime()
 
   if(!TextFile::IsDirectory(dirbuf))
   {
-    if(mkdir(dirbuf.c_str(), getuid()) != 0)
+    if(mkdir(dirbuf.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0)
       throw CoreException(printfify("Error making new runtime directory: %s", strerror(errno)));
   }
   else

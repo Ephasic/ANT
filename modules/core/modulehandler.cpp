@@ -127,11 +127,24 @@ public:
 //       source.Reply(ACCESS_DENIED);
     //else{
       module *mu = FindModule(modd);
+      if(!mu)
+      {
+	source.Reply("Module \002%s\002 not loaded", modd.c_str());
+	return;
+      }
+      if(mu->GetPermanent())
+      {
+	source.Reply("Cannot unload a permanent module!");
+	return;
+      }
+      
       if(!ModuleHandler::Unload(mu))
       {
 	source.Reply("Failed to unload module %s", modd.c_str());
 	Log(source.u, this) << "to unload " << modd << " and failed";
-      }else{
+      }
+      else
+      {
 	source.Reply("Module \2%s\2 unloaded sucessfuly", modd.c_str());
 	Log(source.u, this) << "to unload " << modd;
       }
@@ -162,6 +175,17 @@ public:
      // source.Reply(ACCESS_DENIED);
     //else{
       module *mu = FindModule(modd);
+      if(!mu)
+      {
+	source.Reply("Module \002%s\002 not loaded", modd.c_str());
+	return;
+      }
+      if(mu->GetPermanent())
+      {
+	source.Reply("Cannot unload a permanent module!");
+	return;
+      }
+
       bool err = ModuleHandler::Unload(mu);
       ModErr err2 = ModuleHandler::LoadModule(modd);
       if(!err || err2 != MOD_ERR_OK)
@@ -254,6 +278,7 @@ public:
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);
+    this->SetPermanent(true);
     ModuleHandler::Attach(I_OnReload, this);
   }
   

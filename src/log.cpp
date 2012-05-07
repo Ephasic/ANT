@@ -80,7 +80,7 @@ void CheckLogDelete(Log *log)
   if(!TextFile::IsDirectory(dir))
   {
     Log(LOG_TERMINAL) << "Directory " << dir << " does not exist, making new directory.";
-    if(mkdir(Flux::string(dir).c_str(), getuid()) != 0)
+    if(mkdir(Flux::string(dir).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0)
       throw LogException("Failed to create directory "+dir+": "+Flux::string(strerror(errno)));
   }
 
