@@ -130,7 +130,6 @@ public:
 
       if(n && !n->s)
       {
-	Log(LOG_TERMINAL) << "Connecting via db_plain!";
 	new ReconnectTimer(0, n); //Connect to networks.
 	//n->Connect(); // FIXME: Why can't I just call this?
       }

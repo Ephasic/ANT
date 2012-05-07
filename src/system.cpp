@@ -306,7 +306,7 @@ void startup(int argc, char** argv, char *envp[])
   if(args.HasArg("nocolor", 'c'))
   {
     nocolor = true;
-    Log() << "ANT Commit System is started in No Colors mode.\033[0m"; //reset terminal colors
+    Log() << "ANT Commit System is started in No Colors mode.";
   }
 
   // Set terminal colors to whatever is in the config
@@ -324,7 +324,14 @@ void startup(int argc, char** argv, char *envp[])
 // Clean up our pointers so we don't exit with memory leaks..
 void GarbageCollect()
 {
+  FOREACH_MOD(I_OnShutdown, OnShutdown());
+  SaveDatabases();
+  FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
   SET_SEGV_LOCATION();
+  SocketEngine::Process(); // Read/Write the last bit, close any leftover sockets
+  TimerManager::TickTimers(time(NULL)); // Tick any timers
+  ModuleHandler::UnloadAll();
+
 
   // Clean up any network pointers and clear the map
   for(Flux::insensitive_map<Network*>::iterator it = Networks.begin(), it_end = Networks.end(); it != it_end;)
@@ -372,4 +379,5 @@ void GarbageCollect()
 
   // Shutdown the socket engine and close any remaining sockets.
     SocketEngine::Shutdown();
+    ModuleHandler::SanitizeRuntime();
 }

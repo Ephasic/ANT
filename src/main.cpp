@@ -88,16 +88,9 @@ int main (int argcx, char** argvx, char *envp[])
       /***********************************/
     } // while loop ends here
     // clean up for exit
-    FOREACH_MOD(I_OnShutdown, OnShutdown());
-    SaveDatabases();
-    FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
-    SocketEngine::Process(); // Read/Write the last bit, close any leftover sockets
-    TimerManager::TickTimers(time(NULL)); // Tick any timers
-    ModuleHandler::UnloadAll();
-    ModuleHandler::SanitizeRuntime();
     GarbageCollect();
     delete del_on_exit;
-    Log(LOG_TERMINAL) << "\033[0m";
+    Log(LOG_TERMINAL) << "Bye!\033[0m";
   }//try ends here
   catch(const CoreException& e)
   {

@@ -256,6 +256,7 @@ public:
     this->SetPriority(PRIORITY_FIRST);
     ModuleHandler::Attach(I_OnReload, this);
   }
+  
   void OnReload()
   { //TODO: Solve on module unload.
   Flux::vector updatedmodlist = ParametizeString(Config->Modules, ',');
