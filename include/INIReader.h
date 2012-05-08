@@ -75,11 +75,13 @@ public:
   Flux::string ModuleDir;
   Flux::string Modules;
   Flux::string xmlrpcbindip;
+  Flux::string NameServer;
   std::string dbpass;
   std::string dbname;
   std::string dbuser;
   int xmlrpcport;
   time_t xmlrpctimeout;
+  time_t DNSTimeout;
   bool xmlrpcipv6;
   bool UseIPv6;
   bool dbforce;

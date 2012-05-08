@@ -26,9 +26,11 @@ SocketIO normalSocketIO;
 
 /** Construct the object, sets everything to 0
  */
-sockaddrs::sockaddrs()
+sockaddrs::sockaddrs(const Flux::string &address)
 {
   this->clear();
+  if (!address.empty())
+    this->pton(address.find(':') != Flux::string::npos ? AF_INET6 : AF_INET, address);
 }
 
 /** Memset the object to 0

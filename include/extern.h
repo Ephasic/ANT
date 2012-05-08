@@ -37,7 +37,7 @@ class PingTimeoutTimer;
 class User;
 class NetworkSocket;
 class BufferedSocket;
-class Socket;
+// class Socket;
 class tqueue;
 class Commands;
 class Command;
@@ -55,6 +55,14 @@ class TextFile;
 class Bot;
 class Network;
 class ReconnectTimer;
+class DNSPacket;
+class DNSRequest;
+class DNSManager;
+
+/* Structs */
+struct Question;
+struct ResourceRecord;
+struct DNSQuery;
 struct CommitMessage;
 struct CommandSource;
 
@@ -67,6 +75,7 @@ enum LogType
   LOG_RAWIO,
   LOG_TERMINAL,
   LOG_WARN,
+  LOG_DNS,
   LOG_CRITICAL,
   LOG_THREAD,
   LOG_SILENT

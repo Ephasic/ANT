@@ -25,6 +25,7 @@
 #include <ios>
 #include <typeinfo>
 #include "config.h" /* we include the config header from ./configure */
+
 #ifdef __GNUC__
 # define DEPRECATED(func) func __attribute__ ((deprecated))
 #elif defined(_MSC_VER)

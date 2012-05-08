@@ -11,16 +11,20 @@
 #pragma once
 #ifndef MODULE_H
 #define MODULE_H
+
+#include "extern.h"
+#include "Socket.h"
 #include "user.h"
 #include "command.h"
 #include "network.h"
-#ifndef _WIN32
-# ifdef HAVE_FCNTL_H
-#  include <dlfcn.h>
-# else
-#  error dlfcn.h is required by navn to compile modules!
-# endif
+
+#ifdef HAVE_FCNTL_H
+# include <dlfcn.h>
+#else
+# error dlfcn.h is required by ANT to compile modules!
 #endif
+
+class Socket;
 
 enum Implementation {
   I_BEGIN,

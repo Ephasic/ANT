@@ -27,7 +27,8 @@ Network::Network(const Flux::string &host, const Flux::string &p, const Flux::st
 //   DNSThread *dns = new DNSThread(host);
 //   this->hostnames = dns->GetHostnames();
 //   delete dns;
-  this->hostnames = ForwardResolution(host);
+  DNSQuery rep = DNSManager::BlockingQuery(host, host.search(':') ? DNS_QUERY_AAAA : DNS_QUERY_A);
+  this->hostnames[1] = !rep.answers.empty() ? rep.answers.front().rdata : host;
   Networks[this->name] = this;
   NetworkHosts[host] = this;
 

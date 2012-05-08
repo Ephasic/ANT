@@ -11,7 +11,7 @@
 #pragma once
 #ifndef command_h
 #define command_h
-
+#include "extern.h"
 /// \include includes.h
 #include "includes.h"
 /// \include user.h

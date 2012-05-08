@@ -30,7 +30,7 @@
 #include <queue>
 #include <arpa/inet.h>
 
-#include "extern.h"
+// #include "extern.h"
 #include "thread.h"
 #include "SocketException.h"
 #include "log.h"
@@ -47,7 +47,7 @@ union sockaddrs
 
   /** Construct the object, sets everything to 0
    */
-  sockaddrs();
+  sockaddrs(const Flux::string &address = "");
 
   /** Memset the object to 0
    */
@@ -574,5 +574,7 @@ public:
   void OnConnect();
   void OnError(const Flux::string&);
 };
+
+#include "dns.h"
 
 #endif

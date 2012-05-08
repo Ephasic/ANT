@@ -188,6 +188,10 @@ Log::~Log()
       if(dev || protocoldebug)
 	logstream << TimeStamp() << " " << message;
       break;
+    case LOG_DNS:
+      if(protocoldebug)
+	logstream << TimeStamp() << " [DNSEngine] " << message;
+      break;
     case LOG_RAWIO:
       if(protocoldebug)
 	logstream << TimeStamp() << " " << message;
@@ -217,10 +221,10 @@ Log::~Log()
   if(result != EVENT_CONTINUE)
     return;
 
-  if(type != LOG_SILENT || type != LOG_CRITICAL)
+  if((type != LOG_SILENT || type != LOG_CRITICAL) && InTerm())
     std::cout << (nocolor?NoTermColor(logstream.str()):logstream.str()) << std::endl;
 
-  if(type == LOG_CRITICAL) // Log to stderr instead of stdout
+  if(type == LOG_CRITICAL && InTerm()) // Log to stderr instead of stdout
     std::cerr << (nocolor?NoTermColor(logstream.str()):logstream.str()) << std::endl;
 
   if(this->filename.empty())
