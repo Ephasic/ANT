@@ -179,6 +179,7 @@ public:
 class CIA_RULESET_MOD : public module
 {
   CommitMessage Message;
+  ThrottleTimer *tt;
 public:
   CIA_RULESET_MOD(const Flux::string &Name):module(Name)
   {
@@ -237,7 +238,9 @@ public:
       Flux::string formattedmessgae = Flux::string(ss.str()).strip('\"').strip();
 
       //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
-      ThrottleTimer *tt = new ThrottleTimer();
+      if(!tt)
+	  tt = new ThrottleTimer();
+      
       if(++tt->throttlecount <= 5)
 	c->SendMessage(formattedmessgae);
       else

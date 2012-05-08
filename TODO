@@ -20,7 +20,9 @@ ANT 1.0.0
   [X] Multi-bot handling
   [X] Network class for handling network information
   [ ] Handle high data through-put (REQUIRED)
-  [ ] Announcement throttling PER-NETWORK (CIA does not handle per-network throttles, freezing the daemon until the rest of a commit is announced!)
+  [+] Announcement throttling PER-NETWORK (CIA does not handle per-network throttles, freezing the daemon until the rest of a commit is announced!)
+  [ ] Randomize Reconnect times so we don't cause reconnect Blasts to both the I/O hardware and networks
+  [ ] Disconnect inactive networks/projects who are inactive for several months.
 
 [+] Add Database/User accounts type system for metadata
   [+] MySQL Backend.
@@ -66,6 +68,7 @@ Future
     shouldnt matter whether we stay in the channel or not so we'll just keep the bot there.
 [ ] Fix bot logic if we get locked by nickserv or something
 [ ] Add NickServ support
+[ ] Cron like callback daemon inside source code
 
 Optional
 --------
