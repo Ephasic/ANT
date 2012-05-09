@@ -149,7 +149,6 @@ extern bool IsValidChannel(const Flux::string&);
 extern bool InTerm();
 extern bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
 extern Flux::vector ParametizeString(const Flux::string&, char);
-extern std::map<int, Flux::string> ForwardResolution(const Flux::string&);
 
 /* maps, lists, vectors, etc. */
 extern std::list<module*> Modules;

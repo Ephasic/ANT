@@ -11,15 +11,15 @@ ANT 1.0.0
 ----------
 [-] Bugs
   [X] Fix Glibc crash
-  [ ] Fix derpiness in starting sockets from modules?
-  [ ] Fix slowness in the socket engine
-  [ ] Make resolving hostnames in their own threads. (or not block the whole program while waiting for something to resolve, use select()? )
+  [+] Fix derpiness in starting sockets from modules?
+  [+] Fix slowness in the socket engine
+  [X] Make resolving hostnames in their own threads. (or not block the whole program while waiting for something to resolve, use select()? )
 
 [-] Multisocket the socket engine
   [X] Multi-Network handling
   [X] Multi-bot handling
   [X] Network class for handling network information
-  [ ] Handle high data through-put (REQUIRED)
+  [+] Handle high data through-put (REQUIRED)
   [+] Announcement throttling PER-NETWORK (CIA does not handle per-network throttles, freezing the daemon until the rest of a commit is announced!)
   [ ] Randomize Reconnect times so we don't cause reconnect Blasts to both the I/O hardware and networks
   [ ] Disconnect inactive networks/projects who are inactive for several months.
@@ -43,6 +43,7 @@ ANT 1.0.0
   [ ] Instant Search
   [ ] Add better front page than CIA.vc (should have: Critical Announcements, themes, user themes, commit averages, last commit, etc.)
   [ ] Site Navigation that is understandable
+  [ ] Commits via JSON
   [ ] Buttons and designs for 'master' page should look like ubuntu-tweak.com in a way.
 
 [-] Add Network Oper handling similar to SearchIRC's Oper handling
@@ -53,7 +54,7 @@ ANT 1.0.0
 [ ] Update doxygen documentation
 [+] Fix parts of the core that are designed for 1 network only (like events)
 [ ] Wtf is this Module Priority system? fix that
-[ ] Add buffer limiter (so freenode does not kill the bot)
+[+] Add buffer limiter (so freenode does not kill the bot)
 [ ] Better config format
 [X] Better startup switch management
 [ ] Better terminal Commands Parsing
@@ -69,6 +70,7 @@ Future
 [ ] Fix bot logic if we get locked by nickserv or something
 [ ] Add NickServ support
 [ ] Cron like callback daemon inside source code
+[ ] SSL connections
 
 Optional
 --------

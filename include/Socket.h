@@ -548,18 +548,6 @@ public:
   static void Process();
 };
 
-// class DNSThread : public Thread
-// {
-//   Flux::string hostname;
-// public:
-//   bool exiting;
-//   std::map<int, Flux::string> hostnames;
-//   std::map<int, Flux::string> GetHostnames();
-//   DNSThread(const Flux::string &h);
-//   ~DNSThread();
-//   void ToRun();
-// };
-
 /* Base socket class for ALL network connections for the Network class */
 /* This isnt in network.h because of some include recursion issues -_- */
 class NetworkSocket : public ConnectionSocket, public BufferedSocket

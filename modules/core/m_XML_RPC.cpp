@@ -210,7 +210,9 @@ void htmlcall()
 
 ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 {
-  Log(LOG_DEBUG) << "[XML-RPC] Accepting connection from " << addr.addr();
+  DNSQuery rep = DNSManager::BlockingQuery(addr.addr(), DNS_QUERY_PTR);
+  Flux::string rdnshost = !rep.answers.empty() ? rep.answers.front().rdata : addr.addr();
+  Log(LOG_DEBUG) << "[XML-RPC] Accepting connection from " << rdnshost << " (" << addr.addr() << ')';
   ClientSocket *c = new xmlrpcclient(this, fd, addr);
   return c;
 }
