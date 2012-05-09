@@ -174,7 +174,7 @@ extern void ListUsers(CommandSource &source);
 extern void process(Network*, const Flux::string&);
 extern void ProcessJoin(CommandSource&, const Flux::string&);
 extern void ProcessCommands(CommandSource&, std::vector<Flux::string>&);
-extern void ReadConfig();
+extern void LoadModules();
 
 /* Char's */
 extern char segv_location[255];
