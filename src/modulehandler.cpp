@@ -275,3 +275,22 @@ module *FindModule(const Flux::string &name)
 
   return nullptr;
 }
+
+/******************Configuration variables***********************/
+/**Rehash void
+ * \fn void ReadConfig()
+ * This will re-read the config file values when told to do so
+ */
+void ReadConfig()
+{
+  sepstream sep(Config->Modules, ',');
+  Flux::string tok;
+  while(sep.GetToken(tok))
+  {
+    tok.trim();
+    ModErr e = ModuleHandler::LoadModule(tok);
+    if(e != MOD_ERR_OK)
+      Log() << "ERROR loading module " << tok << ": " << DecodeModErr(e);
+  }
+}
+/******************End Configuration variables********************/
