@@ -290,7 +290,10 @@ void LoadModules()
     tok.trim();
     ModErr e = ModuleHandler::LoadModule(tok);
     if(e != MOD_ERR_OK)
-      Log() << "ERROR loading module " << tok << ": " << DecodeModErr(e);
+    {
+      Log() << "\n[\033[1;31m*\033[0m] " << tok << ": " << DecodeModErr(e) << "\n";
+      throw CoreException("Module Load Error");
+    }
   }
 }
 /******************End Configuration variables********************/
