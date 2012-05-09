@@ -102,7 +102,7 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
   if(FindModule(modname))
     return MOD_ERR_EXISTS;
 
-  Log() << "Attempting to load module [" << modname << ']';
+  Log() << "[\033[1;32m*\033[0m] Loading module:\t\033[1;32m" << modname << "\033[0m\n";
 
   Flux::string mdir = Config->Binary_Dir + "/runtime/"+ (modname.search(".so")?modname+".XXXXXX":modname+".so.XXXXXX");
   Flux::string input = Flux::string(Config->Binary_Dir + "/" + (Config->ModuleDir.empty()?modname:Config->ModuleDir+"/"+modname) + ".so").replace_all_cs("//","/");
