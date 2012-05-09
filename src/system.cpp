@@ -350,7 +350,7 @@ void GarbageCollect()
 	  Channel *c = cit->second;
 	  ++cit;
 	  Log(LOG_MEMORY) << "Deleting Channel @" << c;
-	  delete c;
+	  DeleteZero(c);
 	}
 
       // Clean up any user pointers for the network and clear the map
@@ -361,21 +361,20 @@ void GarbageCollect()
 	  User *u = uit->second;
 	  ++uit;
 	  Log(LOG_MEMORY) << "Deleting User @" << u;
-	  delete u;
+	  DeleteZero(u);
 	}
 
 	n->ChanMap.clear();
 	n->UserNickList.clear();
 	Log(LOG_MEMORY) << "Deleting Network @" << n;
-	delete n;
+	DeleteZero(n);
     }
   }
   Networks.clear();
 
   // Delete our global IRC protocol wrapper
   if(GProto)
-    delete GProto;
-  GProto = nullptr;
+    DeleteZero(GProto);
 
   // Shutdown the socket engine and close any remaining sockets.
     SocketEngine::Shutdown();
