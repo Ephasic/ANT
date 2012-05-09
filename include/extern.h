@@ -180,6 +180,14 @@ extern void ReadConfig();
 extern char segv_location[255];
 extern char **my_av, **my_envp;
 
+/* Functions which must be instanciated in a header file */
+template<typename *T> inline void DeleteZero(T*&n)
+{
+  T *t = n;
+  n = nullptr;
+  delete t;
+}
+
 /**************************************************************/
 /* This is the only #define allowed at the bottom of the file */
 #define FOREACH_MOD(y, x) \
@@ -245,6 +253,6 @@ else \
 
 #define MODULE_HOOK(x) \
 extern "C" module *ModInit(const Flux::string &name) { return new x(name); } \
-extern "C" void ModunInit(x **m) { if(*m) delete *m; *m = nullptr; }
+extern "C" void ModunInit(x **m) { if(*m) DeleteZero(*m); }
 
 #endif
