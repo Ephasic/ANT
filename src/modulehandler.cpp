@@ -281,7 +281,7 @@ module *FindModule(const Flux::string &name)
  * \fn void ReadConfig()
  * This will re-read the config file values when told to do so
  */
-void ReadConfig()
+void LoadModules()
 {
   sepstream sep(Config->Modules, ',');
   Flux::string tok;
