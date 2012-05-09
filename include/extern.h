@@ -184,6 +184,7 @@ extern char **my_av, **my_envp;
 template<typename *T> inline void DeleteZero(T*&n)
 {
   T *t = n;
+  Log(LOG_MEMORY) << "Deleting " << typeid(n).name() << " @" << n;
   n = nullptr;
   delete t;
 }
