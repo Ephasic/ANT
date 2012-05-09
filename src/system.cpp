@@ -314,7 +314,7 @@ void startup(int argc, char** argv, char *envp[])
     Log(LOG_TERMINAL) << Config->LogColor;
 
   ModuleHandler::SanitizeRuntime();
-  ReadConfig(); //load modules
+  LoadModules(); //load modules
   WritePID(); //Write the pid file
   FOREACH_MOD(I_OnStart, OnStart(argc, argv)); //announce we are starting the bot
   Fork(); //Fork to background
