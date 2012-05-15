@@ -102,7 +102,7 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
   if(FindModule(modname))
     return MOD_ERR_EXISTS;
 
-  Log() << "[\033[1;32m*\033[0m] Loading module:\t\033[1;32m" << modname << "\033[0m\n";
+  Log() << "\033[0m[\033[1;32m*\033[0m] Loading module:\t\033[1;32m" << modname << Config->LogColor;
 
   Flux::string mdir = Config->Binary_Dir + "/runtime/"+ (modname.search(".so")?modname+".XXXXXX":modname+".so.XXXXXX");
   Flux::string input = Flux::string(Config->Binary_Dir + "/" + (Config->ModuleDir.empty()?modname:Config->ModuleDir+"/"+modname) + ".so").replace_all_cs("//","/");
@@ -178,7 +178,7 @@ bool ModuleHandler::DeleteModule(module *m)
 
   dlerror();
 
-  void (*df)(module**) = class_cast<void (*)(module**)>(dlsym(m->handle, "ModunInit"));
+  void (*df)(module*) = class_cast<void (*)(module*)>(dlsym(m->handle, "ModunInit"));
   const char *err = dlerror();
 
   SET_SEGV_LOCATION();
@@ -194,7 +194,7 @@ bool ModuleHandler::DeleteModule(module *m)
     return false;
   }
   else
-    df(&m);
+    df(m);
 
   if(handle)
     if(dlclose(handle))
@@ -291,7 +291,7 @@ void LoadModules()
     ModErr e = ModuleHandler::LoadModule(tok);
     if(e != MOD_ERR_OK)
     {
-      Log() << "\n[\033[1;31m*\033[0m] " << tok << ": " << DecodeModErr(e) << "\n";
+      Log() << "\n\033[0m[\033[1;31m*\033[0m] " << tok << ": " << DecodeModErr(e) << Config->LogColor << "\n";
       throw CoreException("Module Load Error");
     }
   }

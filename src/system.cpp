@@ -127,7 +127,7 @@ void Rehash()
       throw ConfigException("Could not read config.");
 
     FOREACH_MOD(I_OnReload, OnReload());
-    ReadConfig();
+    LoadModules();
   }
   catch(const ConfigException &ex)
   {
@@ -324,13 +324,21 @@ void startup(int argc, char** argv, char *envp[])
 // Clean up our pointers so we don't exit with memory leaks..
 void GarbageCollect()
 {
-  FOREACH_MOD(I_OnShutdown, OnShutdown());
-  SaveDatabases();
-  FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
+  // Set the segfault location incase we fuck up somewhere
   SET_SEGV_LOCATION();
-  SocketEngine::Process(); // Read/Write the last bit, close any leftover sockets
-  TimerManager::TickTimers(time(NULL)); // Tick any timers
+  // Announce the shutdown
+  FOREACH_MOD(I_OnShutdown, OnShutdown());
+  // Save the databases
+  SaveDatabases();
+  // Announce garbage cleanup
+  FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
+  // Read/Write the last bit, close any leftover sockets
+  SocketEngine::Process();
+//   TimerManager::TickTimers(time(NULL)); // Tick any timers
+  // Unload all modules
   ModuleHandler::UnloadAll();
+  // Shutdown the timers
+  TimerManager::Shutdown();
 
 
   // Clean up any network pointers and clear the map
@@ -349,7 +357,6 @@ void GarbageCollect()
 	{
 	  Channel *c = cit->second;
 	  ++cit;
-	  Log(LOG_MEMORY) << "Deleting Channel @" << c;
 	  DeleteZero(c);
 	}
 
@@ -360,13 +367,11 @@ void GarbageCollect()
 	{
 	  User *u = uit->second;
 	  ++uit;
-	  Log(LOG_MEMORY) << "Deleting User @" << u;
 	  DeleteZero(u);
 	}
 
 	n->ChanMap.clear();
 	n->UserNickList.clear();
-	Log(LOG_MEMORY) << "Deleting Network @" << n;
 	DeleteZero(n);
     }
   }

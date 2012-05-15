@@ -180,14 +180,9 @@ extern void LoadModules();
 extern char segv_location[255];
 extern char **my_av, **my_envp;
 
-/* Functions which must be instanciated in a header file */
-template<typename *T> inline void DeleteZero(T*&n)
-{
-  T *t = n;
-  Log(LOG_MEMORY) << "Deleting " << typeid(*n).name() << " @" << n;
-  n = nullptr;
-  delete t;
-}
+/* Functions which must be instantiated in a header file */
+// template<typename T> static void DeleteZero(T*&n);
+
 
 /**************************************************************/
 /* This is the only #define allowed at the bottom of the file */
@@ -254,6 +249,6 @@ else \
 
 #define MODULE_HOOK(x) \
 extern "C" module *ModInit(const Flux::string &name) { return new x(name); } \
-extern "C" void ModunInit(x **m) { if(*m) DeleteZero(*m); }
+extern "C" void ModunInit(x *m) { DeleteZero(m); }
 
 #endif

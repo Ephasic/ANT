@@ -123,6 +123,8 @@ class TimerManager : public Base
 	/** Compares two timers
 	 */
 	static bool TimerComparison(Timer *one, Timer *two);
+
+	static void Shutdown();
 };
 
 #endif // TIMERS_H

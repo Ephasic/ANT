@@ -38,4 +38,13 @@ public:
    return *this;
   }
 };
+
+template<typename T> static void DeleteZero(T*&n)
+{
+  T *t = n;
+  Log(LOG_MEMORY) << "Deleting " << typeid(*n).name() << " @" << n;
+  n = nullptr;
+  delete t;
+}
+
 #endif

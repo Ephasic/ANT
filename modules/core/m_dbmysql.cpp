@@ -1,3 +1,5 @@
+/* RequiredLibraries: mysqlclient */
+
 /* Arbitrary Navn Tool -- MySQL Database Sync Module
  *
  * (C) 2011-2012 Azuru
@@ -10,6 +12,8 @@
  */
 
 #include "modules.h"
+#define NO_CLIENT_LONG_LONG
+#include <mysql/mysql.h>
 // Since we use CPPCMS as the frontend (which is required), we can use its features here as well :P
 #include <cppdb/frontend.h>
 

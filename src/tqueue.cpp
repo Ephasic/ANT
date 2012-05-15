@@ -19,7 +19,7 @@ std::vector<tqueue*> QueuedQueues;
 tqueue::tqueue(void (*func)(), long time_to_tick, time_t now, bool repeating) : Timer(time_to_tick, now, repeating), function(func)
 {
   QueuedQueues.push_back(this);
-  Log(LOG_TERMINAL) << "Creating queue: @" << this;
+  Log(LOG_MEMORY) << "Creating queue: @" << this;
 }
 
 // Destroy our queue
@@ -29,13 +29,13 @@ tqueue::~tqueue()
   if(it != QueuedQueues.end())
       QueuedQueues.erase(it);
       
-  Log(LOG_TERMINAL) << "Destroying queue: @" << this;
+  Log(LOG_MEMORY) << "Destroying queue: @" << this;
 }
 
 // Call our callback
 void tqueue::Tick(time_t)
 {
-  Log(LOG_TERMINAL) << "Running queue: @" << this;
+  Log(LOG_MEMORY) << "Running queue: @" << this;
   void (*runfunc)() = this->function;
   runfunc();
 }

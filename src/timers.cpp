@@ -133,3 +133,15 @@ bool TimerManager::TimerComparison(Timer *one, Timer *two)
 {
 	return one->GetTimer() < two->GetTimer();
 }
+
+void TimerManager::Shutdown()
+{
+  TickTimers(time(NULL));
+  
+  for(std::vector<Timer *>::iterator it = TimerManager::Timers.begin(), it_end = TimerManager::Timers.end(); it != it_end;)
+  {
+    Timer *t = *it;
+    ++it;
+    DeleteZero(t);
+  }
+}

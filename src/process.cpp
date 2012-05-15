@@ -125,7 +125,7 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
 	else
 	{
 	  Log() << "Command " << ccom->name << " failed to execute. Stack Restored.";
-	  Source.Reply("An internal error has occured, please contact the bots administrator in Flux-net");
+	  Source.Reply("An internal error has occured, please contact the bots administrator in Azuru");
 	}
 #endif
 	LastRunModule = nullptr;
@@ -166,7 +166,7 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
 	else
 	{
 	  Log() << "Command " << com->name << " failed to execute. Stack Restored.";
-	  Source.Reply("An internal error has occured, please contact the administrator in Flux-Net");
+	  Source.Reply("An internal error has occured, please contact the administrator in Azuru");
 	}
 #endif
 	LastRunModule = nullptr;

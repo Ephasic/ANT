@@ -192,7 +192,9 @@ public:
       {
 	source.Reply("Failed to reload module %s%s", modd.c_str(), err2 != MOD_ERR_OK?Flux::string(": "+DecodeModErr(err2)).c_str():"");
 	Log(source.u, this) << "to reload " << modd << " and failed";
-      }else{
+      }
+      else
+      {
 	source.Reply("Module \2%s\2 reloaded sucessfuly", modd.c_str());
 	Log(source.u, this) << "to reload " << modd;
       }

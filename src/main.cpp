@@ -42,32 +42,29 @@
  */
 #include "modules.h"
 
-int loopcount;
-
-class DBSave : public Timer
+// Collect our garbage
+void GarbageCall()
 {
-public:
-  DBSave():Timer(60, time(NULL), true) {}
-  void Tick(time_t)
-  {
-    SaveDatabases();
-  }
-};
-
-DBSave *del_on_exit;
+  Log(LOG_DEBUG) << "Running Garbage Collection Call.";
+  FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
+}
 
 int main (int argcx, char** argvx, char *envp[])
 {
  SET_SEGV_LOCATION();
   try
   {
+    int loopcount = 0;
+//     tqueue *del_on_exit;
     startup(argcx, argvx, envp);
     time_t last_check = time(NULL);
+    
+    new tqueue(GarbageCall, 120, time(NULL), true);
+    new tqueue(SaveDatabases, 60, time(NULL), true);
 
-    del_on_exit = new DBSave(); // Start the Database Save timer.
+//     del_on_exit = new tqueue(SaveDatabases, 60, time(NULL), true); // Start the Database Save timer.
     GProto = new GlobalProto(); // Global protocol class
 
-    TimerManager::TickTimers(time(NULL)); //Call timers to tick to start pending sockets instantly.
     while(!quitting)
     {
       Log(LOG_RAWIO) << "Top of main loop";
@@ -81,7 +78,6 @@ int main (int argcx, char** argvx, char *envp[])
       if(time(NULL) - last_check >= 3)
       {
 	loopcount = 0;
-	FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
 	TimerManager::TickTimers(time(NULL));
 	last_check = time(NULL);
       }
@@ -89,7 +85,7 @@ int main (int argcx, char** argvx, char *envp[])
     } // while loop ends here
     // clean up for exit
     GarbageCollect();
-    delete del_on_exit;
+//     delete del_on_exit;
     Log(LOG_TERMINAL) << "Bye!\033[0m";
   }//try ends here
   catch(const CoreException& e)
