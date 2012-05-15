@@ -35,6 +35,10 @@ class MySQLInterface : public Base
     Log(LOG_DEBUG) << "[MySQL] Successfully connected to " << hostname << ':' << port << " using database \"" << dbname << "\"";
   }
   
+  MYSQL *GetConnection() const
+  {
+    return this->conn;
+  }
   
   ~MySQLInterface()
   {
@@ -52,8 +56,9 @@ void Read(module *m = nullptr)
   MYSQL_RES *result;
   MYSQL_ROW row;
   int num_fields;
+  Flux::vector params;
   
-  // mysql_query(conn, ""); <-- do something here?
+  // mysql_query(me->GetConnection(), ""); <-- do something here?
   result = mysql_store_result(conn);
   num_fields = mysql_num_fields(result);
 
@@ -61,11 +66,19 @@ void Read(module *m = nullptr)
   {
       for(int i = 0; i < num_fields; i++)
       {
+          params.push_back(row[i]?row[i]:"NULL");
           //printf("%s ", row[i] ? row[i] : "NULL");
       }
   }
 
   mysql_free_result(result);
+  
+  if(m)
+    m->OnDatabasesRead(params);
+  else
+  {
+    FOREACH_MOD(I_OnDatabasesRead, OnDatabasesRead(params));
+  }
 }
 
 void Write(const char *fmt, ...)
