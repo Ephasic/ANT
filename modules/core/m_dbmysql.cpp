@@ -14,15 +14,36 @@
 #include "modules.h"
 #define NO_CLIENT_LONG_LONG
 #include <mysql/mysql.h>
-// Since we use CPPCMS as the frontend (which is required), we can use its features here as well :P
-#include <cppdb/frontend.h>
 
 // FIXME: TODO: ugh this is such a mess, clean this up and make it actually work!
 
-cppdb::session sql("mysql:database="+Config->dbname+";user="+Config->dbuser+";password='"+Config->dbpass+"'");
+class MySQLConnection : public Base
+{
+ MYSQL *conn;
+ public:
+  MySQLConnection(const Flux::string &hostname, const Flux::string &username, const Flux::string &password, const Flux::string &dbname, int port) : Base()
+  {
+    if(!mysql_real_connect(conn, "localhost", "zetcode", "passwd", NULL, 0, NULL, 0))
+      // Throw CoreException instead of module exception because the error should be dealt with.
+      throw CoreException(printfify("Cannot connect to MySQL database: %s", mysql_error(conn)));
+      
+    
+  }
+  
+  
+  
+  ~MySQLConnection()
+  {
+    if(conn) // Close the database connection
+      mysql_close(conn);
+    conn = nullptr;
+  }
+};
+
+// cppdb::session sql("mysql:database="+Config->dbname+";user="+Config->dbuser+";password='"+Config->dbpass+"'");
 void Read(module *m = nullptr)
 {
-  cppdb::result res = sql << "SELECT * from " << Config->dbname << cppdb::exec;
+  // cppdb::result res = sql << "SELECT * from " << Config->dbname << cppdb::exec;
 }
 
 void Write(const char *fmt, ...)
