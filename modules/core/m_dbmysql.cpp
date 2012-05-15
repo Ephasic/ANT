@@ -21,15 +21,19 @@ class MySQLInterface : public Base
 {
  MYSQL *conn;
  public:
-  MySQLInterface(const Flux::string &hostname, const Flux::string &username, const Flux::string &password, const Flux::string &dbname, int port) : Base()
+  MySQLInterface(const Flux::string &hostname, const Flux::string &username, const Flux::string &password, const Flux::string &dbname, int port = 0) : Base()
   {
-    if(!mysql_real_connect(conn, "localhost", "zetcode", "passwd", NULL, 0, NULL, 0))
+    conn = mysql_init(NULL);
+    
+    if(hostname.empty() || username.empty() || password.empty() || dbname.empty())
+      throw ModuleException("Empty parameter in MySQL Interface?");
+    
+    if(!mysql_real_connect(conn, hostname.c_str(), username.c_str(), password.c_str(), dbname.c_str(), port, NULL, 0))
       // Throw CoreException instead of module exception because the error should be dealt with.
       throw CoreException(printfify("Cannot connect to MySQL database: %s (%u)", mysql_error(conn), mysql_errno(conn)));
       
-    
+    Log(LOG_DEBUG) << "[MySQL] Successfully connected to " << hostname << ':' << port << " using database \"" << dbname << "\"";
   }
-  
   
   
   ~MySQLInterface()
@@ -40,10 +44,28 @@ class MySQLInterface : public Base
   }
 };
 
+MySQLInterface *me;
+
 // cppdb::session sql("mysql:database="+Config->dbname+";user="+Config->dbuser+";password='"+Config->dbpass+"'");
 void Read(module *m = nullptr)
 {
-  // cppdb::result res = sql << "SELECT * from " << Config->dbname << cppdb::exec;
+  MYSQL_RES *result;
+  MYSQL_ROW row;
+  int num_fields;
+  
+  // mysql_query(conn, ""); <-- do something here?
+  result = mysql_store_result(conn);
+  num_fields = mysql_num_fields(result);
+
+  while ((row = mysql_fetch_row(result)))
+  {
+      for(int i = 0; i < num_fields; i++)
+      {
+          //printf("%s ", row[i] ? row[i] : "NULL");
+      }
+  }
+
+  mysql_free_result(result);
 }
 
 void Write(const char *fmt, ...)
@@ -72,6 +94,7 @@ public:
   {
     Log() << "[MySQL] Loading Databases.";
     Log() << "[MySQL] Using MySQL client version " << mysql_get_client_info();
+    me = new MySQLInterface(Config->something, Config->Something, Config->Somethingelse, Config->Notimplementedyet, Config->Portidontknow);
     Read();
   }
 
