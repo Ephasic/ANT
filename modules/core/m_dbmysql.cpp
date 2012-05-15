@@ -17,22 +17,22 @@
 
 // FIXME: TODO: ugh this is such a mess, clean this up and make it actually work!
 
-class MySQLConnection : public Base
+class MySQLInterface : public Base
 {
  MYSQL *conn;
  public:
-  MySQLConnection(const Flux::string &hostname, const Flux::string &username, const Flux::string &password, const Flux::string &dbname, int port) : Base()
+  MySQLInterface(const Flux::string &hostname, const Flux::string &username, const Flux::string &password, const Flux::string &dbname, int port) : Base()
   {
     if(!mysql_real_connect(conn, "localhost", "zetcode", "passwd", NULL, 0, NULL, 0))
       // Throw CoreException instead of module exception because the error should be dealt with.
-      throw CoreException(printfify("Cannot connect to MySQL database: %s", mysql_error(conn)));
+      throw CoreException(printfify("Cannot connect to MySQL database: %s (%u)", mysql_error(conn), mysql_errno(conn)));
       
     
   }
   
   
   
-  ~MySQLConnection()
+  ~MySQLInterface()
   {
     if(conn) // Close the database connection
       mysql_close(conn);
@@ -67,9 +67,11 @@ public:
     Implementation i[] = { I_OnDatabasesWrite, I_OnDatabasesRead, I_OnModuleLoad, I_OnSaveDatabases, I_OnForceDatabasesRead };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
   }
+  
   void OnLoad()
   {
     Log() << "[MySQL] Loading Databases.";
+    Log() << "[MySQL] Using MySQL client version " << mysql_get_client_info();
     Read();
   }
 
