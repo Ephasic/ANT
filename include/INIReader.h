@@ -76,9 +76,11 @@ public:
   Flux::string Modules;
   Flux::string xmlrpcbindip;
   Flux::string NameServer;
-  std::string dbpass;
-  std::string dbname;
-  std::string dbuser;
+  Flux::string sqlpass;
+  Flux::string sqlhost;
+  Flux::string sqldb;
+  Flux::string sqluser;
+  int sqlport;
   int xmlrpcport;
   time_t xmlrpctimeout;
   time_t DNSTimeout;

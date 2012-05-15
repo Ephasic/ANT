@@ -237,12 +237,8 @@ void BotConfig::Read()
 {
   SET_SEGV_LOCATION();
   this->LogFile 	= this->Parser->Get("Log","Log_File","navn.log");
-
   this->Realname 	= this->Parser->Get("Connect","Realname",Flux::string("ANT bot "+value_cast<Flux::string>(VERSION)+" (http://ANT.Flux-Net.net/)"));
   this->Ident 		= this->Parser->Get("Connect","Ident","ANT");
-  this->dbpass 		= this->Parser->Get("MySQL", "password", "").std_str();
-  this->dbname 		= this->Parser->Get("MySQL", "database", "").std_str();
-  this->dbuser 		= this->Parser->Get("MySQL", "user", "").std_str();
   this->Channel 	= this->Parser->Get("Connect","Channel","#Test");
   this->NicknamePrefix 	= this->Parser->Get("Bot", "Nickname Prefix", "ANT-");
   this->LogChannel 	= this->Parser->Get("Modules", "LogChannel","");
@@ -262,5 +258,10 @@ void BotConfig::Read()
   this->LogAge 		= this->Parser->GetInteger("Log", "Log Age", 2);
   this->DNSTimeout	= this->Parser->GetInteger("DNS", "Timeout", 30);
   this->NameServer	= this->Parser->Get("DNS", "NameServer", "127.0.0.1");
+  this->sqlpass 	= this->Parser->Get("MySQL", "password", "");
+  this->sqldb 		= this->Parser->Get("MySQL", "database", "");
+  this->sqluser 	= this->Parser->Get("MySQL", "user", "");
+  this->sqlhost		= this->Parser->Get("MySQL", "hostname", "127.0.0.1");
+  this->sqlport		= this->Parser->GetInteger("MySQL", "hostname", 0);
 }
 

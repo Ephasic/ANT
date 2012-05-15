@@ -158,10 +158,6 @@ else(CMAKE244_OR_BETTER)
   include(TestCXXAcceptsFlag)
 endif(CMAKE244_OR_BETTER)
 
-if(WIN32)
-  add_definitions(-D_WIN32)
-endif(WIN32)
-
 # If using Visual Studio, set the C++ flags accordingly
 if(MSVC)
   # Remove the default exception handling flags, also remove default warning level flag

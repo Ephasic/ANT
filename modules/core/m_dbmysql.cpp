@@ -19,23 +19,29 @@
 
 class MySQLInterface : public Base
 {
- MYSQL *conn;
- public:
+  MYSQL *conn;
+public:
   MySQLInterface(const Flux::string &hostname, const Flux::string &username, const Flux::string &password, const Flux::string &dbname, int port = 0) : Base()
   {
     conn = mysql_init(NULL);
-    
+
     if(hostname.empty() || username.empty() || password.empty() || dbname.empty())
       throw ModuleException("Empty parameter in MySQL Interface?");
-    
+
     if(!mysql_real_connect(conn, hostname.c_str(), username.c_str(), password.c_str(), dbname.c_str(), port, NULL, 0))
       // Throw CoreException instead of module exception because the error should be dealt with.
       throw CoreException(printfify("Cannot connect to MySQL database: %s (%u)", mysql_error(conn), mysql_errno(conn)));
-      
+
     Log(LOG_DEBUG) << "[MySQL] Successfully connected to " << hostname << ':' << port << " using database \"" << dbname << "\"";
   }
+
+  MYSQL_RES *RunQuery(const Flux::string &query)
+  {
+    mysql_query(this->conn, query.c_str());
+    return mysql_store_result(this->conn);
+  }
   
-  MYSQL *GetConnection() const
+  const MYSQL *GetConnection() const
   {
     return this->conn;
   }
@@ -50,7 +56,6 @@ class MySQLInterface : public Base
 
 MySQLInterface *me;
 
-// cppdb::session sql("mysql:database="+Config->dbname+";user="+Config->dbuser+";password='"+Config->dbpass+"'");
 void Read(module *m = nullptr)
 {
   MYSQL_RES *result;
@@ -58,8 +63,7 @@ void Read(module *m = nullptr)
   int num_fields;
   Flux::vector params;
   
-  // mysql_query(me->GetConnection(), ""); <-- do something here?
-  result = mysql_store_result(conn);
+//   result = me->RunQuery("");
   num_fields = mysql_num_fields(result);
 
   while ((row = mysql_fetch_row(result)))
@@ -87,10 +91,9 @@ void Write(const char *fmt, ...)
   va_list args;
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
-  sql << buffer << "\n";
+//   sql << buffer << "\n";
   va_end(args);
 }
-
 
 class modmysql : public module
 {
@@ -107,7 +110,7 @@ public:
   {
     Log() << "[MySQL] Loading Databases.";
     Log() << "[MySQL] Using MySQL client version " << mysql_get_client_info();
-    me = new MySQLInterface(Config->something, Config->Something, Config->Somethingelse, Config->Notimplementedyet, Config->Portidontknow);
+    me = new MySQLInterface(Config->sqlhost, Config->sqluser, Config->sqlpass, Config->sqldb, Config->sqlport);
     Read();
   }
 
@@ -131,7 +134,6 @@ public:
   {
     Log() << "[MySQL] Saving Databases..." ;
     FOREACH_MOD(I_OnDatabasesWrite, OnDatabasesWrite(Write));
-
   }
 
   void OnForceDatabasesRead()

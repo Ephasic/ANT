@@ -6,11 +6,6 @@ add_subdirectory(Encryption)
 file(GLOB SRC_SRCS_CPP RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
 set(SRC_SRCS ${SRC_SRCS_C} ${SRC_SRCS_CPP})
 
-# If using Windows, add the windows.cpp, the win32 threading engine, and the socket engine to the list
-if(WIN32)
-  append_to_list(SRC_SRCS src/windows.cpp)
-endif(WIN32)
-
 sort_list(SRC_SRCS)
 
 # Set all the files to use C++ as well as set their compile flags (use the module-specific compile flags, though)
@@ -37,35 +32,6 @@ if(EXTRA_INCLUDES)
   include_directories(${EXTRA_INCLUDES})
 endif(EXTRA_INCLUDES)
 
-# Under Windows, we also include a resource file to the build
-if(WIN32)
-  # Make sure that the resource file is seen as an RC file to be compiled with a resource compiler, not a C++ compiler
-  set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/win32/win32.rc LANGUAGE RC)
-  # Add the resource file to the list of sources
-  append_to_list(SRC_SRCS ${CMAKE_CURRENT_BINARY_DIR}/win32/win32.rc)
-  # For MinGW, we have to change the compile flags
-  if(MINGW)
-    set(RC_CFLAGS "-DMINGW -Ocoff -I${ant_SOURCE_DIR}/include")
-    # If any sort of debugging is being enabled, add a _DEBUG define to the flags for the resource compiler
-    if(CMAKE_BUILD_TYPE STREQUAL "DEBUG" OR CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO")
-      set(RC_CFLAGS "${RC_CFLAGS} -D_DEBUG")
-    endif(CMAKE_BUILD_TYPE STREQUAL "DEBUG" OR CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO")
-    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/win32/win32.rc COMPILE_FLAGS "${RC_CFLAGS}")
-  # For anything else, assumingly Visual Studio at this point, use a different set of compile flags
-  else(MINGW)
-    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/win32/win32.rc COMPILE_FLAGS "/i\"${ant_SOURCE_DIR}/include\"")
-  endif(MINGW)
-endif(WIN32)
-
-# If compiling with Visual Studio, create a static library out of win32/win32_memory.cpp to be included with everything else, needed to override its override of new/delete operators
-if(MSVC)
-  set_source_files_properties(win32_memory.cpp PROPERTIES LANGUAGE CXX COMPILE_FLAGS "${CXXFLAGS}")
-  add_library(win32_memory STATIC win32_memory.cpp)
-  set(WIN32_MEMORY win32_memory)
-else(MSVC)
-  set(WIN32_MEMORY)
-endif(MSVC)
-
 # Generate the Navn executable and set it's linker flags, also set it to export it's symbols even though it's not a module
 add_executable(${PROGRAM_NAME} ${SRC_SRCS})
 set_target_properties(${PROGRAM_NAME} PROPERTIES LINKER_LANGUAGE CXX LINK_FLAGS "${LDFLAGS}" ENABLE_EXPORTS ON)
@@ -73,13 +39,8 @@ set_target_properties(${PROGRAM_NAME} PROPERTIES LINKER_LANGUAGE CXX LINK_FLAGS 
 # Add our hashing libs.
 target_link_libraries(${PROGRAM_NAME} tiger)
 
-# On Windows, also link Navn to the wsock32 and Ws2_32 library, as well as set the version
-if(WIN32)
-  target_link_libraries(${PROGRAM_NAME} wsock32 Ws2_32)
-  set_target_properties(${PROGRAM_NAME} PROPERTIES VERSION "${VERSION_DOTTED}")
-else(WIN32)
-  target_link_libraries(${PROGRAM_NAME} ${LINK_LIBS})
-endif(WIN32)
+# Add our libs needed for linking our program
+target_link_libraries(${PROGRAM_NAME} ${LINK_LIBS})
 
 # Get the filename of the Navn executable as it is in on this system
 get_target_property(BOT_BINARY ${PROGRAM_NAME} LOCATION)
