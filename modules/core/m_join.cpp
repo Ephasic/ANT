@@ -28,7 +28,7 @@ public:
     if(!IsValidChannel(chan))
       source.Reply(CHANNEL_X_INVALID, chan.c_str());
     else{
-      Log(u) << "made the bot join " << chan << " on network " << source.n->name;
+      Log(u) << "made " << source.n->b->nick << " join " << chan << " on network " << source.n->name;
 //       Channel *c = findchannel(chan);
 //       if(c)
 // 	c->SendJoin();
