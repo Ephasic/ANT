@@ -11,6 +11,9 @@
 
 #include "network.h"
 #include "bot.h"
+#include "INIReader.h"
+#include "module.h"
+// #include "modules.h"
 
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
@@ -110,7 +113,7 @@ void Network::Sync()
     new Channel(this, tok);
   }
   
-  this->servername = params[1];
+  this->servername = this->isupport.ServerHost;
   FOREACH_MOD(I_OnNetworkSync, OnNetworkSync(this));
   Log(LOG_DEBUG) << "Network " << this->name << " is synced!";
 }

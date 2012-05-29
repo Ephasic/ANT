@@ -19,7 +19,6 @@
 #pragma once
 #ifndef INIREADER_H
 #define INIREADER_H
-#include "flux.h"
 #include "extern.h"
 #include "textfile.h"
 #include "PosixPath.h"
@@ -59,7 +58,7 @@ private:
 class BotConfig
 {
 public:
-  BotConfig(const Flux::string &dir = binary_dir);
+  BotConfig(const Flux::string &dir = binary_dir, BotConfig* = NULL);
   virtual ~BotConfig();
   INIReader *Parser;
   Flux::string LogFile;

@@ -9,6 +9,10 @@
  * Based on the original code of Anope by The Anope Team.
  */
 #include "log.h"
+#include "INIReader.h"
+#include "SocketException.h"
+#include "module.h"
+// #include "modules.h"
 
 Flux::string NoTermColor(const Flux::string &ret)
 {

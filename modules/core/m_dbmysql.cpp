@@ -220,7 +220,7 @@ void Write(const char *fmt, ...)
   vsnprintf(buffer, sizeof(buffer), fmt, args);
 //   sql << buffer << "\n";
   va_end(args);
-  Flux::vector params = ParametizeString(buffer, ' ');
+  Flux::vector params = ParamitizeString(buffer, ' ');
   
   if(params.size() > 0)
   {

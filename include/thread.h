@@ -13,7 +13,7 @@
 #define THREAD_H
 #include "flux.h"
 #include "SocketException.h"
-#include <errno.h>
+#include "includes.h"
 #include <pthread.h>
 
 class Thread : public Base

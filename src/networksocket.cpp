@@ -10,6 +10,9 @@
  */
 
 #include "network.h"
+#include "INIReader.h"
+#include "module.h"
+#include "bot.h"
 
 /**********************************************************/
 /************************ Timers **************************/
@@ -70,7 +73,7 @@ NetworkSocket::~NetworkSocket()
 bool NetworkSocket::Read(const Flux::string &buf)
 {
   Log(LOG_RAWIO) << '[' << this->net->name << "] " << buf;
-  Flux::vector params = ParametizeString(buf, ' ');
+  Flux::vector params = ParamitizeString(buf, ' ');
 
   if(!params.empty() && params[0].search_ci("ERROR"))
   {

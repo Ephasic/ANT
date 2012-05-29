@@ -14,6 +14,8 @@
 #include "flux.h"
 #include <list> //for std::list
 #include <new>
+#include <cstdio>
+#include <iostream>
 /* Prototypes and external variable declarations only */
 
 /* #define's */
@@ -148,7 +150,7 @@ extern int randint(int x, int y);
 extern bool IsValidChannel(const Flux::string&);
 extern bool InTerm();
 extern bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
-extern Flux::vector ParametizeString(const Flux::string&, char);
+extern Flux::vector ParamitizeString(const Flux::string&, char);
 
 /* maps, lists, vectors, etc. */
 extern std::list<module*> Modules;
@@ -181,8 +183,14 @@ extern char segv_location[255];
 extern char **my_av, **my_envp;
 
 /* Functions which must be instantiated in a header file */
-// template<typename T> static void DeleteZero(T*&n);
-
+template<typename T> static void DeleteZero(T*&n)
+{
+  T *t = n;
+  if(memdebug) // Cannot use Log() here because it gives errors
+    std::cout << "[MEMORY] Deleting " << typeid(*n).name() << " @" << n << std::endl;
+  n = nullptr;
+  delete t;
+}
 
 /**************************************************************/
 /* This is the only #define allowed at the bottom of the file */

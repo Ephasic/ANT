@@ -12,21 +12,15 @@
 #ifndef command_h
 #define command_h
 #include "extern.h"
-/// \include includes.h
 #include "includes.h"
-/// \include user.h
 #include "user.h"
-/**
- *\file  command.h
- *\brief Contains the class Command
- */
 
 /**
  * \class IsoHost
  * \brief Wrapper for an irc host
  * This was written by Justasic to break up the parts of a messages host for easier use.
  */
-class IsoHost : public Flux::string
+class IsoHost
 {
 public:
   IsoHost(const Flux::string&);

@@ -12,6 +12,7 @@
 #include "includes.h"
 #include "module.h"
 #include "bot.h"
+#include "textfile.h"
 // #include <cassert>
 
 /** Segmentation Fault Handler

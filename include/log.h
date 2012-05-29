@@ -11,8 +11,10 @@
 #pragma once
 #ifndef LOG_H
 #define LOG_H
-#include "command.h"
-#include "user.h"
+#include "includes.h"
+// #include "command.h"
+// #include "extern.h"
+// #include "user.h"
 
 class Log
 {
@@ -38,13 +40,5 @@ public:
    return *this;
   }
 };
-
-template<typename T> static void DeleteZero(T*&n)
-{
-  T *t = n;
-  Log(LOG_MEMORY) << "Deleting " << typeid(*n).name() << " @" << n;
-  n = nullptr;
-  delete t;
-}
 
 #endif

@@ -182,6 +182,7 @@ Flux::string TextFile::TempFile(const Flux::string &file)
  */
 bool TextFile::IsFile(const Flux::string &filename)
 {
+  const char *file = filename.c_str();
   struct stat sb;
   if (stat(file, &sb) == -1)
     return false;

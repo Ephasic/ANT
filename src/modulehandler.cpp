@@ -9,6 +9,8 @@
  * Based on the original code of Anope by The Anope Team.
  */
 #include "module.h"
+#include "INIReader.h"
+// #include "modules.h"
 
 /**
  * \fn bool ModuleHandler::Attach(Implementation i, module *mod)

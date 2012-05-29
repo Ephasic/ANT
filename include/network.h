@@ -11,7 +11,8 @@
 #pragma once
 #ifndef NETWORK_H
 #define NETWORK_H
-#include "module.h"
+#include "Socket.h"
+#include "extern.h"
 #include "timers.h"
 
 class Bot;
@@ -107,5 +108,21 @@ public:
   ReconnectTimer(int, Network*);
   void Tick(time_t);
 };
+
+/* Base socket class for ALL network connections for the Network class */
+/* This isnt in network.h because of some include recursion issues -_- */
+class NetworkSocket : public ConnectionSocket, public BufferedSocket
+{
+public:
+  NetworkSocket(Network*);
+  ~NetworkSocket();
+  Network *net;
+  bool SentPing;
+  bool Read(const Flux::string&);
+  bool ProcessWrite();
+  void OnConnect();
+  void OnError(const Flux::string&);
+};
+
 // NetworkSocket is in socket.h :/
 #endif

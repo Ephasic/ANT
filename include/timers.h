@@ -12,9 +12,10 @@
 #define TIMERS_H
 
 #include "includes.h"
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "flux.h"
+// #include <time.h>
+// #include <stdio.h>
+// #include <stdlib.h>
 
 class Timer : public Base
 {

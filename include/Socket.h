@@ -548,21 +548,6 @@ public:
   static void Process();
 };
 
-/* Base socket class for ALL network connections for the Network class */
-/* This isnt in network.h because of some include recursion issues -_- */
-class NetworkSocket : public ConnectionSocket, public BufferedSocket
-{
-public:
-  NetworkSocket(Network*);
-  ~NetworkSocket();
-  Network *net;
-  bool SentPing;
-  bool Read(const Flux::string&);
-  bool ProcessWrite();
-  void OnConnect();
-  void OnError(const Flux::string&);
-};
-
 #include "dns.h"
 
 #endif

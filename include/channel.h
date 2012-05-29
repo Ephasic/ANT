@@ -11,10 +11,8 @@
 #pragma once
 #ifndef CHANNEL_H
 #define CHANNEL_H
-/**
- * \include ircproto.h
- */
 #include "ircproto.h"
+#include "command.h"
 /**
  * \file channel.h
  * \brief Contains the Channel class as well as all of it's contents as prototype declarations.

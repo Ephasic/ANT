@@ -19,11 +19,21 @@
  * Justasic was having earlier. if you can fix it an easier
  * way then do so.
  */
-#include "Socket.h"
-#include "network.h"
-#include "timers.h"
-#include "thread.h"
-#include "INIReader.h"
+// #include "Socket.h"
+// #include "network.h"
+// #include "timers.h"
+// #include "thread.h"
+// #include "INIReader.h"
+#include "extern.h"
+#include <sstream>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <errno.h>
 #include <utility>
 #include <stdint.h>
 #include <arpa/nameser.h>

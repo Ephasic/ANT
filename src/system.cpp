@@ -11,6 +11,7 @@
 // This cannot include modules.h because it will multi-define stuff and make g++ shit bricks
 #include "module.h"
 #include "INIReader.h"
+// #include "modules.h"
 #include "network.h" //We'll solve includes later
 #include "bot.h"
 
@@ -231,7 +232,7 @@ void startup(int argc, char** argv, char *envp[])
   my_envp = envp;
   starttime = time(NULL); //for bot uptime
 
-  Flux::string bindir = getprogdir(argv[0]);
+  Flux::string bindir = getprogdir(Flux::string(argv[0]));
   if(bindir[bindir.length() - 1] == '.')
     bindir = bindir.substr(0, bindir.length() - 2);
 
@@ -338,7 +339,7 @@ void GarbageCollect()
   // Unload all modules
   ModuleHandler::UnloadAll();
   // Shutdown the timers
-  TimerManager::Shutdown();
+//   TimerManager::Shutdown();
 
 
   // Clean up any network pointers and clear the map

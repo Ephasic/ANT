@@ -204,7 +204,7 @@ Flux::string INIReader::MakeKey(const Flux::string &section, const Flux::string 
     return key;
 }
 /**************************************************************************************/
-BotConfig::BotConfig(const Flux::string &dir)
+BotConfig::BotConfig(const Flux::string &dir, BotConfig *old)
 {
  SET_SEGV_LOCATION();
  Flux::string conffile = dir + "/bot.conf";
@@ -223,7 +223,7 @@ BotConfig::BotConfig(const Flux::string &dir)
  }
  catch(const ConfigException &e)
  {
-   if (starttime == time(NULL))
+   if (!old)
      throw; //Let CoreExcepion catch it since its OnStart
    else
       Log(LOG_TERMINAL) << "Config Exception: " << e.GetReason();
