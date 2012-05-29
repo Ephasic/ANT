@@ -26,6 +26,36 @@ struct CommitMessage
   Network *network;
 };
 
+struct iSupport
+{
+  // Other options the server might send.
+  Flux::map<Flux::string> other;
+  // Supported chan modes
+  Flux::string ChanModes;
+  // Supported chan types
+  Flux::string ChanTypes;
+  // The IRCd version
+  Flux::string IRCdVersion;
+  // User modes
+  Flux::string UserModes;
+  // Network name
+  Flux::string Network;
+  // Servers hostname
+  Flux::string ServerHost;
+  // Max away len
+  int AwayLen;
+  // Max kick len
+  int KickLen;
+  // Max channels you can join
+  int MaxChannels;
+  // Max number of bans settable
+  int MaxBans;
+  // Max nickname length
+  int NickLen;
+  // Max Topic Length
+  int TopicLen;
+};
+
 class Network : public Timer
 {
 protected:
@@ -36,6 +66,8 @@ public:
   ~Network();
   // The socket
   NetworkSocket *s;
+  // What that network supports
+  iSupport isupport;
   // When we join a network but aren't synced yet
   std::queue<Channel*> JoinQueue;
   // bot pointer for the network
@@ -44,8 +76,6 @@ public:
   Flux::insensitive_map<User*> UserNickList;
   // Map of all channels in the network
   Flux::insensitive_map<Channel*> ChanMap;
-  // ircd information
-  Flux::string ircdversion;
   // Network name
   Flux::string name;
   // Network hostname currently in use
@@ -59,6 +89,7 @@ public:
   int CurHost;
 
   void Tick(time_t);
+  void Sync();
   void SetConnectedHostname(const Flux::string &str) { this->usedhostname = str; }
   Flux::string GetConHost() const { return this->usedhostname; }
   bool JoinChannel(const Flux::string&);

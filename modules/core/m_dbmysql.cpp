@@ -25,20 +25,83 @@ public:
   virtual ~SQLException() throw() { }
 };
 
+typedef Flux::map<Flux::string> RowMap;
+
+struct QueryData
+{
+  Flux::string query;
+  bool escape;
+}
+
 class MySQLResult : public Base
 {
+  MYSQL_RES *res;
+  std::vector<RowMap> entries;
 public:
-  MySQLResult(unsigned i) // needs finishing
+  unsigned int id;
+  Flux::string FinishedQuery;
+  
+  MySQLResult(unsigned i, const Flux::string &q, MYSQL_RES *r): id(i), res(r), FinishedQuery(q);
   {
-    
+    unsigned num_fields = res?mysql_num_fields(res):0;
+
+    if(!num_fields)
+      return;
+
+    for(MYSQL_ROW row; (row = mysql_fetch_row(res));)
+    {
+      MYSQL_FIELD *fields = mysql_fetch_fields(res);
+
+      if(fields)
+      {
+	RowMap items;
+
+	for(unsigned field_count = 0; field_count < num_fields; ++field_count)
+	{
+	  Flux::string column = (fields[field_count].name?fields[field_count].name:"");
+	  Flux::string data = (row[field_count]?row[field_count]:"");
+
+	  items[column] = data;
+	}
+
+	this->entries.push_back(items);
+      }
+    }
+  }
+
+  inline const unsigned int GetID() const { return this->id; }
+
+  size_t Rows() const { return this->entries.size(); }
+
+  const RowMap &Row(size_t index) const
+  {
+    try
+    {
+      return this->entries[index];
+    }
+    catch (const std::out_of_range &)
+    {
+      throw SQLException("Out of bounds access of MySQLResult");
+    }
+  }
+
+  const Flux::string Get(size_t index, const Flux::string &col) const
+  {
+    const RowMap rows = this->Row(index);
+
+    RowMap::const_iterator it = rows.find(col);
+    if(it == rows.end())
+      throw SQLException("Unknown column name: " + col);
+
+    return it->second;
   }
   
   ~MySQLResult()
   {
-    
+    if(this->res)
+      mysql_free_result(this->res);
   }
 };
-
 
 class MySQLInterface : public Base
 {
@@ -48,6 +111,8 @@ class MySQLInterface : public Base
   Flux::string password;
   Flux::string database;
   int port;
+
+  Flux::string BuildQuery()
 public:
   MySQLInterface(const Flux::string &host, const Flux::string &user, const Flux::string &pass, const Flux::string &dbname, int p = 0) : Base(), hostname(host), username(user), password(pass), database(dbname)
   {
@@ -92,10 +157,15 @@ public:
     return buffer;
   }
 
-  MYSQL_RES *RunQuery(const Flux::string &query)
+  MySQLResult RunQuery(const Flux::string &query)
   {
-    mysql_query(this->conn, query.c_str());
-    return mysql_store_result(this->conn);
+    if(this->CheckConnection() && !mysql_real_query(this->conn, real_query.c_str(), real_query.length()))
+    {
+      MYSQL_RES *res = mysq_store_result(this->conn);
+      unsigned id = mysq_insert_id(this->conn);
+
+      return MySQLResult(id, real_query, res);
+    }
   }
   
   const MYSQL *GetConnection() const
@@ -111,7 +181,7 @@ public:
   }
 };
 
-MySQLInterface *me;
+static MySQLInterface *me;
 
 void Read(module *m = nullptr)
 {
@@ -186,8 +256,16 @@ public:
   {
     Log() << "[MySQL] Loading Databases.";
     Log() << "[MySQL] Using MySQL client version " << mysql_get_client_info();
-    me = new MySQLInterface(Config->sqlhost, Config->sqluser, Config->sqlpass, Config->sqldb, Config->sqlport);
-    Read();
+    try
+    {
+      me = new MySQLInterface(Config->sqlhost, Config->sqluser, Config->sqlpass, Config->sqldb, Config->sqlport);
+      Read();
+    }
+    catch (const SQLException &e)
+    {
+      Log() << "Unable to initialize MySQL Interface: " << e.GetReason();
+      throw;
+    }
   }
 
   void OnDatabasesWrite(void (*Write)(const char*, ...))

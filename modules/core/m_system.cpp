@@ -139,8 +139,7 @@ public:
   void Tick(time_t)
   {
     JoinChansInBuffer(this->n);
-    FOREACH_MOD(I_OnNetworkSync, OnNetworkSync(n));
-    Log(LOG_DEBUG) << "Network " << this->n->name << " is synced!";
+    n->Sync();
   }
 };
 
@@ -202,6 +201,44 @@ public:
 
   void OnNumeric(int i, Network *n, const Flux::vector &params)
   {
+
+    if((i == 5))
+    {
+      // Skip the nickname and the "are supported by this server" parts of the message
+      for(unsigned o = 1; o < params.size() - 1; ++o)
+      {
+	Flux::vector sentence = ParamitizeString(params[o], '=');
+	Flux::string word = sentence[0];
+	Flux::string param = sentence.size() > 1 ? sentence[1] : "";
+	
+	if(word.equals_ci("NETWORK"))
+	  n->isupport.Network = param;
+	
+	if(word.equals_ci("CHANTYPES"))
+	  n->isupport.ChanTypes = param;
+	
+	if(word.equals_ci("AWAYLEN"))
+	  n->isupport.AwayLen = static_cast<int>(param);
+	
+	if(word.equals_ci("KICKLEN"))
+	  n->isupport.KickLen = static_cast<int>(param);
+	
+	if(word.equals_ci("MAXBANS"))
+	  n->isupport.MaxBans = static_cast<int>(param);
+	
+	if(word.equals_ci("MAXCHANNELS"))
+	  n->isupport.MaxChannels = static_cast<int>(param);
+	
+	if(word.equals_ci("NICKLEN"))
+	  n->isupport.NickLen = static_cast<int>(param);
+	
+	if(word.equals_ci("TOPICLEN"))
+	  n->isupport.TopicLen = static_cast<int>(param);
+	
+	n->isupport.other[word] = param;
+      }
+    }
+    
     if((i == 4))
     {
       /* Numeric 004
@@ -214,21 +251,10 @@ public:
 
       RenameBot(n, params[0]);
 
-      if(params[3].search('B'))
-	n->b->SetMode("+B"); //FIXME: get bot mode?
-      if(params[2].search_ci("ircd-seven") && params[3].search('Q'))
-	n->b->SetMode("+Q"); //for freenode to stop those redirects
-
-      sepstream cs(Config->Channel, ',');
-      Flux::string tok;
-      while(cs.GetToken(tok))
-      {
-	tok.trim();
-	new Channel(n, tok);
-      }
-
-      n->servername = params[1];
-      n->ircdversion = params[2];
+      n->isupport.ServerHost = params[1];
+      n->isupport.IRCdVersion = params[2];
+      n->isupport.UserModes = params[3];
+      n->isupport.ChanModes = params[4];
     }
 
     // Send Random garbage occasionally to see if we need to rename
@@ -236,9 +262,7 @@ public:
       RenameBot(n, params[0]);
 
     if((i == 376))
-    {
       new SyncTimer(n);
-    }
 
     /* Nickname is in use numeric
      * Numeric 433
@@ -247,11 +271,8 @@ public:
      * params[2] = message (useless)
      */
     if((i == 433))
-    {
-      //int derp;
       // FIXME: Check internally for the nickname and start from there so we don't waste bandwidth
 	RenameBot(n, params[1]);
-    }
   }
 
   // user!ident@host.com NICK NewNickname

@@ -182,10 +182,19 @@ Flux::string TextFile::TempFile(const Flux::string &file)
  */
 bool TextFile::IsFile(const Flux::string &filename)
 {
-  struct stat fileinfo;
-  if (!stat(filename.c_str(), &fileinfo))
-    return true;
-  return false;
+  struct stat sb;
+  if (stat(file, &sb) == -1)
+    return false;
+  
+  if ((sb.st_mode & S_IFDIR) > 0)
+    return false;
+  
+  FILE *input = fopen(file, "r");
+  if (input == NULL)
+    return false;
+  else
+    fclose(input);
+  return true;
 }
 
 Flux::vector TextFile::DirectoryListing(const Flux::string &directory)

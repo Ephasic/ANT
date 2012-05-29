@@ -120,7 +120,7 @@ void Rehash()
   {
     const Flux::string bi_dir = Config->Binary_Dir;
     BotConfig *configtmp = Config;
-    Config = new BotConfig(bi_dir);
+    Config = new BotConfig(bi_dir, configtmp);
     delete configtmp;
 
     if(!Config)
@@ -237,7 +237,7 @@ void startup(int argc, char** argv, char *envp[])
 
   *const_cast<Flux::string*>(&binary_dir) = bindir;
 
-  Config = new BotConfig(bindir);
+  Config = new BotConfig(bindir, NULL);
   if(!Config)
     throw CoreException("Config Error.");
 
