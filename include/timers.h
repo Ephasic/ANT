@@ -12,10 +12,6 @@
 #define TIMERS_H
 
 #include "includes.h"
-#include "flux.h"
-// #include <time.h>
-// #include <stdio.h>
-// #include <stdlib.h>
 
 class Timer : public Base
 {
@@ -124,8 +120,6 @@ class TimerManager : public Base
 	/** Compares two timers
 	 */
 	static bool TimerComparison(Timer *one, Timer *two);
-
-	static void Shutdown();
 };
 
 #endif // TIMERS_H

@@ -46,13 +46,11 @@
 jmp_buf sigbuf;
 #endif
 
-// This is kind of a junk variable file more or less..
-
+// Junk Global variables that are NEEDED
 char **my_av, **my_envp;
 bool nofork = false, dev = false, protocoldebug = false, quitting = false, nocolor = false, istempnick = false;
 bool memdebug = false;
-Flux::string binary_path, bot_bin, quitmsg, server_name, LastBuf;
-const Flux::string binary_dir;
+Flux::string binary_path, bot_bin, quitmsg, server_name, LastBuf, binary_dir;
 char segv_location[255];
 time_t starttime = 0;
 

@@ -23,5 +23,4 @@ extern Flux::string execute(const char *cmd);
 extern Flux::string urlify(const Flux::string &received);
 extern Flux::string getprogdir(const Flux::string &dir);
 
-
 #endif

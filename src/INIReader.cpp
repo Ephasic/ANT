@@ -263,5 +263,9 @@ void BotConfig::Read()
   this->sqluser 	= this->Parser->Get("MySQL", "user", "");
   this->sqlhost		= this->Parser->Get("MySQL", "hostname", "127.0.0.1");
   this->sqlport		= this->Parser->GetInteger("MySQL", "hostname", 0);
+  this->BurstRate	= this->Parser->GetInteger("SendQ", "Burst Rate", 7);
+  this->SendQLines	= this->Parser->GetInteger("SendQ", "Lines", 5);
+  this->SendQRate	= this->Parser->GetInteger("SendQ", "Rate", 5);
+  this->SendQEnabled	= this->Parser->GetBoolean("SendQ", "Enabled", true);
 }
 

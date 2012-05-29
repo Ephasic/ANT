@@ -31,7 +31,7 @@ struct QueryData
 {
   Flux::string query;
   bool escape;
-}
+};
 
 class MySQLResult : public Base
 {
@@ -41,7 +41,7 @@ public:
   unsigned int id;
   Flux::string FinishedQuery;
   
-  MySQLResult(unsigned i, const Flux::string &q, MYSQL_RES *r): id(i), res(r), FinishedQuery(q);
+  MySQLResult(unsigned i, const Flux::string &q, MYSQL_RES *r): id(i), res(r), FinishedQuery(q)
   {
     unsigned num_fields = res?mysql_num_fields(res):0;
 
@@ -112,7 +112,7 @@ class MySQLInterface : public Base
   Flux::string database;
   int port;
 
-  Flux::string BuildQuery()
+  Flux::string BuildQuery();
 public:
   MySQLInterface(const Flux::string &host, const Flux::string &user, const Flux::string &pass, const Flux::string &dbname, int p = 0) : Base(), hostname(host), username(user), password(pass), database(dbname)
   {
@@ -159,12 +159,13 @@ public:
 
   MySQLResult RunQuery(const Flux::string &query)
   {
+    Flux::string real_query;
     if(this->CheckConnection() && !mysql_real_query(this->conn, real_query.c_str(), real_query.length()))
     {
-      MYSQL_RES *res = mysq_store_result(this->conn);
-      unsigned id = mysq_insert_id(this->conn);
+//       MYSQL_RES *res = mysq_store_result(this->conn);
+//       unsigned id = mysq_insert_id(this->conn);
 
-      return MySQLResult(id, real_query, res);
+//       return MySQLResult(id, real_query, res);
     }
   }
   
@@ -248,6 +249,9 @@ public:
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
+
+    throw ModuleException("This module is incomplete!");
+    
     Implementation i[] = { I_OnDatabasesWrite, I_OnDatabasesRead, I_OnModuleLoad, I_OnSaveDatabases, I_OnForceDatabasesRead };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
   }

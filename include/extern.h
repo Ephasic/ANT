@@ -111,7 +111,7 @@ enum ModErr
 
 /* Typedef's */
 typedef std::map<Flux::string, Command*, ci::less> CommandMap;
-typedef std::vector<module*> EventsVector; //Gay g++
+typedef std::vector<module*> EventsVector; //Gay g++ waning fix
 
 /*  Class pointer finder definitions */
 extern User *FindUser(Network*, const Flux::string&);
@@ -132,8 +132,7 @@ extern CommandMap Commandsmap;
 extern CommandMap ChanCommandMap;
 extern time_t starttime;
 extern uint32_t usercnt, maxusercnt;
-extern Flux::string binary_path, bot_bin, quitmsg, LastBuf;
-extern const Flux::string binary_dir;
+extern Flux::string binary_path, bot_bin, binary_dir, quitmsg, LastBuf;
 extern const Flux::string VERSION_LONG;
 extern bool protocoldebug, dev, nofork, quitting, nocolor, istempnick, memdebug;
 

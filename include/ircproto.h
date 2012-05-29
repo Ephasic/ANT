@@ -11,13 +11,13 @@
 #pragma once
 #ifndef IRCPROTO_H
 #define IRCPROTO_H
-// #include "includes.h"
-// #include "command.h"
 #include "flux.h"
 
 class Network;
+class SendQTimer;
 class IRCProto
 {
+  SendQTimer *sqt;
 public:
   const Network *net;
   IRCProto(const Network*);

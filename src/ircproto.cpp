@@ -10,11 +10,87 @@
  */
 #include "ircproto.h"
 #include "bot.h"
+#include "INIReader.h"
 /**
  *\file  ircproto.cpp
  *\brief Contains the IRCProto class.
  */
-IRCProto::IRCProto(const Network *n) : net(n) { } //Because we have multiple networks, we need this to be dynamic with the sockets
+// Buffer all messages except critical ones and send them in a timely manner
+class SendQTimer : public Timer
+{
+  int sent;
+  const Network *n;
+  inline bool NetworkReady() const { return (this->n && this->n->s && this->n->s->GetStatus(SF_CONNECTED)); }
+  struct
+  {
+    // The Queue of all messages, buffered;
+    std::queue<Flux::string> SendQ;
+    // Number of lines sent before burst
+    int linessent;
+    // Have we sent the burst yet?
+    inline bool HasBurst() const { return (linessent <= Config->BurstRate); }
+  } sqo;
+  
+public:
+  SendQTimer(const Network *net) : Timer(Config->SendQRate, time(NULL), true), sent(0), n(net)
+  {
+    Log(LOG_DEBUG) << "Initialized a SengQ Timer";
+    sqo.linessent = 0;
+  }
+  
+  ~SendQTimer()
+  {
+    Log(LOG_DEBUG) << "Clearing SendQ...";
+    
+    while(!this->sqo.SendQ.empty())
+      this->sqo.SendQ.pop();
+    
+    Log(LOG_DEBUG) << "Destroying SendQ Timer";
+  }
+
+  void SendBuffered(const Flux::string &buffer)
+  {
+    if(Config->SendQEnabled)
+    {
+      if(this->sqo.HasBurst() && NetworkReady())
+      {
+	sqo.linessent++; // Spam for a few lines
+	this->n->s->Write(buffer);
+      }
+      else // Oh well.. fun while it lasted lol
+	sqo.SendQ.push(buffer);
+    }
+    else // Send Unlimited if there's no sendq enabled. Whee!
+      if(NetworkReady())
+	this->n->s->Write(buffer);
+      else
+	Log(LOG_WARN) << "Attempted to send \"" << sqo.SendQ.front() << "\" to the server but no socket exists!";
+  }
+  
+  void Tick(time_t)
+  {
+    while(!sqo.SendQ.empty() && ++sent <= Config->SendQLines)
+    {
+      if(this->n && this->n->s && this->n->s->GetStatus(SF_CONNECTED))
+	this->n->s->Write(sqo.SendQ.front());
+      else
+	Log(LOG_WARN) << "Attempted to send \"" << sqo.SendQ.front() << "\" to the server but no socket exists!";
+      sqo.SendQ.pop();
+    }
+    
+    if(sqo.SendQ.empty())
+      sqo.linessent = 0;
+    sent = 0;
+  }
+};
+
+IRCProto::IRCProto(const Network *n) : net(n)
+{
+  if(!n)
+    throw CoreException("IRCProto with no network?");
+  
+  this->sqt = new SendQTimer(n);
+}
 
 void IRCProto::Raw(const char *fmt, ...)
 {
@@ -23,19 +99,23 @@ void IRCProto::Raw(const char *fmt, ...)
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
   va_end(args);
-  if(this->net && this->net->s && this->net->s->GetStatus(SF_CONNECTED)){
-    this->net->s->Write(Flux::string(buffer));
-    this->net->s->ProcessWrite();
+  
+  if(this->net && this->net->s && this->net->s->GetStatus(SF_CONNECTED))
+  {
+    this->sqt->SendBuffered(Flux::string(buffer));
+//     this->net->s->Write(Flux::string(buffer));
+//     this->net->s->ProcessWrite();
   }
   else
-    Log(LOG_RAWIO) << '[' << this->net->name << ']' << " Attempted to send '" << buffer << '\'';
+    Log(LOG_WARN) << '[' << this->net->name << ']' << " Attempted to send '" << buffer << '\'';
 }
 /**
  * \brief Sends a IRC private message to the user or channel
  * \param Destination Where the message will go
  * \param Message The message to send to Destination
  */
-void IRCProto::privmsg(const Flux::string &where, const char *fmt, ...){
+void IRCProto::privmsg(const Flux::string &where, const char *fmt, ...)
+{
   va_list args;
   char buffer[BUFSIZE] = "";
   if(fmt)
@@ -50,7 +130,8 @@ void IRCProto::privmsg(const Flux::string &where, const char *fmt, ...){
  * \overload void IRCProto::privmsg(Flux::string where, Flux::string msg)
  * \brief Sends a IRC private message to the user or channel
  */
-void IRCProto::privmsg(const Flux::string &where, const Flux::string &msg){
+void IRCProto::privmsg(const Flux::string &where, const Flux::string &msg)
+{
  sepstream sep(msg, '\n');
  Flux::string tok;
  while(sep.GetToken(tok))
@@ -61,7 +142,8 @@ void IRCProto::privmsg(const Flux::string &where, const Flux::string &msg){
  * \param Destination Where the message will go
  * \param Message The message to send to Destination
  */
-void IRCProto::notice(const Flux::string &where, const char *fmt, ...){
+void IRCProto::notice(const Flux::string &where, const char *fmt, ...)
+{
   va_list args;
   char buffer[BUFSIZE] = "";
   if(fmt)
@@ -76,7 +158,8 @@ void IRCProto::notice(const Flux::string &where, const char *fmt, ...){
  * \overload void IRCProto::notice(Flux::string where, Flux::string msg)
  * \brief Sends a IRC notice to the user or channel
  */
-void IRCProto::notice(const Flux::string &where, const Flux::string &msg){
+void IRCProto::notice(const Flux::string &where, const Flux::string &msg)
+{
  sepstream sep(msg, '\n');
  Flux::string tok;
  while(sep.GetToken(tok))
@@ -87,7 +170,8 @@ void IRCProto::notice(const Flux::string &where, const Flux::string &msg){
  * \param Destination Where the message will go
  * \param Message The message to send to Destination
  */
-void IRCProto::action(const Flux::string &where, const char *fmt, ...){
+void IRCProto::action(const Flux::string &where, const char *fmt, ...)
+{
   if(fmt)
   {
     va_list args;
@@ -102,7 +186,8 @@ void IRCProto::action(const Flux::string &where, const char *fmt, ...){
  * \overload void IRCProto::action(Flux::string where, Flux::string msg)
  * \brief Sends a IRC notice to the user or channel
  */
-void IRCProto::action(const Flux::string &where, const Flux::string &msg){
+void IRCProto::action(const Flux::string &where, const Flux::string &msg)
+{
  sepstream sep(msg, '\n');
  Flux::string tok;
  while(sep.GetToken(tok))
@@ -116,7 +201,8 @@ void IRCProto::action(const Flux::string &where, const Flux::string &msg){
  * \param user User to be kicked.
  * \param reason Reason for the kick.
  */
-void IRCProto::kick(const Flux::string &Channel, const Flux::string &User, const char *fmt, ...){
+void IRCProto::kick(const Flux::string &Channel, const Flux::string &User, const char *fmt, ...)
+{
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
@@ -128,7 +214,8 @@ void IRCProto::kick(const Flux::string &Channel, const Flux::string &User, const
  * \fn void command::topic(Flux::string channel, const char *fmt, ...)
  * \brief Sets channel topic.
  */
-void IRCProto::topic(const Flux::string &channel, const char *fmt, ...){
+void IRCProto::topic(const Flux::string &channel, const char *fmt, ...)
+{
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
@@ -156,7 +243,8 @@ void IRCProto::quit(const char *fmt, ...)
  * \param channel Channel to part from.
  * \param reason Reason for parting.
  */
-void IRCProto::part(const Flux::string &channel, const char *fmt, ...){
+void IRCProto::part(const Flux::string &channel, const char *fmt, ...)
+{
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
@@ -176,7 +264,8 @@ void IRCProto::nick(const char *fmt, ...)
 /**
  * \overload void command::kick(Flux::string channel, Flux::string user, Flux::string reason)
  */
-void IRCProto::kick(const Flux::string &chan, const Flux::string &userstr, const Flux::string &msg){
+void IRCProto::kick(const Flux::string &chan, const Flux::string &userstr, const Flux::string &msg)
+{
   this->Raw("KICK %s %s :%s\n", chan.c_str(), userstr.c_str(), msg.c_str());
 }
 /**
@@ -192,13 +281,15 @@ void IRCProto::quit(const Flux::string &message)
 /**
  * \overload void IRCProto::part(Flux::string channel, Flux::string msg)
  */
-void IRCProto::part(const Flux::string &channel, const Flux::string &msg){
+void IRCProto::part(const Flux::string &channel, const Flux::string &msg)
+{
   this->Raw("PART %s :%s\n", channel.c_str(), msg.c_str());
 }
 /**
  * \overload void command::topic(Flux::string channel, Flux::string msg)
  */
-void IRCProto::topic(const Flux::string &chan, const Flux::string &msg){
+void IRCProto::topic(const Flux::string &chan, const Flux::string &msg)
+{
   this->Raw("TOPIC %s :%s\n", chan.c_str(), msg.c_str());
 }
 /**
@@ -216,7 +307,8 @@ void IRCProto::away(const Flux::string &message){
  * \fn void command::oper(Flux::string oper, Flux::string password)
  * \brief Sends IRC command /oper
  */
-void IRCProto::oper(const Flux::string &username, const Flux::string &password){
+void IRCProto::oper(const Flux::string &username, const Flux::string &password)
+{
   this->Raw("OPER %s %s\n", username.c_str(), password.c_str());
 }
 /**
@@ -224,7 +316,8 @@ void IRCProto::oper(const Flux::string &username, const Flux::string &password){
  * \brief Makes the bot join a channel
  * \param stringy_chan A Flux::string with the channel you want to join.
  */
-void IRCProto::join(const Flux::string &dchan){
+void IRCProto::join(const Flux::string &dchan)
+{
   this->Raw("JOIN %s\n", dchan.c_str());
 }
 /**
@@ -232,7 +325,8 @@ void IRCProto::join(const Flux::string &dchan){
  * \brief Parts channel w/o reason.
  * \param channel Channel to part from.
  */
-void IRCProto::part(const Flux::string &fchan){
+void IRCProto::part(const Flux::string &fchan)
+{
   this->Raw("PART %s\n", fchan.c_str());
 }
 /**
@@ -240,7 +334,8 @@ void IRCProto::part(const Flux::string &fchan){
  * \brief Sends a /who to the channel
  * \param chan A Flux::string with the channel you want to /who.
  */
-void IRCProto::who(const Flux::string &chan){
+void IRCProto::who(const Flux::string &chan)
+{
   this->Raw("WHO %s\n", chan.c_str());
 }
 /**
@@ -248,7 +343,8 @@ void IRCProto::who(const Flux::string &chan){
  * \brief Sends /names to the channel
  * \param chan A Flux::string with the channel you want to /names.
  */
-void IRCProto::names(const Flux::string &chan){
+void IRCProto::names(const Flux::string &chan)
+{
   this->Raw("NAMES %s\n", chan.c_str());
 }
 /**
@@ -256,7 +352,8 @@ void IRCProto::names(const Flux::string &chan){
  * \brief Sends a IRC Whois to Server.
  * \param Nick Nick to query
  */
-void IRCProto::whois(const Flux::string &nickname){
+void IRCProto::whois(const Flux::string &nickname)
+{
   this->Raw("WHOIS %s\n", nickname.c_str());
 }
 /**
@@ -265,7 +362,8 @@ void IRCProto::whois(const Flux::string &nickname){
  * \param nickname Nickname of who we are setting a more to.
  * \param mode The mode to set.
  */
-void IRCProto::mode(const Flux::string &chan, const Flux::string &usermode, const Flux::string &usernick){
+void IRCProto::mode(const Flux::string &chan, const Flux::string &usermode, const Flux::string &usernick)
+{
   this->Raw("MODE %s %s %s\n", chan.c_str(), usermode.c_str(), usernick.c_str());
 }
 /**
@@ -274,7 +372,8 @@ void IRCProto::mode(const Flux::string &chan, const Flux::string &usermode, cons
  * @param dest where to set the mode
  * @param mode mode to set
  */
-void IRCProto::mode(const Flux::string &dest, const Flux::string &chanmode){
+void IRCProto::mode(const Flux::string &dest, const Flux::string &chanmode)
+{
   this->Raw("MODE %s %s\n", dest.c_str(), chanmode.c_str());
 }
 
@@ -389,7 +488,8 @@ GlobalProto::GlobalProto() {}
  * \param Destination Where the message will go
  * \param Message The message to send to Destination
  */
-void GlobalProto::privmsg(const Flux::string &where, const char *fmt, ...){
+void GlobalProto::privmsg(const Flux::string &where, const char *fmt, ...)
+{
   va_list args;
   char buffer[BUFSIZE] = "";
   if(fmt)
@@ -404,7 +504,8 @@ void GlobalProto::privmsg(const Flux::string &where, const char *fmt, ...){
  * \overload void GlobalProto::privmsg(Flux::string where, Flux::string msg)
  * \brief Sends a IRC private message to the user or channel
  */
-void GlobalProto::privmsg(const Flux::string &where, const Flux::string &msg){
+void GlobalProto::privmsg(const Flux::string &where, const Flux::string &msg)
+{
   sepstream sep(msg, '\n');
   Flux::string tok;
   while(sep.GetToken(tok))
@@ -415,7 +516,8 @@ void GlobalProto::privmsg(const Flux::string &where, const Flux::string &msg){
  * \param Destination Where the message will go
  * \param Message The message to send to Destination
  */
-void GlobalProto::notice(const Flux::string &where, const char *fmt, ...){
+void GlobalProto::notice(const Flux::string &where, const char *fmt, ...)
+{
   va_list args;
   char buffer[BUFSIZE] = "";
   if(fmt)
@@ -430,7 +532,8 @@ void GlobalProto::notice(const Flux::string &where, const char *fmt, ...){
  * \overload void GlobalProto::notice(Flux::string where, Flux::string msg)
  * \brief Sends a IRC notice to the user or channel
  */
-void GlobalProto::notice(const Flux::string &where, const Flux::string &msg){
+void GlobalProto::notice(const Flux::string &where, const Flux::string &msg)
+{
   sepstream sep(msg, '\n');
   Flux::string tok;
   while(sep.GetToken(tok))
@@ -441,7 +544,8 @@ void GlobalProto::notice(const Flux::string &where, const Flux::string &msg){
  * \param Destination Where the message will go
  * \param Message The message to send to Destination
  */
-void GlobalProto::action(const Flux::string &where, const char *fmt, ...){
+void GlobalProto::action(const Flux::string &where, const char *fmt, ...)
+{
   if(fmt)
   {
     va_list args;
@@ -456,7 +560,8 @@ void GlobalProto::action(const Flux::string &where, const char *fmt, ...){
  * \overload void GlobalProto::action(Flux::string where, Flux::string msg)
  * \brief Sends a IRC notice to the user or channel
  */
-void GlobalProto::action(const Flux::string &where, const Flux::string &msg){
+void GlobalProto::action(const Flux::string &where, const Flux::string &msg)
+{
   sepstream sep(msg, '\n');
   Flux::string tok;
   while(sep.GetToken(tok))
@@ -470,7 +575,8 @@ void GlobalProto::action(const Flux::string &where, const Flux::string &msg){
  * \param user User to be kicked.
  * \param reason Reason for the kick.
  */
-void GlobalProto::kick(const Flux::string &Channel, const Flux::string &User, const char *fmt, ...){
+void GlobalProto::kick(const Flux::string &Channel, const Flux::string &User, const char *fmt, ...)
+{
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
@@ -482,7 +588,8 @@ void GlobalProto::kick(const Flux::string &Channel, const Flux::string &User, co
  * \fn void command::topic(Flux::string channel, const char *fmt, ...)
  * \brief Sets channel topic.
  */
-void GlobalProto::topic(const Flux::string &channel, const char *fmt, ...){
+void GlobalProto::topic(const Flux::string &channel, const char *fmt, ...)
+{
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
@@ -495,7 +602,8 @@ void GlobalProto::topic(const Flux::string &channel, const char *fmt, ...){
  * \brief Handles quitting of irc
  * \param message Quit message
  */
-void GlobalProto::quit(const char *fmt, ...){
+void GlobalProto::quit(const char *fmt, ...)
+{
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
@@ -509,7 +617,8 @@ void GlobalProto::quit(const char *fmt, ...){
  * \param channel Channel to part from.
  * \param reason Reason for parting.
  */
-void GlobalProto::part(const Flux::string &channel, const char *fmt, ...){
+void GlobalProto::part(const Flux::string &channel, const char *fmt, ...)
+{
   char buffer[BUFSIZE] = "";
   va_list args;
   va_start(args, fmt);
@@ -520,25 +629,29 @@ void GlobalProto::part(const Flux::string &channel, const char *fmt, ...){
 /**
  * \overload void command::kick(Flux::string channel, Flux::string user, Flux::string reason)
  */
-void GlobalProto::kick(const Flux::string &chan, const Flux::string &userstr, const Flux::string &msg){
+void GlobalProto::kick(const Flux::string &chan, const Flux::string &userstr, const Flux::string &msg)
+{
   Send_Global("KICK %s %s :%s\n", chan.c_str(), userstr.c_str(), msg.c_str());
 }
 /**
  * \overload void GlobalProto::quit(Flux::string message)
  */
-void GlobalProto::quit(const Flux::string &message){
+void GlobalProto::quit(const Flux::string &message)
+{
   Send_Global("QUIT :%s\n", message.c_str());
 }
 /**
  * \overload void GlobalProto::part(Flux::string channel, Flux::string msg)
  */
-void GlobalProto::part(const Flux::string &channel, const Flux::string &msg){
+void GlobalProto::part(const Flux::string &channel, const Flux::string &msg)
+{
   Send_Global("PART %s :%s\n", channel.c_str(), msg.c_str());
 }
 /**
  * \overload void command::topic(Flux::string channel, Flux::string msg)
  */
-void GlobalProto::topic(const Flux::string &chan, const Flux::string &msg){
+void GlobalProto::topic(const Flux::string &chan, const Flux::string &msg)
+{
   Send_Global("TOPIC %s :%s\n", chan.c_str(), msg.c_str());
 }
 /**
@@ -546,17 +659,20 @@ void GlobalProto::topic(const Flux::string &chan, const Flux::string &msg){
  * \brief Sets the bots nickname in IRC.
  * \param nickname A Flux::string with the new nickname.
  */
-void GlobalProto::nick(const Flux::string &bnick){
+void GlobalProto::nick(const Flux::string &bnick)
+{
   Send_Global("NICK %s\n", bnick.c_str());
 }
-void GlobalProto::away(const Flux::string &message){
+void GlobalProto::away(const Flux::string &message)
+{
   Send_Global("AWAY :%s", message.c_str());
 }
 /**
  * \fn void command::oper(Flux::string oper, Flux::string password)
  * \brief Sends IRC command /oper
  */
-void GlobalProto::oper(const Flux::string &username, const Flux::string &password){
+void GlobalProto::oper(const Flux::string &username, const Flux::string &password)
+{
   Send_Global("OPER %s %s\n", username.c_str(), password.c_str());
 }
 /**
@@ -564,7 +680,8 @@ void GlobalProto::oper(const Flux::string &username, const Flux::string &passwor
  * \brief Makes the bot join a channel
  * \param stringy_chan A Flux::string with the channel you want to join.
  */
-void GlobalProto::join(const Flux::string &dchan){
+void GlobalProto::join(const Flux::string &dchan)
+{
   Send_Global("JOIN %s\n", dchan.c_str());
 }
 /**
@@ -572,7 +689,8 @@ void GlobalProto::join(const Flux::string &dchan){
  * \brief Parts channel w/o reason.
  * \param channel Channel to part from.
  */
-void GlobalProto::part(const Flux::string &fchan){
+void GlobalProto::part(const Flux::string &fchan)
+{
   Send_Global("PART %s\n", fchan.c_str());
 }
 /**
@@ -580,7 +698,8 @@ void GlobalProto::part(const Flux::string &fchan){
  * \brief Sends a /who to the channel
  * \param chan A Flux::string with the channel you want to /who.
  */
-void GlobalProto::who(const Flux::string &chan){
+void GlobalProto::who(const Flux::string &chan)
+{
   Send_Global("WHO %s\n", chan.c_str());
 }
 /**
@@ -588,7 +707,8 @@ void GlobalProto::who(const Flux::string &chan){
  * \brief Sends /names to the channel
  * \param chan A Flux::string with the channel you want to /names.
  */
-void GlobalProto::names(const Flux::string &chan){
+void GlobalProto::names(const Flux::string &chan)
+{
   Send_Global("NAMES %s\n", chan.c_str());
 }
 /**
@@ -596,7 +716,8 @@ void GlobalProto::names(const Flux::string &chan){
  * \brief Sends a IRC Whois to Server.
  * \param Nick Nick to query
  */
-void GlobalProto::whois(const Flux::string &nickname){
+void GlobalProto::whois(const Flux::string &nickname)
+{
   Send_Global("WHOIS %s\n", nickname.c_str());
 }
 /**
@@ -605,7 +726,8 @@ void GlobalProto::whois(const Flux::string &nickname){
  * \param nickname Nickname of who we are setting a more to.
  * \param mode The mode to set.
  */
-void GlobalProto::mode(const Flux::string &chan, const Flux::string &usermode, const Flux::string &usernick){
+void GlobalProto::mode(const Flux::string &chan, const Flux::string &usermode, const Flux::string &usernick)
+{
   Send_Global("MODE %s %s %s\n", chan.c_str(), usermode.c_str(), usernick.c_str());
 }
 /**
@@ -614,7 +736,8 @@ void GlobalProto::mode(const Flux::string &chan, const Flux::string &usermode, c
  * \param ident The ident at the beginning of the IRC host.
  * \param realname The real name gecos used in irc.
  */
-void GlobalProto::user(const Flux::string &ident, const Flux::string &realname){
+void GlobalProto::user(const Flux::string &ident, const Flux::string &realname)
+{
   Send_Global("USER %s * * :%s\n", ident.c_str(), realname.c_str());
 }
 /**
@@ -623,7 +746,8 @@ void GlobalProto::user(const Flux::string &ident, const Flux::string &realname){
  * @param dest where to set the mode
  * @param mode mode to set
  */
-void GlobalProto::mode(const Flux::string &dest, const Flux::string &chanmode){
+void GlobalProto::mode(const Flux::string &dest, const Flux::string &chanmode)
+{
   Send_Global("MODE %s %s\n", dest.c_str(), chanmode.c_str());
 }
 
@@ -635,7 +759,8 @@ void Send_Global(const Flux::string &str)
 {
   Network *n;
   for(auto it : Networks){
-    if((n = it.second) && n->s && n->s->GetStatus(SF_CONNECTED)){
+    if((n = it.second) && n->s && n->s->GetStatus(SF_CONNECTED))
+    {
 	n->s->Write(str);
 	n->s->ProcessWrite();
     }

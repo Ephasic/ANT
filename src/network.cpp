@@ -13,7 +13,6 @@
 #include "bot.h"
 #include "INIReader.h"
 #include "module.h"
-// #include "modules.h"
 
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;

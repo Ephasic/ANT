@@ -79,11 +79,15 @@ public:
   Flux::string sqlhost;
   Flux::string sqldb;
   Flux::string sqluser;
+  int BurstRate;
+  int SendQLines;
+  int SendQRate;
   int sqlport;
   int xmlrpcport;
   time_t xmlrpctimeout;
   time_t DNSTimeout;
   bool xmlrpcipv6;
+  bool SendQEnabled;
   bool UseIPv6;
   bool dbforce;
   size_t SockWait;
