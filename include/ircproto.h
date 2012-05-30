@@ -31,6 +31,7 @@ public:
 
   void quit(const char*, ...);
   void Raw(const char*, ...);
+  void ping(const char*, ...);
   void nick(const char*, ...);
   void invite(const Flux::string&, const Flux::string&);
   void version(const Flux::string &server = "");
@@ -53,6 +54,7 @@ public:
   void oper(const Flux::string&, const Flux::string&);
   void mode(const Flux::string&, const Flux::string&);
   void who(const Flux::string&);
+  void ping(const Flux::string&);
   void quit(const Flux::string&);
   void nick(const Flux::string&);
   void part(const Flux::string&);

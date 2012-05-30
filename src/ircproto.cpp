@@ -20,7 +20,6 @@ class SendQTimer : public Timer
 {
   int sent;
   const Network *n;
-  inline bool NetworkReady() const { return (this->n && this->n->s && this->n->s->GetStatus(SF_CONNECTED)); }
   struct
   {
     // The Queue of all messages, buffered;
@@ -32,6 +31,7 @@ class SendQTimer : public Timer
   } sqo;
   
 public:
+  inline bool NetworkReady() const { return (this->n && this->n->s && this->n->s->GetStatus(SF_CONNECTED)); }
   SendQTimer(const Network *net) : Timer(Config->SendQRate, time(NULL), true), sent(0), n(net)
   {
     Log(LOG_DEBUG) << "Initialized a SengQ Timer";
@@ -237,6 +237,17 @@ void IRCProto::quit(const char *fmt, ...)
   this->quit(Flux::string(buffer));
   va_end(args);
 }
+
+void IRCProto::ping(const char *fmt, ...)
+{
+  char buffer[BUFSIZE] = "";
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(buffer, sizeof(buffer), fmt, args);
+  this->ping(Flux::string(buffer));
+  va_end(args);
+}
+
 /**
  * \fn void command::part(Flux::string channel, Flux::string reason)
  * \brief Sends part with message
@@ -273,10 +284,19 @@ void IRCProto::kick(const Flux::string &chan, const Flux::string &userstr, const
  */
 void IRCProto::quit(const Flux::string &message)
 {
-  if(!message.empty())
-    this->Raw("QUIT :%s\n", message.c_str());
-  else
-    this->Raw("QUIT\n");
+  if(this->sqt->NetworkReady())
+  {
+    if(!message.empty())
+      this->net->s->Write("QUIT :%s\n", message.c_str());
+    else
+      this->net->s->Write("QUIT\n");
+  }
+}
+
+void IRCProto::ping(const Flux::string &message)
+{
+  if(this->sqt->NetworkReady())
+      this->net->s->Write("PING :%s\n", message.c_str());
 }
 /**
  * \overload void IRCProto::part(Flux::string channel, Flux::string msg)

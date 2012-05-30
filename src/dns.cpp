@@ -645,7 +645,7 @@ bool DNSManager::CheckCache(DNSRequest *request)
 		for (cache_map::iterator it_end = this->cache.upper_bound(request->name); it != it_end; ++it)
 		{
 			ResourceRecord &rec = it->second;
-			if (rec.created + rec.ttl >= time(NULL))
+			if (static_cast<int>(rec.created + rec.ttl) >= time(NULL))
 				record.answers.push_back(rec);
 		}
 
@@ -670,7 +670,7 @@ void DNSManager::Tick(time_t now)
 		it_next = it;
 		++it_next;
 
-		if (req.created + req.ttl < now)
+		if (static_cast<int>(req.created + req.ttl) < now)
 			this->cache.erase(it);
 	}
 }

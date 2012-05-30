@@ -58,12 +58,11 @@ private:
 class BotConfig
 {
 public:
-  BotConfig(const Flux::string &dir = binary_dir, BotConfig* = NULL);
+  BotConfig(BotConfig*);
   virtual ~BotConfig();
   INIReader *Parser;
   Flux::string LogFile;
   Flux::string LogColor;
-  Flux::string Binary_Dir;
   Flux::string NicknamePrefix;
   Flux::string Realname;
   Flux::string Ident;

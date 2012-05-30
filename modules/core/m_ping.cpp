@@ -10,7 +10,7 @@
  */
 #include "modules.h"
 
-class PingTimer:public Timer
+class PingTimer : public Timer
 {
 public:
   PingTimer():Timer(60, time(NULL), true) { }
@@ -21,7 +21,7 @@ public:
       Network *n = it.second;
       if(n->b && n->b->ircproto)
       {
-	n->b->ircproto->Raw("PING :%i", static_cast<int>(time(NULL)));
+	n->b->ircproto->ping("PING :%i", static_cast<int>(time(NULL)));
 	n->s->SentPing = true;
       }
     }

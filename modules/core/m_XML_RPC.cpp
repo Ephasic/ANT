@@ -389,8 +389,8 @@ public:
       }
     }
 
-    for(auto it : listen_sockets)
-      delete (it);
+    for(std::vector<xmlrpclistensocket*>::iterator it = listen_sockets.begin(), it_end = listen_sockets.end(); it != it_end; ++it)
+      delete *it;
   }
 };
 

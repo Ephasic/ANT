@@ -119,9 +119,8 @@ void Rehash()
   Log() << "Rehashing Configuration File";
   try
   {
-    const Flux::string bi_dir = Config->Binary_Dir;
     BotConfig *configtmp = Config;
-    Config = new BotConfig(bi_dir, configtmp);
+    Config = new BotConfig(configtmp);
     delete configtmp;
 
     if(!Config)
@@ -235,10 +234,9 @@ void startup(int argc, char** argv, char *envp[])
   Flux::string bindir = getprogdir(Flux::string(argv[0]));
   if(bindir[bindir.length() - 1] == '.')
     bindir = bindir.substr(0, bindir.length() - 2);
+  binary_dir = bindir;
 
-  *const_cast<Flux::string*>(&binary_dir) = bindir;
-
-  Config = new BotConfig(bindir, NULL);
+  Config = new BotConfig(NULL);
   if(!Config)
     throw CoreException("Config Error.");
 
@@ -335,11 +333,9 @@ void GarbageCollect()
   FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
   // Read/Write the last bit, close any leftover sockets
   SocketEngine::Process();
-//   TimerManager::TickTimers(time(NULL)); // Tick any timers
+  TimerManager::TickTimers(time(NULL)); // Tick any timers
   // Unload all modules
   ModuleHandler::UnloadAll();
-  // Shutdown the timers
-//   TimerManager::Shutdown();
 
 
   // Clean up any network pointers and clear the map
