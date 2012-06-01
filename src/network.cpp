@@ -17,7 +17,7 @@
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
 
-Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): Timer(121, time(NULL), true), disconnecting(false), s(nullptr), b(nullptr), hostname(host), port(p), CurHost(0)
+Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): Timer(121, time(NULL), true), disconnecting(false), issynced(false), RTimer(nullptr), s(nullptr), b(nullptr), hostname(host), port(p), CurHost(0)
 {
   if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");
@@ -37,6 +37,8 @@ Network::~Network()
 {
   Log(LOG_DEBUG) << "Deleting network " << this->name << " (" << this->hostname << ':' << this->port << ')';
   this->Disconnect("Network Removed");
+  if(RTimer)
+    delete RTimer;
   Networks.erase(this->name);
   NetworkHosts.erase(this->hostname);
 }
@@ -63,14 +65,13 @@ bool Network::Disconnect()
   // Check if we have a socket to send on
   if(!this->s)
     return false;
+  // Delete the bot object
+  if(this->b)
+    DeleteZero(this->b);
   // We'll let the socket engine delete the socket
   this->s->SetDead(true);
   // say this network is disconnecting
   this->disconnecting = true;
-  // Delete the bot object
-  delete this->b;
-  // Make sure we dont continue to use the bot object
-  this->b = nullptr;
   // return that we did something
   return true;
 }
@@ -97,6 +98,11 @@ bool Network::Disconnect(const Flux::string &buf)
   return true;
 }
 
+bool Network::IsSynced() const
+{
+  return this->issynced && this->s && this->s->GetStatus(SF_CONNECTED);
+}
+
 void Network::Sync()
 {
   if(this->isupport.UserModes.search('B'))
@@ -113,6 +119,7 @@ void Network::Sync()
   }
   
   this->servername = this->isupport.ServerHost;
+  this->issynced = true;
   FOREACH_MOD(I_OnNetworkSync, OnNetworkSync(this));
   Log(LOG_DEBUG) << "Network " << this->name << " is synced!";
 }

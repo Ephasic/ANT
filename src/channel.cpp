@@ -80,7 +80,12 @@ void Channel::SendPart(const char *fmt, ...)
   }
 }
 
-void Channel::SendMessage(const Flux::string &message){ this->n->b->ircproto->privmsg(this->name, message); }
+void Channel::SendMessage(const Flux::string &message)
+{
+  if(this->n->b)
+    this->n->b->ircproto->privmsg(this->name, message);
+}
+
 void Channel::SendMessage(const char *fmt, ...)
 {
   if(fmt)

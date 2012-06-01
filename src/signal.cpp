@@ -109,7 +109,7 @@ void sigact(int sig)
       Rehash();
       break;
     case SIGSEGV:
-      Log(LOG_RAWIO) << "Received SIGSEGV, Segmentation Fault caught.";
+      Log(LOG_RAWIO) << "Received SIGSEGV, Segmentation Fault caught.\033[0m";
       /* this is where the module stack needs to be */
       #ifdef HAVE_SETJMP_H
       if(LastRunModule)

@@ -12,9 +12,6 @@
 #ifndef LOG_H
 #define LOG_H
 #include "includes.h"
-// #include "command.h"
-// #include "extern.h"
-// #include "user.h"
 
 class Log
 {
@@ -26,6 +23,7 @@ public:
   User *u;
   Command *c;
   std::stringstream buffer;
+  std::stringstream logstream;
   static Flux::string TimeStamp();
   Log(LogType type = LOG_NORMAL);
   Log(LogType, User*);

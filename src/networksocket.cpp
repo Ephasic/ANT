@@ -18,7 +18,13 @@
 /************************ Timers **************************/
 /**********************************************************/
 
-ReconnectTimer::ReconnectTimer(int wait, Network *net) : Timer(wait), n(net) {}
+ReconnectTimer::ReconnectTimer(int wait, Network *net) : Timer(wait), n(net)
+{
+  if(!net)
+    return; // Just ignore, we might be exiting from a CoreException
+
+    n->RTimer = this;
+}
 void ReconnectTimer::Tick(time_t)
 {
   try
@@ -33,7 +39,9 @@ void ReconnectTimer::Tick(time_t)
     << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
 
     new ReconnectTimer(Config->RetryWait, n);
+    return;
   }
+  n->RTimer = nullptr;
 }
 
 /**********************************************************/
@@ -45,7 +53,11 @@ NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), Bu
   if(!tnet)
     throw CoreException("Network socket created with no network? lolwut?");
 
-  this->net->SetConnectedHostname(this->net->hostnames[++this->net->CurHost]);
+  this->net->CurHost++;
+  if(static_cast<unsigned int>(this->net->CurHost) >= this->net->hostnames.size())
+    this->net->CurHost = 1;
+  
+  this->net->SetConnectedHostname(this->net->hostnames[this->net->CurHost]);
 
   Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to "
   << tnet->hostname << ':' << tnet->port << '(' << tnet->GetConHost() << ')';

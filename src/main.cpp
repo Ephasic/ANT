@@ -61,7 +61,7 @@ module *LastRunModule; // For crashes
 // Collect our garbage
 void GarbageCall()
 {
-  Log(LOG_DEBUG) << "Running Garbage Collection Call.";
+  Log(LOG_DEBUG) << "Running Garbage Collector.";
   FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
 }
 
@@ -85,7 +85,12 @@ int main (int argcx, char** argvx, char *envp[])
     {
       Log(LOG_RAWIO) << "Top of main loop";
       //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
-      if(++loopcount >= 50) { LastBuf = "50 main loop calls in 3 secs"; raise(SIGSEGV); }
+      if(++loopcount >= 50)
+      {
+	Log(LOG_CRITICAL) << "Infinite while loop detected, Segmentation Fault raised.";
+	LastBuf = "50 main loop calls in 3 secs";
+	raise(SIGSEGV);
+      }
 
       // Process our sockets and whatnot
       SocketEngine::Process();
@@ -107,6 +112,7 @@ int main (int argcx, char** argvx, char *envp[])
   catch(const CoreException& e)
   {
     /* we reset the terminal colors, this should be removed as it makes more issues than it is cool */
+    GarbageCollect();
     Log() << "\033[0mCore Exception Caught: " << e.GetReason();
     return EXIT_FAILURE;
   }

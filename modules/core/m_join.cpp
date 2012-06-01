@@ -10,9 +10,6 @@
  */
 #include "modules.h"
 
-/*This module setup needs serious work!
- * Justasic will work on it but its going to be hard with los's module class.
- */
 class CommandJoin : public Command
 {
 public:
@@ -83,16 +80,101 @@ public:
   }
 };
 
-class Join : public module
+class CommandConnect : public Command
+{
+public:
+  CommandConnect(module *m):Command(m, "CONNECT", C_PRIVATE, 2,4)
+  {
+    this->SetDesc("Connect to a network");
+    this->SetSyntax("\37networkname\37 hostname [port]");
+  }
+  
+  void Run(CommandSource &source, const Flux::vector &params)
+  {
+    Flux::string NetworkName = params[0];
+    Flux::string NetworkHost = params[1];
+    Flux::string NetworkPort = params.size() == 3 ? params[3] : "6667";
+    Network *n = FindNetwork(NetworkName);
+
+    if(n)
+    {
+      source.Reply("\2%s\2 is already connected to \2%s\2", n->b->nick.c_str(), n->name.c_str());
+      return;
+    }
+    else
+    {
+      try
+      {
+	n = new Network(NetworkHost, NetworkPort, NetworkName);
+	n->Connect();
+	source.Reply("Scheduled a connection to \2%s\2 (%s:%s)", NetworkName.c_str(), NetworkHost.c_str(), NetworkPort.c_str());
+	Log(source.u, this) << "to connect to " << NetworkName << " (" << NetworkHost << ':' << NetworkPort << ')';
+      }
+      catch(const SocketException &e)
+      {
+	source.Reply("Cannot connect to %s: %s", NetworkName.c_str(), e.GetReason());
+	Log(source.u, this) << "which received a socket exception: " << e.GetReason();
+      }
+    }
+  }
+  
+  bool OnHelp(CommandSource &source, const Flux::string &nill)
+  {
+    this->SendSyntax(source);
+    source.Reply(" ");
+    source.Reply("Connect to a specified network to announce\n"
+      "commits for, once the network is connected you must manually\n"
+      "join channels, after a database save, the daemon will automatically\n"
+      "reconnect to the network and it's channels on every start with that\n"
+      "database.");
+    return true;
+  }
+};
+
+class CommandDisconnect : public Command
+{
+public:
+  CommandDisconnect(module *m):Command(m, "DISCONNECT", C_PRIVATE, 1,1)
+  {
+    this->SetDesc("Disconnect a network");
+    this->SetSyntax("\37networkname\37");
+  }
+  
+  void Run(CommandSource &source, const Flux::vector &params)
+  {
+    Network *n = FindNetwork(params[0]);
+    
+    if(n)
+    {
+      source.Reply("Disconnecting from \2%s\2", n->name.c_str());
+      delete n;
+    }
+    else
+      source.Reply("\2%s\2 does not exist.", params[0].c_str());
+  }
+  
+  bool OnHelp(CommandSource &source, const Flux::string &nill)
+  {
+    this->SendSyntax(source);
+    source.Reply(" ");
+    source.Reply("Disconnect from an already connected network, this\n"
+      "will remove any database instances once a database is saved\n");
+    return true;
+  }
+};
+
+class m_Join : public module
 {
   CommandJoin cmdjoin;
   CommandPart cmdpart;
+  CommandConnect cmdconnect;
+  CommandDisconnect cmddisconnect;
 public:
-  Join(const Flux::string &Name):module(Name), cmdjoin(this), cmdpart(this)
+  m_Join(const Flux::string &Name):module(Name), cmdjoin(this), cmdpart(this), cmdconnect(this), cmddisconnect(this)
   {
     this->SetVersion(VERSION);
     this->SetAuthor("Justasic");
   }
 };
 
-MODULE_HOOK(Join)
+MODULE_HOOK(m_Join)

@@ -100,7 +100,7 @@ void IRCProto::Raw(const char *fmt, ...)
   vsnprintf(buffer, sizeof(buffer), fmt, args);
   va_end(args);
   
-  if(this->net && this->net->s && this->net->s->GetStatus(SF_CONNECTED))
+  if(this->net->s && this->net->s->GetStatus(SF_CONNECTED))
   {
     this->sqt->SendBuffered(Flux::string(buffer));
 //     this->net->s->Write(Flux::string(buffer));

@@ -255,6 +255,8 @@ void BotConfig::Read()
   this->dbforce 	= this->Parser->GetBoolean("Bot", "Force Database Read", false);
   this->LogColor	= this->Parser->Get("Log", "Color", "\033[0m").replace_all_cs("\\033", "\033");
   this->LogAge 		= this->Parser->GetInteger("Log", "Log Age", 2);
+  this->LogChan		= this->Parser->Get("Log", "LogChan", "");
+  this->LogChanNet	= this->Parser->Get("Log", "LogChanNet", "");
   this->DNSTimeout	= this->Parser->GetInteger("DNS", "Timeout", 30);
   this->NameServer	= this->Parser->Get("DNS", "NameServer", "127.0.0.1");
   this->sqlpass 	= this->Parser->Get("MySQL", "password", "");

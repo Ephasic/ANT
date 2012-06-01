@@ -121,13 +121,22 @@ bool ci::less::operator()(const Flux::string &s1, const Flux::string &s2) const
 {
 	return s1.ci_str().compare(s2.ci_str()) < 0;
 }
+std::vector<Base*> BaseReferences;
+Base::Base()
+{
+  Log(LOG_MEMORY) << "Classbase::+ @" << this;
+  BaseReferences.push_back(this);
+}
 
-Base::Base() { Log(LOG_MEMORY) << "Classbase::+ @" << this; }
 Base::~Base()
 {
   Log(LOG_MEMORY) << "Classbase::- @" << this;
   for(std::set<dynamic_reference_base*>::iterator it = this->References.begin(), it_end = this->References.end(); it != it_end; ++it)
     (*it)->Invalidate();
+  
+  for(std::vector<Base*>::iterator it = BaseReferences.begin(), it_end = BaseReferences.end(); it != it_end; ++it)
+    if((*it) == this)
+      BaseReferences.erase(it);
 }
 void Base::AddReference(dynamic_reference_base *r) { this->References.insert(r); }
 void Base::DelReference(dynamic_reference_base *r) { this->References.erase(r); }

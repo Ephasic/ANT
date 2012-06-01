@@ -105,8 +105,8 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
 
 	while(ccom->MaxParams > 0 && params2.size() > ccom->MaxParams)
 	{
-	 params2[ccom->MaxParams - 1] += " " + params2[ccom->MaxParams];
-	 params2.erase(params2.begin() + ccom->MaxParams);
+	  params2[ccom->MaxParams - 1] += " " + params2[ccom->MaxParams];
+	  params2.erase(params2.begin() + ccom->MaxParams);
 	}
 
 	if(params2.size() < ccom->MinParams)
@@ -268,6 +268,8 @@ void process(Network *n, const Flux::string &buffer)
   Channel *c = FindChannel(n, receiver);
   Bot *b = n->b;
   Flux::vector params2 = ParamitizeString(message, ' ');
+//   for(unsigned i = 0; i < params2.size(); ++i)
+//     Log(LOG_TERMINAL) << "Params2[" << i << "]: " << Flux::Sanitize(params2[i]);
   /***********************************************/
 
   if(command == "004" && source.search('.'))

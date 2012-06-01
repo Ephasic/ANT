@@ -17,6 +17,7 @@
 
 class Bot;
 class NetworkSocket;
+class ReconnectTimer;
 
 struct CommitMessage
 {
@@ -60,11 +61,13 @@ struct iSupport
 class Network : public Timer
 {
 protected:
-  bool disconnecting;
+  bool disconnecting, issynced;
   Flux::string usedhostname;
 public:
   Network(const Flux::string&, const Flux::string&, const Flux::string &n = "");
   ~Network();
+  // ReconnectTimer if we have one
+  ReconnectTimer *RTimer;
   // The socket
   NetworkSocket *s;
   // What that network supports
@@ -91,10 +94,11 @@ public:
 
   void Tick(time_t);
   void Sync();
-  void SetConnectedHostname(const Flux::string &str) { this->usedhostname = str; }
-  Flux::string GetConHost() const { return this->usedhostname; }
+  bool IsSynced() const;
+  inline void SetConnectedHostname(const Flux::string &str) { this->usedhostname = str; }
+  inline Flux::string GetConHost() const { return this->usedhostname; }
+  inline bool IsDisconnecting() { return this->disconnecting; }
   bool JoinChannel(const Flux::string&);
-  bool IsDisconnecting() { return this->disconnecting; }
   bool Disconnect();
   bool Disconnect(const char *fmt, ...);
   bool Disconnect(const Flux::string&);

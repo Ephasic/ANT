@@ -725,7 +725,7 @@ DNSQuery DNSManager::BlockingQuery(const Flux::string &mask, QueryType qt)
 				rr.rdata = addr.addr();
 				result.answers.push_back(rr);
 
-				Log(LOG_DNS) << "Resolver: BlockingQuery: " << mask << " -> " << rr.rdata;
+				Log(LOG_RAWIO) << "[DNSEngine] Resolver: BlockingQuery: " << mask << " -> " << rr.rdata;
 			}
 			catch (const SocketException &) { }
 		}

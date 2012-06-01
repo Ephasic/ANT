@@ -19,10 +19,18 @@ public:
     for(auto it : Networks)
     {
       Network *n = it.second;
-      if(n->b && n->b->ircproto)
+      if(n->IsSynced())
       {
-	n->b->ircproto->ping("PING :%i", static_cast<int>(time(NULL)));
-	n->s->SentPing = true;
+	if(!n->s->SentPing)
+	{
+	  n->b->ircproto->ping("PING :%i", static_cast<int>(time(NULL)));
+	  n->s->SentPing = true;
+	}
+	else
+	{
+	  n->s->SetDead(true);
+	  Log(LOG_DEBUG) << n->name << " timed out, reconnecting.";
+	}
       }
     }
   }
@@ -34,7 +42,6 @@ class Ping_pong : public module
 public:
   Ping_pong(const Flux::string &Name):module(Name)
   {
-//     new PingTimer();
     Implementation i[] = { I_OnPong, I_OnPing };
     ModuleHandler::Attach(i, this, sizeof(i) / sizeof(Implementation));
     this->SetAuthor("Justasic");
@@ -43,12 +50,13 @@ public:
   }
   void OnPong(const std::vector<Flux::string> &params, Network *n)
   {
-     Flux::string ts = params[1];
+     Flux::string ts = ParamitizeString(params[1], ':')[1];
      int lag = time(NULL)-(int)ts;
      n->s->SentPing = false;
-     if(protocoldebug)
-        Log(LOG_RAWIO) << lag << " sec lag (" << ts << " - " << time(NULL) << ')';
+
+     Log(LOG_RAWIO) << lag << " sec lag (" << ts << " - " << time(NULL) << ')';
   }
+  
   void OnPing(const std::vector<Flux::string> &params, Network *n)
   {
     n->s->SentPing = false;

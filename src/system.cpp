@@ -333,7 +333,6 @@ void GarbageCollect()
   FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
   // Read/Write the last bit, close any leftover sockets
   SocketEngine::Process();
-  TimerManager::TickTimers(time(NULL)); // Tick any timers
   // Unload all modules
   ModuleHandler::UnloadAll();
 
@@ -379,6 +378,12 @@ void GarbageCollect()
     DeleteZero(GProto);
 
   // Shutdown the socket engine and close any remaining sockets.
-    SocketEngine::Shutdown();
-    ModuleHandler::SanitizeRuntime();
+  SocketEngine::Shutdown();
+  ModuleHandler::SanitizeRuntime();
+
+  // oh noes! lost pointers!
+  for(std::vector<Base*>::iterator it = BaseReferences.begin(), it_end = BaseReferences.end(); it != it_end; ++it)
+    Log(LOG_MEMORY) << "\033[22;33m[WARNING]" << (Config?Config->LogColor:"\033[0m") << " Unfreed base class: @" << *it;
+//     DeleteZero(*it);
+//   BaseReferences.clear();
 }
