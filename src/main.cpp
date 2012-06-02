@@ -56,7 +56,7 @@ time_t starttime = 0;
 
 BotConfig *Config;
 GlobalProto *GProto;
-module *LastRunModule; // For crashes
+Module *LastRunModule; // For crashes
 
 // Collect our garbage
 void GarbageCall()

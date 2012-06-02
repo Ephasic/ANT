@@ -74,7 +74,8 @@ void CommandSource::Reply(const Flux::string &msg)
  * \return Command class you wanted to find
  * \param name A string containing the command name you're looking for
  */
-Command *FindCommand(const Flux::string &name, CommandType type){
+Command *FindCommand(const Flux::string &name, CommandType type)
+{
   if(name.empty())
     return NULL;
   CommandMap::const_iterator it;
@@ -107,7 +108,7 @@ CommandMap ChanCommandMap;
  * \param size_t the minimum size of the buffer the command vector gets
  * \param size_t the maximum size the vector gets
  */
-Command::Command(module *m, const Flux::string &sname, CommandType t, size_t min_params, size_t max_params): type(t), MaxParams(max_params), MinParams(min_params), name(sname), mod(m)
+Command::Command(Module *m, const Flux::string &sname, CommandType t, size_t min_params, size_t max_params): type(t), MaxParams(max_params), MinParams(min_params), name(sname), mod(m)
 {
   for(unsigned i=0; i < sname.size(); ++i) //commands with spaces can screw up the command handler
     if(isspace(sname[i]))

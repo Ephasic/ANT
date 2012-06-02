@@ -13,15 +13,15 @@
 
 /**
  * \example dummy.cpp
- * This is an example module showing a simple if-said-that-reply-this situation.
+ * This is an example Module showing a simple if-said-that-reply-this situation.
  * \file dummy.cpp Source file holding the \a dummy function.
  * \author Lordofsraam
  */
 
 /**
  * \defgroup dummyM Dummy (Example) Module
- * This is a template or example module.
- * \section commands Commands associated with this module.
+ * This is a template or example Module.
+ * \section commands Commands associated with this Module.
  * \subsection test testing testing
  * Say \a test to see if the bot replies :P
  * @{
@@ -41,9 +41,9 @@ void superreply()
 class commanddummy : public Command
 {
 public:
-  commanddummy(module *m) : Command(m, "TEST", C_PRIVATE, 1,1) //The 0's are how many params the command gets, they're not required and can be removed.
+  commanddummy(Module *m) : Command(m, "TEST", C_PRIVATE, 1,1) //The 0's are how many params the command gets, they're not required and can be removed.
   {
-   this->SetDesc("Test for the modules");
+   this->SetDesc("Test for the Modules");
    this->SetSyntax("\37TEST\37");
   }
   void Run(CommandSource &source, const std::vector<Flux::string> &params)
@@ -62,22 +62,22 @@ public:
     source.Reply(" ");
     source.Reply("This command simply emits 'YAY!' to the user.\n"
 		 "This command is mostly only used to test other core\n"
-		 "functions or modules in the bot");
+		 "functions or Modules in the bot");
     return true;
   }
 };
 
-class dummy : public module
+class dummy : public Module
 {
   commanddummy cmddmy; //Declare our command
 public:
-  dummy(const Flux::string &Name):module(Name), cmddmy(this) //Add our command to teh bot
+  dummy(const Flux::string &Name):Module(Name, MOD_NORMAL), cmddmy(this) //Add our command to teh bot
   {
     this->SetAuthor("Lordofsraam"); //Set the author
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_LAST);
 
-    //Implementation i[] = {  }; //Add that we have a module hook, this can be done in 2 ways
+    //Implementation i[] = {  }; //Add that we have a Module hook, this can be done in 2 ways
     ModuleHandler::Attach(I_OnPrivmsg, this);
     /*or you can do the easy way
      * ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));

@@ -176,17 +176,18 @@ public:
 
 /**************** Module Class *******************/
 
-class CIA_RULESET_MOD : public module
+class CIA_RULESET_MOD : public Module
 {
   CommitMessage Message;
   ThrottleTimer *tt;
 public:
-  CIA_RULESET_MOD(const Flux::string &Name):module(Name)
+  CIA_RULESET_MOD(const Flux::string &Name):Module(Name, MOD_NORMAL)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
-    Implementation i[] = { I_OnCommit };
-    ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
+//     Implementation i[] = { I_OnCommit };
+//     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
+    ModuleHandler::Attach(I_OnCommit, this);
   }
 
 private:

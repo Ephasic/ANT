@@ -184,7 +184,7 @@ public:
 
 static MySQLInterface *me;
 
-void Read(module *m = nullptr)
+void Read(Module *m = nullptr)
 {
   MYSQL_RES *result;
   MYSQL_ROW row;
@@ -242,10 +242,10 @@ void Write(const char *fmt, ...)
   }
 }
 
-class modmysql : public module
+class modmysql : public Module
 {
 public:
-  modmysql(const Flux::string &Name):module(Name)
+  modmysql(const Flux::string &Name):Module(Name, MOD_DATABASE)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
@@ -282,7 +282,7 @@ public:
     Log() << "[MySQL] Reading Databases.";
   }
 
-  void OnModuleLoad(module *m)
+  void OnModuleLoad(Module *m)
   {
     if(m != this)
       Read(m);

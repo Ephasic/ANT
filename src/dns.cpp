@@ -62,7 +62,7 @@ DNSQuery::DNSQuery(const DNSPacket &p)
 	this->error = DNS_ERROR_NONE;
 }
 
-DNSRequest::DNSRequest(const Flux::string &addr, QueryType qt, bool cache, module *c) : Timer(Config->DNSTimeout), Question(addr, qt), use_cache(cache), id(0), creator(c)
+DNSRequest::DNSRequest(const Flux::string &addr, QueryType qt, bool cache, Module *c) : Timer(Config->DNSTimeout), Question(addr, qt), use_cache(cache), id(0), creator(c)
 {
 	if (!DNSEngine)
 		DNSEngine = new DNSManager(Config->NameServer, DNSManager::DNSPort);
@@ -675,7 +675,7 @@ void DNSManager::Tick(time_t now)
 	}
 }
 
-void DNSManager::Cleanup(module *mod)
+void DNSManager::Cleanup(Module *mod)
 {
 	for (std::map<unsigned short, DNSRequest *>::iterator it = this->requests.begin(), it_end = this->requests.end(); it != it_end;)
 	{

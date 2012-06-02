@@ -349,7 +349,7 @@ void GarbageCollect()
       // Clean up any channel pointers for the network and clear the map
       if(!n->ChanMap.empty())
 	for(Flux::insensitive_map<Channel*>::iterator cit = n->ChanMap.begin(),
-	  cit_end = n->ChanMap.end(); cit != cit_end;)
+	  cit_end = n->ChanMap.end(); cit != cit_end; ++cit)
 	{
 	  Channel *c = cit->second;
 	  ++cit;
@@ -383,7 +383,7 @@ void GarbageCollect()
 
   // oh noes! lost pointers!
   for(std::vector<Base*>::iterator it = BaseReferences.begin(), it_end = BaseReferences.end(); it != it_end; ++it)
-    Log(LOG_MEMORY) << "\033[22;33m[WARNING]" << (Config?Config->LogColor:"\033[0m") << " Unfreed base class: @" << *it;
+    Log(LOG_MEMORY) << "\033[22;33m[WARNING]" << (Config?Config->LogColor:"\033[0m") << " Unfreed pointer: @" << *it;
 //     DeleteZero(*it);
 //   BaseReferences.clear();
 }

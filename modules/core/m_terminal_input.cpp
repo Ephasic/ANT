@@ -39,16 +39,16 @@ void ProcessInput(const Flux::string &str)
   else if(params[0].equals_ci("MODRELOAD"))
   {
     if(params.size() >= 2){
-      module *m = FindModule(params[1]);
+      Module *m = FindModule(params[1]);
       if(m)
       {
-	Log(LOG_TERMINAL) << "Reloading module " << params[1];
+	Log(LOG_TERMINAL) << "Reloading Module " << params[1];
 	if(!ModuleHandler::Unload(m))
-	  Log(LOG_TERMINAL) << "Failed to unload module " << params[1];
+	  Log(LOG_TERMINAL) << "Failed to unload Module " << params[1];
 	ModErr e = ModuleHandler::LoadModule(params[1]);
 	if(e != MOD_ERR_OK)
 	{
-	  Log(LOG_TERMINAL) << "Failed to reload module " << params[1] << ": " << DecodeModErr(e);
+	  Log(LOG_TERMINAL) << "Failed to reload Module " << params[1] << ": " << DecodeModErr(e);
 	}
 	Log(LOG_TERMINAL) << "Successfuly reloaded " << params[1];
       }
@@ -62,11 +62,11 @@ void ProcessInput(const Flux::string &str)
   {
     if(params.size() >= 2)
     {
-      module *m = FindModule(params[1]);
+      Module *m = FindModule(params[1]);
       if(m)
       {
 	if(!ModuleHandler::Unload(m))
-	  Log(LOG_TERMINAL) << "Failed to unload module " << params[1];
+	  Log(LOG_TERMINAL) << "Failed to unload Module " << params[1];
       }
       else
 	Log(LOG_TERMINAL) << "Module " << params[1] << " does not exist!";
@@ -80,9 +80,9 @@ void ProcessInput(const Flux::string &str)
     {
       ModErr e = ModuleHandler::LoadModule(params[1]);
       if(e != MOD_ERR_OK)
-	Log(LOG_TERMINAL) << "Failed to load module " << params[1] << ": " << DecodeModErr(e);
+	Log(LOG_TERMINAL) << "Failed to load Module " << params[1] << ": " << DecodeModErr(e);
       else
-	Log(LOG_TERMINAL) << "Successfuly loaded module " << params[1];
+	Log(LOG_TERMINAL) << "Successfuly loaded Module " << params[1];
     }
   }
   else if(params[0].equals_ci("MODLIST"))
@@ -121,7 +121,8 @@ void ProcessInput(const Flux::string &str)
     }
     printf("Total of %i Modules\n", c);
   }
-  else if(params[0].equals_ci("RESTART")){
+  else if(params[0].equals_ci("RESTART"))
+  {
     Flux::string reason = params.size() > 2?str.substr(8):"No Reason";
     reason.trim();
     restart(reason);
@@ -157,18 +158,14 @@ public:
   }
 };
 
-class ModTerminalInput : public module
+class ModTerminalInput : public Module
 {
   Thread *t;
 public:
-  ModTerminalInput(const Flux::string &Name):module(Name), t(nullptr)
+  ModTerminalInput(const Flux::string &Name):Module(Name, MOD_NORMAL), t(nullptr)
   {
     this->SetVersion(VERSION);
     this->SetAuthor("Justasic");
-  }
-  ~ModTerminalInput() { if(t) delete t; }
-  void OnLoad() //This virtual is called when the module is loaded.
-  {
     if(nofork && InTerm())
     {
       if(!t)
@@ -176,6 +173,12 @@ public:
     }
     else
       throw ModuleException("Cannot run m_terminal_input when fork'ed");
+  }
+  
+  ~ModTerminalInput()
+  {
+    if(t)
+      delete t;
   }
 };
 

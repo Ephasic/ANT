@@ -13,9 +13,9 @@
 class CommandMList : public Command
 {
 public:
-  CommandMList(module *m):Command(m, "MODLIST", C_PRIVATE, 0, 1)
+  CommandMList(Module *m):Command(m, "MODLIST", C_PRIVATE, 0, 1)
   {
-    this->SetDesc("Lists all loaded modules");
+    this->SetDesc("Lists all loaded Modules");
     this->SetSyntax("\37priority\37");
   }
   void Run(CommandSource &source, const Flux::vector &params)
@@ -56,15 +56,15 @@ public:
       }
     }
     source.Reply("Total of \2%i\2 Modules", c);
-    Log(source.u, this) << "to list all module" << (priority.empty()?"":" with priority "+priority);
+    Log(source.u, this) << "to list all Module" << (priority.empty()?"":" with priority "+priority);
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
     this->SendSyntax(source);
     source.Reply(" ");
-    source.Reply("This command displays a list of all modules\n"
-		 "or modules by priority and displays who created\n"
-		 "the modules and what priority it has in the bot");
+    source.Reply("This command displays a list of all Modules\n"
+		 "or Modules by priority and displays who created\n"
+		 "the Modules and what priority it has in the bot");
     return true;
   }
 };
@@ -72,30 +72,30 @@ public:
 class CommandMLoad : public Command
 {
 public:
-  CommandMLoad(module *m):Command(m, "MODLOAD", C_PRIVATE, 1, 1)
+  CommandMLoad(Module *m):Command(m, "MODLOAD", C_PRIVATE, 1, 1)
   {
-    this->SetDesc("Load a module");
+    this->SetDesc("Load a Module");
     this->SetSyntax("\37name\37");
   }
   void Run(CommandSource &source, const Flux::vector &params)
   {
-    const Flux::string module = params[1];
-    if(module.empty())
+    const Flux::string Module = params[1];
+    if(Module.empty())
       this->SendSyntax(source);
     //else if(!source.u->IsOwner())
     //  source.Reply(ACCESS_DENIED);
     else
     {
-      ModErr e = ModuleHandler::LoadModule(module);
+      ModErr e = ModuleHandler::LoadModule(Module);
       if(e != MOD_ERR_OK)
       {
-	source.Reply("Failed to load module %s: %s", module.c_str(), DecodeModErr(e).c_str());
-	Log(source.u, this) << "to load " << module << " and failed: " << DecodeModErr(e);
+	source.Reply("Failed to load Module %s: %s", Module.c_str(), DecodeModErr(e).c_str());
+	Log(source.u, this) << "to load " << Module << " and failed: " << DecodeModErr(e);
       }
       else
       {
-	source.Reply("Module \2%s\2 loaded sucessfuly", module.c_str());
-	Log(source.u, this) << "to load " << module;
+	source.Reply("Module \2%s\2 loaded sucessfuly", Module.c_str());
+	Log(source.u, this) << "to load " << Module;
       }
     }
   }
@@ -103,10 +103,10 @@ public:
   {
     this->SendSyntax(source);
     source.Reply(" ");
-    source.Reply("This command loads a module into the bot.\n"
-		 "If the module fails to load, it will print\n"
+    source.Reply("This command loads a Module into the bot.\n"
+		 "If the Module fails to load, it will print\n"
 		 "an error message, if it crashes, the bot will\n"
-		 "automatically notify the owner and unload that module\n"
+		 "automatically notify the owner and unload that Module\n"
 		 "Note: You must be the bots owner to use this command");
     return true;
   }
@@ -115,9 +115,9 @@ public:
 class CommandMUnload : public Command
 {
 public:
-  CommandMUnload(module *m):Command(m, "MODUNLOAD", C_PRIVATE, 1, 1)
+  CommandMUnload(Module *m):Command(m, "MODUNLOAD", C_PRIVATE, 1, 1)
   {
-    this->SetDesc("Unloads a module");
+    this->SetDesc("Unloads a Module");
     this->SetSyntax("\37name\37");
   }
   void Run(CommandSource &source, const Flux::vector &params)
@@ -126,7 +126,7 @@ public:
     //if(!source.u->IsOwner())
 //       source.Reply(ACCESS_DENIED);
     //else{
-      module *mu = FindModule(modd);
+      Module *mu = FindModule(modd);
       if(!mu)
       {
 	source.Reply("Module \002%s\002 not loaded", modd.c_str());
@@ -134,13 +134,13 @@ public:
       }
       if(mu->GetPermanent())
       {
-	source.Reply("Cannot unload a permanent module!");
+	source.Reply("Cannot unload a permanent Module!");
 	return;
       }
       
       if(!ModuleHandler::Unload(mu))
       {
-	source.Reply("Failed to unload module %s", modd.c_str());
+	source.Reply("Failed to unload Module %s", modd.c_str());
 	Log(source.u, this) << "to unload " << modd << " and failed";
       }
       else
@@ -154,7 +154,7 @@ public:
   {
     this->SendSyntax(source);
     source.Reply(" ");
-    source.Reply("This command unloads a module from the bot\n"
+    source.Reply("This command unloads a Module from the bot\n"
 		 "Note: You must be the bots owner to use this command");
     return true;
   }
@@ -163,9 +163,9 @@ public:
 class CommandMReload : public Command
 {
 public:
-  CommandMReload(module *m):Command(m, "MODRELOAD", C_PRIVATE, 1, 1)
+  CommandMReload(Module *m):Command(m, "MODRELOAD", C_PRIVATE, 1, 1)
   {
-    this->SetDesc("Reloads a module");
+    this->SetDesc("Reloads a Module");
     this->SetSyntax("\37name\37");
   }
   void Run(CommandSource &source, const Flux::vector &params)
@@ -174,7 +174,7 @@ public:
     //if(!source.u->IsOwner())
      // source.Reply(ACCESS_DENIED);
     //else{
-      module *mu = FindModule(modd);
+      Module *mu = FindModule(modd);
       if(!mu)
       {
 	source.Reply("Module \002%s\002 not loaded", modd.c_str());
@@ -182,7 +182,7 @@ public:
       }
       if(mu->GetPermanent())
       {
-	source.Reply("Cannot unload a permanent module!");
+	source.Reply("Cannot unload a permanent Module!");
 	return;
       }
 
@@ -190,7 +190,7 @@ public:
       ModErr err2 = ModuleHandler::LoadModule(modd);
       if(!err || err2 != MOD_ERR_OK)
       {
-	source.Reply("Failed to reload module %s%s", modd.c_str(), err2 != MOD_ERR_OK?Flux::string(": "+DecodeModErr(err2)).c_str():"");
+	source.Reply("Failed to reload Module %s%s", modd.c_str(), err2 != MOD_ERR_OK?Flux::string(": "+DecodeModErr(err2)).c_str():"");
 	Log(source.u, this) << "to reload " << modd << " and failed";
       }
       else
@@ -204,7 +204,7 @@ public:
   {
     this->SendSyntax(source);
     source.Reply(" ");
-    source.Reply("This command reloads the module, it does\n"
+    source.Reply("This command reloads the Module, it does\n"
 		 "the same as modunload and modload just in\n"
 		 "one command to be run which is much faster");
     return true;
@@ -214,9 +214,9 @@ public:
 class CommandMInfo : public Command
 {
 public:
-  CommandMInfo(module *m):Command(m, "MODINFO", C_PRIVATE, 1, 1)
+  CommandMInfo(Module *m):Command(m, "MODINFO", C_PRIVATE, 1, 1)
   {
-   this->SetDesc("Provides info on a module");
+   this->SetDesc("Provides info on a Module");
    this->SetSyntax("\37name\37");
   }
   void Run(CommandSource &source, const Flux::vector &params)
@@ -227,7 +227,7 @@ public:
       this->SendSyntax(source);
       return;
     }
-      module *mo = FindModule(modd);
+      Module *mo = FindModule(modd);
       if(!mo)
       {
 	source.Reply("Module \2%s\2 is not loaded", modd.c_str());
@@ -253,21 +253,21 @@ public:
       else
 	source.Reply("Adds commands: \2%s\2", cmds.c_str());
 	source.Reply("******** End Info ********");
-      Log(source.u, this) << "to show info on module " << mo->name;
+      Log(source.u, this) << "to show info on Module " << mo->name;
   }
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
     this->SendSyntax(source);
     source.Reply(" ");
-    source.Reply("This command displays module information\n"
-		 "based off the author of the module, its\n"
+    source.Reply("This command displays Module information\n"
+		 "based off the author of the Module, its\n"
 		 "priority, how many commands it adds, the\n"
-		 "version of the module and when it was loaded");
+		 "version of the Module and when it was loaded");
     return true;
   }
 };
 
-class M_Handler : public module
+class M_Handler : public Module
 {
   CommandMList list;
   CommandMLoad load;
@@ -275,7 +275,7 @@ class M_Handler : public module
   CommandMInfo info;
   CommandMReload reload;
 public:
-  M_Handler(const Flux::string &Name):module(Name), list(this), load(this), unload(this), info(this), reload(this)
+  M_Handler(const Flux::string &Name):Module(Name, MOD_NORMAL), list(this), load(this), unload(this), info(this), reload(this)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
@@ -285,15 +285,15 @@ public:
   }
   
   void OnReload()
-  { //TODO: Solve on module unload.
+  { //TODO: Solve on Module unload.
   Flux::vector updatedmodlist = ParamitizeString(Config->Modules, ',');
-    for(auto it : updatedmodlist) // Find any newly loaded modules.
+    for(auto it : updatedmodlist) // Find any newly loaded Modules.
     {
       Flux::string mname = it;
       mname.trim();
       if(!FindModule(mname))
       {
-	Log() << "Rehash loaded module " << mname;
+	Log() << "Rehash loaded Module " << mname;
 	ModuleHandler::LoadModule(mname);
       }
     }

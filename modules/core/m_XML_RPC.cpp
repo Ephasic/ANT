@@ -13,7 +13,6 @@
  * This is the module file for the XML_RPC commits, this will handle 98% of the commits the bot will process!
  */
 #include "modules.h"
-#include "module.h"
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_utils.hpp"
 #include "rapidxml/rapidxml_iterators.hpp"
@@ -217,7 +216,7 @@ ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
   return c;
 }
 
-class module;
+
 /* This is down here so we don't make a huge mess in the middle of the file */
 // Parse our message then announce it as a commit using the OnCommit event.
 void xmlrpcclient::HandleMessage()
@@ -352,10 +351,10 @@ public:
   }
 };
 
-class xmlrpcmod : public module
+class xmlrpcmod : public Module
 {
 public:
-  xmlrpcmod(const Flux::string &Name):module(Name)
+  xmlrpcmod(const Flux::string &Name):Module(Name, MOD_NORMAL)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);

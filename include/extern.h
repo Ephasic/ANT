@@ -46,7 +46,7 @@ class Commands;
 class Command;
 class Oper;
 class Thread;
-class module;
+class Module;
 class IRCProto;
 class GlobalProto;
 class ModuleHandler;
@@ -97,6 +97,16 @@ enum CommandType
   C_PRIVATE
 };
 
+enum ModType
+{
+  MOD_UNDEFINED,
+  MOD_ENCRYPTION,
+  MOD_PROTOCOL,
+  MOD_SOCKETENGINE,
+  MOD_DATABASE,
+  MOD_NORMAL
+};
+
 enum ModErr
 {
   MOD_ERR_OK,
@@ -112,12 +122,12 @@ enum ModErr
 
 /* Typedef's */
 typedef std::map<Flux::string, Command*, ci::less> CommandMap;
-typedef std::vector<module*> EventsVector; //Gay g++ waning fix
+typedef std::vector<Module*> EventsVector; //Gay g++ waning fix
 
 /*  Class pointer finder definitions */
 extern User *FindUser(Network*, const Flux::string&);
 extern Channel *FindChannel(Network*, const Flux::string&);
-extern module *FindModule(const Flux::string&);
+extern Module *FindModule(const Flux::string&);
 extern Command *FindCommand(const Flux::string&, CommandType);
 extern Network *FindNetwork(const Flux::string&);
 extern Bot *FindBot(const Flux::string&);
@@ -127,7 +137,7 @@ extern Network *FindNetworkByHost(const Flux::string&);
 /* extern's */
 extern Network *FluxNet;
 extern BotConfig *Config;
-extern module *LastRunModule;
+extern Module *LastRunModule;
 extern GlobalProto *GProto;
 extern CommandMap Commandsmap;
 extern CommandMap ChanCommandMap;
@@ -154,7 +164,7 @@ extern bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
 extern Flux::vector ParamitizeString(const Flux::string&, char);
 
 /* maps, lists, vectors, etc. */
-extern std::list<module*> Modules;
+extern std::list<Module*> Modules;
 extern Flux::insensitive_map<Network*> Networks;
 extern Flux::map<Network*> NetworkHosts;
 
@@ -170,7 +180,7 @@ extern void sigact(int);
 extern void SaveDatabases();
 extern void JoinChansInBuffer(Network*);
 extern void InitSignals();
-extern void HandleSegfault(module*);
+extern void HandleSegfault(Module*);
 extern void restart(const Flux::string&);
 extern void ListChans(CommandSource &source);
 extern void ListUsers(CommandSource &source);
@@ -221,9 +231,9 @@ else \
 #define FOREACH_RESULT(y, x, v) \
 if (true) \
 { \
-  std::vector<module*>::iterator safei; \
+  EventsVector::iterator safei; \
   v = EVENT_CONTINUE; \
-  for (std::vector<module*>::iterator _i = ModuleHandler::EventHandlers[y].begin(); _i != ModuleHandler::EventHandlers[y].end();) \
+  for (EventsVector::iterator _i = ModuleHandler::EventHandlers[y].begin(); _i != ModuleHandler::EventHandlers[y].end();) \
     { \
       safei = _i; \
       ++safei; \
@@ -257,7 +267,7 @@ else \
 #define Delete unlink
 
 #define MODULE_HOOK(x) \
-extern "C" module *ModInit(const Flux::string &name) { return new x(name); } \
+extern "C" Module *ModInit(const Flux::string &name) { return new x(name); } \
 extern "C" void ModunInit(x *m) { DeleteZero(m); }
 
 #endif

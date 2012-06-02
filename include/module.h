@@ -9,8 +9,8 @@
  * Based on the original code of Anope by The Anope Team.
  */
 #pragma once
-#ifndef MODULE_H
-#define MODULE_H
+#ifndef Module_H
+#define Module_H
 
 #include "extern.h"
 #include "Socket.h"
@@ -21,7 +21,7 @@
 #ifdef HAVE_FCNTL_H
 # include <dlfcn.h>
 #else
-# error dlfcn.h is required by ANT to compile modules!
+# error dlfcn.h is required by ANT to compile Modules!
 #endif
 
 class Socket;
@@ -48,12 +48,13 @@ enum ModulePriority
   PRIORITY_LAST
 };
 
-class module : public Base
+class Module : public Base
 {
   Flux::string author, version;
   time_t loadtime;
   ModulePriority Priority;
   bool permanent;
+  ModType type;
 protected:
   void SetAuthor(const Flux::string&);
   void SetVersion(const Flux::string&);
@@ -62,14 +63,16 @@ protected:
 public:
   void *handle;
   Flux::string name, filename, filepath;
-  Flux::string GetAuthor();
-  Flux::string GetVersion();
-  ModulePriority GetPriority();
-  bool GetPermanent();
-  time_t GetLoadTime();
-  module(const Flux::string&);
-
-  virtual ~module();
+  inline Flux::string GetAuthor() const { return this->author; }
+  inline Flux::string GetVersion() const { return this->version; }
+  inline ModulePriority GetPriority() const { return this->Priority; }
+  inline bool GetPermanent() const { return this->permanent; } 
+  inline time_t GetLoadTime() const { return this->loadtime; }
+  inline ModType GetModuleType() const { return this->type; }
+  
+  Module(const Flux::string&, ModType = MOD_UNDEFINED);
+  virtual ~Module();
+  
   virtual EventResult OnPreReceiveMessage(const Flux::string&) { return EVENT_CONTINUE; }
   virtual void OnPrivmsg(User*, const Flux::vector&) {}
   virtual void OnChannelAction(User*, Channel*, const Flux::vector&) {}
@@ -92,10 +95,10 @@ public:
   virtual void OnPing(const std::vector<Flux::string>&, Network*) {}
   virtual void OnPong(const std::vector<Flux::string>&, Network*) {}
   virtual void OnArgument(int, const Flux::string&) {}
-  virtual void OnModuleLoad(module*) {}
+  virtual void OnModuleLoad(Module*) {}
   virtual void OnFork(int) {}
   virtual void OnSocketError(const Flux::string&) {}
-  virtual void OnModuleUnload(module*){}
+  virtual void OnModuleUnload(Module*){}
   virtual void OnRestart(const Flux::string&) {}
   virtual void OnShutdown() {}
   virtual void OnNickChange(User*, const Flux::string&) {}
@@ -116,7 +119,6 @@ public:
   virtual void OnPostConnect(Socket*) {}
   virtual void OnConnectionError(const Flux::string&) {}
   virtual void OnInvite(User *u, const Flux::string&) {}
-  virtual void OnLoad() {} // This is NOT to be called by FOREACH_MOD! not that it can be.
 };
 
 class ModuleHandler
@@ -127,13 +129,13 @@ public:
   static Flux::string DecodePriority(ModulePriority);
   static void SanitizeRuntime();
   static void UnloadAll();
-  static bool Unload(module*);
+  static bool Unload(Module*);
 
-  static bool Attach(Implementation i, module *mod);
-  static void Attach(Implementation *i, module *mod, size_t sz);
-  static bool Detach(Implementation i, module *mod);
-  static void DetachAll(module*);
+  static bool Attach(Implementation i, Module *mod);
+  static void Attach(Implementation *i, Module *mod, size_t sz);
+  static bool Detach(Implementation i, Module *mod);
+  static void DetachAll(Module*);
 private:
-  static bool DeleteModule(module*);
+  static bool DeleteModule(Module*);
 };
 #endif

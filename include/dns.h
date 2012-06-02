@@ -107,9 +107,9 @@ class DNSRequest : public Timer, public Question
 	/* Request id */
  	unsigned short id;
  	/* Creator of this request */
-	module *creator;
+	Module *creator;
 
-	DNSRequest(const Flux::string &addr, QueryType qt, bool cache = false, module *c = nullptr);
+	DNSRequest(const Flux::string &addr, QueryType qt, bool cache = false, Module *c = nullptr);
 
 	virtual ~DNSRequest();
 
@@ -185,7 +185,7 @@ class DNSManager : public Timer, public Socket
 	/** Cleanup all pending DNS queries for a module
 	 * @param mod The module
 	 */
-	void Cleanup(module*);
+	void Cleanup(Module*);
 
 	/** Does a BLOCKING DNS query and returns the first IP.
 	 * Only use this if you know what you are doing. Unless you specifically

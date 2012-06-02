@@ -20,7 +20,7 @@
  * \brief A segfault handler to report what happened and where it happened.
  * \param module the module class in which the segfault happened include
  */
-void HandleSegfault(module *m)
+void HandleSegfault(Module *m)
 {
 #ifdef HAVE_BACKTRACE
  void *array[10];

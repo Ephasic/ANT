@@ -36,11 +36,11 @@ public:
   }
 };
 
-class Ping_pong : public module
+class Ping_pong : public Module
 {
   PingTimer pingtimer;
 public:
-  Ping_pong(const Flux::string &Name):module(Name)
+  Ping_pong(const Flux::string &Name):Module(Name, MOD_NORMAL)
   {
     Implementation i[] = { I_OnPong, I_OnPing };
     ModuleHandler::Attach(i, this, sizeof(i) / sizeof(Implementation));

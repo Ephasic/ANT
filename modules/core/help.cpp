@@ -32,7 +32,7 @@
 class CommandHelp : public Command
 {
 public:
-  CommandHelp(module *m):Command(m, "HELP", C_PRIVATE, 0, 1)
+  CommandHelp(Module *m):Command(m, "HELP", C_PRIVATE, 0, 1)
   {
    this->SetDesc("Displays help messages");
   }
@@ -64,7 +64,7 @@ public:
 class CommandCHelp : public Command
 {
 public:
-  CommandCHelp(module *m):Command(m, "!HELP", C_CHANNEL, 0,1)
+  CommandCHelp(Module *m):Command(m, "!HELP", C_CHANNEL, 0,1)
   {
    this->SetDesc("Displays Channel help messages");
   }
@@ -93,12 +93,12 @@ public:
   }
 };
 
-class help_m:public module
+class help_m : public Module
 {
   CommandHelp help;
   CommandCHelp chelp;
 public:
-  help_m(const Flux::string &Name):module(Name), help(this), chelp(this)
+  help_m(const Flux::string &Name):Module(Name, MOD_NORMAL), help(this), chelp(this)
   {
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);

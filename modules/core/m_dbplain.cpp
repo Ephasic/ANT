@@ -26,7 +26,7 @@ void Write(const char *fmt, ...)
     va_end(args);
 }
 
-void Read(module *m = nullptr)
+void Read(Module *m = nullptr)
 {
   std::fstream db;
   db.open("ANT.db", std::ios_base::in);
@@ -80,10 +80,10 @@ void Read(module *m = nullptr)
   db.close();
 }
 
-class dbplain : public module
+class dbplain : public Module
 {
 public:
-  dbplain(const Flux::string &Name):module(Name)
+  dbplain(const Flux::string &Name):Module(Name, MOD_DATABASE)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
@@ -152,7 +152,7 @@ public:
 //     }
   }
 
-  void OnModuleLoad(module *m)
+  void OnModuleLoad(Module *m)
   {
     if(m != this)
       Read(m);

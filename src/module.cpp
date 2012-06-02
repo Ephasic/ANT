@@ -12,17 +12,17 @@
 #include "module.h"
 // This code sucks, you know it and I know it.
 // Move on and call me an idiot later.
-std::list<module*> Modules;
+std::list<Module*> Modules;
 EventsVector ModuleHandler::EventHandlers[I_END];
 /**
- * \fn module::module(Flux::string n)
+ * \fn Module::Module(Flux::string n)
  * \brief Module Constructor
- * \param name Name of the module
- * \param activated Wether the module is activated or not
- * \param priority The module priority
+ * \param name Name of the Module
+ * \param activated Wether the Module is activated or not
+ * \param priority The Module priority
  */
 
-module::module(const Flux::string &n): author(""), version(""), loadtime(time(NULL)), Priority(PRIORITY_DONTCARE), permanent(false), handle(nullptr), name(n), filename(""), filepath("")
+Module::Module(const Flux::string &n, ModType m): author(""), version(""), loadtime(time(NULL)), Priority(PRIORITY_DONTCARE), permanent(false), handle(nullptr), name(n), filename(""), filepath("")
 {
   SET_SEGV_LOCATION();
   if(FindModule(this->name))
@@ -30,63 +30,38 @@ module::module(const Flux::string &n): author(""), version(""), loadtime(time(NU
 
   Modules.push_back(this);
   if(!nofork)
-    Log() << "Loaded module " << n;
+    Log() << "Loaded Module " << n;
 }
 
-module::~module()
+Module::~Module()
 {
   SET_SEGV_LOCATION();
-  Log(LOG_DEBUG) << "Unloading module " << this->name;
+  Log(LOG_DEBUG) << "Unloading Module " << this->name;
   ModuleHandler::DetachAll(this);
 
   auto it = std::find(Modules.begin(), Modules.end(), this);
   if(it != Modules.end())
     Modules.erase(it);
   else
-    Log() << "Could not find " << this->name << " in module map!";
+    Log() << "Could not find " << this->name << " in Module map!";
 }
 
-void module::SetAuthor(const Flux::string &person)
+void Module::SetAuthor(const Flux::string &person)
 {
   this->author = person;
 }
 
-void module::SetVersion(const Flux::string &ver)
+void Module::SetVersion(const Flux::string &ver)
 {
   this->version = ver;
 }
 
-void module::SetPriority(ModulePriority p)
+void Module::SetPriority(ModulePriority p)
 {
   this->Priority = p;
 }
 
-void module::SetPermanent(bool state)
+void Module::SetPermanent(bool state)
 {
   this->permanent = state;
-}
-
-Flux::string module::GetVersion()
-{
-  return this->version;
-}
-
-time_t module::GetLoadTime()
-{
-  return this->loadtime;
-}
-
-Flux::string module::GetAuthor()
-{
-  return this->author;
-}
-
-ModulePriority module::GetPriority()
-{
-  return this->Priority;
-}
-
-bool module::GetPermanent()
-{
-  return this->permanent;
 }

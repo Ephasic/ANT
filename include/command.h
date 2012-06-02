@@ -65,8 +65,8 @@ public:
   size_t MaxParams;
   size_t MinParams;
   Flux::string name;
-  module *mod;
-  Command(module *m, const Flux::string &sname, CommandType t = C_NULL, size_t min_params=0, size_t max_params=0);
+  Module *mod;
+  Command(Module *m, const Flux::string &sname, CommandType t = C_NULL, size_t min_params=0, size_t max_params=0);
   virtual ~Command();
 protected:
   void SetDesc(const Flux::string&);

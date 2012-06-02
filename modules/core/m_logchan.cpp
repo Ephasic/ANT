@@ -34,10 +34,10 @@ Flux::string NoTermColor(const Flux::string &ret)
   return str;
 }
 
-class LogChan : public module
+class LogChan : public Module
 {
 public:
-  LogChan(const Flux::string &Name) : module(Name)
+  LogChan(const Flux::string &Name) : Module(Name, MOD_NORMAL)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
@@ -79,7 +79,7 @@ public:
 	break;
       case LOG_DNS:
 	if(protocoldebug)
-	  logstream << "[DNSEngine] " << message;
+	  logstream << "\0032[DNSEngine]\017 " << message;
 	break;
       case LOG_RAWIO:
 	if(protocoldebug)

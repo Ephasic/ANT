@@ -10,15 +10,14 @@
  */
 #include "module.h"
 #include "INIReader.h"
-// #include "modules.h"
 
 /**
- * \fn bool ModuleHandler::Attach(Implementation i, module *mod)
+ * \fn bool ModuleHandler::Attach(Implementation i, Module *mod)
  * \brief Module hook for the FOREACH_MOD macro
- * \param Implementation The Implementation of the call list you want your module to have
- * \param Module the module the Implementation is on
+ * \param Implementation The Implementation of the call list you want your Module to have
+ * \param Module the Module the Implementation is on
  */
-bool ModuleHandler::Attach(Implementation i, module *mod)
+bool ModuleHandler::Attach(Implementation i, Module *mod)
 {
   if(std::find(EventHandlers[i].begin(), EventHandlers[i].end(), mod) != EventHandlers[i].end())
     return false;
@@ -27,8 +26,8 @@ bool ModuleHandler::Attach(Implementation i, module *mod)
   return true;
 }
 
-/// \overload bool ModuleHandler::Attach(Implementation *i, module *mod, size_t sz)
-void ModuleHandler::Attach(Implementation *i, module *mod, size_t sz)
+/// \overload bool ModuleHandler::Attach(Implementation *i, Module *mod, size_t sz)
+void ModuleHandler::Attach(Implementation *i, Module *mod, size_t sz)
 {
   for(size_t n = 0; n < sz; ++n)
     Attach(i[n], mod);
@@ -74,12 +73,12 @@ template<class TYPE> TYPE class_cast(void *symbol)
 }
 
 /**
- * \fn bool ModuleHandler::Detach(Implementation i, module *mod)
- * \brief Unhook for the module hook ModuleHandler::Attach()
- * \param Implementation The Implementation of the call list you want your module to detach
- * \param Module the module the Implementation is on
+ * \fn bool ModuleHandler::Detach(Implementation i, Module *mod)
+ * \brief Unhook for the Module hook ModuleHandler::Attach()
+ * \param Implementation The Implementation of the call list you want your Module to detach
+ * \param Module the Module the Implementation is on
  */
-bool ModuleHandler::Detach(Implementation i, module *mod)
+bool ModuleHandler::Detach(Implementation i, Module *mod)
 {
   auto x = std::find(EventHandlers[i].begin(), EventHandlers[i].end(), mod);
   if(x == EventHandlers[i].end())
@@ -88,7 +87,7 @@ bool ModuleHandler::Detach(Implementation i, module *mod)
   return true;
 }
 
-void ModuleHandler::DetachAll(module *m)
+void ModuleHandler::DetachAll(Module *m)
 {
   for(size_t n = I_BEGIN+1; n != I_END; ++n)
     Detach(static_cast<Implementation>(n), m);
@@ -104,14 +103,14 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
   if(FindModule(modname))
     return MOD_ERR_EXISTS;
 
-  Log() << "\033[0m[\033[1;32m*\033[0m] Loading module:\t\033[1;32m" << modname << Config->LogColor;
+  Log() << "\033[0m[\033[1;32m*\033[0m] Loading Module:\t\033[1;32m" << modname << Config->LogColor;
 
   Flux::string mdir = binary_dir + "/runtime/"+ (modname.search(".so")?modname+".XXXXXX":modname+".so.XXXXXX");
   Flux::string input = Flux::string(binary_dir + "/" + (Config->ModuleDir.empty()?modname:Config->ModuleDir+"/"+modname) + ".so").replace_all_cs("//","/");
 
   TextFile mod(input);
   Flux::string output = TextFile::TempFile(mdir);
-  Log(LOG_RAWIO) << "Runtime module location: " << output;
+  Log(LOG_RAWIO) << "Runtime Module location: " << output;
 
   mod.Copy(output);
   if(mod.GetLastError() != FILE_IO_OK)
@@ -134,20 +133,20 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
 
   dlerror();
 
-  module *(*f)(const Flux::string&) = class_cast<module *(*)(const Flux::string&)>(dlsym(handle, "ModInit"));
+  Module *(*f)(const Flux::string&) = class_cast<Module *(*)(const Flux::string&)>(dlsym(handle, "ModInit"));
   err = dlerror();
 
   if(!f && err && *err)
   {
-    Log() << "No module init function, moving on.";
+    Log() << "No Module init function, moving on.";
     dlclose(handle);
     return MOD_ERR_NOLOAD;
   }
 
   if(!f)
-    throw CoreException("Can't find module constructor, yet no moderr?");
+    throw CoreException("Can't find Module constructor, yet no moderr?");
 
-  module *m;
+  Module *m;
   try
   {
     m = f(modname);
@@ -162,14 +161,12 @@ ModErr ModuleHandler::LoadModule(const Flux::string &modname)
   m->filename = (modname.search(".so")?modname:modname+".so");
   m->handle = reinterpret_cast<void*>(handle); //we'll convert to auto later, for now reinterpret_cast.
 
-  m->OnLoad();
-
   FOREACH_MOD(I_OnModuleLoad, OnModuleLoad(m));
 
   return MOD_ERR_OK;
 }
 
-bool ModuleHandler::DeleteModule(module *m)
+bool ModuleHandler::DeleteModule(Module *m)
 {
   SET_SEGV_LOCATION();
   if (!m || !m->handle)
@@ -180,7 +177,7 @@ bool ModuleHandler::DeleteModule(module *m)
 
   dlerror();
 
-  void (*df)(module*) = class_cast<void (*)(module*)>(dlsym(m->handle, "ModunInit"));
+  void (*df)(Module*) = class_cast<void (*)(Module*)>(dlsym(m->handle, "ModunInit"));
   const char *err = dlerror();
 
   SET_SEGV_LOCATION();
@@ -205,7 +202,7 @@ bool ModuleHandler::DeleteModule(module *m)
     return true;
 }
 
-bool ModuleHandler::Unload(module *m)
+bool ModuleHandler::Unload(Module *m)
 {
   if(!m || m->GetPermanent())
     return false;
@@ -216,9 +213,9 @@ bool ModuleHandler::Unload(module *m)
 
 void ModuleHandler::UnloadAll()
 {
-  for(std::list<module*>::iterator it = Modules.begin(), it_end = Modules.end(); it != it_end;)
+  for(std::list<Module*>::iterator it = Modules.begin(), it_end = Modules.end(); it != it_end;)
   {
-    module *m = *it;
+    Module *m = *it;
     ++it;
     // ignore Unload function because we're forcing a unload regardless of whether it's permanent or not.
     FOREACH_MOD(I_OnModuleUnload, OnModuleUnload(m));
@@ -262,15 +259,15 @@ void ModuleHandler::SanitizeRuntime()
 }
 
 /**
- * \fn module *FindModule(const Flux::string &name)
- * \brief Find a module in the module list
- * \param name A string containing the module name you're looking for
+ * \fn Module *FindModule(const Flux::string &name)
+ * \brief Find a Module in the Module list
+ * \param name A string containing the Module name you're looking for
  */
-module *FindModule(const Flux::string &name)
+Module *FindModule(const Flux::string &name)
 {
   for(auto it : Modules)
   {
-    module *m = it;
+    Module *m = it;
     if(m->name.equals_ci(name))
       return m;
   }

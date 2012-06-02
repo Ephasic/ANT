@@ -13,7 +13,7 @@
 class CommandRehash : public Command
 {
 public:
-  CommandRehash(module *m):Command(m, "REHASH", C_PRIVATE)
+  CommandRehash(Module *m):Command(m, "REHASH", C_PRIVATE)
   {
     this->SetDesc("Rehashes the config file");
   }
@@ -39,7 +39,7 @@ public:
 class CommandRestart : public Command
 {
 public:
-  CommandRestart(module *m):Command(m, "RESTART", C_PRIVATE, 0, 1)
+  CommandRestart(Module *m):Command(m, "RESTART", C_PRIVATE, 0, 1)
   {
    this->SetDesc("Restarts the bot");
    this->SetSyntax("\37reason\37");
@@ -68,7 +68,7 @@ public:
 class CommandQuit : public Command
 {
 public:
-  CommandQuit(module *m):Command(m, "QUIT", C_PRIVATE, 1, 1)
+  CommandQuit(Module *m):Command(m, "QUIT", C_PRIVATE, 1, 1)
   {
     this->SetDesc("Quits the bot from IRC");
     this->SetSyntax("\37randompass\37");
@@ -96,7 +96,7 @@ public:
 class CommandPID: public Command
 {
 public:
-  CommandPID(module *m):Command(m, "PID", C_PRIVATE)
+  CommandPID(Module *m):Command(m, "PID", C_PRIVATE)
   {
     this->SetDesc("Gets the bots Process ID");
   }
@@ -143,7 +143,7 @@ public:
   }
 };
 
-class m_system : public module
+class m_system : public Module
 {
   CommandRehash cmdrehash;
   CommandQuit cmdquit;
@@ -151,7 +151,7 @@ class m_system : public module
   CommandPID pid;
 
 public:
-  m_system(const Flux::string &Name):module(Name), cmdrehash(this), cmdquit(this), cmdrestart(this), pid(this)
+  m_system(const Flux::string &Name):Module(Name, MOD_NORMAL), cmdrehash(this), cmdquit(this), cmdrestart(this), pid(this)
   {
     Implementation i[] = { I_OnNumeric, I_OnKick, I_OnNotice, I_OnNickChange, I_OnChannelAction };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));

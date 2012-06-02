@@ -193,7 +193,7 @@ Log::~Log()
       break;
     case LOG_DNS:
       if(protocoldebug)
-	logstream << TimeStamp() << " [DNSEngine] " << message;
+	logstream << TimeStamp() << " \033[34;0m[DNSEngine]\033[0m " << message;
       break;
     case LOG_RAWIO:
       if(protocoldebug)
@@ -211,7 +211,7 @@ Log::~Log()
       return; // ignore everything else, it doesn't matter
     case LOG_TERMINAL:
       if(InTerm())
-	// We allow colors here because it's supposed to be consodered 'raw'
+	// We allow colors here because it's supposed to be considered 'raw'
 	std::cout << raw << std::endl;
       return;
     default:

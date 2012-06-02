@@ -9,7 +9,6 @@
  * Based on the original code of Services by Andy Church.
  */
 
-// FIXME: THIS SOCKET ENGINE *CANNOT* HANDLE THE COMMITS THAT GO THROUGH THIS BOT!
 #include "Socket.h"
 #include "INIReader.h"
 

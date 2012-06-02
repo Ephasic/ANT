@@ -13,7 +13,7 @@
 class CommandJoin : public Command
 {
 public:
-  CommandJoin(module *m) : Command(m, "JOIN", C_PRIVATE, 1, 1)
+  CommandJoin(Module *m) : Command(m, "JOIN", C_PRIVATE, 1, 1)
   {
    this->SetDesc("Joins a channel");
    this->SetSyntax("\37channel\37");
@@ -46,7 +46,7 @@ public:
 class CommandPart : public Command
 {
 public:
-  CommandPart(module *m):Command(m, "PART", C_PRIVATE, 1,1)
+  CommandPart(Module *m):Command(m, "PART", C_PRIVATE, 1,1)
   {
     this->SetDesc("Part a channel");
     this->SetSyntax("\37channel\37");
@@ -83,7 +83,7 @@ public:
 class CommandConnect : public Command
 {
 public:
-  CommandConnect(module *m):Command(m, "CONNECT", C_PRIVATE, 2,4)
+  CommandConnect(Module *m):Command(m, "CONNECT", C_PRIVATE, 2,4)
   {
     this->SetDesc("Connect to a network");
     this->SetSyntax("\37networkname\37 hostname [port]");
@@ -134,7 +134,7 @@ public:
 class CommandDisconnect : public Command
 {
 public:
-  CommandDisconnect(module *m):Command(m, "DISCONNECT", C_PRIVATE, 1,1)
+  CommandDisconnect(Module *m):Command(m, "DISCONNECT", C_PRIVATE, 1,1)
   {
     this->SetDesc("Disconnect a network");
     this->SetSyntax("\37networkname\37");
@@ -163,14 +163,14 @@ public:
   }
 };
 
-class m_Join : public module
+class m_Join : public Module
 {
   CommandJoin cmdjoin;
   CommandPart cmdpart;
   CommandConnect cmdconnect;
   CommandDisconnect cmddisconnect;
 public:
-  m_Join(const Flux::string &Name):module(Name), cmdjoin(this), cmdpart(this), cmdconnect(this), cmddisconnect(this)
+  m_Join(const Flux::string &Name):Module(Name, MOD_NORMAL), cmdjoin(this), cmdpart(this), cmdconnect(this), cmddisconnect(this)
   {
     this->SetVersion(VERSION);
     this->SetAuthor("Justasic");
