@@ -193,7 +193,7 @@ Log::~Log()
       break;
     case LOG_DNS:
       if(protocoldebug)
-	logstream << TimeStamp() << " \033[34;0m[DNSEngine]\033[0m " << message;
+	logstream << TimeStamp() << " \033[34;0m[DNSEngine]" << LogColor << "" << message;
       break;
     case LOG_RAWIO:
       if(protocoldebug)

@@ -360,15 +360,7 @@ public:
     this->SetVersion(VERSION);
 
     // Try and make a socket.
-    try
-    {
-      new xmlrpclistensocket(Config->xmlrpcbindip, Config->xmlrpcport, Config->xmlrpcipv6);
-    }
-    catch(const SocketException &ex)
-    {
-      Log() << "[XML-RPC] " << ex.GetReason();
-      new RetryStart();
-    }
+    new RetryStart();
   }
 
   ~xmlrpcmod()

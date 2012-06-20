@@ -181,7 +181,7 @@ class CIA_RULESET_MOD : public Module
   CommitMessage Message;
   ThrottleTimer *tt;
 public:
-  CIA_RULESET_MOD(const Flux::string &Name):Module(Name, MOD_NORMAL)
+  CIA_RULESET_MOD(const Flux::string &Name):Module(Name, MOD_NORMAL), tt(nullptr)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);

@@ -89,6 +89,8 @@ public:
     this->SetVersion(VERSION);
     Implementation i[] = { I_OnDatabasesWrite, I_OnDatabasesRead, I_OnModuleLoad, I_OnSaveDatabases, I_OnForceDatabasesRead };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
+
+    this->OnForceDatabasesRead();
   }
 
   void OnDatabasesWrite(void (*Write)(const char*, ...))
@@ -162,12 +164,6 @@ public:
   {
     Log() << "[db_plain] Reading Database.";
     Read();
-  }
-
-  void OnLoad()
-  {
-    Log() << "[db_plain] Loading Database.";
-    Read(); // Load the databases
   }
 
   void OnSaveDatabases()
