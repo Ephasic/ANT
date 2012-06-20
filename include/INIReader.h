@@ -28,13 +28,10 @@
 class INIReader
 {
 public:
+  Flux::vector modules;
     // Construct INIReader and parse given filename. See ini.h for more info
     // about the parsing.
     INIReader(const Flux::string&);
-
-    // Return the result of ini_parse(), i.e., 0 on success, line number of
-    // first error on parse error, or -1 on file open error.
-    int ParseError();
 
     // Get a string value from INI file, returning default_value if not found.
     Flux::string Get(const Flux::string&, const Flux::string&, const Flux::string&);
@@ -52,7 +49,7 @@ private:
     static Flux::string MakeKey(const Flux::string&, const Flux::string&);
 
     // Parse the INI file
-    int Parse(const Flux::string &filename);
+    void Parse(const Flux::string &filename);
 };
 
 class BotConfig
@@ -73,7 +70,7 @@ public:
   Flux::string PidFile;
   Flux::string UserPass;
   Flux::string ModuleDir;
-  Flux::string Modules;
+  Flux::vector Modules;
   Flux::string xmlrpcbindip;
   Flux::string NameServer;
   Flux::string sqlpass;

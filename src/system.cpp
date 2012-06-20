@@ -332,7 +332,8 @@ void GarbageCollect()
   // Announce garbage cleanup
   FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
   // Read/Write the last bit, close any leftover sockets
-  SocketEngine::Process();
+  if(Config)
+    SocketEngine::Process();
   // Unload all modules
   ModuleHandler::UnloadAll();
 
@@ -378,7 +379,8 @@ void GarbageCollect()
     DeleteZero(GProto);
 
   // Shutdown the socket engine and close any remaining sockets.
-  SocketEngine::Shutdown();
+  if(Config)
+    SocketEngine::Shutdown();
   ModuleHandler::SanitizeRuntime();
 
   // oh noes! lost pointers!

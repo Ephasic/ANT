@@ -74,6 +74,7 @@ int main (int argcx, char** argvx, char *envp[])
 //     tqueue *del_on_exit;
     startup(argcx, argvx, envp);
     time_t last_check = time(NULL);
+    throw CoreException("blah");
     
     new tqueue(GarbageCall, 120, time(NULL), true);
     new tqueue(SaveDatabases, 60, time(NULL), true);

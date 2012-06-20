@@ -80,20 +80,6 @@ void SocketEngine::Process()
   tval.tv_sec = Config->SockWait;
   tval.tv_usec = 0;
 
-  #ifdef _WIN32
-  /* We can use the socket engine to "sleep" services for a period of
-   * time between connections to the uplink, which allows modules,
-   * timers, etc to function properly. Windows, being as useful as it is,
-   * does not allow to select() on 0 sockets and will immediately return error.
-   * Thus:
-   */
-  if (FDCount == 0)
-  {
-    sleep(tval.tv_sec);
-    return;
-  }
-  #endif
-
   int sresult = select(MaxFD + 1, &rfdset, &wfdset, &efdset, &tval);
 
   if (sresult == -1)

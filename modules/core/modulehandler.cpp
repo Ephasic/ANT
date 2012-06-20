@@ -284,19 +284,19 @@ public:
     ModuleHandler::Attach(I_OnReload, this);
   }
   
-  void OnReload()
-  { //TODO: Solve on Module unload.
-  Flux::vector updatedmodlist = ParamitizeString(Config->Modules, ',');
-    for(auto it : updatedmodlist) // Find any newly loaded Modules.
-    {
-      Flux::string mname = it;
-      mname.trim();
-      if(!FindModule(mname))
-      {
-	Log() << "Rehash loaded Module " << mname;
-	ModuleHandler::LoadModule(mname);
-      }
-    }
-  }
+//   void OnReload()
+//   { //TODO: Solve on Module unload.
+//   Flux::vector updatedmodlist = ParamitizeString(Config->Modules, ',');
+//     for(auto it : updatedmodlist) // Find any newly loaded Modules.
+//     {
+//       Flux::string mname = it;
+//       mname.trim();
+//       if(!FindModule(mname))
+//       {
+// 	Log() << "Rehash loaded Module " << mname;
+// 	ModuleHandler::LoadModule(mname);
+//       }
+//     }
+//   }
 };
 MODULE_HOOK(M_Handler)

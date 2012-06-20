@@ -282,15 +282,12 @@ Module *FindModule(const Flux::string &name)
  */
 void LoadModules()
 {
-  sepstream sep(Config->Modules, ',');
-  Flux::string tok;
-  while(sep.GetToken(tok))
+  for(unsigned i = 0; i < Config->Modules.size(); ++i)
   {
-    tok.trim();
-    ModErr e = ModuleHandler::LoadModule(tok);
+    ModErr e = ModuleHandler::LoadModule(Config->Modules[i]);
     if(e != MOD_ERR_OK)
     {
-      Log() << "\n\033[0m[\033[1;31m*\033[0m] " << tok << ": " << DecodeModErr(e) << Config->LogColor << "\n";
+      Log() << "\n\033[0m[\033[1;31m*\033[0m] " << Config->Modules[i] << ": " << DecodeModErr(e) << Config->LogColor << "\n";
       throw CoreException("Module Load Error");
     }
   }

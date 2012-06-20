@@ -232,7 +232,7 @@ Log::~Log()
 
   if(this->filename.empty())
   {
-    std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!" << LogColor << std::endl;
+//     std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!" << LogColor << std::endl;
     return; // Exit if there's no file to log to
   }
 
