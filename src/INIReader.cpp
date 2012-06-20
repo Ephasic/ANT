@@ -205,104 +205,106 @@ void INIReader::Parse(const Flux::string &filename)
       section = line;
       section.erase(0, 1);
       section.erase(section.length() - 1);
-      Log(LOG_TERMINAL) << "Section: " << section;
+//       Log(LOG_TERMINAL) << "Section: " << section;
       continue;
     }
 
     if(line.search("//"))
       line = line.substr(line.find("//"));
 
+
+    bool passedequals = false;
     // Parse the rest of the config char by char
     for(unsigned i = 0; i < len; ++i)
     {
       char ch = line[i];
 
-      // Anything before a equals sign
-      if(isalpha(ch) && ch != '=' && !in_comment && !in_quote)
+      if(ch == '/' && i+1 < len && line[i+1] == '*')
       {
-	key += ch;
+	in_comment = true;
+// 	Log(LOG_TERMINAL) << "Found Comment line: " << ch;
 	continue;
       }
 
-      // substring after the equals sign and parse what it equals to
-      if(ch == '=')
+      if(in_comment)
       {
-	line = line.substr(0, i);
-	line.trim();
-	line.
-	Log(LOG_TERMINAL) << "SUBSTR: \"" << line << '"';
-	len = line.length();
-      }
-      
-      if(isdigit(ch))
-      {
-	value += ch;
-	Log(LOG_TERMINAL) << "IS NUMBER: " << ch;
+	if(ch == '*' && i+1 < len && line[i+1] == '/')
+	  in_comment = false;
+// 	Log(LOG_TERMINAL) << (in_comment?"":"End ") << "comment line: " << ch;
 	continue;
       }
-      else
+
+      if(ch == '=')
       {
-	if((ch != ';' || ch != '"') && (!in_comment || !in_quote))
+	key = line.substr(0, i);
+	key.trim();
+// 	Log(LOG_TERMINAL) << "KEY: " << key;
+	passedequals = true;
+      }
+
+      if(isdigit(ch) && passedequals)
+      {
+	if(in_quote || in_comment)
 	{
-	  if(ch != ' ')
-	  {
-	    Log(LOG_TERMINAL) << "LINE: " << line << " CH: '" << ch << '\'';
-	    throw ConfigException(printfify("Unknown or unterminated string at %i:%i", lineno, i+1));
-	  }
+	  // what the fuck c++?
+	}
+	else
+	{
+// 	  Log(LOG_TERMINAL) << "DIGIT: " << ch;
+	  value += ch;
 	}
       }
 
-      /******************************************************/
-      // Get quoted strings
-      if(in_quote && ch == '"')
+      if(ch == '"' && !in_quote)
       {
-	in_quote = false;
-	continue;
-      }
-      
-      if(ch == '"')
-      {
+// 	Log(LOG_TERMINAL) << "START QUOTE: " << ch;
 	in_quote = true;
 	continue;
       }
-      
-      if (in_quote)
+
+      if(in_quote)
       {
-	Log(LOG_TERMINAL) << "IN QUOTE: " << ch;
+	if(ch == '"')
+	{
+// 	  Log(LOG_TERMINAL) << "END QUOTE: " << ch;
+	  in_quote = false;
+	  continue;
+	}
+// 	Log(LOG_TERMINAL) << "IN QUOTE: " << ch;
 	value += ch;
-	continue;
       }
-      /******************************************************/
 
-      /******************************************************/
-      // Multi-line comments
-      if(in_comment && ch == '*' && ch++ == '/')
-      {
-	in_comment = false;
-	continue;
-      }
-      
-      if(ch == '*' && ch-- == '/')
-      {
-	in_comment = true;
-	continue;
-      }
-      /******************************************************/
-    }
+    } // for
+
+    if(value.empty())
+      continue;
     
-    if((!in_comment || !in_quote) && line[len - 1] != ';')
-    {
-      Log(LOG_TERMINAL) << "unterminated: '" << line[len - 1] << '\'';
-      throw ConfigException(printfify("Line %i is unterminated in configuration", lineno));
-    }
+//       Log(LOG_TERMINAL) << "";
+//       Log(LOG_TERMINAL) << "SECTION: " << section;
+//       Log(LOG_TERMINAL) << "VALUE: " << value;
+//       Log(LOG_TERMINAL) << "KEY: " << key;
+      Log(LOG_TERMINAL) << "TOTAL: " << this->MakeKey(section, key) << ": " << value;
+//       Log(LOG_TERMINAL) << "";
 
-    Log(LOG_TERMINAL) << "SECTION: " << section;
-    Log(LOG_TERMINAL) << "VALUE: " << value;
-    Log(LOG_TERMINAL) << "KEY: " << key;
-    Log(LOG_TERMINAL) << "TOTAL: " << section << '.' << key << ": " << value;
-  }
-  file.close();
-}
+    if(section.equals_ci("Modules") && key.equals_ci("Module"))
+      this->Modules.push_back(value);
+    else
+      _values[this->MakeKey(section, key)] = value;
+
+    } // while
+    
+    if(in_comment || in_quote)
+    {
+//       if(in_comment)
+// 	Log(LOG_TERMINAL) << "Unterminated comment!";
+// 
+//       if(in_quote)
+// 	Log(LOG_TERMINAL) << "Unterminated quote!";
+      throw ConfigException("Unterminated comment or quote");
+    }
+    file.close();
+    
+} // function
 
 /**
  * \class INIReader The config parser class, this parses the INI file for config values

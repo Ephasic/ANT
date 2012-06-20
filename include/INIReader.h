@@ -32,6 +32,7 @@ public:
     // Construct INIReader and parse given filename. See ini.h for more info
     // about the parsing.
     INIReader(const Flux::string&);
+    Flux::vector Modules;
 
     // Get a string value from INI file, returning default_value if not found.
     Flux::string Get(const Flux::string&, const Flux::string&, const Flux::string&);
@@ -70,13 +71,13 @@ public:
   Flux::string PidFile;
   Flux::string UserPass;
   Flux::string ModuleDir;
-  Flux::vector Modules;
   Flux::string xmlrpcbindip;
   Flux::string NameServer;
   Flux::string sqlpass;
   Flux::string sqlhost;
   Flux::string sqldb;
   Flux::string sqluser;
+  Flux::vector Modules;
   int BurstRate;
   int SendQLines;
   int SendQRate;
