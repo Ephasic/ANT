@@ -408,7 +408,6 @@ void BotConfig::Read()
   this->LogChannel 	= this->Parser->Get("Modules", "LogChannel","");
   this->PidFile 	= this->Parser->Get("Bot","PID File","navn.pid");
   this->ModuleDir 	= this->Parser->Get("Modules", "ModuleDir", "");
-  this->Modules 	= this->Parser->modules;
   this->xmlrpcbindip 	= this->Parser->Get("XML-RPC", "BindAddress", "0.0.0.0");
   this->LogTime 	= this->Parser->GetInteger("Log", "Log Time", 0);
   this->xmlrpcport 	= this->Parser->GetInteger("XML-RPC", "Port", 12345);
@@ -433,5 +432,6 @@ void BotConfig::Read()
   this->SendQLines	= this->Parser->GetInteger("SendQ", "Lines", 5);
   this->SendQRate	= this->Parser->GetInteger("SendQ", "Rate", 5);
   this->SendQEnabled	= this->Parser->GetBoolean("SendQ", "Enabled", true);
+  this->Modules 	= this->Parser->Modules;
 }
 

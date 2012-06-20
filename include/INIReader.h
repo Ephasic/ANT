@@ -28,7 +28,6 @@
 class INIReader
 {
 public:
-  Flux::vector modules;
     // Construct INIReader and parse given filename. See ini.h for more info
     // about the parsing.
     INIReader(const Flux::string&);

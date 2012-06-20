@@ -343,34 +343,31 @@ void GarbageCollect()
   {
     Network *n = it->second;
     ++it;
-    if(n)
-    {
-      n->Disconnect("Shutting down.");
-      
-      // Clean up any channel pointers for the network and clear the map
-      if(!n->ChanMap.empty())
-	for(Flux::insensitive_map<Channel*>::iterator cit = n->ChanMap.begin(),
-	  cit_end = n->ChanMap.end(); cit != cit_end; ++cit)
-	{
-	  Channel *c = cit->second;
-	  ++cit;
-	  DeleteZero(c);
-	}
+    n->Disconnect("Shutting down.");
 
-      // Clean up any user pointers for the network and clear the map
-      if(!n->UserNickList.empty())
-	for(Flux::insensitive_map<User*>::iterator uit = n->UserNickList.begin(),
-	  uit_end = n->UserNickList.end(); uit != uit_end;)
-	{
-	  User *u = uit->second;
-	  ++uit;
-	  DeleteZero(u);
-	}
+    // Clean up any channel pointers for the network and clear the map
+    if(!n->ChanMap.empty())
+      for(Flux::insensitive_map<Channel*>::iterator cit = n->ChanMap.begin(),
+	cit_end = n->ChanMap.end(); cit != cit_end; ++cit)
+      {
+	Channel *c = cit->second;
+	++cit;
+	DeleteZero(c);
+      }
 
-	n->ChanMap.clear();
-	n->UserNickList.clear();
-	DeleteZero(n);
-    }
+    // Clean up any user pointers for the network and clear the map
+    if(!n->UserNickList.empty())
+      for(Flux::insensitive_map<User*>::iterator uit = n->UserNickList.begin(),
+	uit_end = n->UserNickList.end(); uit != uit_end;)
+      {
+	User *u = uit->second;
+	++uit;
+	DeleteZero(u);
+      }
+
+      n->ChanMap.clear();
+      n->UserNickList.clear();
+      DeleteZero(n);
   }
   Networks.clear();
 
@@ -384,8 +381,12 @@ void GarbageCollect()
   ModuleHandler::SanitizeRuntime();
 
   // oh noes! lost pointers!
-  for(std::vector<Base*>::iterator it = BaseReferences.begin(), it_end = BaseReferences.end(); it != it_end; ++it)
-    Log(LOG_MEMORY) << "\033[22;33m[WARNING]" << (Config?Config->LogColor:"\033[0m") << " Unfreed pointer: @" << *it;
-//     DeleteZero(*it);
-//   BaseReferences.clear();
+  for(std::vector<Base*>::iterator it = BaseReferences.begin(), it_end = BaseReferences.end(); it != it_end; )
+  {
+    Base *b = *it;
+    ++it;
+    Log(LOG_MEMORY) << "Deleting lost pointer: @" << b;
+    DeleteZero(b);
+  }
+  BaseReferences.clear();
 }
