@@ -142,51 +142,16 @@ Flux::string CreateFileString(const Flux::vector &files)
   return "";
 }
 
-/**************** Throttling ******************/
-
-// Someone just please clean this up?
-std::queue<std::pair<Flux::string, CommitMessage>> throttledmessages;
-class ThrottleTimer : public Timer
-{
-  void CleanQueue()
-  {
-    while(!throttledmessages.empty() && ++throttlecount <= 5)
-    {
-      std::pair<Flux::string, CommitMessage> msgdata = throttledmessages.front();
-      throttledmessages.pop();
-
-      for(auto it : msgdata.second.Channels)
-	it->SendMessage(msgdata.first);
-    }
-  }
-public:
-  int throttlecount;
-  ThrottleTimer():Timer(5), throttlecount(0)
-  {
-    // something here?
-  }
-
-  void Tick(time_t)
-  {
-    this->throttlecount = 0;
-    this->CleanQueue();
-    Log(LOG_TERMINAL) << "Throttle reset!";
-  }
-};
-
 /**************** Module Class *******************/
 
 class CIA_RULESET_MOD : public Module
 {
   CommitMessage Message;
-  ThrottleTimer *tt;
 public:
-  CIA_RULESET_MOD(const Flux::string &Name):Module(Name, MOD_NORMAL), tt(nullptr)
+  CIA_RULESET_MOD(const Flux::string &Name):Module(Name, MOD_NORMAL)
   {
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
-//     Implementation i[] = { I_OnCommit };
-//     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
     ModuleHandler::Attach(I_OnCommit, this);
   }
 
@@ -239,13 +204,7 @@ public:
       Flux::string formattedmessgae = Flux::string(ss.str()).strip('\"').strip();
 
       //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
-      if(!tt)
-	  tt = new ThrottleTimer();
-      
-      if(++tt->throttlecount <= 5)
-	c->SendMessage(formattedmessgae);
-      else
-	throttledmessages.push(std::make_pair(formattedmessgae, msg));
+      c->SendMessage(formattedmessgae);
     }
   }
 };
