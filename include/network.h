@@ -92,6 +92,18 @@ public:
   Flux::string servername;
   int CurHost;
 
+  // Check if that network accepts that chan type.
+  inline bool IsValidChannel(const Flux::string &chan)
+  {
+    for(unsigned i = 0; i < isupport.ChanTypes.size(); ++i)
+    {
+      char ch = isupport.ChanTypes[i];
+      if (chan[0] != ch)
+	return false;
+    }
+    return true;
+  }
+
   void Tick(time_t);
   void Sync();
   bool IsSynced() const;
@@ -126,24 +138,5 @@ public:
   void OnError(const Flux::string&);
 };
 
-// class SendQTimer : public Timer
-// {
-//   int sent;
-//   Network *n;
-// public:
-//   struct SendQobject
-//   {
-//     // The Queue of all messages, buffered;
-//     std::queue<Flux::string> SendQ;
-//     // Number of lines sent before burst
-//     int linessent;
-//     // Have we sent the burst yet?
-//     inline bool HasBurst() const { return (linessent <= Config->BurstRate); }
-//   } sqo;
-//   
-//   SendQTimer(Network*);
-//   ~SendQTimer();
-//   void Tick(time_t);
-// };
 
 #endif

@@ -90,7 +90,7 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
     if(!protocoldebug)
       Log(LOG_TERMINAL) << '<' << u->nick << '-' << receiver << "> " << Source.params[1];
 
-    if(!IsValidChannel(receiver))
+    if(!Source.n->IsValidChannel(receiver))
     {
       Source.Reply("Unknown command \2%s\2", Flux::Sanitize(params2[0]).c_str());
       FOREACH_MOD(I_OnPrivmsg, OnPrivmsg(u, params2));
@@ -139,7 +139,7 @@ void ProcessCommand(CommandSource &Source, Flux::vector &params2, const Flux::st
   else
   {
     Command *com = FindCommand(params2[0], C_PRIVATE);
-    if(com && !IsValidChannel(receiver) && command == "PRIVMSG")
+    if(com && !Source.n->IsValidChannel(receiver) && command == "PRIVMSG")
     {
       Source.command = com->name;
       params2.erase(params2.begin());
@@ -316,7 +316,7 @@ void process(Network *n, const Flux::string &buffer)
   if(command.equals_ci("PART"))
   {
     FOREACH_MOD(I_OnPart, OnPart(u, c, params[0]));
-    if(IsValidChannel(receiver) && c && u && u == n->b)
+    if(n->IsValidChannel(receiver) && c && u && u == n->b)
      delete c; //This should remove the channel from all users if the bot is parting..
     else
     {
@@ -344,7 +344,7 @@ void process(Network *n, const Flux::string &buffer)
 
   if(command.equals_ci("NOTICE") && !source.find('.'))
   {
-    if(!IsValidChannel(receiver))
+    if(!n->IsValidChannel(receiver))
     {
       FOREACH_MOD(I_OnNotice, OnNotice(u, params2));
     }
@@ -356,12 +356,12 @@ void process(Network *n, const Flux::string &buffer)
 
   if(command.equals_ci("MODE"))
   {
-    if(IsValidChannel(params[0]) && params.size() == 2)
+    if(n->IsValidChannel(params[0]) && params.size() == 2)
     {
       FOREACH_MOD(I_OnChannelMode, OnChannelMode(u, c, params[1]));
     }
 
-    else if(IsValidChannel(params[0]) && params.size() == 3)
+    else if(n->IsValidChannel(params[0]) && params.size() == 3)
     {
       FOREACH_MOD(I_OnChannelOp, OnChannelOp(u, c, params[1], params[2]));
     }
@@ -376,7 +376,7 @@ void process(Network *n, const Flux::string &buffer)
   {
     if(!u && n && (!nickname.empty() || !uident.empty() || !uhost.empty()))
       u = new User(n, nickname, uident, uhost);
-    else if(!c && n && IsValidChannel(receiver))
+    else if(!c && n && n->IsValidChannel(receiver))
       c = new Channel(n, receiver);
     else if(!u->findchannel(c->name))
       u->AddChan(c);

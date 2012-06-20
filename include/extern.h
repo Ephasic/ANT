@@ -146,7 +146,7 @@ extern time_t starttime;
 extern uint32_t usercnt, maxusercnt;
 extern Flux::string binary_path, bot_bin, binary_dir, quitmsg, LastBuf;
 extern const Flux::string VERSION_LONG;
-extern bool protocoldebug, dev, nofork, quitting, nocolor, istempnick, memdebug;
+extern bool protocoldebug, dev, nofork, quitting, nocolor, istempnick, memdebug, readonly;
 
 /* function extern's */
 extern Flux::string getprogdir(const Flux::string&, Flux::string &Bot_bin);
@@ -158,7 +158,6 @@ extern Flux::string printfify(const char*, ...);
 #define CURR_LOCATION printfify("%s:%s", __FILE__, __PRETTY_FUNCTION__)
 extern Flux::string CondenseVector(const Flux::vector&);
 extern int randint(int x, int y);
-extern bool IsValidChannel(const Flux::string&);
 extern bool InTerm();
 extern bool BlakeHash(Flux::string&, const Flux::string&, const Flux::string&);
 extern Flux::vector ParamitizeString(const Flux::string&, char);

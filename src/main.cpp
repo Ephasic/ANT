@@ -49,7 +49,7 @@ jmp_buf sigbuf;
 // Junk Global variables that are NEEDED
 char **my_av, **my_envp;
 bool nofork = false, dev = false, protocoldebug = false, quitting = false, nocolor = false, istempnick = false;
-bool memdebug = false;
+bool memdebug = false, readonly = false;
 Flux::string binary_path, bot_bin, quitmsg, server_name, LastBuf, binary_dir;
 char segv_location[255];
 time_t starttime = 0;
@@ -65,6 +65,14 @@ void GarbageCall()
   FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
 }
 
+// Save Database call
+void SaveDatabases()
+{
+  Log() << "Saving Databases.";
+  FOREACH_MOD(I_OnSaveDatabases, OnSaveDatabases());
+}
+
+// Entry Point
 int main (int argcx, char** argvx, char *envp[])
 {
  SET_SEGV_LOCATION();
@@ -76,7 +84,8 @@ int main (int argcx, char** argvx, char *envp[])
     time_t last_check = time(NULL);
     
     new tqueue(GarbageCall, 120, time(NULL), true);
-    new tqueue(SaveDatabases, 60, time(NULL), true);
+    if(!readonly)
+      new tqueue(SaveDatabases, 60, time(NULL), true);
 
 //     del_on_exit = new tqueue(SaveDatabases, 60, time(NULL), true); // Start the Database Save timer.
     GProto = new GlobalProto(); // Global protocol class

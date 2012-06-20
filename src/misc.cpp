@@ -172,19 +172,6 @@ Flux::string Flux::Sanitize(const Flux::string &string)
     ret = ret.replace_all_cs(special[i].character, special[i].replace);
   return ret.c_str();
 }
-/**
- * \fn bool IsValadChannel(const Flux::string nerp)
- * This function returns if the channel is valid or not.
- * \param nerp Channel sring to be tested.
- * \return True if the Flux::string is a valid channel, false otherwise.
- */
-bool IsValidChannel(const Flux::string &chan)
-{
- if (chan[0] != '#')
-    return false;
-
- return true;
-}
 
 Flux::string printfify(const char *fmt, ...)
 {
@@ -248,12 +235,6 @@ void RenameBot(Network *n, const Flux::string &nick)
   }
 
   n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
-}
-
-void SaveDatabases()
-{
-  Log() << "Saving Databases.";
-  FOREACH_MOD(I_OnSaveDatabases, OnSaveDatabases());
 }
 
 /**

@@ -15,10 +15,10 @@ Channel::Channel(Network *net, const Flux::string &nname, time_t ts): name(nname
 {
   if(nname.empty())
     throw CoreException("I don't like empty channel names in my channel constructor >:d");
-  if(!IsValidChannel(nname))
-    throw CoreException("An Invalid channel was passed into the Channel constructor :<");
   if(!net)
     throw CoreException("Channel \""+nname+"\" created with no network!");
+  if(!net->IsValidChannel(nname))
+    throw CoreException("An Invalid channel was passed into the Channel constructor :<");
 
   this->n->ChanMap[this->name] = this;
   Log(LOG_DEBUG) << "Created new channel '" << nname << "' on " << net->name;

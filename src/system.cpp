@@ -259,6 +259,12 @@ void startup(int argc, char** argv, char *envp[])
     Log(LOG_DEBUG) << "ANT Commit System is started With No Forking enabled.";
   }
 
+  if(args.HasArg("readonly", 'r'))
+  {
+    readonly = true;
+    Log(LOG_DEBUG) << "ANT Commit System is started With read only databases enabled.";
+  }
+
   if(args.HasArg("memorydebug", 'm'))
   {
     memdebug = true;
@@ -275,6 +281,7 @@ void startup(int argc, char** argv, char *envp[])
     Log(LOG_TERMINAL) << "-p, --protocoldebug";
     Log(LOG_TERMINAL) << "-c, --nocolor";
     Log(LOG_TERMINAL) << "-m, --memorydebug";
+    Log(LOG_TERMINAL) << "-r, --readonly";
     Log(LOG_TERMINAL) << "-v, --version";
     Log(LOG_TERMINAL) << "See --version for full version information";
     Log(LOG_TERMINAL) << "This bot does have Epic Powers.";

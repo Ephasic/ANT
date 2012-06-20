@@ -22,7 +22,7 @@ public:
   {
     User *u = source.u;
     Flux::string chan = params[1];
-    if(!IsValidChannel(chan))
+    if(!source.n->IsValidChannel(chan))
       source.Reply(CHANNEL_X_INVALID, chan.c_str());
     else{
       Log(u) << "made " << source.n->b->nick << " join " << chan << " on network " << source.n->name;
@@ -58,7 +58,7 @@ public:
       return;
     
     User *u = source.u;
-    if(!IsValidChannel(chan))
+    if(!source.n->IsValidChannel(chan))
      source.Reply(CHANNEL_X_INVALID, chan.c_str());
     else
     {
