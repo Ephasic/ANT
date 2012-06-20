@@ -68,8 +68,11 @@ void GarbageCall()
 // Save Database call
 void SaveDatabases()
 {
-  Log() << "Saving Databases.";
-  FOREACH_MOD(I_OnSaveDatabases, OnSaveDatabases());
+  if(!readonly)
+  {
+    Log() << "Saving Databases.";
+    FOREACH_MOD(I_OnSaveDatabases, OnSaveDatabases());
+  }
 }
 
 // Entry Point
