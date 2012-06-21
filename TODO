@@ -51,6 +51,7 @@ ANT 1.0.0
 
 [+] Add more event handlers (FOREACH_MOD)
 [?] Some kind of timed-queue callback system
+[ ] Redo the whole User-Channel tracking system so it does not segfault the bot.
 [ ] Update doxygen documentation
 [+] Fix parts of the core that are designed for 1 network only (like events)
 [ ] Wtf is this Module Priority system? fix that

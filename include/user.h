@@ -24,9 +24,17 @@ class User : public Base
 public:
   User(Network*, const Flux::string&, const Flux::string&, const Flux::string&, const Flux::string &realname = "", const Flux::string &server ="");
   virtual ~User();
+  
   CList ChannelList;
-  Flux::string nick, host, realname, ident, fullhost, server;
+  Flux::string nick;
+  Flux::string host;
+  Flux::string realname;
+  Flux::string ident;
+  Flux::string fullhost;
+  Flux::string server;
   Network *n;
+
+  // Functions
   void AddChan(Channel*);
   void DelChan(Channel*);
   Channel *findchannel(const Flux::string&);

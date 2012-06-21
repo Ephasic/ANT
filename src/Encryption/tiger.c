@@ -143,7 +143,7 @@ extern word64 table[4*256];
 }
 
 /* The compress function is a function. Requires smaller cache?    */
-tiger_compress(word64 *str, word64 state[3])
+void tiger_compress(word64 *str, word64 state[3])
 {
   tiger_compress_macro(((word64*)str), ((word64*)state));
 }
@@ -156,7 +156,7 @@ tiger_compress(word64 *str, word64 state[3])
   tiger_compress_macro(((word64*)str), ((word64*)state))
 #endif
 
-tiger(word64 *str, word64 length, word64 res[3])
+void tiger(word64 *str, word64 length, word64 res[3])
 {
   register word64 i, j;
   unsigned char temp[64];

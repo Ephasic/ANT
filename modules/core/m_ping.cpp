@@ -19,18 +19,27 @@ public:
     for(auto it : Networks)
     {
       Network *n = it.second;
-      if(n->IsSynced())
+      if(n->IsSynced() && n->b)
       {
-	if(!n->s->SentPing)
-	{
-	  n->b->ircproto->ping("PING :%i", static_cast<int>(time(NULL)));
+// 	if(n->s->SentPing)
+// 	{
+// 	  n->s->SetDead(true);
+// 	  Log(LOG_DEBUG) << n->name << " timed out, reconnecting.";
+// 	}
+// 	else
+// 	{
+	  #ifdef HAVE_GETTIMEOFDAY
+	  struct timeval tv;
+	  gettimeofday(&tv, NULL);
+
+	  // Milisecond lag times :D
+	  n->b->ircproto->ping("%i.%06d", tv.tv_sec, static_cast<int>(tv.tv_usec));
+	  #else
+	  n->b->ircproto->ping("%i", static_cast<int>(time(NULL)));
+	  #endif
 	  n->s->SentPing = true;
-	}
-	else
-	{
-	  n->s->SetDead(true);
-	  Log(LOG_DEBUG) << n->name << " timed out, reconnecting.";
-	}
+
+// 	}
       }
     }
   }
@@ -48,13 +57,26 @@ public:
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);
   }
+  
   void OnPong(const std::vector<Flux::string> &params, Network *n)
   {
-     Flux::string ts = ParamitizeString(params[1], ':')[1];
-     int lag = time(NULL)-(int)ts;
-     n->s->SentPing = false;
+    n->s->SentPing = false;
+#ifdef HAVE_GETTIMEOFDAY
+    Flux::string timestamp = params[1].substr(0, params[1].find('.'));
+    Flux::string miliseconds = params[1].substr(params[1].find('.')+1);
 
-     Log(LOG_RAWIO) << lag << " sec lag (" << ts << " - " << time(NULL) << ')';
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    int secondlag = tv.tv_sec - static_cast<int>(timestamp);
+    int milisecond = tv.tv_usec - static_cast<int>(miliseconds);
+    Log(LOG_RAWIO) << secondlag << '.' << milisecond << " sec lag (" << params[1] << " - " << tv.tv_sec << '.' << tv.tv_usec << ")";
+#else
+    Flux::string ts = params[1];
+    int lag = time(NULL) - static_cast<int>(ts);
+
+    Log(LOG_RAWIO) << lag << " sec lag (" << ts << " - " << time(NULL) << ')';
+#endif
   }
   
   void OnPing(const std::vector<Flux::string> &params, Network *n)

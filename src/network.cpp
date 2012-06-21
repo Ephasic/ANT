@@ -156,9 +156,9 @@ Network *FindNetworkByHost(const Flux::string &name)
 
 void Network::Tick(time_t)
 {
-  Log(LOG_RAWIO) << this->name << ": Ping Timeout";
   if(this->s && this->s->GetStatus(SF_CONNECTED) && this->s->SentPing)
   {
+    Log(LOG_RAWIO) << this->name << ": Ping Timeout";
     this->s->SetDead(true);
     new ReconnectTimer(Config->RetryWait, this);
   }
