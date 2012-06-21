@@ -48,7 +48,7 @@ void ReconnectTimer::Tick(time_t)
 /****************** Socket Engine *************************/
 /**********************************************************/
 
-NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet), SentPing(false)
+NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet), pings(0)
 {
   if(!tnet)
     throw CoreException("Network socket created with no network? lolwut?");

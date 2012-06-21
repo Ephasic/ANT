@@ -37,7 +37,7 @@ public:
 	  #else
 	  n->b->ircproto->ping("%i", static_cast<int>(time(NULL)));
 	  #endif
-	  n->s->SentPing = true;
+	  n->s->pings++;
 
 // 	}
       }
@@ -60,7 +60,7 @@ public:
   
   void OnPong(const std::vector<Flux::string> &params, Network *n)
   {
-    n->s->SentPing = false;
+    n->s->pings = 0;
 #ifdef HAVE_GETTIMEOFDAY
     Flux::string timestamp = params[1].substr(0, params[1].find('.'));
     Flux::string miliseconds = params[1].substr(params[1].find('.')+1);
@@ -81,7 +81,7 @@ public:
   
   void OnPing(const std::vector<Flux::string> &params, Network *n)
   {
-    n->s->SentPing = false;
+    n->s->pings = 0;
     n->s->Write("PONG :%s\n", params[0].c_str());
   }
 };

@@ -131,7 +131,7 @@ public:
   NetworkSocket(Network*);
   ~NetworkSocket();
   Network *net;
-  bool SentPing;
+  int pings;
   bool Read(const Flux::string&);
   bool ProcessWrite();
   void OnConnect();
