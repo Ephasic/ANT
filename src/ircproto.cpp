@@ -80,6 +80,8 @@ public:
     
     if(sqo.SendQ.empty())
       sqo.linessent = 0;
+    else
+      Log(LOG_RAWIO) << "SendQ Buffer Size: " << sqo.SendQ.size();
     sent = 0;
   }
 };
