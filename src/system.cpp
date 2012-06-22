@@ -344,7 +344,6 @@ void GarbageCollect()
   // Unload all modules
   ModuleHandler::UnloadAll();
 
-
   // Clean up any network pointers and clear the map
   for(Flux::insensitive_map<Network*>::iterator it = Networks.begin(), it_end = Networks.end(); it != it_end;)
   {
@@ -396,4 +395,8 @@ void GarbageCollect()
     DeleteZero(b);
   }
   BaseReferences.clear();
+  // Vectors don't always clear, so clear them here.
+  std::vector<Base*>().swap(BaseReferences);
 }
+
+
