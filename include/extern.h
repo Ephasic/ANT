@@ -204,6 +204,77 @@ template<typename T> static void DeleteZero(T*&n)
 
 /**************************************************************/
 /* This is the only #define allowed at the bottom of the file */
+#ifdef HAVE_SETJMP_H
+// We have setjmp, try and recover from Segmentation Faults
+#define FOREACH_MOD(y, x) \
+if(true) \
+{ \
+    EventsVector::iterator safei; \
+    for (auto _i = ModuleHandler::EventHandlers[y].begin(); _i != ModuleHandler::EventHandlers[y].end(); ) \
+    { \
+       safei = _i; \
+       ++safei; \
+       try \
+       { \
+	  SET_SEGV_LOCATION(); \
+	  if(setjmp(sigbuf) == 0) \
+	  { \
+	    LastRunModule = *_i; \
+	    (*_i)->x ; \
+	  } \
+	  else \
+	  {\
+	    throw ModuleException(printfify("%s failed to run an event. Segmentation fault occured.", LastRunModule->name.c_str())); \
+	  } \
+       } \
+       catch (const ModuleException &modexcept) \
+       { \
+	  Log() << "Exception caught: " << modexcept.GetReason(); \
+       } \
+        _i = safei; \
+    } \
+} \
+else \
+      static_cast<void>(0)
+
+#define FOREACH_RESULT(y, x, v) \
+if (true) \
+{ \
+  EventsVector::iterator safei; \
+  v = EVENT_CONTINUE; \
+  for (EventsVector::iterator _i = ModuleHandler::EventHandlers[y].begin(); _i != ModuleHandler::EventHandlers[y].end();) \
+    { \
+      safei = _i; \
+      ++safei; \
+      try \
+      { \
+	if(setjmp(sigbuf) == 0) \
+	{ \
+	  SET_SEGV_LOCATION(); \
+	  EventResult res = (*_i)->x ; \
+	  if (res != EVENT_CONTINUE) \
+	  { \
+	    v = res; \
+	    break; \
+	  } \
+	} \
+	else \
+	{ \
+	  throw ModuleException(printfify("%s failed to run an event. Segmentation fault occured.", LastRunModule->name.c_str())); \
+	} \
+      } \
+      catch (const ModuleException &modexcept) \
+      { \
+	Log() << "Exception caught: " << modexcept.GetReason(); \
+      } \
+      _i = safei; \
+    } \
+} \
+else \
+  static_cast<void>(0)
+
+#else // HAVE_SETJMP_H
+// We don't have setjmp
 #define FOREACH_MOD(y, x) \
 if(true) \
 { \
@@ -254,6 +325,8 @@ if (true) \
 } \
 else \
   static_cast<void>(0)
+
+#endif // HAVE_SETJMP_H
 
 
 #ifndef __GXX_EXPERIMENTAL_CXX0X__
