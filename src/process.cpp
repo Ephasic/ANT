@@ -9,6 +9,8 @@
  * Based on the original code of Anope by The Anope Team.
  */
 
+// Abandon hope, all ye who enter here!
+
 #include "user.h"
 #include "bot.h"
 #include "module.h"
