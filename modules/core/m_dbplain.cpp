@@ -132,8 +132,9 @@ public:
 
       if(n && !n->s)
       {
-	new ReconnectTimer(0, n); //Connect to networks.
+	new ReconnectTimer(0, n); // Connect to networks.
 	//n->Connect(); // FIXME: Why can't I just call this?
+	//SocketEngine::Process(true);
       }
     }
 

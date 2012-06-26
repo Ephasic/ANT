@@ -544,8 +544,9 @@ public:
   static void ClearWritable(Socket *s);
 
   /** Read from sockets and do things
+   * @param fast Process the sockets without the normal iteration blocking
    */
-  static void Process();
+  static void Process(bool fast = false);
 };
 
 #include "dns.h"

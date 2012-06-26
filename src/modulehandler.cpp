@@ -284,11 +284,13 @@ void LoadModules()
   for(unsigned i = 0; i < Config->Modules.size(); ++i)
   {
     ModErr e = ModuleHandler::LoadModule(Config->Modules[i]);
+    //SocketEngine::Process(true);
     if(e != MOD_ERR_OK)
     {
       Log() << "\n\033[0m[\033[1;31m*\033[0m] " << Config->Modules[i] << ": " << DecodeModErr(e) << Config->LogColor << "\n";
       throw CoreException("Module Load Error");
     }
   }
+  TimerManager::TickTimers(time(NULL));
 }
 /******************End Configuration variables********************/

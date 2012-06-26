@@ -82,7 +82,6 @@ int main (int argcx, char** argvx, char *envp[])
   try
   {
     int loopcount = 0;
-//     tqueue *del_on_exit;
     startup(argcx, argvx, envp);
     time_t last_check = time(NULL);
     
@@ -90,7 +89,7 @@ int main (int argcx, char** argvx, char *envp[])
     if(!readonly)
       new tqueue(SaveDatabases, 60, time(NULL), true);
 
-//     del_on_exit = new tqueue(SaveDatabases, 60, time(NULL), true); // Start the Database Save timer.
+    new tqueue(SaveDatabases, 60, time(NULL), true); // Start the Database Save timer.
     GProto = new GlobalProto(); // Global protocol class
 
     while(!quitting)
@@ -118,7 +117,6 @@ int main (int argcx, char** argvx, char *envp[])
     } // while loop ends here
     // clean up for exit
     GarbageCollect();
-//     delete del_on_exit;
     Log(LOG_TERMINAL) << "Bye!\033[0m";
   }//try ends here
   catch(const CoreException& e)

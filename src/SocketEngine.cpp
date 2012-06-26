@@ -73,12 +73,12 @@ void SocketEngine::ClearWritable(Socket *s)
   s->SetStatus(SF_WRITABLE, false);
 }
 
-void SocketEngine::Process()
+void SocketEngine::Process(bool fast)
 {
   fd_set rfdset = ReadFDs, wfdset = WriteFDs, efdset = ReadFDs;
   timeval tval;
-  tval.tv_sec = Config->SockWait;
-  tval.tv_usec = 0;
+  tval.tv_sec = fast ? 0 : Config->SockWait;
+  tval.tv_usec = fast ? 1 : 0;
 
   int sresult = select(MaxFD + 1, &rfdset, &wfdset, &efdset, &tval);
 

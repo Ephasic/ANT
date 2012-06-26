@@ -134,3 +134,11 @@ bool TimerManager::TimerComparison(Timer *one, Timer *two)
 {
 	return one->GetTimer() < two->GetTimer();
 }
+
+/** Clear the timers and shutdown the timer manager
+ */
+void TimerManager::Shutdown()
+{
+	TimerManager::Timers.clear();
+	std::vector<Timer*>().swap(TimerManager::Timers);
+}

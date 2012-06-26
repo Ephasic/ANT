@@ -120,6 +120,10 @@ class TimerManager : public Base
 	/** Compares two timers
 	 */
 	static bool TimerComparison(Timer *one, Timer *two);
+
+	/** Clears the timers and shutdown the timer manager
+	*/
+	static void Shutdown();
 };
 
 #endif // TIMERS_H

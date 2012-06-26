@@ -385,6 +385,11 @@ void GarbageCollect()
   if(Config)
     SocketEngine::Shutdown();
   ModuleHandler::SanitizeRuntime();
+ 
+  // Shutdown the timer manager and clear the vector of it's memory space
+  // NOTE: this does not delete timers that are still active, that will
+  // be handled below by deleting lost pointers
+  TimerManager::Shutdown();
 
   // oh noes! lost pointers!
   for(std::vector<Base*>::iterator it = BaseReferences.begin(), it_end = BaseReferences.end(); it != it_end; )
