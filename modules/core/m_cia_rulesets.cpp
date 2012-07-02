@@ -195,10 +195,13 @@ public:
       Log(LOG_DEBUG) << "Announcing in " << c->name << " (" << c->n->name << ')';
 
       // Build the commit message with stringstream
+      // TODO: Make this a formatted string and interpret that.
       std::stringstream ss;
       ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
       ss << NORMAL << BOLD << '[' << this->GetCommitData("branch") << "] " << NORMAL << YELLOW << 'r'
       << this->GetCommitData("revision");
+      if(!this->GetCommitData("insertions").empty() && !this->GetCommitData("deletions").empty())
+      	ss << NORMAL << " ~" << PURPLE << " " << this->GetCommitData("insertions") << "(+) " << this->GetCommitData("deletions") << "(-)";
       ss << NORMAL << BOLD << " | " << NORMAL << AQUA << files << NORMAL << ": " << this->GetCommitData("log"); //<< files;
 
       Flux::string formattedmessgae = Flux::string(ss.str()).strip('\"').strip();

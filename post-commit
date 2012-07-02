@@ -257,6 +257,10 @@ $message .= <<EM
            </files>
            <log>$logmsg - $shorturl</log>
        </commit>
+       <stats>
+          <insertions>550</insertions>
+          <deletions>324</deletions>
+       </stats>
    </body>
 </message>
 EM

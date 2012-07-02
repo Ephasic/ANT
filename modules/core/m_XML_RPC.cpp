@@ -306,6 +306,15 @@ void xmlrpcclient::HandleMessage()
 	  message.Files.erase(std::unique(message.Files.begin(), message.Files.end()), message.Files.end());
 	}
       }
+
+      node = mnode->first_node("stats", 0, true);
+      if(node)
+      {
+	if(node->first_node("insertions", 0, true))
+	  message.info["insertions"] = node->first_node("insertions", 0, true)->value();
+	if(node->first_node("deletions", 0, true))
+	  message.info["deletions"] = node->first_node("deletions", 0, true)->value();
+      }
     }
 
     Log(LOG_TERMINAL) << "\n*** COMMIT INFO! ***";

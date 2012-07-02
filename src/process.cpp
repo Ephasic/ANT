@@ -9,7 +9,8 @@
  * Based on the original code of Anope by The Anope Team.
  */
 
-// Abandon hope, all ye who enter here!
+// Abandon all hope, ye who enter here!
+// below here be scary parsing related things!
 
 #include "user.h"
 #include "bot.h"
@@ -41,6 +42,7 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan)
     Flux::vector &params = source.params;
     if(params.size() < 8)
       return;
+    
     Flux::string channel = params[1];
     Flux::string Ident = params[2];
     Flux::string Host = params[3];
@@ -399,9 +401,7 @@ void process(Network *n, const Flux::string &buffer)
   Source.raw = buffer;
   /**************************************/
   if(command == "352")
-  {
     ProcessJoin(Source, c->name);
-  }
 
   if(source.empty() || message.empty() || params2.empty())
     return;
