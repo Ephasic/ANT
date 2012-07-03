@@ -44,6 +44,7 @@ Flux::map<Flux::vector> PosixCommonPrefix(const Flux::vector &files)
   return CommonDirectories;
 }
 
+// I swear, this function has some of the worst function calls ever.
 Flux::string BuildFileString(Flux::vector files)
 {
   Flux::map<Flux::vector> CommonDirectories = PosixCommonPrefix(files);
@@ -54,13 +55,27 @@ Flux::string BuildFileString(Flux::vector files)
   // Only one directory
   if(CommonDirectories.size() == 1)
   {
-    prefix = CommonDirectories.begin()->first;
-    ret = printfify("%d files", CommonDirectories.begin()->second.size());
+    // there's only one file
+    if(CommonDirectories.begin()->second.size() == 1)
+      prefix = CommonDirectories.begin()->first + "/" + (*CommonDirectories.begin()->second.begin());
+    // Oh no! two files! wat do?!
+    else if(CommonDirectories.begin()->second.size() == 2)
+    {
+      prefix = CommonDirectories.begin()->first;
+      ret = CommonDirectories.begin()->second[0] + " " + CommonDirectories.begin()->second[1];
+    }
+    else
+    { // TOO MANY FILEZ!!!
+      prefix = CommonDirectories.begin()->first;
+      ret = printfify("%d files", CommonDirectories.begin()->second.size());
+    }
   }
-  else
+  else // Y U CHANGE SO MUCH?!
     ret = printfify("%u files in %u dirs", files.size(), CommonDirectories.size());
-  
-  return printfify("%s(%s)", (prefix.empty() ? "" : Flux::string(prefix+" ").c_str()), ret.c_str());
+
+  // my god it makes my eyes hurt!
+  return printfify("%s%s", (prefix.empty() ? "" : Flux::string(prefix+" ").c_str()),
+		   (ret.empty() ? "" : printfify("(%s)", ret.c_str()).c_str()));
 }
 
 /**************** Module Class *******************/
@@ -136,6 +151,7 @@ public:
     // FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
 
+    // Make the file list not spam IRC
     Flux::string files = BuildFileString(msg.Files);
 
     for(auto it : msg.Channels)
@@ -143,13 +159,11 @@ public:
       Channel *c = it;
       Log(LOG_DEBUG) << "Announcing in " << c->name << " (" << c->n->name << ')';
 
-      // Build the commit message with stringstream
-      // TODO: Make this a formatted string and interpret that.
-      Flux::string message =
-      printfify("\0034\002{project}: \017\0037{author} * \017\002[{branch}]\017\0038 r{revision}"
-		"\017 ~\0036 {insertions}(+) {deletions}(-)\017\002 | \017\00310%s\017: {log}", files.c_str());
+      // Build the commit message
+      Flux::string message = "\0034\002{project}: \017\0037{author} * \017\002[{branch}]\017\0038 r{revision}"
+			    "\017 ~\0036 {insertions}(+) {deletions}(-)\017\002 | \017\00310{files}\017: {log}";
 
-      Flux::string formattedmessgae = FormatString(message);
+      Flux::string formattedmessgae = FormatString(message).replace_all_ci("{files}", files);
 
       //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
       c->SendMessage(formattedmessgae);
