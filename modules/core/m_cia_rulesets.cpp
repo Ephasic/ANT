@@ -18,61 +18,12 @@
 
 
 // Calculate files to announce.
-// FIXME: This needs to calculate directories as well
 // FIXME: This needs to be handled by the Rulesets system later on.
 // link to CIA file formatter: http://code.google.com/p/cia-vc/source/browse/trunk/cia/LibCIA/Formatters/Commit.py
 
-// FIXME: This needs some serious fixing! It should calculate directories and files the same as CIA.vc
-Flux::string BuildFileString(Flux::vector files)
-{
-  Flux::string ret;
-  if(files.size() <= 3)
-  {
-    for(auto it : files)
-    {
-      Flux::string file = it;
-      size_t slash = file.rfind("/");
-      if(slash < file.size())
-      {
-	Log(LOG_TERMINAL) << "File: " << file << " slash: " << slash;
-	Flux::string f = file.substr(slash+1);
-	ret += f + " ";
-      }
-      else
-	ret += file + " ";
-    }
-  }
-  else
-  {
-    int dirs = 0;
-    for(auto it : files)
-    {
-      Flux::string file = it;
-      size_t slash = file.rfind("/");
-
-      if(slash < file.size())
-      {
-	Flux::string dir = file.substr(0, slash);
-// 	Log(LOG_TERMINAL) << "DIR: " << dir;
-	if(!dir.empty())
-	  dirs++;
-      }
-    }
-
-    std::stringstream ss;
-    ss << "(" << files.size() << " files";
-
-    if(dirs < 0)
-      ss << " in " << dirs;
-
-    ss << " changed)";
-    //ret = "(" + value_cast<Flux::string>(files.size()) + " files" + (dirs < 0?"":" in "+dirs) + " changed)";
-    ret = ss.str();
-  }
-  ret.trim();
-  return ret;
-}
-
+// This function is to do the same thing that pythons posix.PosixCommonPrefix does
+// inside CIA.vc or whatever, It will build an array of directories with the files
+// inside them as an array
 Flux::map<Flux::vector> PosixCommonPrefix(const Flux::vector &files)
 {
   Flux::map<Flux::vector> CommonDirectories;
@@ -93,15 +44,24 @@ Flux::map<Flux::vector> PosixCommonPrefix(const Flux::vector &files)
   return CommonDirectories;
 }
 
-Flux::vector ConsolidateFiles(const Flux::vector &files)
+Flux::string BuildFileString(Flux::vector files)
 {
-  if (files.size() <= 2)
-    return files;
-
-  // TODO: make this into (%s changed, %s files) or whatever
-  return files;
+  Flux::map<Flux::vector> CommonDirectories = PosixCommonPrefix(files);
+  
+  Flux::string ret;
+  Flux::string prefix;
+  
+  // Only one directory
+  if(CommonDirectories.size() == 1)
+  {
+    prefix = CommonDirectories.begin()->first;
+    ret = printfify("%d files", CommonDirectories.begin()->second.size());
+  }
+  else
+    ret = printfify("%u files in %u dirs", files.size(), CommonDirectories.size());
+  
+  return printfify("%s(%s)", (prefix.empty() ? "" : Flux::string(prefix+" ").c_str()), ret.c_str());
 }
-
 
 /**************** Module Class *******************/
 
@@ -175,17 +135,6 @@ public:
     this->Message = msg;
     // FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
-
-    Flux::vector Files = msg.Files;
-    Flux::map<Flux::vector> paths = PosixCommonPrefix(Files);
-
-    for(Flux::map<Flux::vector>::iterator it = paths.begin(); it != paths.end(); ++it)
-    {
-      Log(LOG_TERMINAL) << "Directory \"" << it->first << "\":";
-      Flux::vector difiles = it->second;
-      for(unsigned i = 0; i < difiles.size(); ++i)
-	Log(LOG_TERMINAL) << "  " << difiles[i];
-    }
 
     Flux::string files = BuildFileString(msg.Files);
 
