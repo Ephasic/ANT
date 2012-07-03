@@ -73,74 +73,35 @@ Flux::string BuildFileString(Flux::vector files)
   return ret;
 }
 
-Flux::vector PosixCommonPrefix(Flux::vector &files)
+Flux::map<Flux::vector> PosixCommonPrefix(const Flux::vector &files)
 {
-  Flux::map<int> endings;
-  Flux::map<Flux::vector> endings2;
-  Flux::vector dirs;
-
-  for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
+  Flux::map<Flux::vector> CommonDirectories;
+  for(Flux::vector::const_iterator it = files.begin(); it != files.end(); ++it)
   {
-    Flux::string path = *it, dir, file;
-    Flux::string::size_type pos = path.rfind("/") + 1;
-    if(pos == Flux::string::npos)
-      continue;
+    Flux::string path = *it;
+    Flux::string directory = path.substr(0, path.rfind('/'));
+    Flux::string file = path.substr(path.rfind('/') + 1);
+    Log(LOG_TERMINAL) << "DIR: " << directory << " FILE: " << file;
 
-    file = path.substr(pos);
-    dir = path.erase(pos);
-    dirs.push_back(dir);
+    // Initialize the vector
+    if(CommonDirectories.find(directory) == CommonDirectories.end())
+      CommonDirectories[directory] = Flux::vector();
 
-    *it = file;
-
-    Log(LOG_TERMINAL) << "DIR: " << dir << " file: " << file << " IT: " << *it;
-
-    bool found = false;
-    for(Flux::map<int>::iterator it2 = endings.begin(); it2 != endings.end(); ++it2)
-    {
-      if(it2->first.equals_cs(dir))
-      {
-	it2->second++;
-	found = true;
-      }
-    }
-
-    for(Flux::map<Flux::vector>::iterator it2 = endings2.begin(); it2 != endings2.end(); ++it2)
-    {
-      if(it2->first.equals_cs(dir))
-      {
-	static_cast<void>(0);
-// 	it2->second;
-// 	found = true;
-      }
-    }
-
-    if(!found)
-    {
-      endings[dir] = 1;
-//       endings[dir] = 
-    }
-
+    CommonDirectories[directory].push_back(file);
   }
-
-  for(auto it : endings)
-  {
-    Log(LOG_TERMINAL) << "IT 1: " << it.first << " IT 2: " << it.second;
-  }
-
-  return dirs;
+  
+  return CommonDirectories;
 }
 
 Flux::vector ConsolidateFiles(const Flux::vector &files)
 {
-  if (files.size() <= 1)
+  if (files.size() <= 2)
     return files;
+
+  // TODO: make this into (%s changed, %s files) or whatever
   return files;
 }
 
-Flux::string CreateFileString(const Flux::vector &files)
-{
-  return "";
-}
 
 /**************** Module Class *******************/
 
@@ -216,7 +177,15 @@ public:
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
 
     Flux::vector Files = msg.Files;
-    PosixCommonPrefix(Files);
+    Flux::map<Flux::vector> paths = PosixCommonPrefix(Files);
+
+    for(Flux::map<Flux::vector>::iterator it = paths.begin(); it != paths.end(); ++it)
+    {
+      Log(LOG_TERMINAL) << "Directory \"" << it->first << "\":";
+      Flux::vector difiles = it->second;
+      for(unsigned i = 0; i < difiles.size(); ++i)
+	Log(LOG_TERMINAL) << "  " << difiles[i];
+    }
 
     Flux::string files = BuildFileString(msg.Files);
 

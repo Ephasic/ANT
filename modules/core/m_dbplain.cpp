@@ -125,7 +125,6 @@ public:
 	  // 			host 	port 	    net name
 	  n = new Network(params[1], params[2], params[3]);
 	}
-
 	else
 	  Log(LOG_DEBUG) << "[db_plain] Unable to read network line!";
       }

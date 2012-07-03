@@ -227,7 +227,7 @@ bool TextFile::IsDirectory(const Flux::string &dirname)
 {
   struct stat fileinfo;
   if(stat(dirname.c_str(), &fileinfo) == 0)
-    return true;
+     return true;
   return false;
 }
 

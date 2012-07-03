@@ -53,7 +53,7 @@ User *Channel::finduser(Network *net, const Flux::string &usr)
 void Channel::SendJoin()
 {
   if(!this->n || !this->n->b)
-    return; // incase we have some weird shit
+     return; // incase we have some weird shit
   
   this->n->b->ircproto->join(this->name);
   this->SendWho();
