@@ -119,7 +119,7 @@ $alt_local_message_target = "";
 
 ### The code itself
 
-use vars qw ($commit $tree @parent $author $committer);
+use vars qw ($commit $tree @parent $author $committer $insertions $deletions);
 use vars qw ($user $branch $rev @files $logmsg $message);
 my $line;
 
@@ -168,6 +168,10 @@ while (defined ($line = <COMMIT>)) {
 }
 close COMMIT;
 
+`git diff --shortstat $commit^ $commit` =~ m/(.*), (\d+) insertions\(\+\), (\d) deletions/;
+our $ins = $2; our $del = $3;
+# printf "\n\"%s\" \"%s\"\n", $ins, $del; #$deletions;
+
 
 open DIFF, "git diff-tree -r $parent[0] $tree|" or die "git diff-tree $parent[0] $tree: $!";
 while (defined ($line = <DIFF>)) {
@@ -204,7 +208,7 @@ exit unless @files;
 ### Compose the mail message
 
 
-my ($VERSION) = '1.0+alioth1';
+my ($VERSION) = '1.1+Justasic';
 my $ts = time;
 
 chomp($VERSION);
@@ -258,8 +262,8 @@ $message .= <<EM
            <log>$logmsg - $shorturl</log>
        </commit>
        <stats>
-          <insertions>550</insertions>
-          <deletions>324</deletions>
+          <insertions>$ins</insertions>
+          <deletions>$del</deletions>
        </stats>
    </body>
 </message>

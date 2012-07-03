@@ -32,7 +32,7 @@ Flux::map<Flux::vector> PosixCommonPrefix(const Flux::vector &files)
     Flux::string path = *it;
     Flux::string directory = path.substr(0, path.rfind('/'));
     Flux::string file = path.substr(path.rfind('/') + 1);
-    Log(LOG_TERMINAL) << "DIR: " << directory << " FILE: " << file;
+//     Log(LOG_TERMINAL) << "DIR: " << directory << " FILE: " << file;
 
     // Initialize the vector
     if(CommonDirectories.find(directory) == CommonDirectories.end())
@@ -45,7 +45,7 @@ Flux::map<Flux::vector> PosixCommonPrefix(const Flux::vector &files)
 }
 
 // I swear, this function has some of the worst function calls ever.
-Flux::string BuildFileString(Flux::vector files)
+Flux::string BuildFileString(const Flux::vector &files)
 {
   Flux::map<Flux::vector> CommonDirectories = PosixCommonPrefix(files);
   
@@ -82,7 +82,6 @@ Flux::string BuildFileString(Flux::vector files)
 
 class CIA_RULESET_MOD : public Module
 {
-  CommitMessage Message;
 public:
   CIA_RULESET_MOD(const Flux::string &Name):Module(Name, MOD_NORMAL)
   {
@@ -93,40 +92,40 @@ public:
 
 private:
   // Small api for getting commit data easily
-  Flux::string GetCommitData(const Flux::string &n)
+  inline Flux::string GetCommitData(const CommitMessage &msg, const Flux::string &n)
   {
-    CommitMessage msg = this->Message;
     for(auto it : msg.info)
     {
       if(it.first.equals_ci(n))
 	return it.second;
     }
+      
     return "";
   }
 
   // Used to make string formatting less bulky
-  Flux::string FormatString(const Flux::string &string)
+  Flux::string FormatString(const CommitMessage &msg, const Flux::string &string)
   {
-    static struct special_chars
+    struct special_chars
     {
       Flux::string character;
       Flux::string replace;
       special_chars(const Flux::string &c, const Flux::string &r) : character(c), replace(r) { }
     }
     special[] = {
-      special_chars("{project}", this->GetCommitData("project")),
-      special_chars("{author}", this->GetCommitData("author")),
-      special_chars("{branch}", this->GetCommitData("branch")),
-      special_chars("{timestamp}", this->GetCommitData("timestamp")),
-      special_chars("{module}", this->GetCommitData("module")),
-      special_chars("{scriptname}", this->GetCommitData("scriptname")),
-      special_chars("{scriptversion}", this->GetCommitData("scriptversion")),
-      special_chars("{scripturl}", this->GetCommitData("scripturl")),
-      special_chars("{scriptauthor}", this->GetCommitData("scriptauthor")),
-      special_chars("{revision}", this->GetCommitData("revision")),
-      special_chars("{insertions}", this->GetCommitData("insertions")),
-      special_chars("{deletions}", this->GetCommitData("deletions")),
-      special_chars("{log}", this->GetCommitData("log")),
+      special_chars("{project}",       this->GetCommitData(msg, "project")),
+      special_chars("{author}",        this->GetCommitData(msg, "author")),
+      special_chars("{branch}",        this->GetCommitData(msg, "branch")),
+      special_chars("{timestamp}",     this->GetCommitData(msg, "timestamp")),
+      special_chars("{module}",        this->GetCommitData(msg, "module")),
+      special_chars("{scriptname}",    this->GetCommitData(msg, "scriptname")),
+      special_chars("{scriptversion}", this->GetCommitData(msg, "scriptversion")),
+      special_chars("{scripturl}",     this->GetCommitData(msg, "scripturl")),
+      special_chars("{scriptauthor}",  this->GetCommitData(msg, "scriptauthor")),
+      special_chars("{revision}",      this->GetCommitData(msg, "revision")),
+      special_chars("{insertions}",    this->GetCommitData(msg, "insertions")),
+      special_chars("{deletions}",     this->GetCommitData(msg, "deletions")),
+      special_chars("{log}",           this->GetCommitData(msg, "log")),
       special_chars("","")
     };
     Flux::string ret = string;
@@ -146,26 +145,23 @@ public:
       Log(LOG_DEBUG) << "Module canceled commit message!";
       return;
     }
-
-    this->Message = msg;
+    
     // FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
 
     // Make the file list not spam IRC
     Flux::string files = BuildFileString(msg.Files);
 
+    // Build the commit message
+    Flux::string message = "\0034\002{project}: \017\0037{author} * \017\002[{branch}]\017\0038 r{revision}"
+    "\017 ~\0036 {insertions}(+) {deletions}(-)\017\002 | \017\00310{files}\017: {log}";
+    
+    Flux::string formattedmessgae = FormatString(msg, message).replace_all_ci("{files}", files);
+
     for(auto it : msg.Channels)
     {
       Channel *c = it;
       Log(LOG_DEBUG) << "Announcing in " << c->name << " (" << c->n->name << ')';
-
-      // Build the commit message
-      Flux::string message = "\0034\002{project}: \017\0037{author} * \017\002[{branch}]\017\0038 r{revision}"
-			    "\017 ~\0036 {insertions}(+) {deletions}(-)\017\002 | \017\00310{files}\017: {log}";
-
-      Flux::string formattedmessgae = FormatString(message).replace_all_ci("{files}", files);
-
-      //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
       c->SendMessage(formattedmessgae);
     }
   }

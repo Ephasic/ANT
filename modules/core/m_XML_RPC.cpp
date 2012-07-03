@@ -66,6 +66,7 @@ public:
     Log(LOG_DEBUG) << "[XML-RPC] New Listen socket created " << bindip << ':' << port << (ipv6?" (IPv6)":" (IPv4)");
     listen_sockets.push_back(this);
   }
+  
   ~xmlrpclistensocket()
   {
     auto it = std::find(listen_sockets.begin(), listen_sockets.end(), this);
@@ -98,7 +99,7 @@ public:
   bool Read(const Flux::string &m)
   {
     Flux::string message = SanitizeXML(m);
-    Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
+//     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
 
     if(message.search_ci("GET") && message.search_ci("HTTP/1."))
     { //If connection is HTTP GET request
@@ -112,7 +113,7 @@ public:
     else if((message.search_ci("POST") && message.search_ci("HTTP/1.")))
     { //This is a commit
       this->in_header = true;
-      Log(LOG_DEBUG) << "[XML-RPC] " << message;
+//       Log(LOG_DEBUG) << "[XML-RPC] " << message;
     }
     else if(this->in_header && (message.search_ci("Content-Type: text/xml") || message.search_ci("Content Type: text/xml")))
       this->IsXML = true;
@@ -124,7 +125,7 @@ public:
     }
     else if(this->in_query)
     {
-      Log(LOG_DEBUG) << "[XML-RPC] " << message;
+//       Log(LOG_DEBUG) << "[XML-RPC] " << message;
 
       if(!message.search_ci("</message>"))
 	  this->RawCommitXML += message.strip();
@@ -175,8 +176,8 @@ public:
 
   bool ProcessWrite()
   {
-    if(!this->WriteBuffer.empty())
-      Log(LOG_TERMINAL) << "Process Write:\n " << this->WriteBuffer;
+//     if(!this->WriteBuffer.empty())
+//       Log(LOG_TERMINAL) << "Process Write:\n " << this->WriteBuffer;
     return BufferedSocket::ProcessWrite() && ClientSocket::ProcessWrite();
   }
 
@@ -207,11 +208,35 @@ void htmlcall()
   client->SetStatus(SF_DEAD, true);
 }
 
+class ClientIPLookup : public DNSRequest
+{
+  const sockaddrs addr;
+public:
+  ClientIPLookup(const sockaddrs &address) : DNSRequest(Flux::string(address.addr()), DNS_QUERY_PTR), addr(address)
+  {
+    Log(LOG_TERMINAL) << "Looking up " << addr.addr();
+  }
+
+  ~ClientIPLookup()
+  {
+    Log(LOG_TERMINAL) << "Deleting old DNS request for " << addr.addr();
+  }
+
+  void OnLookupComplete(const DNSQuery *r)
+  {
+    Log(LOG_DEBUG) << "[XML-RPC] Accepting connection from " <<
+      (r->answers.empty() ? addr.addr() : r->answers.front().rdata)
+      << " (" << addr.addr() << ')';
+  }
+};
+
 ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 {
-  DNSQuery rep = DNSManager::BlockingQuery(addr.addr(), DNS_QUERY_PTR);
-  Flux::string rdnshost = !rep.answers.empty() ? rep.answers.front().rdata : addr.addr();
-  Log(LOG_DEBUG) << "[XML-RPC] Accepting connection from " << rdnshost << " (" << addr.addr() << ')';
+  new ClientIPLookup(addr);
+  
+//   DNSQuery rep = DNSManager::BlockingQuery(addr.addr(), DNS_QUERY_PTR);
+//   Flux::string rdnshost = !rep.answers.empty() ? rep.answers.front().rdata : addr.addr();
+  
   ClientSocket *c = new xmlrpcclient(this, fd, addr);
   return c;
 }
@@ -316,6 +341,9 @@ void xmlrpcclient::HandleMessage()
 	  message.info["deletions"] = node->first_node("deletions", 0, true)->value();
       }
     }
+
+    // remove everything from memory
+    doc.clear();
 
     Log(LOG_TERMINAL) << "\n*** COMMIT INFO! ***";
     for(auto it : message.info)
