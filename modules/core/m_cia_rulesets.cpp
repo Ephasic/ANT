@@ -168,6 +168,37 @@ private:
     return "";
   }
 
+  // Used to make string formatting less bulky
+  Flux::string FormatString(const Flux::string &string)
+  {
+    static struct special_chars
+    {
+      Flux::string character;
+      Flux::string replace;
+      special_chars(const Flux::string &c, const Flux::string &r) : character(c), replace(r) { }
+    }
+    special[] = {
+      special_chars("{project}", this->GetCommitData("project")),
+      special_chars("{author}", this->GetCommitData("author")),
+      special_chars("{branch}", this->GetCommitData("branch")),
+      special_chars("{timestamp}", this->GetCommitData("timestamp")),
+      special_chars("{module}", this->GetCommitData("module")),
+      special_chars("{scriptname}", this->GetCommitData("scriptname")),
+      special_chars("{scriptversion}", this->GetCommitData("scriptversion")),
+      special_chars("{scripturl}", this->GetCommitData("scripturl")),
+      special_chars("{scriptauthor}", this->GetCommitData("scriptauthor")),
+      special_chars("{revision}", this->GetCommitData("revision")),
+      special_chars("{insertions}", this->GetCommitData("insertions")),
+      special_chars("{deletions}", this->GetCommitData("deletions")),
+      special_chars("{log}", this->GetCommitData("log")),
+      special_chars("","")
+    };
+    Flux::string ret = string;
+    for(int i = 0; special[i].character.empty() == false; ++i)
+      ret = ret.replace_all_ci(special[i].character, special[i].replace);
+    return ret.c_str();
+  }
+
 public:
 
   void OnCommit(CommitMessage &msg)
@@ -196,15 +227,11 @@ public:
 
       // Build the commit message with stringstream
       // TODO: Make this a formatted string and interpret that.
-      std::stringstream ss;
-      ss << RED << BOLD << this->GetCommitData("project") << ": " << NORMAL << ORANGE << this->GetCommitData("author") << " * ";
-      ss << NORMAL << BOLD << '[' << this->GetCommitData("branch") << "] " << NORMAL << YELLOW << 'r'
-      << this->GetCommitData("revision");
-      if(!this->GetCommitData("insertions").empty() && !this->GetCommitData("deletions").empty())
-      	ss << NORMAL << " ~" << PURPLE << " " << this->GetCommitData("insertions") << "(+) " << this->GetCommitData("deletions") << "(-)";
-      ss << NORMAL << BOLD << " | " << NORMAL << AQUA << files << NORMAL << ": " << this->GetCommitData("log"); //<< files;
+      Flux::string message =
+      printfify("\0034\002{project}: \017\0037{author} * \017\002[{branch}]\017\0038 r{revision}"
+		"\017 ~\0036 {insertions}(+) {deletions}(-)\017\002 | \017\00310%s\017: {log}", files.c_str());
 
-      Flux::string formattedmessgae = Flux::string(ss.str()).strip('\"').strip();
+      Flux::string formattedmessgae = FormatString(message);
 
       //Log(LOG_TERMINAL) << "Commit Msg: \"" <<  formattedmessgae << "\"";
       c->SendMessage(formattedmessgae);
