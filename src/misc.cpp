@@ -228,6 +228,7 @@ void RenameBot(Network *n, const Flux::string &nick)
       return;
     }
   }
+  
   if(nick.search_ci(Config->NicknamePrefix.strip('-')) && nick.search_ci("tmp"))
   {
     n->b->SetNick(printfify("%s1", Config->NicknamePrefix.c_str()));

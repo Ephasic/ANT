@@ -58,7 +58,7 @@ struct iSupport
   int TopicLen;
 };
 
-class Network : public Timer
+class Network : public Base
 {
 protected:
   bool disconnecting, issynced;
@@ -104,7 +104,6 @@ public:
     return true;
   }
 
-  void Tick(time_t);
   void Sync();
   bool IsSynced() const;
   inline void SetConnectedHostname(const Flux::string &str) { this->usedhostname = str; }

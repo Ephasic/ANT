@@ -21,7 +21,7 @@ Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux
     throw CoreException("Bot with no ident??");
   if(net->b)
   {
-    Log() << "Bot assigned to a network with a bot already assigned??";
+    Log(LOG_WARN) << "Bot assigned to a network with a bot already assigned??";
     return; //close the constructor instead of throwing.
 //     throw CoreException("Bot assigned to a network with a bot already assigned??");
   }

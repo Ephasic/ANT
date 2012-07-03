@@ -21,25 +21,21 @@ public:
       Network *n = it.second;
       if(n->IsSynced() && n->b)
       {
-// 	if(n->s->SentPing)
-// 	{
-// 	  n->s->SetDead(true);
-// 	  Log(LOG_DEBUG) << n->name << " timed out, reconnecting.";
-// 	}
-// 	else
-// 	{
-	  #ifdef HAVE_GETTIMEOFDAY
-	  struct timeval tv;
-	  gettimeofday(&tv, NULL);
+	#ifdef HAVE_GETTIMEOFDAY
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
 
-	  // Milisecond lag times :D
-	  n->b->ircproto->ping("%i.%06d", tv.tv_sec, static_cast<int>(tv.tv_usec));
-	  #else
-	  n->b->ircproto->ping("%i", static_cast<int>(time(NULL)));
-	  #endif
-	  n->s->pings++;
-
-// 	}
+	// Milisecond lag times :D
+	n->b->ircproto->ping("%i.%06d", tv.tv_sec, static_cast<int>(tv.tv_usec));
+	#else
+	n->b->ircproto->ping("%i", static_cast<int>(time(NULL)));
+	#endif
+	if(++n->s->pings < 3)
+	{
+	  Log(LOG_RAWIO) << n->name << ": Ping Timeout";
+	  n->s->SetDead(true);
+	  new ReconnectTimer(Config->RetryWait, n);
+	}
       }
     }
   }

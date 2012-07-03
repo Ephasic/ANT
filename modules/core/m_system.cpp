@@ -284,9 +284,12 @@ public:
     if(u->nick.search(Config->NicknamePrefix))
     {
       Log(LOG_TERMINAL) << "Is bot nickname!";
-//     :Server.test.net 433 ANT-1 ANT-2 :Nickname is already in use.
-      RenameBot(u->n, msg);
-      new tqueue(SendJunk, 10);
+      if(u->nick.search(u->n->b->nick))
+      {
+//      :Server.test.net 433 ANT-1 ANT-2 :Nickname is already in use.
+	RenameBot(u->n, msg);
+	new tqueue(SendJunk, 10);
+      }
     }
   }
 

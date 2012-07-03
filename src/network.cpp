@@ -17,7 +17,7 @@
 Flux::insensitive_map<Network*> Networks;
 Flux::map<Network*> NetworkHosts;
 
-Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): Timer(121, time(NULL), true), disconnecting(false), issynced(false), RTimer(nullptr), s(nullptr), b(nullptr), hostname(host), port(p), CurHost(0)
+Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): disconnecting(false), issynced(false), RTimer(nullptr), s(nullptr), b(nullptr), hostname(host), port(p), CurHost(0)
 {
   if(host.empty() || p.empty())
     throw CoreException("Network class created with incorrect parameters given");
@@ -25,6 +25,7 @@ Network::Network(const Flux::string &host, const Flux::string &p, const Flux::st
   //If we didn't specify the network name, use the hostname.
   this->name = n.empty()?host:n;
 
+  // TODO: Non-Blocking queries are a must
   DNSQuery rep = DNSManager::BlockingQuery(host, host.search(':') ? DNS_QUERY_AAAA : DNS_QUERY_A);
   this->hostnames[1] = !rep.answers.empty() ? rep.answers.front().rdata : host;
   Networks[this->name] = this;
@@ -152,14 +153,4 @@ Network *FindNetworkByHost(const Flux::string &name)
   if(it != NetworkHosts.end())
     return it->second;
   return nullptr;
-}
-
-void Network::Tick(time_t)
-{
-  if(this->s && this->s->GetStatus(SF_CONNECTED) && this->s->pings < 3)
-  {
-    Log(LOG_RAWIO) << this->name << ": Ping Timeout";
-//     this->s->SetDead(true);
-    new ReconnectTimer(Config->RetryWait, this);
-  }
 }
