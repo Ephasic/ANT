@@ -277,10 +277,16 @@ public:
      * params[1] = Attempted nickname
      * params[2] = message (useless)
      */
-    // FIXME: Check internally for the nickname and start from there so we don't waste bandwidth
     if((i == 433))
     {
-      n->b->BotNum++;
+      // Make sure we're not incrementing if the server sends a random 443
+      if(params[1].search(Config->NicknamePrefix))
+      {
+	Flux::string number = params[1].substr(Config->NicknamePrefix.size());
+	if(static_cast<int>(number) == n->b->BotNum)
+	  n->b->BotNum++;
+      }
+      
       n->b->CheckNickname();
     }
   }
