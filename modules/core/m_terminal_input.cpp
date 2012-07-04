@@ -70,6 +70,7 @@ void ProcessInput(const Flux::string &str)
     Log(LOG_TERMINAL) << "Cannot process command, must be connected to a network!";
     return;
   }
+  
   Flux::string Justasic = str;
   Justasic.trim();
   Flux::vector Lordofsraam = ParamitizeString(Justasic, ' ');
@@ -97,6 +98,7 @@ void ProcessInput(const Flux::string &str)
 /** \class InputThread
  * This thread allows for user input to be possible, this is activated when the nofork option is specified.
  */
+// TODO: Make this its own socket?
 class InputThread : public Thread
 {
 public:

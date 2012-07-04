@@ -24,7 +24,8 @@ public:
     Flux::string chan = params[1];
     if(!source.n->IsValidChannel(chan))
       source.Reply(CHANNEL_X_INVALID, chan.c_str());
-    else{
+    else
+    {
       Log(u) << "made " << source.n->b->nick << " join " << chan << " on network " << source.n->name;
 //       Channel *c = findchannel(chan);
 //       if(c)

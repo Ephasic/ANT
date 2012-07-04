@@ -16,8 +16,6 @@
 #include "bot.h"
 #include "module.h"
 
-// I_OnPrivmsg I_OnAction, I_OnChanmsg, I_OnChannelAction
-
 /**
  * \fn void ProcessJoin(CommandSource &source, const Flux::string &chan)
  * \brief Processes the /who numeric (352), this should only be used in Process() unless its for something special

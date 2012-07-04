@@ -171,30 +171,41 @@ public:
     // Imported from CIA.vc c:
     if(msg.search_ci("rubs "+b->nick+"'s tummy"))
       c->SendMessage("*purr*");
+    
     if(msg.search_ci("hugs "+b->nick))
       c->SendAction("hugs %s", u->nick.c_str());
+    
     if(msg.search_ci("eats "+b->nick))
       c->SendAction("tastes crunchy");
+    
     if(msg.search_ci("kicks "+b->nick))
       c->SendMessage("ow");
 
     // Justasic's additions
     if(msg.search_ci("smashes "+b->nick) || msg.search_ci("steps on "+b->nick))
       c->SendAction("is flattened");
+    
     if(msg.search_ci("burns "+b->nick) || msg.search_ci("sets "+b->nick+" on fire"))
       c->SendAction("runs around");
+    
     if(msg.search_ci("punches "+b->nick))
       c->SendAction("cries");
+    
     if(msg.search_ci("fries "+b->nick))
       c->SendAction("sizzles");
+    
     if(msg.search_ci("pets "+b->nick))
       c->SendMessage("*purr*");
+    
     if(msg.search_ci("pokes "+b->nick))
       c->SendAction("farts");
+    
     if(msg.search_ci("slaps "+b->nick))
       c->SendAction("punches %s in the esophagus!", u->nick.c_str());
+    
     if(msg.search_ci("adopts "+b->nick))
       c->SendAction("runs away in 4 years");
+    
     if(msg.search_ci("murders "+b->nick))
       c->SendAction("dies");
   }
@@ -249,7 +260,7 @@ public:
        * params[4] = channel modes
        */
 
-      RenameBot(n, params[0]);
+      n->b->CheckNickname();
 
       n->isupport.ServerHost = params[1];
       n->isupport.IRCdVersion = params[2];

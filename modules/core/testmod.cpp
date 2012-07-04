@@ -93,11 +93,11 @@ public:
 
    if(params[0].equals_ci("!userlist"))
    {
-     Flux::string users;
-     for(auto it : u->n->UserNickList)
-      users += it.second->nick+" ";
+      Flux::string users;
+      for(auto it : u->n->UserNickList)
+	users += it.second->nick+" ";
 
-    u->SendMessage(users);
+      u->SendMessage(users);
    }
   }
 };

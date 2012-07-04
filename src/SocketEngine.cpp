@@ -83,9 +83,8 @@ void SocketEngine::Process(bool fast)
   int sresult = select(MaxFD + 1, &rfdset, &wfdset, &efdset, &tval);
 
   if (sresult == -1)
-  {
     Log() << "SockEngine::Process(): error: " << strerror(errno);
-  }
+
   if(sresult < 1)
     return; // Nothing to do..
   else if (sresult)

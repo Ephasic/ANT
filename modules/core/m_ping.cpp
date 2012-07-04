@@ -30,11 +30,11 @@ public:
 	#else
 	n->b->ircproto->ping("%i", static_cast<int>(time(NULL)));
 	#endif
-	if(++n->s->pings < 3)
+	if(++n->s->pings >= 3)
 	{
 	  Log(LOG_RAWIO) << n->name << ": Ping Timeout";
-// 	  n->s->SetDead(true);
-// 	  new ReconnectTimer(Config->RetryWait, n);
+	  n->s->SetDead(true);
+	  new ReconnectTimer(Config->RetryWait, n);
 	}
       }
     }

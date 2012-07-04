@@ -170,7 +170,6 @@ extern Flux::map<Network*> NetworkHosts;
 /* void's */
 extern void GarbageCollect();
 extern void Rehash();
-extern void RenameBot(Network*, const Flux::string&);
 extern void Send_Global(const Flux::string&);
 extern void Send_Global(const char*, ...);
 extern void QuitUser(Network*, User*);
