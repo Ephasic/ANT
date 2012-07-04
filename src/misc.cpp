@@ -215,29 +215,6 @@ bool InTerm()
   return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr)));
 }
 
-void RenameBot(Network *n, const Flux::string &nick)
-{
-  if(nick.search(Config->NicknamePrefix) && !nick.search_ci("tmp"))
-  {
-    if(nick.size() >= Config->NicknamePrefix.size())
-    {
-      Flux::string num = nick.substr(Config->NicknamePrefix.size());
-      num.trim();
-      int number = (int)num;
-      n->b->SetNick(printfify("%s%i", Config->NicknamePrefix.c_str(), ++number));
-      return;
-    }
-  }
-  
-  if(nick.search_ci(Config->NicknamePrefix.strip('-')) && nick.search_ci("tmp"))
-  {
-    n->b->SetNick(printfify("%s1", Config->NicknamePrefix.c_str()));
-    return;
-  }
-
-  n->b->SetNick(printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(), randint(0, 999)));
-}
-
 /**
  * \fn Flux::string duration(const time_t &t)
  * Expresses in a string the period of time represented by a given amount

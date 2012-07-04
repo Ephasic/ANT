@@ -32,7 +32,7 @@ enum Implementation {
 	I_OnRestart, I_OnShutdown, I_OnReload, I_OnCommand, I_OnNetworkSync,
 	I_OnStart, I_OnNumeric, I_OnPreConnect, I_OnPostConnect,
 	I_OnCTCP, I_OnQuit, I_OnJoin, I_OnKick, I_OnConnectionError,
-	I_OnNotice, I_OnNickChange, I_OnChannelMode, I_OnUserMode,
+	I_OnNotice, I_OnPreNickChange, I_OnNickChange, I_OnChannelMode, I_OnUserMode,
 	I_OnChannelOp, I_OnPart, I_OnInvite, I_OnArgument, I_OnFork,
 	I_OnSocketError, I_OnPing, I_OnPong, I_OnCommit, I_OnDatabasesWrite,
 	I_OnSignal, I_OnDatabasesRead, I_OnSaveDatabases, I_OnForceDatabasesRead,
@@ -101,7 +101,8 @@ public:
   virtual void OnModuleUnload(Module*){}
   virtual void OnRestart(const Flux::string&) {}
   virtual void OnShutdown() {}
-  virtual void OnNickChange(User*, const Flux::string&) {}
+  virtual void OnNickChange(User*) {}
+  virtual void OnPreNickChange(User*, const Flux::string&) {}
   virtual void OnQuit(User*, const Flux::string&) {}
   virtual void OnJoin(User*, Channel*) {}
   virtual void OnKick(User*, User*, Channel*, const Flux::string&) {}

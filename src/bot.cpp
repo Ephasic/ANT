@@ -10,8 +10,9 @@
  */
 
 #include "bot.h"
+#include "INIReader.h"
 
-Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net)
+Bot::Bot(Network *net, const Flux::string &ni, const Flux::string &i, const Flux::string &real): User(net, ni, i, net->hostname, real), network(net), BotNum(1)
 {
   if(!net)
     throw CoreException("Bot with no network??");
@@ -76,13 +77,22 @@ void Bot::Quit(const Flux::string &message)
 
 void Bot::SetNick(const Flux::string &nickname)
 {
-  this->SetNewNick(nickname);
   this->ircproto->nick(nickname);
 }
 
 void Bot::introduce()
 {
   this->ircproto->introduce_client(this->nick, this->ident, this->realname);
+}
+
+// Make sure our nickname is still valid.
+void Bot::CheckNickname()
+{
+  if(this->nick.search_ci("tmp"))
+    this->SetNick(Config->NicknamePrefix + value_cast<Flux::string>(BotNum));
+
+  if(!this->nick.equals_cs(Config->NicknamePrefix + value_cast<Flux::string>(BotNum, false)))
+    this->SetNick(Config->NicknamePrefix + value_cast<Flux::string>(BotNum, false));
 }
 
 Bot *FindBot(const Flux::string &nick)

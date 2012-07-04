@@ -302,7 +302,9 @@ void process(Network *n, const Flux::string &buffer)
 
   if(command.equals_cs("NICK") && u)
   {
-    FOREACH_MOD(I_OnNickChange, OnNickChange(u, params[0])); u->SetNewNick(params[0]);
+    FOREACH_MOD(I_OnPreNickChange, OnPreNickChange(u, params[0]));
+    u->SetNewNick(params[0]);
+    FOREACH_MOD(I_OnNickChange, OnNickChange(u));
   }
 
   if(!u && !FindUser(n, nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty()))

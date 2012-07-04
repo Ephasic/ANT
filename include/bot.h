@@ -25,8 +25,8 @@ public:
   Flux::map<Channel*> channels;
   /* IRCProto class for the network */
   IRCProto *ircproto;
-  /* Announce a commit that has been made */
-//   void AnnounceCommit(CommitMessage&);
+  /* The Bot number */
+  int BotNum;
   /* Join a channel */
   void Join(Channel*);
   void Join(const Flux::string&);
@@ -40,6 +40,8 @@ public:
   void introduce();
   /* Set a mode to the bot, User class does not have this so we do it manually */
   void SetMode(const Flux::string&);
+  /* Make sure we're still a valid nickname */
+  void CheckNickname();
 };
 
 #endif

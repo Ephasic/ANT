@@ -116,18 +116,6 @@ public:
   }
 };
 
-// This void sends some random junk to the server when its called
-// by a tqueue.
-void SendJunk()
-{
-  for(auto it : Networks)
-  {
-    Network *n = it.second;
-    if(n->s && n->s->GetStatus(SF_CONNECTED))
-      n->s->Write("randomjunkcheck");
-  }
-}
-
 // This class is so we can sync each network, i would use a tqueue here but
 // tqueue's don't accept arguments yet (if it's even possible) :|
 class SyncTimer : public Timer
@@ -142,6 +130,16 @@ public:
     n->Sync();
   }
 };
+
+void NicknameCheck()
+{
+  // Make sure our nicknames are consistent
+  for(auto it : Networks)
+  {
+    if(it.second->b)
+      it.second->b->CheckNickname();
+  }
+}
 
 class m_system : public Module
 {
@@ -159,6 +157,8 @@ public:
     this->SetAuthor("Justasic");
     this->SetVersion(VERSION);
     this->SetPermanent(true);
+    // Check our nickname every 30 seconds or so
+    new tqueue(NicknameCheck, 30);
   }
 
   // Have a little fun with the system, these are useful to see how lagged the system is or if it's
@@ -257,10 +257,6 @@ public:
       n->isupport.ChanModes = params[4];
     }
 
-    // Send Random garbage occasionally to see if we need to rename
-    if((i == 421))
-      RenameBot(n, params[0]);
-
     if((i == 376))
       new SyncTimer(n);
 
@@ -270,36 +266,29 @@ public:
      * params[1] = Attempted nickname
      * params[2] = message (useless)
      */
+    // FIXME: Check internally for the nickname and start from there so we don't waste bandwidth
     if((i == 433))
-      // FIXME: Check internally for the nickname and start from there so we don't waste bandwidth
-	RenameBot(n, params[1]);
+    {
+      n->b->BotNum++;
+      n->b->CheckNickname();
+    }
   }
-
+  
   // user!ident@host.com NICK NewNickname
   // User*			msg
-  void OnNickChange(User *u, const Flux::string &msg)
+  void OnNickChange(User *u)
   {
-    Log(LOG_TERMINAL) << "Rename: " << u->nick << " " << msg << " " << u->n->b->nick;
-
-    if(u->nick.search(Config->NicknamePrefix))
-    {
-      Log(LOG_TERMINAL) << "Is bot nickname!";
-      if(u->nick.search(u->n->b->nick))
-      {
-//      :Server.test.net 433 ANT-1 ANT-2 :Nickname is already in use.
-	RenameBot(u->n, msg);
-	new tqueue(SendJunk, 10);
-      }
-    }
+    if(u == dynamic_cast<User*>(u->n->b))
+      u->n->b->CheckNickname();
   }
 
   void OnKick(User *u, User *kickee, Channel *c, const Flux::string &reason)
   {
-     if(kickee && kickee->nick.equals_cs(c->n->b->nick))
-     {
-       Log(u) << "kicked " << kickee->nick << " from " << c->name  << " in network " << c->n->name << ' ' << '(' << reason << ')';
-	c->SendJoin();
-     }
+    if(kickee && kickee == dynamic_cast<User*>(u->n->b))
+    {
+      Log(u) << "kicked " << kickee->nick << " from " << c->name  << " in network " << c->n->name << ' ' << '(' << reason << ')';
+      c->SendJoin();
+    }
   }
 };
 

@@ -38,7 +38,7 @@ public:
   void AddChan(Channel*);
   void DelChan(Channel*);
   Channel *findchannel(const Flux::string&);
-  void SetNewNick(const Flux::string&);
+  virtual void SetNewNick(const Flux::string&);
   void SendWho();
   virtual void SendMessage(const Flux::string&);
   virtual void SendMessage(const char*, ...);
