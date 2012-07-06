@@ -212,7 +212,6 @@ public:
 
   void OnNumeric(int i, Network *n, const Flux::vector &params)
   {
-
     if((i == 5))
     {
       // Skip the nickname and the "are supported by this server" parts of the message
@@ -239,6 +238,9 @@ public:
 	
 	if(word.equals_ci("MAXCHANNELS"))
 	  n->isupport.MaxChannels = static_cast<int>(param);
+
+	if(word.equals_ci("CHANNELLEN"))
+	  n->isupport.ChannelLen = static_cast<int>(param);
 	
 	if(word.equals_ci("NICKLEN"))
 	  n->isupport.NickLen = static_cast<int>(param);
