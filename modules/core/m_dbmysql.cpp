@@ -14,6 +14,7 @@
 #include "modules.h"
 #define NO_CLIENT_LONG_LONG
 #include <mysql/mysql.h>
+#include <stdexcept>
 
 // FIXME: TODO: ugh this is such a mess, clean this up and make it actually work!
 
@@ -79,7 +80,7 @@ public:
     {
       return this->entries[index];
     }
-    catch (const std::out_of_range &)
+    catch (const std::out_of_range&)
     {
       throw SQLException("Out of bounds access of MySQLResult");
     }

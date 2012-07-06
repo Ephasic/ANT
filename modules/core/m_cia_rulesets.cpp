@@ -126,6 +126,7 @@ private:
       special_chars("{insertions}",    this->GetCommitData(msg, "insertions")),
       special_chars("{deletions}",     this->GetCommitData(msg, "deletions")),
       special_chars("{log}",           this->GetCommitData(msg, "log")),
+      special_chars("{files}",         BuildFileString(msg.Files)),
       special_chars("","")
     };
     Flux::string ret = string;
@@ -149,14 +150,11 @@ public:
     // FIXME: if they're no connections, buffer the message
     Log(LOG_DEBUG) << "AnnounceCommit Called.";
 
-    // Make the file list not spam IRC
-    Flux::string files = BuildFileString(msg.Files);
-
     // Build the commit message
     Flux::string message = "\0034\002{project}: \017\0037{author} * \017\002[{branch}]\017\0038 r{revision}"
     "\017 ~\0036 {insertions}(+) {deletions}(-)\017\002 | \017\00310{files}\017: {log}";
     
-    Flux::string formattedmessgae = FormatString(msg, message).replace_all_ci("{files}", files);
+    Flux::string formattedmessgae = FormatString(msg, message);
 
     for(auto it : msg.Channels)
     {

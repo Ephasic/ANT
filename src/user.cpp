@@ -21,13 +21,7 @@ User::User(Network *net, const Flux::string &snick, const Flux::string &sident, 
   if(!net)
     throw CoreException("User created with no network??");
 
-//  this->nick = snick;
-//  this->n = net;
-//  this->ident = sident;
-//  this->host = shost;
-//  this->realname = srealname;
-//  this->server = sserver;
-//  this->fullhost = snick+"!"+sident+"@"+shost;
+
   this->n->UserNickList[snick] = this;
 
   Log(LOG_RAWIO) << "New user! " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
