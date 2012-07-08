@@ -47,13 +47,14 @@ typedef std::map<User*, Channel*> UList;
 class Channel : public Base
 { 
 public:
-  Channel(Network*, const Flux::string&, time_t ts = time(NULL));
+  Channel(Network*, const Flux::string&);
   ~Channel();
   UList UserList;
   User *finduser(Network*, const Flux::string&);
   Flux::string name;
   Flux::string topic;
   Flux::string topic_setter;
+  Flux::string modes;
   Network *n;
   time_t topic_time;
   time_t creation_time;

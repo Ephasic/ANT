@@ -63,7 +63,7 @@ public:
      source.Reply(CHANNEL_X_INVALID, chan.c_str());
     else
     {
-      Channel *c = FindChannel(source.n, chan);
+      Channel *c = source.n->FindChannel(chan);
       if(c)
 	c->SendPart();
       else

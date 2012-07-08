@@ -125,8 +125,6 @@ typedef std::map<Flux::string, Command*, ci::less> CommandMap;
 typedef std::vector<Module*> EventsVector; //Gay g++ waning fix
 
 /*  Class pointer finder definitions */
-extern User *FindUser(Network*, const Flux::string&);
-extern Channel *FindChannel(Network*, const Flux::string&);
 extern Module *FindModule(const Flux::string&);
 extern Command *FindCommand(const Flux::string&, CommandType);
 extern Network *FindNetwork(const Flux::string&);

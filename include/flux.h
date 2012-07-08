@@ -652,6 +652,8 @@ namespace Flux {
     inline operator float() { return value_cast<float>(this->_string, false); }
     /* Cast into a double */
     inline operator double() { return value_cast<double>(this->_string, false); }
+    /* Cast into a unsigned long */
+    inline operator unsigned long int() { return value_cast<size_t>(this->_string, false); }
     /* Cast into a long integer */
     inline operator long() { return value_cast<long>(this->_string, false); }
     /* Cast into a unsigned integer */

@@ -52,7 +52,7 @@ public:
     Network *n = FindNetwork(Config->LogChanNet);
     if(!n || !n->IsSynced())
       return EVENT_CONTINUE;
-    Channel *c = FindChannel(n, Config->LogChan);
+    Channel *c = n->FindChannel(Config->LogChan);
     if(!c || l->type == LOG_RAWIO)
       return EVENT_CONTINUE;
     

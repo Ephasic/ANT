@@ -110,11 +110,3 @@ void User::SendPrivmsg(const Flux::string &message)
 {
   this->n->b->ircproto->privmsg(this->nick, message);
 }
-
-User *FindUser(Network *n, const Flux::string &fnick)
-{
-  auto it = n->UserNickList.find(fnick);
-  if(it != n->UserNickList.end())
-    return it->second;
-  return nullptr;
-}

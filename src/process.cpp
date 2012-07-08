@@ -50,14 +50,14 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan)
     Flux::string hops = params[7].substr(0,1);
     Flux::string realname = params[7].erase(0,2);
     /*******************************************************/
-    User *u = FindUser(source.n, Nickname);
+    User *u = source.n->FindUser(Nickname);
     if(!u)
     {
       if((!Host.empty() || !Nickname.empty() || !Ident.empty()) && source.n)
 	u = new User(source.n, Nickname, Ident, Host, realname, Server);
     }
 
-    Channel *c = FindChannel(source.n, channel);
+    Channel *c = source.n->FindChannel(channel);
     if(!c)
     {
       if(!channel.empty() && source.n)
@@ -265,9 +265,8 @@ void process(Network *n, const Flux::string &buffer)
   Flux::string nickname = h.nick;
   Flux::string uident = h.ident;
   Flux::string uhost = h.host;
-  Flux::string cmd;
-  User *u = FindUser(n, nickname);
-  Channel *c = FindChannel(n, receiver);
+  User *u = n->FindUser(nickname);
+  Channel *c = n->FindChannel(receiver);
   Bot *b = n->b;
   Flux::vector params2 = ParamitizeString(message, ' ');
 //   for(unsigned i = 0; i < params2.size(); ++i)
@@ -305,7 +304,7 @@ void process(Network *n, const Flux::string &buffer)
     FOREACH_MOD(I_OnNickChange, OnNickChange(u));
   }
 
-  if(!u && !FindUser(n, nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty()))
+  if(!u && !n->FindUser(nickname) && (!nickname.empty() || !uident.empty() || !uhost.empty()))
   {
     if(!nickname.search('.') && n)
       u = new User(n, nickname, uident, uhost);
@@ -342,7 +341,7 @@ void process(Network *n, const Flux::string &buffer)
 
   EVENT_HOOK(command, "PING", I_OnPing, OnPing(params, n));
   EVENT_HOOK(command, "PONG", I_OnPong, OnPong(params, n));
-  EVENT_HOOK(command, "KICK", I_OnKick, OnKick(u, FindUser(n, params[1]), FindChannel(n, params[0]), params[2]));
+  EVENT_HOOK(command, "KICK", I_OnKick, OnKick(u, n->FindUser(params[1]), n->FindChannel(params[0]), params[2]));
   EVENT_HOOK(command, "ERROR", I_OnConnectionError, OnConnectionError(buffer));
   EVENT_HOOK(command, "INVITE", I_OnInvite, OnInvite(u, params[1]));
 
@@ -391,6 +390,42 @@ void process(Network *n, const Flux::string &buffer)
       FOREACH_MOD(I_OnJoin, OnJoin(u, c));
     }
   }
+
+  // Get channel timestamp and modes with the below numerics
+  if(command == "329")
+  {
+    Channel *chan = n->FindChannel(params[1]);
+    if(chan)
+      chan->creation_time = static_cast<long>(params[2]);
+  }
+
+  if(command == "324")
+  {
+    // NOTE: This *only* does the modes with + in front of them
+    Channel *chan = n->FindChannel(params[1]);
+    if(chan)
+      chan->modes = params[2];
+  }
+
+  // Get the actual topic
+  if(command == "332")
+  {
+    Channel *chan = n->FindChannel(params[1]);
+    if(chan)
+      chan->topic = params[2];
+  }
+  
+  // Get the topic setter and timestamp
+  if(command == "333")
+  {
+    Channel *chan = n->FindChannel(params[1]);
+    if(chan)
+    {
+      chan->topic_time = static_cast<long>(params[3]);
+      chan->topic_setter = params[2];
+    }
+  }
+  
   /**************************************/
   CommandSource Source;
   Source.u = u; //User class

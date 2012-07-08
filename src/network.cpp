@@ -49,7 +49,7 @@ bool Network::JoinChannel(const Flux::string &chan)
   Log(LOG_DEBUG) << "Scheduling Channel " << chan << " for join.";
   if(IsValidChannel(chan))
   {
-    Channel *c = FindChannel(this, chan);
+    Channel *c = this->FindChannel(chan);
     if(!c)
       c = new Channel(this, chan);
     if(!this->s || !this->s->GetStatus(SF_CONNECTED))
@@ -137,6 +137,22 @@ bool Network::Connect()
   if(!this->s)
     this->s = new NetworkSocket(this);
   return true;
+}
+
+User *Network::FindUser(const Flux::string &fnick)
+{
+  auto it = this->UserNickList.find(fnick);
+  if(it != this->UserNickList.end())
+    return it->second;
+  return nullptr;
+}
+
+Channel *Network::FindChannel(const Flux::string &channel)
+{
+  auto it = this->ChanMap.find(channel);
+  if(it != this->ChanMap.end())
+    return it->second;
+  return NULL;
 }
 
 Network *FindNetwork(const Flux::string &name)

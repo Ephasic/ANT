@@ -48,7 +48,7 @@ void Bot::Join(Channel *c)
 
 void Bot::Join(const Flux::string &chan)
 {
-  Channel *c = FindChannel(this->n, chan);
+  Channel *c = this->n->FindChannel(chan);
   if(!c)
     c = new Channel(this->n, chan);
   c->SendJoin();
@@ -112,7 +112,7 @@ bool IsBot(User *u)
 
   for(auto it : Networks)
   {
-    if(it.second->b != nullptr && it.second->b == u)
+    if(it.second->b != nullptr && it.second->b == dynamic_cast<Bot*>(u))
       return true;
   }
 

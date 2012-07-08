@@ -106,15 +106,28 @@ public:
     return true;
   }
 
+  // Sync this network, make sure all channels are joined, etc.
   void Sync();
+  // Has the channel been synced yet?
   bool IsSynced() const;
+  // Set the current connected hostname
   inline void SetConnectedHostname(const Flux::string &str) { this->usedhostname = str; }
+  // Get the current connected hostname
   inline Flux::string GetConHost() const { return this->usedhostname; }
+  // Check if this network is disconnecting
   inline bool IsDisconnecting() { return this->disconnecting; }
-  bool JoinChannel(const Flux::string&);
+  // Find a channel inside the network
+  Channel *FindChannel(const Flux::string&);
+  // Find a user inside the network
+  User *FindUser(const Flux::string &fnick);
+  // Join a channel, if there is no connection, queue the channel for join
+  bool JoinChannel(const Flux::string &chan);
+  // Disconnect from this network
   bool Disconnect();
+  // Same as above except with a message
   bool Disconnect(const char *fmt, ...);
   bool Disconnect(const Flux::string&);
+  // Connect to the network
   bool Connect();
 };
 
