@@ -41,24 +41,18 @@ namespace Flux
 }
 
 extern bool protocoldebug;
-template<typename type_name, typename value> inline type_name value_cast(const value &y, bool use_reinterpret_cast = true)
+template<typename type_name, typename value> inline type_name value_cast(const value &y)
 {
-  std::stringstream stream; //Try safe casting with a stringstream.
+  std::stringstream stream;
   type_name nullpointer;
   type_name x;
-  if(!(stream << std::setprecision(800) << y)) //we use setprecision so scientific notation does not get in the way.
+  if(!(stream << std::setprecision(1000) << y)) // use setprecision so scientific notation does not get in the way.
     throw;
   if(!(stream >> x))
-  { //If stringstream fails, force the cast.
-    if(!use_reinterpret_cast)
-    {
-      if(protocoldebug)
-	printf("Failed to cast \"%s\" to \"%s\"\n", typeid(value).name(), typeid(type_name).name());
-      return nullpointer;
-    }
+  {
     if(protocoldebug)
-      printf("Failed to cast \"%s\" to \"%s\", attempting to force with reinterpret_cast\n", typeid(value).name(), typeid(type_name).name());
-    x = *reinterpret_cast<type_name*>(const_cast<value*>(&(y)));
+      printf("Failed to cast \"%s\" to \"%s\"\n", typeid(value).name(), typeid(type_name).name());
+    return nullpointer;
   }
   return x;
 }
@@ -647,17 +641,17 @@ namespace Flux {
       return bin;
     }
     /* Cast into an integer */
-    inline operator int() { return value_cast<int>(this->_string, false); }
+    inline operator int() { return value_cast<int>(this->_string); }
     /* Cast into a float */
-    inline operator float() { return value_cast<float>(this->_string, false); }
+    inline operator float() { return value_cast<float>(this->_string); }
     /* Cast into a double */
-    inline operator double() { return value_cast<double>(this->_string, false); }
+    inline operator double() { return value_cast<double>(this->_string); }
     /* Cast into a unsigned long */
-    inline operator unsigned long int() { return value_cast<size_t>(this->_string, false); }
+    inline operator unsigned long int() { return value_cast<size_t>(this->_string); }
     /* Cast into a long integer */
-    inline operator long() { return value_cast<long>(this->_string, false); }
+    inline operator long() { return value_cast<long>(this->_string); }
     /* Cast into a unsigned integer */
-    inline operator unsigned() { return value_cast<unsigned>(this->_string, false); }
+    inline operator unsigned() { return value_cast<unsigned>(this->_string); }
 
     friend std::ostream &operator<<(std::ostream &os, const string &_str);
     friend std::istream &operator>>(std::istream &os, string &_str);

@@ -91,8 +91,8 @@ void Bot::CheckNickname()
   if(this->nick.search_ci("tmp"))
     this->SetNick(Config->NicknamePrefix + value_cast<Flux::string>(BotNum));
 
-  if(!this->nick.equals_cs(Config->NicknamePrefix + value_cast<Flux::string>(BotNum, false)))
-    this->SetNick(Config->NicknamePrefix + value_cast<Flux::string>(BotNum, false));
+  if(!this->nick.equals_cs(Config->NicknamePrefix + value_cast<Flux::string>(BotNum)))
+    this->SetNick(Config->NicknamePrefix + value_cast<Flux::string>(BotNum));
 }
 
 Bot *FindBot(const Flux::string &nick)
