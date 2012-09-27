@@ -1,6 +1,7 @@
-Arbitrary Navn Tool -- README
-(C) 2011-2012 Azuru
-Contact us at Development@Azuru.net
+(C) 2011-2012 Azuru/Ephasic
+Contact us at Development@Azuru.net or ant@ephasic.org
+
+Arbitrary Navn Tool
 ============================================================
 ------------------------------------------------------------
 
@@ -44,10 +45,8 @@ How to start in Protocol Debug mode
 1. Follow above instructions.
 2. Start the bot with ./ant -n -p
 
-## 4. CONTACT
-Our IRC: irc.Azuru.net
-Ports: 6660-6669. SSL: 5000
-Our Website: http://www.Azuru.net/
-Git: https://code.google.com/p/arbitrary-navn-tool/
-Git Web: http://code.google.com/p/arbitrary-navn-tool/source/browse/
+## 4. CONTACT/SUPPORT
+IRC: irc.Azuru.net (ports: 6660-6669; SSL: 5000) or irc.alphachat.net (SSL: 6697)
+Website: http://www.Azuru.net/ or http://www.ephasic.org/
 
+Git: https://github.com/Ephasic/ANT
