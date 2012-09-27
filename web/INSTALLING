@@ -1,0 +1,4 @@
+You will need a current version of node.js.
+
+Just run npm install and then modify the config.json.
+Then just run: node ant
