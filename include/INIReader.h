@@ -71,6 +71,7 @@ public:
   Flux::string UserPass;
   Flux::string ModuleDir;
   Flux::string xmlrpcbindip;
+  Flux::string jsonrpcbindip;
   Flux::string NameServer;
   Flux::string sqlpass;
   Flux::string sqlhost;
@@ -82,9 +83,12 @@ public:
   int SendQRate;
   int sqlport;
   int xmlrpcport;
+  int jsonrpcport;
   time_t xmlrpctimeout;
+  time_t jsonrpctimeout;
   time_t DNSTimeout;
   bool xmlrpcipv6;
+  bool jsonrpcipv6;
   bool SendQEnabled;
   bool UseIPv6;
   bool dbforce;

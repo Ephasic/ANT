@@ -37,16 +37,16 @@
 //       linenum++;
 //       line.trim();
 //       //printf("UNPARSED: %s\n", line.c_str());
-// 
+//
 //       if(line[0] == '#' || line.empty())
 // 	continue;
-// 	
+//
 //       /********************************************/
 //       unsigned c=0, len = line.length();
 //       for(; c < len; ++c)
 //       {
 // 	char ch = line[c];
-// 
+//
 // 	if(in_quote)
 // 	{
 // 	  if(ch == '"')
@@ -67,7 +67,7 @@
 // 	  quoted_text.clear();
 // 	  continue;
 // 	}
-// 	
+//
 // 	if(in_comment)
 // 	{
 // 	  if(ch == '*' && c+1 < len && line[c+1] == '/')
@@ -90,17 +90,17 @@
 // 	  continue;
 // 	}
 //       }
-//       
+//
 //       if(line.search("/*") && line.search("*/"))
 //       {
 // 	in_comment = contin = false;
 // 	line = line.erase(line.find("/*"), line.find("*/"));
 // 	line.trim();
 //       }
-//       
+//
 //       if(in_comment || contin)
 // 	continue;
-//       
+//
 //       /********************************************/
 //       if(line[0] == '[' && line[line.size() -1] == ']')
 //       {
@@ -114,7 +114,7 @@
 //       {
 // 	name = line;
 // 	int d = line.find_first_of('=');
-// 	
+//
 // 	if(line.find_first_of(';') < static_cast<unsigned>(d))
 // 	  throw ConfigException(printfify("Cannot have semi-colon immediately after assignment: %i", linenum));
 // 	else if(d > 0)
@@ -152,13 +152,13 @@
 //       else
 // 	throw ConfigException(printfify("Undefined data: %i", linenum));
 //     }
-//     
+//
 //     if(in_comment)
 //       throw ConfigException(printfify("Unterminated comment: %i", linenum));
-//     
+//
 //     if(in_quote)
 //       throw ConfigException(printfify("Unterminated quote: %i", linenum));
-//     
+//
 //     file.close();
 //   }
 //   else
@@ -176,13 +176,13 @@ void INIReader::Parse(const Flux::string &filename)
   bool in_quote = false;
   int lineno = 0;
   Flux::string section;
-  
+
   while(file.good())
   {
     // Different things needed for the map.
     Flux::string key;
     Flux::string value;
-    
+
     // Get the line from the file
     Flux::string line;
     std::getline(file, line.std_str());
@@ -199,7 +199,7 @@ void INIReader::Parse(const Flux::string &filename)
     // Get INI sections
     if((line[0] == '[' && line[len - 1] != ']') || (line[0] != '[' && line[len - 1] == ']'))
       throw ConfigException(printfify("Invalid or unterminated section at %i in configuration", lineno));
-    
+
     if(line[0] == '[' && line[len - 1] == ']')
     {
       section = line;
@@ -278,7 +278,7 @@ void INIReader::Parse(const Flux::string &filename)
 
     if(value.empty())
       continue;
-    
+
 //       Log(LOG_TERMINAL) << "";
 //       Log(LOG_TERMINAL) << "SECTION: " << section;
 //       Log(LOG_TERMINAL) << "VALUE: " << value;
@@ -292,18 +292,18 @@ void INIReader::Parse(const Flux::string &filename)
       _values[this->MakeKey(section, key)] = value;
 
     } // while
-    
+
     if(in_comment || in_quote)
     {
 //       if(in_comment)
 // 	Log(LOG_TERMINAL) << "Unterminated comment!";
-// 
+//
 //       if(in_quote)
 // 	Log(LOG_TERMINAL) << "Unterminated quote!";
       throw ConfigException("Unterminated comment or quote");
     }
     file.close();
-    
+
 } // function
 
 /**
@@ -409,10 +409,14 @@ void BotConfig::Read()
   this->PidFile 	= this->Parser->Get("Bot","PID File","navn.pid");
   this->ModuleDir 	= this->Parser->Get("Modules", "ModuleDir", "");
   this->xmlrpcbindip 	= this->Parser->Get("XML-RPC", "BindAddress", "0.0.0.0");
+  this->jsonrpcbindip  = this->Parser->Get("JSON-RPC", "BindAddress", "0.0.0.0");
   this->LogTime 	= this->Parser->GetInteger("Log", "Log Time", 0);
   this->xmlrpcport 	= this->Parser->GetInteger("XML-RPC", "Port", 12345);
   this->xmlrpcipv6 	= this->Parser->GetBoolean("XML-RPC", "IPv6", false);
   this->xmlrpctimeout 	= this->Parser->GetInteger("XML-RPC", "Timeout", 30);
+  this->jsonrpctimeout = this->Parser->GetInteger("JSON-RPC", "Timeout", 30);
+  this->jsonrpcport    = this->Parser->GetInteger("JSON-RPC", "Port", 12346);
+  this->jsonrpcipv6    = this->Parser->GetBoolean("JSON-RPC", "IPv6", false);
   this->UseIPv6 	= this->Parser->GetBoolean("Connect", "UseIPv6", false);
   this->SockWait 	= this->Parser->GetInteger("Socket","Socket Timeout",5);
   this->RetryWait 	= this->Parser->GetInteger("Socket", "Retry Wait", 30);
