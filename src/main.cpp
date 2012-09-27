@@ -78,54 +78,54 @@ void SaveDatabases()
 // Entry Point
 int main (int argcx, char** argvx, char *envp[])
 {
- SET_SEGV_LOCATION();
-  try
-  {
-    int loopcount = 0;
-    startup(argcx, argvx, envp);
-    time_t last_check = time(NULL);
-    
-    new tqueue(GarbageCall, 120, time(NULL), true);
-    if(!readonly)
-      new tqueue(SaveDatabases, 60, time(NULL), true);
-
-    new tqueue(SaveDatabases, 60, time(NULL), true); // Start the Database Save timer.
-    GProto = new GlobalProto(); // Global protocol class
-
-    while(!quitting)
+    SET_SEGV_LOCATION();
+    try
     {
-      Log(LOG_RAWIO) << "Top of main loop";
-      //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
-      if(++loopcount >= 50)
-      {
-	Log(LOG_CRITICAL) << "Infinite while loop detected, Segmentation Fault raised.";
-	LastBuf = "50 main loop calls in 3 secs";
-	raise(SIGSEGV);
-      }
+	int loopcount = 0;
+	startup(argcx, argvx, envp);
+	time_t last_check = time(NULL);
 
-      // Process our sockets and whatnot
-      SocketEngine::Process();
-      /* Process Timers */
-      /***********************************/
-      if(time(NULL) - last_check >= 3)
-      {
-	loopcount = 0;
-	TimerManager::TickTimers(time(NULL));
-	last_check = time(NULL);
-      }
-      /***********************************/
-    } // while loop ends here
-    // clean up for exit
-    GarbageCollect();
-    Log(LOG_TERMINAL) << "Bye!\033[0m";
-  }//try ends here
-  catch(const CoreException& e)
-  {
-    /* we reset the terminal colors, this should be removed as it makes more issues than it is cool */
-    GarbageCollect();
-    Log() << "\033[0mCore Exception Caught: " << e.GetReason();
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+	new tqueue(GarbageCall, 120, time(NULL), true);
+	if(!readonly)
+	    new tqueue(SaveDatabases, 60, time(NULL), true);
+
+	new tqueue(SaveDatabases, 60, time(NULL), true); // Start the Database Save timer.
+	GProto = new GlobalProto(); // Global protocol class
+
+	while(!quitting)
+	{
+	    Log(LOG_RAWIO) << "Top of main loop";
+	    //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
+	    if(++loopcount >= 50)
+	    {
+		Log(LOG_CRITICAL) << "Infinite while loop detected, Segmentation Fault raised.";
+		LastBuf = "50 main loop calls in 3 secs";
+		raise(SIGSEGV);
+	    }
+
+	    // Process our sockets and whatnot
+	    SocketEngine::Process();
+	    /* Process Timers */
+	    /***********************************/
+	    if(time(NULL) - last_check >= 3)
+	    {
+		loopcount = 0;
+		TimerManager::TickTimers(time(NULL));
+		last_check = time(NULL);
+	    }
+	    /***********************************/
+	} // while loop ends here
+	// clean up for exit
+	GarbageCollect();
+	Log(LOG_TERMINAL) << "Bye!\033[0m";
+    }//try ends here
+    catch(const CoreException& e)
+    {
+	/* we reset the terminal colors, this should be removed as it makes more issues than it is cool */
+	GarbageCollect();
+	Log() << "\033[0mCore Exception Caught: " << e.GetReason();
+	return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 
