@@ -1,6 +1,4 @@
-Arbitrary Navn Tool -- README
-(C) 2011-2012 Azuru
-Contact us at Development@Azuru.net
+Arbitrary Navn Tool -- (C) 2011-2012 Azuru
 ============================================================
 ------------------------------------------------------------
 
@@ -45,6 +43,7 @@ How to start in Protocol Debug mode
 2. Start the bot with ./ant -n -p
 
 ## 4. CONTACT
+Email: Development@Azuru.net
 Our IRC: irc.Azuru.net
 Ports: 6660-6669. SSL: 5000
 Our Website: http://www.Azuru.net/
