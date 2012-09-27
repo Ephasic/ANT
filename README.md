@@ -27,20 +27,20 @@ Segmentation fault traces:
   for attempts to restore program before crash, include '<setjmp.h>'
 
 ## 3. HOW TO INSTALL
-1. Extract the source with unzip on linux.
-2. Make sure you have updated Gpp and G++ to latest versions or have build-essentials installed.
-3. run ./Config
-4. Run make
-5. Run make install
-6. To start the bot(s) run ./ant
+- 1. Extract the source with unzip on linux.
+- 2. Make sure you have updated Gpp and G++ to latest versions or have build-essentials installed.
+- 3. run `./Config`
+- 4. Run `make`
+- 5. Run `make install`
+- 6. To start the bot(s) run `./ant`
 
 How to start in developer mode
-1. Follow above instructions.
-2. Start the bot with ./ant -d
+- 1. Follow above instructions.
+- 2. Start the bot with `./ant -d`
 
 How to start in Protocol Debug mode
-1. Follow above instructions.
-2. Start the bot with ./ant -n -p
+- 1. Follow above instructions.
+- 2. Start the bot with `./ant -n -p`
 
 ## 4. CONTACT
 Email: Development@Azuru.net
