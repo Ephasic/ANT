@@ -411,11 +411,11 @@ void BotConfig::Read()
   this->xmlrpcbindip 	= this->Parser->Get("XML-RPC", "BindAddress", "0.0.0.0");
   this->jsonrpcbindip  = this->Parser->Get("JSON-RPC", "BindAddress", "0.0.0.0");
   this->LogTime 	= this->Parser->GetInteger("Log", "Log Time", 0);
-  this->xmlrpcport 	= this->Parser->GetInteger("XML-RPC", "Port", 12345);
+  this->xmlrpcport 	= this->Parser->GetInteger("XML-RPC", "Port", 3910);
   this->xmlrpcipv6 	= this->Parser->GetBoolean("XML-RPC", "IPv6", false);
   this->xmlrpctimeout 	= this->Parser->GetInteger("XML-RPC", "Timeout", 30);
   this->jsonrpctimeout = this->Parser->GetInteger("JSON-RPC", "Timeout", 30);
-  this->jsonrpcport    = this->Parser->GetInteger("JSON-RPC", "Port", 12346);
+  this->jsonrpcport    = this->Parser->GetInteger("JSON-RPC", "Port", 3920);
   this->jsonrpcipv6    = this->Parser->GetBoolean("JSON-RPC", "IPv6", false);
   this->UseIPv6 	= this->Parser->GetBoolean("Connect", "UseIPv6", false);
   this->SockWait 	= this->Parser->GetInteger("Socket","Socket Timeout",5);
