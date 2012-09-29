@@ -15,7 +15,7 @@
 // Queues :D
 std::vector<tqueue*> QueuedQueues;
 
-// Our constructor where we create our timer and push 
+// Our constructor where we create our timer and push
 tqueue::tqueue(void (*func)(), long time_to_tick, time_t now, bool repeating) : Timer(time_to_tick, now, repeating), function(func)
 {
   QueuedQueues.push_back(this);
@@ -28,7 +28,7 @@ tqueue::~tqueue()
   std::vector<tqueue*>::iterator it = std::find(QueuedQueues.begin(), QueuedQueues.end(), this);
   if(it != QueuedQueues.end())
       QueuedQueues.erase(it);
-      
+
   Log(LOG_MEMORY) << "Destroying queue: @" << this;
 }
 

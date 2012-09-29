@@ -66,13 +66,13 @@ public:
   inline Flux::string GetAuthor() const { return this->author; }
   inline Flux::string GetVersion() const { return this->version; }
   inline ModulePriority GetPriority() const { return this->Priority; }
-  inline bool GetPermanent() const { return this->permanent; } 
+  inline bool GetPermanent() const { return this->permanent; }
   inline time_t GetLoadTime() const { return this->loadtime; }
   inline ModType GetModuleType() const { return this->type; }
-  
+
   Module(const Flux::string&, ModType = MOD_UNDEFINED);
   virtual ~Module();
-  
+
   virtual EventResult OnPreReceiveMessage(const Flux::string&) { return EVENT_CONTINUE; }
   virtual void OnPrivmsg(User*, const Flux::vector&) {}
   virtual void OnChannelAction(User*, Channel*, const Flux::vector&) {}

@@ -133,7 +133,7 @@ Base::~Base()
   Log(LOG_MEMORY) << "Classbase::- @" << this;
   for(std::set<dynamic_reference_base*>::iterator it = this->References.begin(), it_end = this->References.end(); it != it_end; ++it)
     (*it)->Invalidate();
-  
+
   for(std::vector<Base*>::iterator it = BaseReferences.begin(), it_end = BaseReferences.end(); it != it_end; ++it)
     if((*it) == this)
       BaseReferences.erase(it);

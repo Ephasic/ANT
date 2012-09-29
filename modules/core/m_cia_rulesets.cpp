@@ -40,7 +40,7 @@ Flux::map<Flux::vector> PosixCommonPrefix(const Flux::vector &files)
 
     CommonDirectories[directory].push_back(file);
   }
-  
+
   return CommonDirectories;
 }
 
@@ -48,10 +48,10 @@ Flux::map<Flux::vector> PosixCommonPrefix(const Flux::vector &files)
 Flux::string BuildFileString(const Flux::vector &files)
 {
   Flux::map<Flux::vector> CommonDirectories = PosixCommonPrefix(files);
-  
+
   Flux::string ret;
   Flux::string prefix;
-  
+
   // Only one directory
   if(CommonDirectories.size() == 1)
   {
@@ -99,7 +99,7 @@ private:
       if(it.first.equals_ci(n))
 	return it.second;
     }
-      
+
     return "";
   }
 
@@ -139,29 +139,37 @@ public:
 
   void OnCommit(CommitMessage &msg)
   {
-    EventResult e;
-    FOREACH_RESULT(I_OnPreCommit, OnPreCommit(msg), e);
-    if(e == EVENT_STOP)
-    {
-      Log(LOG_DEBUG) << "Module canceled commit message!";
-      return;
-    }
-    
-    // FIXME: if they're no connections, buffer the message
-    Log(LOG_DEBUG) << "AnnounceCommit Called.";
+	EventResult e;
+	FOREACH_RESULT(I_OnPreCommit, OnPreCommit(msg), e);
+	if(e == EVENT_STOP)
+	{
+	    Log(LOG_DEBUG) << "Module canceled commit message!";
+	    return;
+	}
 
-    // Build the commit message
-    Flux::string message = "\0034\002{project}: \017\0037{author} * \017\002[{branch}]\017\0038 r{revision}"
-    "\017 ~\0036 {insertions}(+) {deletions}(-)\017\002 | \017\00310{files}\017: {log}";
-    
-    Flux::string formattedmessgae = FormatString(msg, message);
+	// FIXME: if they're no connections, buffer the message
+	Log(LOG_DEBUG) << "AnnounceCommit Called.";
 
-    for(auto it : msg.Channels)
-    {
-      Channel *c = it;
-      Log(LOG_DEBUG) << "Announcing in " << c->name << " (" << c->n->name << ')';
-      c->SendMessage(formattedmessgae);
-    }
+	// Build the commit message
+	Flux::string message = "\0034\002{project}: \017\0037{author} * \017\002[{branch}]\017\0038 r{revision}"
+	"\017 ~\0036 {insertions}(+) {deletions}(-)\017\002 | \017\00310{files}\017: {log}";
+
+	Flux::string formattedmessgae = FormatString(msg, message);
+
+// 	for(unsigned i = 0; i < formattedmessgae.size(); ++i)
+// 	    printf("Char: %#x %03o - '%c'\n", formattedmessgae[i], formattedmessgae[i], formattedmessgae[i]);
+//
+// 	Log(LOG_TERMINAL) << msg.Channels.size() << " channels to announce in: ";
+// 	for(auto it : msg.Channels)
+// 	    Log(LOG_TERMINAL) << it->name;
+//
+// 	Log(LOG_TERMINAL) << "";
+	for(auto it : msg.Channels)
+	{
+	    Channel *c = it;
+	    Log(LOG_DEBUG) << "Announcing in " << c->name << " (" << c->n->name << ')';
+	    c->SendMessage(formattedmessgae);
+	}
   }
 };
 

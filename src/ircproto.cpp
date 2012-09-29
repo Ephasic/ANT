@@ -29,7 +29,7 @@ class SendQTimer : public Timer
     // Have we sent the burst yet?
     inline bool HasBurst() const { return (linessent <= Config->BurstRate); }
   } sqo;
-  
+
 public:
   inline bool NetworkReady() const { return (this->n && this->n->s && this->n->s->GetStatus(SF_CONNECTED)); }
   SendQTimer(const Network *net) : Timer(Config->SendQRate, time(NULL), true), sent(0), n(net)
@@ -37,14 +37,14 @@ public:
     Log(LOG_DEBUG) << "Initialized a SengQ Timer";
     sqo.linessent = 0;
   }
-  
+
   ~SendQTimer()
   {
     Log(LOG_DEBUG) << "Clearing SendQ...";
-    
+
     while(!this->sqo.SendQ.empty())
       this->sqo.SendQ.pop();
-    
+
     Log(LOG_DEBUG) << "Destroying SendQ Timer";
   }
 
@@ -66,7 +66,7 @@ public:
       else
 	Log(LOG_WARN) << "Attempted to send \"" << sqo.SendQ.front() << "\" to the server but no socket exists!";
   }
-  
+
   void Tick(time_t)
   {
     while(!sqo.SendQ.empty() && ++sent <= Config->SendQLines)
@@ -77,7 +77,7 @@ public:
 	Log(LOG_WARN) << "Attempted to send \"" << sqo.SendQ.front() << "\" to the server but no socket exists!";
       sqo.SendQ.pop();
     }
-    
+
     if(sqo.SendQ.empty())
       sqo.linessent = 0;
     else
@@ -90,7 +90,7 @@ IRCProto::IRCProto(const Network *n) : net(n)
 {
   if(!n)
     throw CoreException("IRCProto with no network?");
-  
+
   this->sqt = new SendQTimer(n);
 }
 
@@ -101,7 +101,7 @@ void IRCProto::Raw(const char *fmt, ...)
   va_start(args, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, args);
   va_end(args);
-  
+
   if(this->net->s && this->net->s->GetStatus(SF_CONNECTED))
   {
     this->sqt->SendBuffered(Flux::string(buffer));

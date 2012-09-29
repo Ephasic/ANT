@@ -57,7 +57,7 @@ public:
     Flux::string chan = params[1];
     if(chan.empty())
       return;
-    
+
     User *u = source.u;
     if(!source.n->IsValidChannel(chan))
      source.Reply(CHANNEL_X_INVALID, chan.c_str());
@@ -89,7 +89,7 @@ public:
     this->SetDesc("Connect to a network");
     this->SetSyntax("\37networkname\37 hostname [port]");
   }
-  
+
   void Run(CommandSource &source, const Flux::vector &params)
   {
     Flux::string NetworkName = params[0];
@@ -118,7 +118,7 @@ public:
       }
     }
   }
-  
+
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
     this->SendSyntax(source);
@@ -140,11 +140,11 @@ public:
     this->SetDesc("Disconnect a network");
     this->SetSyntax("\37networkname\37");
   }
-  
+
   void Run(CommandSource &source, const Flux::vector &params)
   {
     Network *n = FindNetwork(params[0]);
-    
+
     if(n)
     {
       source.Reply("Disconnecting from \2%s\2", n->name.c_str());
@@ -153,7 +153,7 @@ public:
     else
       source.Reply("\2%s\2 does not exist.", params[0].c_str());
   }
-  
+
   bool OnHelp(CommandSource &source, const Flux::string &nill)
   {
     this->SendSyntax(source);

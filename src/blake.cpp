@@ -214,11 +214,11 @@ bool BlakeHash(Flux::string &rethash, const Flux::string &text, const Flux::stri
   if(cmphash.size() > 64)
     {
       Log(LOG_TERMINAL) << "[Blake-512]: Comparison hash overflow? is this hash valid?";
-      Log(LOG_TERMINAL) << "[Blake-512]: Hash: " << cmphash; 
+      Log(LOG_TERMINAL) << "[Blake-512]: Hash: " << cmphash;
       return false;
     }
-  
-  
+
+
   uint8_t digest[64];
   uint8_t testdigest[64];
   uint8_t data[65535]; // does it need to be this big and can it be this big???
@@ -234,7 +234,7 @@ bool BlakeHash(Flux::string &rethash, const Flux::string &text, const Flux::stri
     Log(LOG_TERMINAL) << "[Blake-512]: data array: " << sizeof(data) << " text: " << text.size();
     return false;
   }
-  
+
   // Convert the Flux::string to a uint8_t array
   for(unsigned i = 0; i < text.size(); ++i)
     data[i] = static_cast<uint8_t>(text[i]);
@@ -244,7 +244,7 @@ bool BlakeHash(Flux::string &rethash, const Flux::string &text, const Flux::stri
 
   // Check if the comparison hash isnt empty, then make comparison on it
   if(!cmphash.empty())
-  { 
+  {
     // move the cmphash into the testdigest array
     for(unsigned i = 0; i < cmphash.size() && i < 64; ++i)
       testdigest[i] = static_cast<uint8_t>(cmphash[i]);

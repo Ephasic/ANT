@@ -16,31 +16,31 @@
 
 Flux::string NoTermColor(const Flux::string &ret)
 {
-  Flux::string str;
-  bool in_term_color = false;
+    Flux::string str;
+    bool in_term_color = false;
 
-  for(unsigned i=0; i < ret.length(); ++i)
-  {
-    char c = ret[i];
-
-    if(in_term_color)
+    for(unsigned i=0; i < ret.length(); ++i)
     {
-      if(c == 'm')
-	in_term_color = false;
-      continue;
+	char c = ret[i];
+
+	if(in_term_color)
+	{
+	    if(c == 'm')
+		in_term_color = false;
+	    continue;
+	}
+
+	if(c == '\033')
+	{
+	    in_term_color = true;
+	    continue;
+	}
+
+	if(!in_term_color)
+	    str += c;
     }
 
-    if(c == '\033')
-    {
-      in_term_color = true;
-      continue;
-    }
-
-    if(!in_term_color)
-      str += c;
-  }
-
-  return str;
+    return str;
 }
 
 /**
@@ -80,64 +80,64 @@ static inline Flux::string CreateLogName(const Flux::string &file, time_t t = ti
  */
 void CheckLogDelete(Log *log)
 {
-  Flux::string dir = binary_dir+"/logs/";
-  if(!TextFile::IsDirectory(dir))
-  {
-    Log(LOG_TERMINAL) << "Directory " << dir << " does not exist, making new directory.";
-    if(mkdir(Flux::string(dir).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0)
-      throw LogException("Failed to create directory "+dir+": "+Flux::string(strerror(errno)));
-  }
-
-  Flux::vector files = TextFile::DirectoryListing(dir);
-  if(log)
-    files.push_back(log->filename);
-
-  if(files.empty())
-    Log(LOG_TERMINAL) << "No Logs!";
-
-  for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
-  {
-    Flux::string file = dir+(*it);
-
-    if(TextFile::IsFile(file))
+    Flux::string dir = binary_dir+"/logs/";
+    if(!TextFile::IsDirectory(dir))
     {
-      Flux::string t = file.isolate('-', ' ').strip('-');
-      int timestamp = (int)t;
-
-      if(timestamp > (time(NULL) - 86400 * Config->LogAge) && timestamp != starttime)
-      {
-	Delete(file.c_str());
-	Log(LOG_DEBUG) << "Deleted old logfile " << file;
-      }
+	Log(LOG_TERMINAL) << "Directory " << dir << " does not exist, making new directory.";
+	if(mkdir(Flux::string(dir).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0)
+	    throw LogException("Failed to create directory "+dir+": "+Flux::string(strerror(errno)));
     }
-  }
+
+    Flux::vector files = TextFile::DirectoryListing(dir);
+    if(log)
+	files.push_back(log->filename);
+
+    if(files.empty())
+	Log(LOG_TERMINAL) << "No Logs!";
+
+    for(Flux::vector::iterator it = files.begin(); it != files.end(); ++it)
+    {
+	Flux::string file = dir+(*it);
+
+	if(TextFile::IsFile(file))
+	{
+	    Flux::string t = file.isolate('-', ' ').strip('-');
+	    int timestamp = (int)t;
+
+	    if(timestamp > (time(NULL) - 86400 * Config->LogAge) && timestamp != starttime)
+	    {
+		Delete(file.c_str());
+		Log(LOG_DEBUG) << "Deleted old logfile " << file;
+	    }
+	}
+    }
 }
 
 Flux::string Log::TimeStamp()
 {
- char tbuf[256];
-  time_t t;
+    char tbuf[256];
+    time_t t;
 
-  if (time(&t) < 0)
-	  throw CoreException("time() failed");
+    if (time(&t) < 0)
+	    throw CoreException("time() failed");
 
-  tm tm = *localtime(&t);
-#if HAVE_GETTIMEOFDAY
-  if (protocoldebug)
-  {
-    char *s;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    strftime(tbuf, sizeof(tbuf) - 1, "[%b %d %H:%M:%S", &tm);
-    s = tbuf + strlen(tbuf);
-    s += snprintf(s, sizeof(tbuf) - (s - tbuf), ".%06d", static_cast<int>(tv.tv_usec));
-    strftime(s, sizeof(tbuf) - (s - tbuf) - 1, " %Y]", &tm);
-  }
-  else
-#endif
-    strftime(tbuf, sizeof(tbuf) - 1, "[%b %d %H:%M:%S %Y]", &tm);
+    tm tm = *localtime(&t);
+    #if HAVE_GETTIMEOFDAY
+    if (protocoldebug)
+    {
+	char *s;
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	strftime(tbuf, sizeof(tbuf) - 1, "[%b %d %H:%M:%S", &tm);
+	s = tbuf + strlen(tbuf);
+	s += snprintf(s, sizeof(tbuf) - (s - tbuf), ".%06d", static_cast<int>(tv.tv_usec));
+	strftime(s, sizeof(tbuf) - (s - tbuf) - 1, " %Y]", &tm);
+    }
+    else
+    #endif
+	strftime(tbuf, sizeof(tbuf) - 1, "[%b %d %H:%M:%S %Y]", &tm);
 
-  return Flux::Sanitize(tbuf);
+    return Flux::Sanitize(tbuf);
 }
 
 Log::Log(LogType t) : type(t), u(NULL), c(NULL) {}
@@ -145,14 +145,14 @@ Log::Log(LogType t, User *user):type(t), u(user), c(NULL) { if(!u) throw CoreExc
 Log::Log(User *user): type(LOG_NORMAL), u(user), c(NULL) { if(!u) throw CoreException("No user argument in Log()"); }
 Log::Log(User *user, Command *command):type(LOG_NORMAL), u(user), c(command)
 {
-  if(!u) throw CoreException("No user argument in Log()");
-  if(!c) throw CoreException("No command argument in Log()");
+    if(!u) throw CoreException("No user argument in Log()");
+    if(!c) throw CoreException("No command argument in Log()");
 }
 
 Log::Log(LogType t, User *user, Command *command): type(t), u(user), c(command)
 {
-  if(!u) throw CoreException("No user argument in Log()");
-  if(!c) throw CoreException("No command argument in Log()");
+    if(!u) throw CoreException("No user argument in Log()");
+    if(!c) throw CoreException("No command argument in Log()");
 }
 
 Log::~Log()

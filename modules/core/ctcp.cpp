@@ -55,7 +55,7 @@ public:
 
 	n->b->ircproto->notice(source, "\001VERSION ANT-%s %s %s\001",VERSION_FULL, uts.sysname, uts.machine);
     }
-    
+
     if(cmd == "\001TIME\001")
 	n->b->ircproto->notice(source,"\001TIME %s\001", do_strftime(time(NULL), true).c_str());
 

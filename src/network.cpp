@@ -46,19 +46,19 @@ Network::~Network()
 
 bool Network::JoinChannel(const Flux::string &chan)
 {
-  Log(LOG_DEBUG) << "Scheduling Channel " << chan << " for join.";
-  if(IsValidChannel(chan))
-  {
-    Channel *c = this->FindChannel(chan);
-    if(!c)
-      c = new Channel(this, chan);
-    if(!this->s || !this->s->GetStatus(SF_CONNECTED))
-      this->JoinQueue.push(c);
-    else
-      c->SendJoin();
-    return true;
-  }
-  return false;
+    Log(LOG_DEBUG) << "Scheduling Channel " << chan << " for join.";
+    if(IsValidChannel(chan))
+    {
+	Channel *c = this->FindChannel(chan);
+	if(!c)
+	    c = new Channel(this, chan);
+	if(!this->s || !this->s->GetStatus(SF_CONNECTED))
+	    this->JoinQueue.push(c);
+	else
+	    c->SendJoin();
+	return true;
+    }
+    return false;
 }
 
 bool Network::Disconnect()
@@ -106,23 +106,32 @@ bool Network::IsSynced() const
 
 void Network::Sync()
 {
-  if(this->isupport.UserModes.search('B'))
-    this->b->SetMode("+B"); //FIXME: get bot mode?
-  if(this->isupport.IRCdVersion.search_ci("ircd-seven") && this->isupport.UserModes.search('Q'))
-    this->b->SetMode("+Q"); //for freenode to stop those redirects
-      
-  sepstream cs(Config->Channel, ',');
-  Flux::string tok;
-  while(cs.GetToken(tok))
-  {
-    tok.trim();
-    new Channel(this, tok);
-  }
-  
-  this->servername = this->isupport.ServerHost;
-  this->issynced = true;
-  FOREACH_MOD(I_OnNetworkSync, OnNetworkSync(this));
-  Log(LOG_DEBUG) << "Network " << this->name << " is synced!";
+    if(this->isupport.UserModes.search('B'))
+	this->b->SetMode("+B"); //FIXME: get bot mode?
+    if(this->isupport.IRCdVersion.search_ci("ircd-seven") && this->isupport.UserModes.search('Q'))
+	this->b->SetMode("+Q"); //for freenode to stop those redirects
+
+    sepstream cs(Config->Channel, ',');
+    Flux::string tok;
+    while(cs.GetToken(tok))
+    {
+	tok.trim();
+	new Channel(this, tok);
+    }
+
+    // Join pending channels
+    while(!this->JoinQueue.empty())
+    {
+	Channel *c = this->JoinQueue.front();
+	this->JoinQueue.pop();
+	Log(LOG_DEBUG) << "Joining " << c->name << " (" << this->name << ')';
+	c->SendJoin();
+    }
+
+    this->servername = this->isupport.ServerHost;
+    this->issynced = true;
+    FOREACH_MOD(I_OnNetworkSync, OnNetworkSync(this));
+    Log(LOG_DEBUG) << "Network " << this->name << " is synced!";
 }
 
 bool Network::Connect()

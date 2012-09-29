@@ -37,24 +37,24 @@
 typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > base_string;
 namespace Flux
 {
-  class string;
+    class string;
 }
 
 extern bool protocoldebug;
 template<typename type_name, typename value> inline type_name value_cast(const value &y)
 {
-  std::stringstream stream;
-  type_name nullpointer;
-  type_name x;
-  if(!(stream << std::setprecision(1000) << y)) // use setprecision so scientific notation does not get in the way.
-    throw;
-  if(!(stream >> x))
-  {
-    if(protocoldebug)
-      printf("Failed to cast \"%s\" to \"%s\"\n", typeid(value).name(), typeid(type_name).name());
-    return nullpointer;
-  }
-  return x;
+    std::stringstream stream;
+    type_name nullpointer;
+    type_name x;
+    if(!(stream << std::setprecision(1000) << y)) // use setprecision so scientific notation does not get in the way.
+	throw;
+    if(!(stream >> x))
+    {
+	if(protocoldebug)
+	    printf("Failed to cast \"%s\" to \"%s\"\n", typeid(value).name(), typeid(type_name).name());
+	return nullpointer;
+    }
+    return x;
 }
 /** Case insensitive map, ASCII rules.
  * That is;
@@ -326,19 +326,19 @@ namespace Flux {
     inline base_string &std_str() { return this->_string; }
     inline string url_str() const
     {
-      string ret;
-      const char *t = this->_string.c_str();
-      while(t && *t)
-      {
-	int c = *t;
-	const char *e = url_escape_table[c];
-	if(e)
-	  ret += e;
-	else
-	  ret += c;
-	t++;
-      }
-      return ret;
+	string ret;
+	const char *t = this->_string.c_str();
+	while(t && *t)
+	{
+	    int c = *t;
+	    const char *e = url_escape_table[c];
+	    if(e)
+		ret += e;
+	    else
+		ret += c;
+	    t++;
+	}
+	return ret;
     }
 
     inline bool empty() const { return this->_string.empty(); }
@@ -358,10 +358,10 @@ namespace Flux {
 
     inline void trim()
     {
-     while(!this->_string.empty() && isspace(this->_string[0]))
-       this->_string.erase(this->_string.begin());
-     while(!this->_string.empty() && isspace(this->_string[this->_string.length() - 1]))
-       this->_string.erase(this->_string.length() - 1);
+	while(!this->_string.empty() && isspace(this->_string[0]))
+	    this->_string.erase(this->_string.begin());
+	while(!this->_string.empty() && isspace(this->_string[this->_string.length() - 1]))
+	    this->_string.erase(this->_string.length() - 1);
     }
 
     inline string tolower() { std::transform(_string.begin(), _string.end(), _string.begin(), ::tolower); return *this; }
@@ -436,27 +436,27 @@ namespace Flux {
     inline string replace(iterator first, iterator last, size_type n, char chr) { return string(this->_string.replace(first, last, n, chr)); }
     template <class InputIterator> inline string replace(iterator first, iterator last, InputIterator f, InputIterator l) { return string(this->_string.replace(first, last, f, l)); }
     inline string replace_all_cs(const string &_orig, const string &_repl)
+    {
+	Flux::string new_string = *this;
+	size_type pos = new_string.find(_orig), orig_length = _orig.length(), repl_length = _repl.length();
+	while (pos != npos)
 	{
-		Flux::string new_string = *this;
-		size_type pos = new_string.find(_orig), orig_length = _orig.length(), repl_length = _repl.length();
-		while (pos != npos)
-		{
-			new_string = new_string.substr(0, pos) + _repl + new_string.substr(pos + orig_length);
-			pos = new_string.find(_orig, pos + repl_length);
-		}
-		return new_string;
+	    new_string = new_string.substr(0, pos) + _repl + new_string.substr(pos + orig_length);
+	    pos = new_string.find(_orig, pos + repl_length);
 	}
+	return new_string;
+    }
      inline string replace_all_ci(const string &_orig, const string &_repl)
+    {
+	Flux::string new_string = *this;
+	size_type pos = new_string.find_ci(_orig), orig_length = _orig.length(), repl_length = _repl.length();
+	while (pos != npos)
 	{
-		Flux::string new_string = *this;
-		size_type pos = new_string.find_ci(_orig), orig_length = _orig.length(), repl_length = _repl.length();
-		while (pos != npos)
-		{
-			new_string = new_string.substr(0, pos) + _repl + new_string.substr(pos + orig_length);
-			pos = new_string.find_ci(_orig, pos + repl_length);
-		}
-		return new_string;
+	    new_string = new_string.substr(0, pos) + _repl + new_string.substr(pos + orig_length);
+	    pos = new_string.find_ci(_orig, pos + repl_length);
 	}
+	return new_string;
+    }
     inline string substr(size_type pos = 0, size_type n = npos) const { return this->_string.substr(pos, n).c_str(); }
 
     inline iterator begin() { return this->_string.begin(); }
@@ -476,16 +476,16 @@ namespace Flux {
 
     inline string isolate(char b, char e) const
     {
-      string to_find;
-      size_t pos = _string.find(b);
-      pos += 1;
-      for (unsigned i = pos; i < _string.length(); i++){
-	if (_string[i] == e)
-	  break;
-	else
-	  to_find = to_find+_string[i];
-      }
-      return to_find;
+	string to_find;
+	size_t pos = _string.find(b);
+	pos += 1;
+	for (unsigned i = pos; i < _string.length(); i++){
+	    if (_string[i] == e)
+		break;
+	    else
+		to_find = to_find+_string[i];
+	}
+	return to_find;
     }
 
 
@@ -500,10 +500,10 @@ namespace Flux {
 
     inline string strip() const
     {
-      string new_buf = *this;
-      new_buf = new_buf.replace_all_cs("\n", "");
-      new_buf = new_buf.replace_all_cs("\r", "");
-      return new_buf;
+	string new_buf = *this;
+	new_buf = new_buf.replace_all_cs("\n", "");
+	new_buf = new_buf.replace_all_cs("\r", "");
+	return new_buf;
     }
     /* Strip specific chars */
     inline string strip(const char &_delim)
@@ -515,9 +515,9 @@ namespace Flux {
 
     inline string strip(const char &_delim) const
     {
-      string new_buf = *this;
-      new_buf = new_buf.replace_all_cs(_delim, "");
-      return new_buf;
+	string new_buf = *this;
+	new_buf = new_buf.replace_all_cs(_delim, "");
+	return new_buf;
     }
     //Transform from Text to Base64
     inline string b64encode()

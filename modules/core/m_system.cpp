@@ -120,25 +120,24 @@ public:
 // tqueue's don't accept arguments yet (if it's even possible) :|
 class SyncTimer : public Timer
 {
-  Network *n;
+    Network *n;
 public:
-  SyncTimer(Network *net):Timer(5), n(net) {}
+    SyncTimer(Network *net):Timer(5), n(net) { }
 
-  void Tick(time_t)
-  {
-    JoinChansInBuffer(this->n);
-    n->Sync();
-  }
+    void Tick(time_t)
+    {
+	n->Sync();
+    }
 };
 
 void NicknameCheck()
 {
-  // Make sure our nicknames are consistent
-  for(auto it : Networks)
-  {
-    if(it.second->b)
-      it.second->b->CheckNickname();
-  }
+    // Make sure our nicknames are consistent
+    for(auto it : Networks)
+    {
+	if(it.second->b)
+	    it.second->b->CheckNickname();
+    }
 }
 
 class m_system : public Module
@@ -165,49 +164,49 @@ public:
   // even working properly
   void OnChannelAction(User *u, Channel *c, const std::vector<Flux::string> &params)
   {
-    Flux::string msg = CondenseVector(params);
-    Bot *b = u->n->b;
+	Flux::string msg = CondenseVector(params);
+	Bot *b = u->n->b;
 
-    // Imported from CIA.vc c:
-    if(msg.search_ci("rubs "+b->nick+"'s tummy"))
-      c->SendMessage("*purr*");
-    
-    if(msg.search_ci("hugs "+b->nick))
-      c->SendAction("hugs %s", u->nick.c_str());
-    
-    if(msg.search_ci("eats "+b->nick))
-      c->SendAction("tastes crunchy");
-    
-    if(msg.search_ci("kicks "+b->nick))
-      c->SendMessage("ow");
+	// Imported from CIA.vc c:
+	if(msg.search_ci("rubs "+b->nick+"'s tummy"))
+	    c->SendMessage("*purr*");
 
-    // Justasic's additions
-    if(msg.search_ci("smashes "+b->nick) || msg.search_ci("steps on "+b->nick))
-      c->SendAction("is flattened");
-    
-    if(msg.search_ci("burns "+b->nick) || msg.search_ci("sets "+b->nick+" on fire"))
-      c->SendAction("runs around");
-    
-    if(msg.search_ci("punches "+b->nick))
-      c->SendAction("cries");
-    
-    if(msg.search_ci("fries "+b->nick))
-      c->SendAction("sizzles");
-    
-    if(msg.search_ci("pets "+b->nick))
-      c->SendMessage("*purr*");
-    
-    if(msg.search_ci("pokes "+b->nick))
-      c->SendAction("farts");
-    
-    if(msg.search_ci("slaps "+b->nick))
-      c->SendAction("punches %s in the esophagus!", u->nick.c_str());
-    
-    if(msg.search_ci("adopts "+b->nick))
-      c->SendAction("runs away in 4 years");
-    
-    if(msg.search_ci("murders "+b->nick))
-      c->SendAction("dies");
+	if(msg.search_ci("hugs "+b->nick))
+	    c->SendAction("hugs %s", u->nick.c_str());
+
+	if(msg.search_ci("eats "+b->nick))
+	    c->SendAction("tastes crunchy");
+
+	if(msg.search_ci("kicks "+b->nick))
+	    c->SendMessage("ow");
+
+	// Justasic's additions
+	if(msg.search_ci("smashes "+b->nick) || msg.search_ci("steps on "+b->nick))
+	    c->SendAction("is flattened");
+
+	if(msg.search_ci("burns "+b->nick) || msg.search_ci("sets "+b->nick+" on fire"))
+	    c->SendAction("runs around");
+
+	if(msg.search_ci("punches "+b->nick))
+	    c->SendAction("cries");
+
+	if(msg.search_ci("fries "+b->nick))
+	    c->SendAction("sizzles");
+
+	if(msg.search_ci("pets "+b->nick))
+	    c->SendMessage("*purr*");
+
+	if(msg.search_ci("pokes "+b->nick))
+	    c->SendAction("farts");
+
+	if(msg.search_ci("slaps "+b->nick))
+	    c->SendAction("punches %s in the esophagus!", u->nick.c_str());
+
+	if(msg.search_ci("adopts "+b->nick))
+	    c->SendAction("runs away in 4 years");
+
+	if(msg.search_ci("murders "+b->nick))
+	    c->SendAction("dies");
   }
 
   void OnNumeric(int i, Network *n, const Flux::vector &params)
@@ -220,38 +219,38 @@ public:
 	Flux::vector sentence = ParamitizeString(params[o], '=');
 	Flux::string word = sentence[0];
 	Flux::string param = sentence.size() > 1 ? sentence[1] : "";
-	
+
 	if(word.equals_ci("NETWORK"))
 	  n->isupport.Network = param;
-	
+
 	if(word.equals_ci("CHANTYPES"))
 	  n->isupport.ChanTypes = param;
-	
+
 	if(word.equals_ci("AWAYLEN"))
 	  n->isupport.AwayLen = static_cast<int>(param);
-	
+
 	if(word.equals_ci("KICKLEN"))
 	  n->isupport.KickLen = static_cast<int>(param);
-	
+
 	if(word.equals_ci("MAXBANS"))
 	  n->isupport.MaxBans = static_cast<int>(param);
-	
+
 	if(word.equals_ci("MAXCHANNELS"))
 	  n->isupport.MaxChannels = static_cast<int>(param);
 
 	if(word.equals_ci("CHANNELLEN"))
 	  n->isupport.ChannelLen = static_cast<int>(param);
-	
+
 	if(word.equals_ci("NICKLEN"))
 	  n->isupport.NickLen = static_cast<int>(param);
-	
+
 	if(word.equals_ci("TOPICLEN"))
 	  n->isupport.TopicLen = static_cast<int>(param);
-	
+
 	n->isupport.other[word] = param;
       }
     }
-    
+
     if((i == 4))
     {
       /* Numeric 004
@@ -288,11 +287,11 @@ public:
 	if(static_cast<int>(number) == n->b->BotNum)
 	  n->b->BotNum++;
       }
-      
+
       n->b->CheckNickname();
     }
   }
-  
+
   // user!ident@host.com NICK NewNickname
   // User*			msg
   void OnNickChange(User *u)

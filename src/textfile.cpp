@@ -186,10 +186,10 @@ bool TextFile::IsFile(const Flux::string &filename)
   struct stat sb;
   if (stat(file, &sb) == -1)
     return false;
-  
+
   if ((sb.st_mode & S_IFDIR) > 0)
     return false;
-  
+
   FILE *input = fopen(file, "r");
   if (input == NULL)
     return false;

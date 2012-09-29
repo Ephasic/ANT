@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- DNS Resolution Engine
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -97,8 +97,8 @@ void DNSRequest::Process()
 		delete this;
 		return;
 	}
-	
-	DNSPacket *p = new DNSPacket();	
+
+	DNSPacket *p = new DNSPacket();
 	p->flags = DNS_QUERYFLAGS_RD;
 
 	p->id = this->id;
@@ -118,7 +118,7 @@ void DNSRequest::Tick(time_t)
 	DNSQuery rr(*this);
 	rr.error = DNS_ERROR_TIMEOUT;
 	this->OnError(&rr);
-} 
+}
 
 void DNSPacket::PackName(unsigned char *output, unsigned short output_size, unsigned short &pos, const Flux::string &name)
 {
@@ -311,7 +311,7 @@ void DNSPacket::Fill(const unsigned char *input, const unsigned short len)
 
 	for (unsigned i = 0; i < qdcount; ++i)
 		this->questions.push_back(this->UnpackQuestion(input, len, packet_pos));
-	
+
 	for (unsigned i = 0; i < ancount; ++i)
 		this->answers.push_back(this->UnpackResourceRecord(input, len, packet_pos));
 
@@ -326,7 +326,7 @@ unsigned short DNSPacket::Pack(unsigned char *output, unsigned short output_size
 {
 	if (output_size < DNSPacket::HEADER_LENGTH)
 		throw SocketException("Unable to pack packet");
-	
+
 	unsigned short pos = 0;
 
 	output[pos++] = this->id >> 8;
@@ -467,7 +467,7 @@ unsigned short DNSPacket::Pack(unsigned char *output, unsigned short output_size
 					break;
 			}
 		}
-	
+
 	return pos;
 }
 
@@ -483,7 +483,7 @@ DNSManager::~DNSManager()
 	this->packets.clear();
 
 	for (std::map<unsigned short, DNSRequest *>::iterator it = this->requests.begin(), it_end = this->requests.end(); it != it_end; ++it)
-	{	
+	{
 		DNSRequest *request = it->second;
 
 		DNSQuery rr(*request);
@@ -594,7 +594,7 @@ bool DNSManager::ProcessRead()
 		request->OnLookupComplete(&recv_packet);
 		DNSEngine->AddCache(recv_packet);
 	}
-	
+
 	delete request;
 	return true;
 }
@@ -641,7 +641,7 @@ bool DNSManager::CheckCache(DNSRequest *request)
 	if (it != this->cache.end())
 	{
 		DNSQuery record(*request);
-		
+
 		for (cache_map::iterator it_end = this->cache.upper_bound(request->name); it != it_end; ++it)
 		{
 			ResourceRecord &rec = it->second;

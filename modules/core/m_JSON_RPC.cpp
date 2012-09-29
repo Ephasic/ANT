@@ -25,6 +25,7 @@ class JSONRPCModule;
 class RetryStart;
 
 std::vector<JSONListenSocket*> listen_sockets;
+static const Flux::string systemver = value_cast<Flux::string>(VERSION_FULL);
 
 // Listen socket used to see if there are new clients to accept from.
 class JSONListenSocket : public ListenSocket
@@ -68,8 +69,34 @@ public:
     {
 	// TODO: For now just print to the terminal whatever we receive.
 	Log(LOG_RAWIO) << m;
-	Log(LOG_RAWIO) << "\nFinished receiving JSON-RPC!";
+	//Log(LOG_RAWIO) << "\nFinished receiving JSON-RPC!";
 	return true;
+    }
+
+    // very basic HTTP reply method.
+    void HTTPReply(int code, const Flux::string &statustype, const Flux::string &contenttype, const Flux::string &message)
+    {
+	// Basic header
+	this->Write("HTTP/1.1 %d %s", code, statustype.c_str());
+	this->Write("CONNECTION: CLOSE");
+	this->Write("DATE: "+do_strftime(time(NULL), true));
+	this->Write("SERVER: ANT Commit System version " + systemver);
+
+	// Some codes do not require content.
+	if(!contenttype.empty() && !message.empty());
+	{
+	    this->Write("CONTENT-TYPE: %s", contenttype.c_str());
+	    this->Write(printfify("CONTENT-LENGTH: %i", message.size()));
+	}
+
+	// That stupid fucking newline
+	this->Write("");
+
+	// Message content
+	if(!message.empty())
+	    this->Write(message);
+
+	this->SetStatus(SF_DEAD, true);
     }
 
     // Timeout if someone idles on the server for too long without submitting data.

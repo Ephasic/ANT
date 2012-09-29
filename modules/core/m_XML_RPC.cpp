@@ -34,6 +34,7 @@ Flux::string SanitizeXML(const Flux::string &str)
 	chars("&gt;", ">"),
 	chars("&#39", "'"),
 	chars("&#xA", "\n"),
+	chars("\r", ""),
 	chars("", "")
     };
 
@@ -43,11 +44,12 @@ Flux::string SanitizeXML(const Flux::string &str)
     return ret;
 }
 
-// Simple web page incase a web browser decides to go to the link
-const Flux::string systemver = value_cast<Flux::string>(VERSION_FULL);
-const Flux::string HTTPREQUEST = "<center><h1>ANT Commit system version "+systemver+"</h1></center>\n"
+// Simple web page in case a web browser decides to go to the link
+static const Flux::string systemver = value_cast<Flux::string>(VERSION_FULL);
+static const Flux::string HTTPREQUEST =
+"<center><h1>ANT Commit system version "+systemver+"</h1></center>\n"
 "<center><h4>This is the address for XML-RPC commits</h4>\n"
-"<p>This will not provide XML-RPC requests and ONLY uses POST to commit the data (same as most <a href=\"http://cia.vc/doc/clients/\">CIA.vc scripts</a> work), if you are looking for the site, please see <a href=\"http://www.Azuru.net/\">Azuru.net</a> for the sites location or optionally connect to Azuru IRC for support:</p>\n"
+"<p>This will not provide XML-RPC requests and ONLY uses POST to commit the data (same as most <a href=\"http://cia.vc/doc/clients/\">CIA.vc scripts</a>), if you are looking for the site, please see <a href=\"http://www.Azuru.net/\">Azuru.net</a> for the sites location or optionally connect to Azuru IRC for support:</p>\n"
 "<a href=\"irc://irc.Azuru.net/Computers\"><FONT COLOR=\"red\">irc.Azuru.net</FONT>:<FONT COlOR=\"Blue\">6667</FONT></a></br>\n"
 "Channel: <FONT COLOR=\"Green\">#Commits</FONT></br>\n"
 "Channel: <FONT COLOR=\"Green\">#Computers</FONT></br></center>\n";
@@ -77,102 +79,125 @@ public:
 	Log(LOG_DEBUG) << "[XML-RPC] Deleting listen socket for " << this->bindaddr.addr() << ':' <<
 	this->bindaddr.port() << (this->IsIPv6()?" (IPv6)":" (IPv4)");
     }
+
     ClientSocket *OnAccept(int fd, const sockaddrs &addr);
 };
+
 /*****************************************************************/
 /*********************** Client Socket ***************************/
 /*****************************************************************/
 
-// Declared below
-extern Flux::string messagestr;
-extern xmlrpcclient *client;
-extern void htmlcall();
-
 class xmlrpcclient : public ClientSocket, public BufferedSocket, public Timer
 {
-    Flux::string RawCommitXML;
-    bool in_query, in_header, IsXML, is_httpreq;
+    Flux::vector httpheader, httpcontent;
+    bool in_header, is_httpreq;
 public:
     xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()),
     ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), Timer(Config->xmlrpctimeout),
-    in_query(false), in_header(false), IsXML(false), is_httpreq(false) {}
+    in_header(true), is_httpreq(false) { }
 
     bool Read(const Flux::string &m)
     {
 	Flux::string message = SanitizeXML(m);
-    //     Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
+        //Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
 
-	if(message.search_ci("GET") && message.search_ci("HTTP/1."))
-	{ //If connection is HTTP GET request
-	    messagestr = message;
-	    client = this;
-	    new tqueue(htmlcall, 0); // Wait for the 3 second timeout
-	    this->is_httpreq = true;
-	    Log(LOG_TERMINAL) << "HTTP GET Request.";
-	    return true;
-	}
-	else if((message.search_ci("POST") && message.search_ci("HTTP/1.")))
-	{ //This is a commit
-	    this->in_header = true;
-    //       Log(LOG_DEBUG) << "[XML-RPC] " << message;
-	}
-	else if(this->in_header && (message.search_ci("Content-Type: text/xml") || message.search_ci("Content Type: text/xml")))
-	    this->IsXML = true;
-	else if(message.search_ci("<?xml"))
+	// According to the HTTP protocol, content and header are deliminated by
+	// a newline which the socket engine interprets as a blank/empty line.
+	// In my opinion this is the worst deliminator in the world and whoever
+	// thought it up should be tortured and burned on the stake.
+	if(message.empty())
 	{
-	    this->in_query = this->IsXML = true;
-	    this->in_header = false;
-	    this->RawCommitXML += message.strip();
-	}
-	else if(this->in_query)
-	{
-	//       Log(LOG_DEBUG) << "[XML-RPC] " << message;
+	    in_header = false;
 
-	    if(!message.search_ci("</message>"))
-		this->RawCommitXML += message.strip();
+	    if(is_httpreq)
+		this->HTTPReply(200, "OK", "text/html", HTTPREQUEST);
+	}
+
+	// the method line
+	if(in_header && !message.search(':') && !message.empty())
+	{
+	    Flux::vector line = ParamitizeString(message, ' ');
+	    if(line.size() < 3)
+	    {
+		// Oh noes! Someone sent bad data!
+		this->HTTPReply(400, "Bad Request", "", "");
+		Log(LOG_DEBUG) << "Invalid or malformed syntax!";
+	    }
+
+	    if(line[0].equals_ci("GET"))
+		is_httpreq = true;
+	    else if(line[0].equals_ci("POST"))
+	    {
+		// Process XML data for Commit, nothing to do here!
+	    }
 	    else
 	    {
-		this->in_query = false;
-		this->RawCommitXML += message.strip();
-		Log(LOG_DEBUG) << "[XML-RPC] Processing Message from " << this->clientaddr.addr();
+		// invalid request, return 405!
+		this->HTTPReply(405, "Method Not Allowed", "", "");
+		Log(LOG_DEBUG) << "Invalid method request: " << line[0];
+	    }
+	}
+	// Other header info
+	else if(in_header)
+	{
+	    httpheader.push_back(message);
 
-		// Reply to our XML-RPC request stating that we received the commit.
-		Flux::string reply = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n"
+	    Flux::vector line = ParamitizeString(message, ':');
+
+	    if(line.size() == 2 && line[0].equals_ci("Content-Type") && !line[1].search_ci("text/xml"))
+		this->HTTPReply(415, "Unsupported Media Type", "", "");
+
+	    if(line.size() > 1 && line[0].equals_ci("User-Agent"))
+		; // Eventually track user agents to see what everyone is using!
+	}
+	// CONTENT! :D
+	else
+	{
+	    httpcontent.push_back(message);
+
+	    if(message.equals_ci("</message>"))
+	    {
+		Flux::string reply =
+		"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n"
 		"<methodResponse>\n"
 		"<params>\n"
 		"<param><value><string>Commit Received!</string></value></param>\n"
 		"</params>\n"
 		"</methodResponse>\n";
 
-		this->Write("HTTP/1.0 200 OK");
-		this->Write("SERVER: ANT Commit System version " + systemver);
-		this->Write("CONTENT-TYPE: TEXT/XML");
-		this->Write(printfify("CONTENT-LENGTH: %i", reply.size()));
-		this->Write("CONNECTION: CLOSE");
-		this->Write("DATE: "+do_strftime(time(NULL), true));
-		this->Write("");
-		this->Write(reply);
 		this->HandleMessage();
-		this->ProcessWrite();
-		return false; //Close the connection.
+		this->HTTPReply(200, "OK", "text/xml", reply);
 	    }
 	}
-	else if(!this->in_query && !this->in_header && !this->IsXML && !this->is_httpreq)
-	{
-	    Log(LOG_TERMINAL) << "Invalid HTTP POST.";
-	    return false; //Invalid HTTP POST, not XML-RPC
-	}
-	else if(this->in_header || this->is_httpreq) //We're still in the header, but don't need the junk.
-	    return true;
-	else
-	{
-	    this->Write("ERROR: Unknown connection from "+this->clientaddr.addr()+"\n");
-	    this->ProcessWrite(); //Write the data
-	    Log(LOG_TERMINAL) << "Unknown: " << message;
-	    return false; //Close the connection.
-	}
+
 	this->ProcessWrite();
 	return true;
+    }
+
+    // very basic HTTP reply method.
+    void HTTPReply(int code, const Flux::string &statustype, const Flux::string &contenttype, const Flux::string &message)
+    {
+	// Basic header
+	this->Write("HTTP/1.1 %d %s", code, statustype.c_str());
+	this->Write("CONNECTION: CLOSE");
+	this->Write("DATE: "+do_strftime(time(NULL), true));
+	this->Write("SERVER: ANT Commit System version " + systemver);
+
+	// Some codes do not require content.
+	if(!contenttype.empty() && !message.empty());
+	{
+	    this->Write("CONTENT-TYPE: %s", contenttype.c_str());
+	    this->Write(printfify("CONTENT-LENGTH: %i", message.size()));
+	}
+
+	// That stupid fucking newline
+	this->Write("");
+
+	// Message content
+	if(!message.empty())
+	    this->Write(message);
+
+	this->SetStatus(SF_DEAD, true);
     }
 
     bool ProcessWrite()
@@ -186,77 +211,33 @@ public:
     void Tick(time_t)
     {
 	Log(LOG_DEBUG) << "[XML-RPC] Connection Timeout for " << this->clientaddr.addr() << ", closing connection.";
-	this->SetDead(true);
-    }
-};
-
-Flux::string messagestr;
-xmlrpcclient *client;
-
-void htmlcall()
-{
-    int len = HTTPREQUEST.size();
-    bool isfavicon = messagestr.search_ci("/favicon.ico");
-    client->Write("HTTP/1.0 200 OK");
-    client->Write("CONNECTION: CLOSE");
-    client->Write("CONTENT-TYPE: TEXT/HTML");
-    client->Write(printfify("CONTENT-LENGTH: %i", isfavicon?0:len));
-    client->Write("DATE: "+do_strftime(time(NULL), true));
-    client->Write("SERVER: ANT Commit System version " + systemver);
-    client->Write("");
-    client->Write(isfavicon?"":HTTPREQUEST);
-    client->ProcessWrite();
-    client->SetStatus(SF_DEAD, true);
-}
-
-class ClientIPLookup : public DNSRequest
-{
-    const sockaddrs addr;
-public:
-    ClientIPLookup(const sockaddrs &address) : DNSRequest(Flux::string(address.addr()), DNS_QUERY_PTR), addr(address)
-    {
-	Log(LOG_TERMINAL) << "Looking up " << addr.addr();
-    }
-
-    ~ClientIPLookup()
-    {
-	Log(LOG_TERMINAL) << "Deleting old DNS request for " << addr.addr();
-    }
-
-    void OnLookupComplete(const DNSQuery *r)
-    {
-	Log(LOG_DEBUG) << "[XML-RPC] Accepting connection from " << (r->answers.empty() ? addr.addr() : r->answers.front().rdata)
-	<< " (" << addr.addr() << ')';
+	this->HTTPReply(408, "Request Timeout", "", "");
     }
 };
 
 ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 {
-    new ClientIPLookup(addr);
-
-//     DNSQuery rep = DNSManager::BlockingQuery(addr.addr(), DNS_QUERY_PTR);
-//     Flux::string rdnshost = !rep.answers.empty() ? rep.answers.front().rdata : addr.addr();
-
+    // TODO: Reverse DNS Resolve the IP address for logging?
     ClientSocket *c = new xmlrpcclient(this, fd, addr);
     return c;
 }
-
 
 /* This is down here so we don't make a huge mess in the middle of the file */
 // Parse our message then announce it as a commit using the OnCommit event.
 void xmlrpcclient::HandleMessage()
 {
-    if(this->RawCommitXML.empty())
+
+    if(this->httpcontent.empty())
 	return;
 
     Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
-    Flux::string blah = this->RawCommitXML.cc_str();
+    Flux::string blah = CondenseVector(this->httpcontent).cc_str();
+
     // Strip out all the XML garbage we don't need since RapidXML will crash if we don't
     size_t pos1 = blah.find("<?");
     size_t pos2 = blah.find("<message>");
 
     blah = blah.erase(pos1, pos2).replace_all_cs("  ", " ");
-    //   Log(LOG_TERMINAL) << "\nBLAH! " << blah;
 
     try
     {
@@ -336,14 +317,20 @@ void xmlrpcclient::HandleMessage()
 	    if(node)
 	    {
 		if(node->first_node("insertions", 0, true))
-		message.info["insertions"] = node->first_node("insertions", 0, true)->value();
+		    message.info["insertions"] = node->first_node("insertions", 0, true)->value();
 		if(node->first_node("deletions", 0, true))
-		message.info["deletions"] = node->first_node("deletions", 0, true)->value();
+		    message.info["deletions"] = node->first_node("deletions", 0, true)->value();
 	    }
 	}
 
 	// remove everything from memory
 	doc.clear();
+
+	for(auto IT : Networks)
+	{
+	    for(auto it : IT.second->ChanMap)
+		message.Channels.push_back(it.second);
+	}
 
 	Log(LOG_TERMINAL) << "\n*** COMMIT INFO! ***";
 	for(auto it : message.info)
@@ -353,13 +340,11 @@ void xmlrpcclient::HandleMessage()
 	for(auto it : message.Files)
 	    Log(LOG_TERMINAL) << "File[" << ++i << "]: " << it;
 
-	Log(LOG_TERMINAL) << "*** END COMMIT INFO! ***\n";
+	i = 0;
+	for(auto it : message.Channels)
+	    Log(LOG_TERMINAL) << Flux::Sanitize("Channel["+ value_cast<Flux::string>(++i) + "]: " + it->name + " - " + it->n->name + " | @") << it;
 
-	for(auto IT : Networks)
-	{
-	    for(auto it : IT.second->ChanMap)
-		message.Channels.push_back(it.second);
-	}
+	Log(LOG_TERMINAL) << "*** END COMMIT INFO! ***\n";
 
 	/* Announce to other modules for commit announcement */
 	FOREACH_MOD(I_OnCommit, OnCommit(message));
@@ -418,7 +403,7 @@ public:
 	}
 
 	for(std::vector<xmlrpclistensocket*>::iterator it = listen_sockets.begin(), it_end = listen_sockets.end(); it != it_end; ++it)
-	delete *it;
+	    delete *it;
     }
 };
 

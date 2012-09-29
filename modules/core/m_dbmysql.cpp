@@ -41,7 +41,7 @@ class MySQLResult : public Base
 public:
   unsigned int id;
   Flux::string FinishedQuery;
-  
+
   MySQLResult(unsigned i, const Flux::string &q, MYSQL_RES *r): id(i), res(r), FinishedQuery(q)
   {
     unsigned num_fields = res?mysql_num_fields(res):0;
@@ -96,7 +96,7 @@ public:
 
     return it->second;
   }
-  
+
   ~MySQLResult()
   {
     if(this->res)
@@ -169,12 +169,12 @@ public:
 //       return MySQLResult(id, real_query, res);
     }
   }
-  
+
   const MYSQL *GetConnection() const
   {
     return this->conn;
   }
-  
+
   ~MySQLInterface()
   {
     if(conn) // Close the database connection
@@ -191,7 +191,7 @@ void Read(Module *m = nullptr)
   MYSQL_ROW row;
   int num_fields;
   Flux::vector params;
-  
+
 //   result = me->RunQuery("");
   num_fields = mysql_num_fields(result);
 
@@ -205,7 +205,7 @@ void Read(Module *m = nullptr)
   }
 
   mysql_free_result(result);
-  
+
   if(m)
     m->OnDatabasesRead(params);
   else
@@ -223,7 +223,7 @@ void Write(const char *fmt, ...)
 //   sql << buffer << "\n";
   va_end(args);
   Flux::vector params = ParamitizeString(buffer, ' ');
-  
+
   if(params.size() > 0)
   {
     Flux::string key = params[1];
@@ -252,11 +252,11 @@ public:
     this->SetVersion(VERSION);
 
     throw ModuleException("This module is incomplete!");
-    
+
     Implementation i[] = { I_OnDatabasesWrite, I_OnDatabasesRead, I_OnModuleLoad, I_OnSaveDatabases, I_OnForceDatabasesRead };
     ModuleHandler::Attach(i, this, sizeof(i)/sizeof(Implementation));
   }
-  
+
   void OnLoad()
   {
     Log() << "[MySQL] Loading Databases.";

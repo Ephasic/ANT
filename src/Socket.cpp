@@ -644,42 +644,46 @@ BufferedSocket::~BufferedSocket()
 
 bool BufferedSocket::ProcessRead()
 {
-  char tbuffer[NET_BUFSIZE];
-  this->RecvLen = 0;
+    char tbuffer[NET_BUFSIZE];
+    this->RecvLen = 0;
 
-  int len = this->IO->Recv(this, tbuffer, sizeof(tbuffer) - 1);
-  if (len <= 0)
-    return false;
+    int len = this->IO->Recv(this, tbuffer, sizeof(tbuffer) - 1);
+    if (len <= 0)
+	return false;
 
-  tbuffer[len] = 0;
-  this->RecvLen = len;
+    tbuffer[len] = 0;
+    this->RecvLen = len;
 
-  Flux::string sbuffer = this->extrabuf;
-  sbuffer += tbuffer;
-  this->extrabuf.clear();
-  size_t lastnewline = sbuffer.rfind('\n');
-  if (lastnewline == Flux::string::npos)
-  {
-    this->extrabuf = sbuffer;
+    Flux::string sbuffer = this->extrabuf;
+    sbuffer += tbuffer;
+    this->extrabuf.clear();
+    size_t lastnewline = sbuffer.rfind('\n');
+    if (lastnewline == Flux::string::npos)
+    {
+	this->extrabuf = sbuffer;
+	return true;
+    }
+    if (lastnewline < sbuffer.length() - 1)
+    {
+	this->extrabuf = sbuffer.substr(lastnewline);
+	this->extrabuf.trim();
+	sbuffer = sbuffer.substr(0, lastnewline);
+    }
+
+    sepstream stream(sbuffer, '\n');
+
+    Flux::string tbuf;
+    while (stream.GetToken(tbuf))
+    {
+// 	Log(LOG_TERMINAL) << "BUFFER: " << tbuf;
+	// Stupid HTTP protocol requires that there be a blank line sent to
+	// the read socket, therefore we cannot check if the buffer is empty
+	// and force the user to check for their protocol. :<
+	tbuf.trim();
+	if (/*!tbuf.empty() &&*/ !Read(tbuf))
+	    return false;
+    }
     return true;
-  }
-  if (lastnewline < sbuffer.length() - 1)
-  {
-    this->extrabuf = sbuffer.substr(lastnewline);
-    this->extrabuf.trim();
-    sbuffer = sbuffer.substr(0, lastnewline);
-  }
-
-  sepstream stream(sbuffer, '\n');
-
-  Flux::string tbuf;
-  while (stream.GetToken(tbuf))
-  {
-    tbuf.trim();
-    if (!tbuf.empty() && !Read(tbuf))
-      return false;
-  }
-  return true;
 }
 
 bool BufferedSocket::ProcessWrite()

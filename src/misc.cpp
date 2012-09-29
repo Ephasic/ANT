@@ -164,6 +164,7 @@ Flux::string Flux::Sanitize(const Flux::string &string)
   special_chars("\037",""),
   special_chars("\026",""),
   special_chars("\001",""),
+  special_chars("\r", ""),
   special_chars("","")
  };
   Flux::string ret = string.c_str();

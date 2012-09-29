@@ -18,7 +18,7 @@
  * The only use of this file is to fix the includes hell that
  * Justasic was having earlier. if you can fix it an easier
  * way then do so.
- */ 
+ */
 #include "extern.h"
 #include <sstream>
 #include <cstdio>

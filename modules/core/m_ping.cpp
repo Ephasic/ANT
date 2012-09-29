@@ -53,7 +53,7 @@ public:
     this->SetVersion(VERSION);
     this->SetPriority(PRIORITY_FIRST);
   }
-  
+
   void OnPong(const std::vector<Flux::string> &params, Network *n)
   {
     n->s->pings = 0;
@@ -74,7 +74,7 @@ public:
     Log(LOG_RAWIO) << lag << " sec lag (" << ts << " - " << time(NULL) << ')';
 #endif
   }
-  
+
   void OnPing(const std::vector<Flux::string> &params, Network *n)
   {
     n->s->pings = 0;

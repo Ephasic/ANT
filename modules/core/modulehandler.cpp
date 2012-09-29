@@ -137,7 +137,7 @@ public:
 	source.Reply("Cannot unload a permanent Module!");
 	return;
       }
-      
+
       if(!ModuleHandler::Unload(mu))
       {
 	source.Reply("Failed to unload Module %s", modd.c_str());
@@ -283,7 +283,7 @@ public:
     this->SetPermanent(true);
     ModuleHandler::Attach(I_OnReload, this);
   }
-  
+
 //   void OnReload()
 //   { //TODO: Solve on Module unload.
 //   Flux::vector updatedmodlist = ParamitizeString(Config->Modules, ',');

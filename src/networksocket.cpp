@@ -56,7 +56,7 @@ NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), Bu
   this->net->CurHost++;
   if(static_cast<unsigned int>(this->net->CurHost) >= this->net->hostnames.size())
     this->net->CurHost = 1;
-  
+
   this->net->SetConnectedHostname(this->net->hostnames[this->net->CurHost]);
 
   Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to "
@@ -84,37 +84,41 @@ NetworkSocket::~NetworkSocket()
 
 bool NetworkSocket::Read(const Flux::string &buf)
 {
-  Log(LOG_RAWIO) << '[' << this->net->name << "] " << buf;
-  Flux::vector params = ParamitizeString(buf, ' ');
+    // since BufferedSocket was modified to accommodate stupid HTTP, this code is required.
+    if(buf.empty())
+	return true;
 
-  if(!params.empty() && params[0].search_ci("ERROR"))
-  {
-    FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
-    Log(LOG_TERMINAL) << "Socket Error, Closing socket!";
-    return false; //Socket is dead so we'll let the socket engine handle it
-  }
+    Log(LOG_RAWIO) << '[' << this->net->name << "] " << buf;
+    Flux::vector params = ParamitizeString(buf, ' ');
 
-  process(this->net, buf);
+    if(!params.empty() && params[0].search_ci("ERROR"))
+    {
+	FOREACH_MOD(I_OnSocketError, OnSocketError(buf));
+	Log(LOG_TERMINAL) << "Socket Error, Closing socket!";
+	return false; //Socket is dead so we'll let the socket engine handle it
+    }
 
-  if(!params.empty() && params[0].equals_ci("PING"))
-  {
-    this->Write("PONG :"+params[1]);
-    this->ProcessWrite();
-  }
-  return true;
+    process(this->net, buf);
+
+    if(!params.empty() && params[0].equals_ci("PING"))
+    {
+	this->Write("PONG :"+params[1]);
+	this->ProcessWrite();
+    }
+    return true;
 }
 
 void NetworkSocket::OnConnect()
 {
-  Log(LOG_TERMINAL) << "Successfully connected to " << this->net->name << " ["
-  << this->net->hostname << ':' << this->net->port << "] (" << this->net->GetConHost() << ")";
+    Log(LOG_TERMINAL) << "Successfully connected to " << this->net->name << " ["
+    << this->net->hostname << ':' << this->net->port << "] (" << this->net->GetConHost() << ")";
 
-  new Bot(this->net, printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(),
-			       randint(0, 999)), Config->Ident, Config->Realname);
+    new Bot(this->net, printfify("%stmp%03d", Config->NicknamePrefix.strip('-').c_str(),
+				randint(0, 999)), Config->Ident, Config->Realname);
 
-  this->net->b->introduce();
-  FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
-  this->ProcessWrite();
+    this->net->b->introduce();
+    FOREACH_MOD(I_OnPostConnect, OnPostConnect(this, this->net));
+    this->ProcessWrite();
 }
 
 void NetworkSocket::OnError(const Flux::string &buf)
@@ -125,6 +129,6 @@ void NetworkSocket::OnError(const Flux::string &buf)
 
 bool NetworkSocket::ProcessWrite()
 {
-  Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << this->WriteBuffer;
-  return ConnectionSocket::ProcessWrite() && BufferedSocket::ProcessWrite();
+    Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << this->WriteBuffer;
+    return ConnectionSocket::ProcessWrite() && BufferedSocket::ProcessWrite();
 }

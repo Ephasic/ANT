@@ -1,5 +1,5 @@
 /* Arbitrary Navn Tool -- DNS Resolution Engine
- * 
+ *
  * (C) 2011-2012 Azuru
  * Contact us at Development@Azuru.net
  *
@@ -118,7 +118,7 @@ class DNSRequest : public Timer, public Question
 	virtual void OnLookupComplete(const DNSQuery *r) = 0;
 
 	virtual void OnError(const DNSQuery *r);
-	
+
 	void Tick(time_t);
 };
 
@@ -131,7 +131,7 @@ class DNSPacket : public DNSQuery
 
 	void PackName(unsigned char *output, unsigned short output_size, unsigned short &pos, const Flux::string &name);
 	Flux::string UnpackName(const unsigned char *input, unsigned short input_size, unsigned short &pos);
-	
+
 	Question UnpackQuestion(const unsigned char *input, unsigned short input_size, unsigned short &pos);
 	ResourceRecord UnpackResourceRecord(const unsigned char *input, unsigned short input_size, unsigned short &poss);
  public:

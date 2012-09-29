@@ -21,43 +21,43 @@ class ReconnectTimer;
 
 struct CommitMessage
 {
-  Flux::map<Flux::string> info;
-  Flux::vector Files;
-  std::vector<Channel*> Channels;
-  std::vector<Bot*> Bots;
-  Network *network;
+    Flux::map<Flux::string> info;
+    Flux::vector Files;
+    std::vector<Channel*> Channels;
+    std::vector<Bot*> Bots;
+    Network *network;
 };
 
 struct iSupport
 {
-  // Other options the server might send.
-  Flux::map<Flux::string> other;
-  // Supported chan modes
-  Flux::string ChanModes;
-  // Supported chan types
-  Flux::string ChanTypes;
-  // The IRCd version
-  Flux::string IRCdVersion;
-  // User modes
-  Flux::string UserModes;
-  // Network name
-  Flux::string Network;
-  // Servers hostname
-  Flux::string ServerHost;
-  // Max away length
-  int AwayLen;
-  // Max kick length
-  int KickLen;
-  // Max Channel length
-  int ChannelLen;
-  // Max channels you can join
-  int MaxChannels;
-  // Max number of bans settable
-  int MaxBans;
-  // Max nickname length
-  int NickLen;
-  // Max Topic Length
-  int TopicLen;
+    // Other options the server might send.
+    Flux::map<Flux::string> other;
+    // Supported chan modes
+    Flux::string ChanModes;
+    // Supported chan types
+    Flux::string ChanTypes;
+    // The IRCd version
+    Flux::string IRCdVersion;
+    // User modes
+    Flux::string UserModes;
+    // Network name
+    Flux::string Network;
+    // Servers hostname
+    Flux::string ServerHost;
+    // Max away length
+    int AwayLen;
+    // Max kick length
+    int KickLen;
+    // Max Channel length
+    int ChannelLen;
+    // Max channels you can join
+    int MaxChannels;
+    // Max number of bans settable
+    int MaxBans;
+    // Max nickname length
+    int NickLen;
+    // Max Topic Length
+    int TopicLen;
 };
 
 class Network : public Base
@@ -97,13 +97,13 @@ public:
   // Check if that network accepts that chan type.
   inline bool IsValidChannel(const Flux::string &chan)
   {
-    for(unsigned i = 0; i < isupport.ChanTypes.size(); ++i)
-    {
-      char ch = isupport.ChanTypes[i];
-      if (chan[0] != ch)
-	return false;
-    }
-    return true;
+	for(unsigned i = 0; i < isupport.ChanTypes.size(); ++i)
+	{
+	    char ch = isupport.ChanTypes[i];
+	    if (chan[0] != ch)
+		return false;
+	}
+	return true;
   }
 
   // Sync this network, make sure all channels are joined, etc.
@@ -133,23 +133,23 @@ public:
 
 class ReconnectTimer : public Timer
 {
-  Network *n;
+    Network *n;
 public:
-  ReconnectTimer(int, Network*);
-  void Tick(time_t);
+    ReconnectTimer(int, Network*);
+    void Tick(time_t);
 };
 
 class NetworkSocket : public ConnectionSocket, public BufferedSocket
 {
 public:
-  NetworkSocket(Network*);
-  ~NetworkSocket();
-  Network *net;
-  int pings;
-  bool Read(const Flux::string&);
-  bool ProcessWrite();
-  void OnConnect();
-  void OnError(const Flux::string&);
+    NetworkSocket(Network*);
+    ~NetworkSocket();
+    Network *net;
+    int pings;
+    bool Read(const Flux::string&);
+    bool ProcessWrite();
+    void OnConnect();
+    void OnError(const Flux::string&);
 };
 
 

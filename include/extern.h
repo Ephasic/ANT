@@ -174,7 +174,6 @@ extern void QuitUser(Network*, User*);
 extern void Fork();
 extern void sigact(int);
 extern void SaveDatabases();
-extern void JoinChansInBuffer(Network*);
 extern void InitSignals();
 extern void HandleSegfault(Module*);
 extern void restart(const Flux::string&);

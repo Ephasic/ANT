@@ -27,20 +27,20 @@
 #define EVENT_HOOK(w, x, y, z) \
 if(true) \
 { \
-  if(w.equals_ci(x)) \
-  {\
-    FOREACH_MOD(y, z); \
-  } \
+    if(w.equals_ci(x)) \
+    {\
+	FOREACH_MOD(y, z); \
+    } \
 } \
 else \
-  static_cast<void>(0);
+    static_cast<void>(0);
 
 void ProcessJoin(CommandSource &source, const Flux::string &chan)
 {
     Flux::vector &params = source.params;
     if(params.size() < 8)
       return;
-    
+
     Flux::string channel = params[1];
     Flux::string Ident = params[2];
     Flux::string Host = params[3];
@@ -414,7 +414,7 @@ void process(Network *n, const Flux::string &buffer)
     if(chan)
       chan->topic = params[2];
   }
-  
+
   // Get the topic setter and timestamp
   if(command == "333")
   {
@@ -425,7 +425,7 @@ void process(Network *n, const Flux::string &buffer)
       chan->topic_setter = params[2];
     }
   }
-  
+
   /**************************************/
   CommandSource Source;
   Source.u = u; //User class

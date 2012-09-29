@@ -45,7 +45,7 @@
  */
 typedef std::map<User*, Channel*> UList;
 class Channel : public Base
-{ 
+{
 public:
   Channel(Network*, const Flux::string&);
   ~Channel();

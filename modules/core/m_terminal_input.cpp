@@ -15,7 +15,7 @@
 class CliUser : public User
 {
   inline bool IsEven(unsigned int num) { return !(num & 1); }
-  
+
   // Correct color codes when sending to the terminal
   Flux::string FixColors(const Flux::string &string)
   {
@@ -25,7 +25,7 @@ class CliUser : public User
     for(unsigned i = 0; i < actualstring.size(); ++i)
     {
       char c = actualstring[i];
-      
+
       if(c == '\002')
       {
 	i++;
@@ -34,7 +34,7 @@ class CliUser : public User
 	else
 	  actualstring.insert(i, "\033[1m");
       }
-      
+
       if(c == '\037')
       {
 	i++;
@@ -46,13 +46,13 @@ class CliUser : public User
     }
     return Flux::Sanitize(actualstring);
   }
-  
+
 public:
   CliUser() : User(Networks.begin()->second, "Console", "Konsole", "magic.location", "Touch my body, feel me on the floor", "127.0.0.1")
   {
     // am i forgetting something here?
   }
-  
+
   // forward messages to the console, not IRC
   void SendMessage(const Flux::string &message)
   {
@@ -70,19 +70,19 @@ void ProcessInput(const Flux::string &str)
     Log(LOG_TERMINAL) << "Cannot process command, must be connected to a network!";
     return;
   }
-  
+
   Flux::string Justasic = str;
   Justasic.trim();
   Flux::vector Lordofsraam = ParamitizeString(Justasic, ' ');
   Flux::string command = Lordofsraam.size() > 0 ? Lordofsraam[0] : "";
   command.trim();
-  
+
   if(command[0] == '!')
   {
     DeathBlade->SendMessage("Commands cannot be prefixed with !");
     return;
   }
-  
+
   CommandSource source;
   source.u = DeathBlade;
   source.c = nullptr;
@@ -90,7 +90,7 @@ void ProcessInput(const Flux::string &str)
   source.n = DeathBlade->n;
   source.params = Lordofsraam;
   source.raw = Justasic;
-  
+
   // The core can handle it now!
   ProcessCommand(source, Lordofsraam, "Console", "PRIVMSG");
 }
@@ -147,7 +147,7 @@ public:
       throw ModuleException("Cannot run m_terminal_input when fork'ed");
     DeathBlade = this->Justasic;
   }
-  
+
   ~ModTerminalInput()
   {
     if(t)

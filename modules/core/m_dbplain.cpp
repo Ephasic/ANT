@@ -95,63 +95,54 @@ public:
 
   void OnDatabasesWrite(void (*Write)(const char*, ...))
   {
-    for(auto it : Networks) // Save networks
-    {
-      Network *n = it.second;
-      Write("N %s %s %s", n->hostname.c_str(), n->port.c_str(), n->name.c_str());
-      if(n->b)
-	Write("NB %s %s %s", n->name.c_str(), n->b->nick.c_str(), n->b->ident.c_str());
-      for(auto cit : n->ChanMap) // Save Channels in those networks
-      {
-	Channel *c = cit.second;
-	Write("NC %s %s", n->name.c_str(), c->name.c_str());
-      } //We don't put realnames in the database as its too hard to catch what the full name is
-    }
+	for(auto it : Networks) // Save networks
+	{
+	    Network *n = it.second;
+	    Write("N %s %s %s", n->hostname.c_str(), n->port.c_str(), n->name.c_str());
+	    for(auto cit : n->ChanMap) // Save Channels in those networks
+	    {
+		Channel *c = cit.second;
+		Write("NC %s %s", n->name.c_str(), c->name.c_str());
+	    } //We don't put realnames in the database as its too hard to catch what the full name is
+	}
   }
 
   void OnDatabasesRead(const Flux::vector &params)
   {
-    Flux::string key = params[0];
-    if(key.empty())
-      return;
+	Flux::string key = params[0];
+	if(key.empty())
+	    return;
 
-    if(key.equals_ci("N"))
-    {
-      Network *n = FindNetwork(params[1]);
-      if(!n)
-      {
-	if(params.size() >= 4)
+	if(key.equals_ci("N"))
 	{
-	  // 			host 	port 	    net name
-	  n = new Network(params[1], params[2], params[3]);
+	    Network *n = FindNetwork(params[1]);
+	    if(!n)
+	    {
+		if(params.size() >= 4)
+		{
+		    // 			host 	port 	    net name
+		    n = new Network(params[1], params[2], params[3]);
+		}
+		else
+		    Log(LOG_DEBUG) << "[db_plain] Unable to read network line!";
+	    }
+
+	    if(n && !n->s)
+	    {
+		new ReconnectTimer(0, n); // Connect to networks.
+		//n->Connect(); // FIXME: Why can't I just call this?
+		//SocketEngine::Process(true);
+	    }
 	}
-	else
-	  Log(LOG_DEBUG) << "[db_plain] Unable to read network line!";
-      }
 
-      if(n && !n->s)
-      {
-	new ReconnectTimer(0, n); // Connect to networks.
-	//n->Connect(); // FIXME: Why can't I just call this?
-	//SocketEngine::Process(true);
-      }
-    }
-
-    if(key.equals_ci("NC"))
-    {
-      Network *n = FindNetwork(params[1]);
-      if(!n)
-	Log(LOG_DEBUG) << "[db_plain] Unable to find network " << params[1] << " for channel creation";
-      else
-	n->JoinChannel(params[2]);
-    }
-//     if(key.equals_ci("NB"))
-//     {
-//       Network *n = FindNetwork(params[1]);
-//       if(n){
-// 	new Bot(n, params[2], params[3], Config->Realname);
-//       }
-//     }
+	if(key.equals_ci("NC"))
+	{
+	    Network *n = FindNetwork(params[1]);
+	    if(!n)
+		Log(LOG_DEBUG) << "[db_plain] Unable to find network " << params[1] << " for channel creation";
+	    else
+		n->JoinChannel(params[2]);
+	}
   }
 
   void OnModuleLoad(Module *m)
