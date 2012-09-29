@@ -13,32 +13,32 @@
 class PingTimer : public Timer
 {
 public:
-  PingTimer():Timer(60, time(NULL), true) { }
-  void Tick(time_t)
-  {
-    for(auto it : Networks)
+    PingTimer():Timer(60, time(NULL), true) { }
+    void Tick(time_t)
     {
-      Network *n = it.second;
-      if(n->IsSynced() && n->b)
-      {
-	#ifdef HAVE_GETTIMEOFDAY
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-
-	// Milisecond lag times :D
-	n->b->ircproto->ping("%i.%06d", tv.tv_sec, static_cast<int>(tv.tv_usec));
-	#else
-	n->b->ircproto->ping("%i", static_cast<int>(time(NULL)));
-	#endif
-	if(++n->s->pings >= 3)
+	for(auto it : Networks)
 	{
-	  Log(LOG_RAWIO) << n->name << ": Ping Timeout";
-	  n->s->SetDead(true);
-	  new ReconnectTimer(Config->RetryWait, n);
+	    Network *n = it.second;
+	    if(n->IsSynced() && n->b)
+	    {
+		#ifdef HAVE_GETTIMEOFDAY
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+
+		// Milisecond lag times :D
+		n->b->ircproto->ping("%i.%06d", tv.tv_sec, static_cast<int>(tv.tv_usec));
+		#else
+		n->b->ircproto->ping("%i", static_cast<int>(time(NULL)));
+		#endif
+		if(++n->s->pings >= 3)
+		{
+		    Log(LOG_RAWIO) << n->name << ": Ping Timeout";
+		    n->s->SetDead(true);
+		    new ReconnectTimer(Config->RetryWait, n);
+		}
+	    }
 	}
-      }
     }
-  }
 };
 
 class Ping_pong : public Module

@@ -19,29 +19,29 @@ Flux::map<Network*> NetworkHosts;
 
 Network::Network(const Flux::string &host, const Flux::string &p, const Flux::string &n): disconnecting(false), issynced(false), RTimer(nullptr), s(nullptr), b(nullptr), hostname(host), port(p), CurHost(0)
 {
-  if(host.empty() || p.empty())
-    throw CoreException("Network class created with incorrect parameters given");
+    if(host.empty() || p.empty())
+	throw CoreException("Network class created with incorrect parameters given");
 
-  //If we didn't specify the network name, use the hostname.
-  this->name = n.empty()?host:n;
+    //If we didn't specify the network name, use the hostname.
+    this->name = n.empty()?host:n;
 
-  // TODO: Non-Blocking queries are a must
-  DNSQuery rep = DNSManager::BlockingQuery(host, host.search(':') ? DNS_QUERY_AAAA : DNS_QUERY_A);
-  this->hostnames[1] = !rep.answers.empty() ? rep.answers.front().rdata : host;
-  Networks[this->name] = this;
-  NetworkHosts[host] = this;
+    // TODO: Non-Blocking queries are a must
+    DNSQuery rep = DNSManager::BlockingQuery(host, host.search(':') ? DNS_QUERY_AAAA : DNS_QUERY_A);
+    this->hostnames[1] = !rep.answers.empty() ? rep.answers.front().rdata : host;
+    Networks[this->name] = this;
+    NetworkHosts[host] = this;
 
-  Log(LOG_DEBUG) << "New network created: " << n << " " << host << ':' << p;
+    Log(LOG_DEBUG) << "New network created: " << n << " " << host << ':' << p;
 }
 
 Network::~Network()
 {
-  Log(LOG_DEBUG) << "Deleting network " << this->name << " (" << this->hostname << ':' << this->port << ')';
-  this->Disconnect("Network Removed");
-  if(RTimer)
-    delete RTimer;
-  Networks.erase(this->name);
-  NetworkHosts.erase(this->hostname);
+    Log(LOG_DEBUG) << "Deleting network " << this->name << " (" << this->hostname << ':' << this->port << ')';
+    this->Disconnect("Network Removed");
+    if(RTimer)
+	delete RTimer;
+    Networks.erase(this->name);
+    NetworkHosts.erase(this->hostname);
 }
 
 bool Network::JoinChannel(const Flux::string &chan)
@@ -63,18 +63,18 @@ bool Network::JoinChannel(const Flux::string &chan)
 
 bool Network::Disconnect()
 {
-  // Check if we have a socket to send on
-  if(!this->s)
-    return false;
-  // Delete the bot object
-  if(this->b)
-    DeleteZero(this->b);
-  // We'll let the socket engine delete the socket
-  this->s->SetDead(true);
-  // say this network is disconnecting
-  this->disconnecting = true;
-  // return that we did something
-  return true;
+    // Check if we have a socket to send on
+    if(!this->s)
+	return false;
+    // Delete the bot object
+    if(this->b)
+	DeleteZero(this->b);
+    // We'll let the socket engine delete the socket
+    this->s->SetDead(true);
+    // say this network is disconnecting
+    this->disconnecting = true;
+    // return that we did something
+    return true;
 }
 
 bool Network::Disconnect(const char *fmt, ...)

@@ -27,6 +27,15 @@ class RetryStart;
 std::vector<JSONListenSocket*> listen_sockets;
 static const Flux::string systemver = value_cast<Flux::string>(VERSION_FULL);
 
+//TODO: Modify this!
+static const Flux::string HTTPREQUEST =
+"<center><h1>ANT Commit system version "+systemver+"</h1></center>\n"
+"<center><h4>This is the address for JSON-RPC commits</h4>\n"
+"<p>This will not provide JSON-RPC requests and ONLY uses POST to commit the data (same as most <a href=\"http://cia.vc/doc/clients/\">CIA.vc scripts</a>), if you are looking for the site, please see <a href=\"http://www.Azuru.net/\">Azuru.net</a> for the sites location or optionally connect to Azuru IRC for support:</p>\n"
+"<a href=\"irc://irc.Azuru.net/Computers\"><FONT COLOR=\"red\">irc.Azuru.net</FONT>:<FONT COlOR=\"Blue\">6667</FONT></a></br>\n"
+"Channel: <FONT COLOR=\"Green\">#Commits</FONT></br>\n"
+"Channel: <FONT COLOR=\"Green\">#Computers</FONT></br></center>\n";
+
 // Listen socket used to see if there are new clients to accept from.
 class JSONListenSocket : public ListenSocket
 {
@@ -53,23 +62,85 @@ public:
 // Client socket class used to accept data from the JSON client
 class JSONClient : public ClientSocket, public BufferedSocket, public Timer
 {
+    bool in_header, is_httpreq;
+    Flux::vector httpheader, httpcontent;
 public:
-    JSONClient(JSONListenSocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), Timer(Config->jsonrpctimeout)
+    JSONClient(JSONListenSocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), Timer(Config->jsonrpctimeout),
+    in_header(true), is_httpreq(false)
     {
 	Log(LOG_RAWIO) << "[JSON-RPC] Created and accepted client from " << this->clientaddr.addr();
     }
 
-    ~JSONClient()
-    {
-	Log(LOG_DEBUG) << "[JSON-RPC] Finished accepting message from " << this->clientaddr.addr() << "!";
-    }
-
     // Data from socket!
-    bool Read(const Flux::string &m)
+    bool Read(const Flux::string &message)
     {
-	// TODO: For now just print to the terminal whatever we receive.
-	Log(LOG_RAWIO) << m;
-	//Log(LOG_RAWIO) << "\nFinished receiving JSON-RPC!";
+// 	Flux::string message = SanitizeXML(m);
+	Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
+
+	// According to the HTTP protocol, content and header are deliminated by
+	// a newline which the socket engine interprets as a blank/empty line.
+	// In my opinion this is the worst deliminator in the world and whoever
+	// thought it up should be tortured and burned on the stake.
+	if(message.empty())
+	{
+	    in_header = false;
+
+	    if(is_httpreq)
+		this->HTTPReply(200, "OK", "text/html", HTTPREQUEST);
+	}
+
+	// the method line
+	if(in_header && !message.search(':') && !message.empty())
+	{
+	    Flux::vector line = ParamitizeString(message, ' ');
+	    if(line.size() < 3)
+	    {
+		// Oh noes! Someone sent bad data!
+		this->HTTPReply(400, "Bad Request", "", "");
+		Log(LOG_DEBUG) << "Invalid or malformed syntax!";
+	    }
+
+	    if(line[0].equals_ci("GET"))
+		is_httpreq = true;
+	    else if(line[0].equals_ci("POST"))
+	    {
+		// Process XML data for Commit, nothing to do here!
+	    }
+	    else
+	    {
+		// invalid request, return 405!
+		this->HTTPReply(405, "Method Not Allowed", "", "");
+		Log(LOG_DEBUG) << "Invalid method request: " << line[0];
+	    }
+	}
+	// Other header info
+	else if(in_header)
+	{
+	    httpheader.push_back(message);
+
+	    Flux::vector line = ParamitizeString(message, ':');
+
+	    if(line.size() == 2 && line[0].equals_ci("Content-Type") && !line[1].search_ci("text/xml"))
+		this->HTTPReply(415, "Unsupported Media Type", "", "");
+
+	    if(line.size() > 1 && line[0].equals_ci("User-Agent"))
+		; // Eventually track user agents to see what everyone is using!
+	}
+	// CONTENT! :D
+	else
+	{
+	    httpcontent.push_back(message);
+
+	    // ###: This should go off content length to justify when the document ends.
+	    if(/* ###: TODO: This.*/0)
+	    {
+		this->HandleMessage();
+		// ###: Is this a proper reply?
+		this->HTTPReply(200, "OK", "text/html", "Message accepted into queue.");
+	    }
+	}
+
+	this->ProcessWrite();
 	return true;
     }
 
@@ -103,7 +174,12 @@ public:
     void Tick(time_t)
     {
 	Log(LOG_DEBUG) << "[JSON-RPC] Connection Timeout for " << this->clientaddr.addr() << ", closing connection.";
-	this->SetDead(true);
+	this->HTTPReply(408, "Request Timeout", "", "");
+    }
+
+    void HandleMessage()
+    {
+	// TODO: This.
     }
 };
 

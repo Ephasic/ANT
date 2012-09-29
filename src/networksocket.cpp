@@ -25,23 +25,29 @@ ReconnectTimer::ReconnectTimer(int wait, Network *net) : Timer(wait), n(net)
 
     n->RTimer = this;
 }
+
 void ReconnectTimer::Tick(time_t)
 {
-  try
-  {
-    if(!quitting)
-      n->Connect();
-  }
-  catch (const SocketException &e)
-  {
-    n->s = nullptr; // XXX: Does this memleak?
-    Log() << "Connection to " << n->name << " [" << n->GetConHost() << ':'
-    << n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
+    Log(LOG_TERMINAL) << "JoinQueue.size() = " << n->JoinQueue.size();
+    try
+    {
+	if(!quitting)
+	{
+	    for(auto it : n->ChanMap)
+		n->JoinQueue.push(it.second);
+	    n->Connect();
+	}
+    }
+    catch (const SocketException &e)
+    {
+	n->s = nullptr; // ###: Does this memleak?
+	Log() << "Connection to " << n->name << " [" << n->GetConHost() << ':'
+	<< n->port << "] Failed! (" << e.GetReason() << ") Retrying in " << Config->RetryWait << " seconds.";
 
-    new ReconnectTimer(Config->RetryWait, n);
-    return;
-  }
-  n->RTimer = nullptr;
+	new ReconnectTimer(Config->RetryWait, n);
+	return;
+    }
+    n->RTimer = nullptr;
 }
 
 /**********************************************************/
