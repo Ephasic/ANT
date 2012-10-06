@@ -11,6 +11,8 @@
 #include "user.h"
 #include "bot.h"
 
+std::map<User*, std::vector<Channel*>> CUserMap;
+// std::map<Channel*, std::vector<User*>> UChanMap;
 uint32_t usercnt = 0, maxusercnt = 0;
 
 User::User(Network *net, const Flux::string &snick, const Flux::string &sident, const Flux::string &shost, const Flux::string &srealname, const Flux::string &sserver) : nick(snick), host(shost), realname(srealname), ident(sident), fullhost(snick+"!"+sident+"@"+shost), server(sserver), n(net)
@@ -23,6 +25,7 @@ User::User(Network *net, const Flux::string &snick, const Flux::string &sident, 
 
 
     this->n->UserNickList[snick] = this;
+    CUserMap[this] = std::vector<Channel*>();
 
     Log(LOG_RAWIO) << "New user! " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
 
@@ -38,6 +41,13 @@ User::~User()
 {
     Log() << "Deleting user " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
     this->n->UserNickList.erase(this->nick);
+    CUserMap.erase(this);
+    for(auto it : UChanMap)
+    {
+	for(std::vector<User*>::iterator it2 = it.second.begin(), it2_end = it.second.end(); it2 != it2_end; ++it2)
+	    if((*it2) == this)
+		it.second.erase(it2);
+    }
 }
 
 void User::SendWho()
@@ -79,25 +89,35 @@ void User::SetNewNick(const Flux::string &newnick)
 void User::AddChan(Channel *c)
 {
     if(c)
-	ChannelList[c] = this;
+	CUserMap[this].push_back(c);
 }
 
 void User::DelChan(Channel *c)
 {
-    CList::iterator it = ChannelList.find(c);
-    if(it != ChannelList.end())
-	ChannelList.erase(it);
+    if(c)
+    {
+	for(auto it : CUserMap)
+	{
+	    if(it.first == this)
+		for(std::vector<Channel*>::iterator it2 = it.second.begin(), it2_end = it.second.end(); it2 != it2_end; ++it2)
+		    if((*it2) == c)
+			CUserMap[this].erase(it2);
+	}
+	if(CUserMap[this].empty())
+	    delete this; // remove the user, it has no channels.
+    }
 }
 
 Channel *User::findchannel(const Flux::string &name)
 {
-    auto it1 = this->n->ChanMap.find(name);
-    Channel *c = it1->second;
-    if(!c)
-	return nullptr;
-    CList::iterator it = ChannelList.find(c);
-    if(it != ChannelList.end())
-	return it->first;
+    for(auto it : CUserMap)
+    {
+	if(it.first == this)
+	    for(auto it2 : it.second)
+		if(it2->name.equals_ci(name))
+		    return it2;
+    }
+
     return nullptr;
 }
 

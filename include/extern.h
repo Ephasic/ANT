@@ -166,13 +166,15 @@ extern Flux::vector ParamitizeString(const Flux::string&, char);
 extern std::list<Module*> Modules;
 extern Flux::insensitive_map<Network*> Networks;
 extern Flux::map<Network*> NetworkHosts;
+extern std::map<User*, std::vector<Channel*>> CUserMap;
+extern std::map<Channel*, std::vector<User*>> UChanMap;
 
 /* void's */
 extern void GarbageCollect();
 extern void Rehash();
 extern void Send_Global(const Flux::string&);
 extern void Send_Global(const char*, ...);
-extern void QuitUser(Network*, User*);
+// extern void QuitUser(Network*, User*);
 extern void Fork();
 extern void sigact(int);
 extern void SaveDatabases();

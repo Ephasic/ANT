@@ -63,7 +63,7 @@ void Bot::SetMode(const Flux::string &modestr)
 
 void Bot::Part(Channel *c, const Flux::string &message)
 {
-  if(!c->finduser(this->n, this->nick))
+  if(!c->finduser(this->nick))
     return;
 
   c->SendPart(message);

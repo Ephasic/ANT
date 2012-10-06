@@ -18,14 +18,12 @@
  * \brief A Class for IRC Users
  * This class wraps around IRC Users and includes several useful commands as well as User information.
  */
-typedef std::map<Channel*, User*> CList;
 class User : public Base
 {
 public:
     User(Network*, const Flux::string&, const Flux::string&, const Flux::string&, const Flux::string &realname = "", const Flux::string &server ="");
     virtual ~User();
 
-    CList ChannelList;
     Flux::string nick;
     Flux::string host;
     Flux::string realname;

@@ -53,20 +53,20 @@ void ProcessJoin(CommandSource &source, const Flux::string &chan)
     User *u = source.n->FindUser(Nickname);
     if(!u)
     {
-      if((!Host.empty() || !Nickname.empty() || !Ident.empty()) && source.n)
-	u = new User(source.n, Nickname, Ident, Host, realname, Server);
+	if((!Host.empty() || !Nickname.empty() || !Ident.empty()) && source.n)
+	    u = new User(source.n, Nickname, Ident, Host, realname, Server);
     }
 
     Channel *c = source.n->FindChannel(channel);
     if(!c)
     {
-      if(!channel.empty() && source.n)
-       c = new Channel(source.n, channel);
+	if(!channel.empty() && source.n)
+	c = new Channel(source.n, channel);
     }
     if(u)
-      u->AddChan(c);
+	u->AddChan(c);
     if(c)
-      c->AddUser(u);
+	c->AddUser(u);
 }
 /*********************************************************************************/
 /**
@@ -313,27 +313,28 @@ void process(Network *n, const Flux::string &buffer)
   if(command.equals_ci("QUIT"))
   {
     FOREACH_MOD(I_OnQuit, OnQuit(u, params[0]));
-    QuitUser(n, u);
+    delete u;
+//     QuitUser(n, u);
   }
 
   if(command.equals_ci("PART"))
   {
     FOREACH_MOD(I_OnPart, OnPart(u, c, params[0]));
     if(n->IsValidChannel(receiver) && c && u && u == n->b)
-     delete c; //This should remove the channel from all users if the bot is parting..
+	delete c; //This should remove the channel from all users if the bot is parting..
     else
     {
-     if(u)
-       u->DelChan(c);
+	if(u)
+	    u->DelChan(c);
 
-     if(c)
-       c->DelUser(u);
+	if(c)
+	    c->DelUser(u);
 
-     if(u && c && !u->findchannel(c->name))
-     {
-       Log(LOG_TERMINAL) << "Deleted " << u->nick << '|' << c->name << '|' << u->findchannel(c->name);
-       delete u;
-     }
+	if(u && c && !u->findchannel(c->name))
+	{
+	    Log(LOG_TERMINAL) << "Deleted " << u->nick << '|' << c->name << '|' << u->findchannel(c->name);
+	    delete u;
+	}
     }
   }
 
@@ -383,7 +384,7 @@ void process(Network *n, const Flux::string &buffer)
       c = new Channel(n, receiver);
     else if(!u->findchannel(c->name))
       u->AddChan(c);
-    else if(!c->finduser(n, u->nick))
+    else if(!c->finduser(u->nick))
       c->AddUser(u);
     else if(u != n->b)
     {
