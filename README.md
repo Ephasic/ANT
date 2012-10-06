@@ -30,7 +30,6 @@ Building:
   - Linux/Unix
   - CMake
   - GCC 4.5 or higher (anything below and it causes C++11 errors)
-  - CPPCMS 1.0.1 or higher (included)
   - Discount 2.1.3 or higher (included, download:
 http://www.pell.portland.or.us/~orc/Code/discount/)
 
@@ -47,13 +46,15 @@ build-essentials installed.
 - Run `make install`
 - To start the bot(s) run `./ant`
 
-How to start in developer mode
-- Follow above instructions.
-- Start the bot with `./ant -d`
-
-How to start in Protocol Debug mode
-- Follow above instructions.
-- Start the bot with `./ant -n -p`
+Other switches
+ - List of switches: -h, --help
+ - Start with minimal logging: -d, --developer
+ - Stay in console: -n, --nofork
+ - Debug everything sent to/from every socket: -p, --protocoldebug
+ - No terminal colors: -c, --nocolor
+ - Show memory info: -m, --memorydebug
+ - Do not write to databases: -r, --readonly
+ - Print version: -v, --version
 
 ## 5. CONTACT
 Our IRC: irc.Azuru.net #ANT (Ports: 6660-6669 / SSL: 5000)  or irc.AlphaChat.net #ephasic (6667 / SSL: 6697)
