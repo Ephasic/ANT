@@ -1,7 +1,3 @@
-
-# Compile our encryptions before we compile anything else
-add_subdirectory(Encryption)
-
 # Find all the *.cpp files within the current source directory, and sort the list
 file(GLOB SRC_SRCS_CPP RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
 set(SRC_SRCS ${SRC_SRCS_C} ${SRC_SRCS_CPP})
@@ -35,9 +31,6 @@ endif(EXTRA_INCLUDES)
 # Generate the Navn executable and set it's linker flags, also set it to export it's symbols even though it's not a module
 add_executable(${PROGRAM_NAME} ${SRC_SRCS})
 set_target_properties(${PROGRAM_NAME} PROPERTIES LINKER_LANGUAGE CXX LINK_FLAGS "${LDFLAGS}" ENABLE_EXPORTS ON)
-
-# Add our hashing libs.
-target_link_libraries(${PROGRAM_NAME} tiger)
 
 # Add our libs needed for linking our program
 target_link_libraries(${PROGRAM_NAME} ${LINK_LIBS})

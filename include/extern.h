@@ -154,6 +154,7 @@ extern Flux::string isolate(char begin, char end, const Flux::string &msg);
 extern Flux::string do_strftime(const time_t&, bool short_output = false);
 extern Flux::string duration(const time_t&);
 extern Flux::string printfify(const char*, ...);
+extern Flux::string TigerHash(const Flux::string &str);
 #define CURR_LOCATION printfify("%s:%s", __FILE__, __PRETTY_FUNCTION__)
 extern Flux::string CondenseVector(const Flux::vector&);
 extern int randint(int x, int y);
