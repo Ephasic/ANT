@@ -435,7 +435,7 @@ namespace Flux {
 
     inline string replace(iterator first, iterator last, size_type n, char chr) { return string(this->_string.replace(first, last, n, chr)); }
     template <class InputIterator> inline string replace(iterator first, iterator last, InputIterator f, InputIterator l) { return string(this->_string.replace(first, last, f, l)); }
-    inline string replace_all_cs(const string &_orig, const string &_repl)
+    inline string replace_all_cs(const string &_orig, const string &_repl) const
     {
 	Flux::string new_string = *this;
 	size_type pos = new_string.find(_orig), orig_length = _orig.length(), repl_length = _repl.length();
@@ -446,7 +446,7 @@ namespace Flux {
 	}
 	return new_string;
     }
-     inline string replace_all_ci(const string &_orig, const string &_repl)
+     inline string replace_all_ci(const string &_orig, const string &_repl) const
     {
 	Flux::string new_string = *this;
 	size_type pos = new_string.find_ci(_orig), orig_length = _orig.length(), repl_length = _repl.length();

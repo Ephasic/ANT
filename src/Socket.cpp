@@ -719,7 +719,7 @@ void BufferedSocket::Write(const char *message, ...)
 
 void BufferedSocket::Write(const Flux::string &message)
 {
-  this->WriteBuffer += message + "\r\n";
+  this->WriteBuffer += message + "\n";
   SocketEngine::MarkWritable(this);
 }
 

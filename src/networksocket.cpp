@@ -14,6 +14,13 @@
 #include "module.h"
 #include "bot.h"
 
+// Replace /r with /n. Dunno why these show up everywhere
+Flux::string FixBuffer(const Flux::string &buf)
+{
+    return buf.replace_all_cs("\r", "\n");
+//     return buf;
+}
+
 /**********************************************************/
 /************************ Timers **************************/
 /**********************************************************/
@@ -34,7 +41,7 @@ void ReconnectTimer::Tick(time_t)
 	if(!quitting)
 	{
 	    for(auto it : n->ChanMap)
-		n->JoinQueue.push(it.second);
+		n->JoinQueue.push_back(it.second);
 	    n->Connect();
 	}
     }
@@ -94,7 +101,7 @@ bool NetworkSocket::Read(const Flux::string &buf)
     if(buf.empty())
 	return true;
 
-    Log(LOG_RAWIO) << '[' << this->net->name << "] " << buf;
+    Log(LOG_RAWIO) << '[' << this->net->name << "] " << FixBuffer(buf);
     Flux::vector params = ParamitizeString(buf, ' ');
 
     if(!params.empty() && params[0].search_ci("ERROR"))
@@ -135,6 +142,6 @@ void NetworkSocket::OnError(const Flux::string &buf)
 
 bool NetworkSocket::ProcessWrite()
 {
-    Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << this->WriteBuffer;
+    Log(LOG_RAWIO) << '[' << this->net->name << ']' << ' ' << FixBuffer(this->WriteBuffer);
     return ConnectionSocket::ProcessWrite() && BufferedSocket::ProcessWrite();
 }

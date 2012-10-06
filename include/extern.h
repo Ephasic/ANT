@@ -13,6 +13,7 @@
 #define EXTERN_H
 #include "flux.h"
 #include <list> //for std::list
+#include <deque> // for std::deque
 #include <new>
 #include <cstdio>
 #include <iostream>

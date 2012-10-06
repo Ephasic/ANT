@@ -75,7 +75,7 @@ public:
   // What that network supports
   iSupport isupport;
   // When we join a network but aren't synced yet
-  std::queue<Channel*> JoinQueue;
+  std::deque<Channel*> JoinQueue;
   // bot pointer for the network
   Bot *b;
   // Map of all users in the network

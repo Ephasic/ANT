@@ -53,7 +53,18 @@ bool Network::JoinChannel(const Flux::string &chan)
 	if(!c)
 	    c = new Channel(this, chan);
 	if(!this->s || !this->s->GetStatus(SF_CONNECTED))
-	    this->JoinQueue.push(c);
+	{
+	    for(auto it : this->JoinQueue)
+	    {
+		if(it == c)
+		{
+		    Log(LOG_WARN) << "Channel " << c->name << " already in queue to join network " << c->n->name << "! ignoring..";
+		    return true;
+		}
+		else
+		    this->JoinQueue.push_back(c);
+	    }
+	}
 	else
 	    c->SendJoin();
 	return true;
@@ -123,7 +134,7 @@ void Network::Sync()
     while(!this->JoinQueue.empty())
     {
 	Channel *c = this->JoinQueue.front();
-	this->JoinQueue.pop();
+	this->JoinQueue.pop_front();
 	Log(LOG_DEBUG) << "Joining " << c->name << " (" << this->name << ')';
 	c->SendJoin();
     }
