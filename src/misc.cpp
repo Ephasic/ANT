@@ -19,8 +19,8 @@
  */
 int randint(int x, int y)
 {
-  srand(time(NULL));
-  return rand()%(y-x+1)+x;
+    srand(time(NULL));
+    return rand()%(y-x+1)+x;
 }
 
 /**
@@ -29,70 +29,73 @@ int randint(int x, int y)
  */
 IsoHost::IsoHost(const Flux::string &fullhost)
 {
-  nick = fullhost.isolate(':','!');
-  raw = fullhost;
-  host = fullhost.isolate('@',' ');
-  ident = fullhost.isolate('!','@');
+    nick = fullhost.isolate(':','!');
+    raw = fullhost;
+    host = fullhost.isolate('@',' ');
+    ident = fullhost.isolate('!','@');
 }
 
 void Fork()
 {
-  if (!nofork && InTerm())
-  {
-    int i = fork();
-    if(i > 0)
+    if (!nofork && InTerm())
     {
-      Log(LOG_TERMINAL) << "ANT Commit System v" << VERSION << " Started";
-      Log(LOG_TERMINAL) << "Forking to background. PID: " << i << "\033[0m";
-      FOREACH_MOD(I_OnFork, OnFork(i));
-      exit(0);
+	int i = fork();
+
+	if(i > 0)
+	{
+	    Log(LOG_TERMINAL) << "ANT Commit System v" << VERSION << " Started";
+	    Log(LOG_TERMINAL) << "Forking to background. PID: " << i << "\033[0m";
+	    FOREACH_MOD(I_OnFork, OnFork(i));
+	    exit(0);
+	}
+
+	if(isatty(fileno(stdout)))
+	    fclose(stdout);
+	if(isatty(fileno(stdin)))
+	    fclose(stdin);
+	if(isatty(fileno(stderr)))
+	    fclose(stderr);
+	if(setpgid(0, 0) < 0)
+	    throw CoreException("Unable to setpgid()");
+	else if(i == -1)
+	    Log() << "Error, unable to fork: " << strerror(errno);
     }
-    if(isatty(fileno(stdout)))
-      fclose(stdout);
-    if(isatty(fileno(stdin)))
-      fclose(stdin);
-    if(isatty(fileno(stderr)))
-      fclose(stderr);
-    if(setpgid(0, 0) < 0)
-      throw CoreException("Unable to setpgid()");
-    else if(i == -1)
-      Log() << "Error, unable to fork: " << strerror(errno);
-  }else
-    Log() << "ANT Commit System Started, PID: " << getpid() << Config->LogColor;
+    else
+	Log() << "ANT Commit System Started, PID: " << getpid() << Config->LogColor;
 }
 
 Flux::string CondenseVector(const Flux::vector &params)
 {
-  Flux::string ret;
-  for(auto it : params)
-    ret += it + " ";
-  ret.trim();
-  return ret;
+    Flux::string ret;
+    for(auto it : params)
+	ret += it + " ";
+    ret.trim();
+    return ret;
 }
 
 Flux::string Flux::RandomNickString(size_t length)
 {
-  Flux::string randomchars;
-  srand(time(NULL));
-  for(unsigned i=0; i < length; ++i)
-  {
-    top:
-    char c = (char) (rand() % ('z' - '0' + 1) + '0');
-    if(isalphibeticnum(c))
-      randomchars += c;
-    else
-      goto top;
-  }
-  return randomchars;
+    Flux::string randomchars;
+    srand(time(NULL));
+    for(unsigned i=0; i < length; ++i)
+    {
+	top:
+	char c = (char) (rand() % ('z' - '0' + 1) + '0');
+	if(isalphibeticnum(c))
+	    randomchars += c;
+	else
+	    goto top;
+    }
+    return randomchars;
 }
 
 Flux::string Flux::RandomString(size_t length)
 {
-  Flux::string randomchars;
-  srand((unsigned)time(NULL));
-  for(unsigned i=0; i < length; ++i)
-    randomchars += (char) (rand() % ('z' - '0' + 1) + '0');
-  return randomchars;
+    Flux::string randomchars;
+    srand((unsigned)time(NULL));
+    for(unsigned i=0; i < length; ++i)
+	randomchars += (char) (rand() % ('z' - '0' + 1) + '0');
+    return randomchars;
 }
 
 /**
@@ -150,28 +153,29 @@ Flux::string StripColors(const Flux::string &input)
 
 Flux::string Flux::Sanitize(const Flux::string &string)
 {
- static struct special_chars
- {
-   Flux::string character;
-   Flux::string replace;
-   special_chars(const Flux::string &c, const Flux::string &r) : character(c), replace(r) { }
- }
- special[] = {
-  special_chars("  ", " "),
-  special_chars("\n",""),
-  special_chars("\002",""),
-  special_chars("\035",""),
-  special_chars("\037",""),
-  special_chars("\026",""),
-  special_chars("\001",""),
-  special_chars("\r", ""),
-  special_chars("","")
- };
-  Flux::string ret = string.c_str();
-  ret = StripColors(ret);
-  for(int i = 0; special[i].character.empty() == false; ++i)
-    ret = ret.replace_all_cs(special[i].character, special[i].replace);
-  return ret.c_str();
+    static struct special_chars
+    {
+	Flux::string character;
+	Flux::string replace;
+	special_chars(const Flux::string &c, const Flux::string &r) : character(c), replace(r) { }
+    }
+    special[] = {
+	special_chars("  ", " "),
+	special_chars("\n",""),
+	special_chars("\002",""),
+	special_chars("\035",""),
+	special_chars("\037",""),
+	special_chars("\026",""),
+	special_chars("\001",""),
+	special_chars("\r", ""),
+	special_chars("","")
+    };
+
+    Flux::string ret = string.c_str();
+    ret = StripColors(ret);
+    for(int i = 0; special[i].character.empty() == false; ++i)
+	ret = ret.replace_all_cs(special[i].character, special[i].replace);
+    return ret.c_str();
 }
 
 Flux::string printfify(const char *fmt, ...)

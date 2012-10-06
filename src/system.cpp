@@ -176,46 +176,46 @@ protected:
 public:
   CommandLineArguments(int ac, char **av)
   {
-    for(int i = 1; i < ac; ++i)
-    {
-      Flux::string argsarg = av[i];
-      Flux::string param;
-      while(!argsarg.empty() && argsarg[0] == '-')
-	argsarg.erase(argsarg.begin());
+	for(int i = 1; i < ac; ++i)
+	{
+	    Flux::string argsarg = av[i];
+	    Flux::string param;
+	    while(!argsarg.empty() && argsarg[0] == '-')
+		argsarg.erase(argsarg.begin());
 
-      size_t t = argsarg.find('=');
-      if(t != Flux::string::npos)
-      {
-	param = argsarg.substr(t+1);
-	argsarg.erase(t);
-      }
+	    size_t t = argsarg.find('=');
+	    if(t != Flux::string::npos)
+	    {
+		param = argsarg.substr(t+1);
+		argsarg.erase(t);
+	    }
 
-      if(argsarg.empty())
-	continue;
+	    if(argsarg.empty())
+		continue;
 
-      Arguments[argsarg] = param;
-    }
+	    Arguments[argsarg] = param;
+	}
   }
 
   bool HasArg(const Flux::string &name, char shortname = '\0')
   {
-    Flux::string Cppisstupidrighthere;
-    return this->HasArg(name, shortname, Cppisstupidrighthere);
+	Flux::string Cppisstupidrighthere;
+	return this->HasArg(name, shortname, Cppisstupidrighthere);
   }
 
   bool HasArg(const Flux::string &name, char shortname, Flux::string &args)
   {
-    args.clear();
+	args.clear();
 
-    for(Flux::map<Flux::string>::iterator it = this->Arguments.begin(); it != this->Arguments.end(); ++it)
-    {
-      if(it->first.equals_ci(name) || it->first[0] == shortname)
-      {
-	args = it->second;
-	return true;
-      }
-    }
-    return false;
+	for(Flux::map<Flux::string>::iterator it = this->Arguments.begin(); it != this->Arguments.end(); ++it)
+	{
+	    if(it->first.equals_ci(name) || it->first[0] == shortname)
+	    {
+		args = it->second;
+		return true;
+	    }
+	}
+	return false;
   }
 };
 
@@ -224,184 +224,182 @@ public:
  */
 void startup(int argc, char** argv, char *envp[])
 {
-  SET_SEGV_LOCATION();
-  InitSignals();
-  Config = nullptr;
-  my_av = argv;
-  my_envp = envp;
-  starttime = time(NULL); //for bot uptime
+    SET_SEGV_LOCATION();
+    InitSignals();
+    Config = nullptr;
+    my_av = argv;
+    my_envp = envp;
+    starttime = time(NULL); //for bot uptime
 
-  Flux::string bindir = getprogdir(Flux::string(argv[0]));
-  if(bindir[bindir.length() - 1] == '.')
-    bindir = bindir.substr(0, bindir.length() - 2);
-  binary_dir = bindir;
+    Flux::string bindir = getprogdir(Flux::string(argv[0]));
+    if(bindir[bindir.length() - 1] == '.')
+	bindir = bindir.substr(0, bindir.length() - 2);
+    binary_dir = bindir;
 
-  Config = new BotConfig(NULL);
-  if(!Config)
-    throw CoreException("Config Error.");
+    Config = new BotConfig(NULL);
+    if(!Config)
+	throw CoreException("Config Error.");
 
-  Flux::string dir = argv[0];
-  Flux::string::size_type n = dir.rfind('/');
-  dir = "." + dir.substr(n);
+    Flux::string dir = argv[0];
+    Flux::string::size_type n = dir.rfind('/');
+    dir = "." + dir.substr(n);
 
-  //gets the command line parameters if any.
-  CommandLineArguments args(argc, argv);
+    //gets the command line parameters if any.
+    CommandLineArguments args(argc, argv);
 
-  if(args.HasArg("developer", 'd'))
-  {
-    dev = nofork = true;
-    Log(LOG_DEBUG) << "ANT Commit System is started in Developer mode.";
-  }
+    if(args.HasArg("developer", 'd'))
+    {
+	dev = nofork = true;
+	Log(LOG_DEBUG) << "ANT Commit System is started in Developer mode.";
+    }
 
-  if(args.HasArg("nofork", 'n'))
-  {
-    nofork = true;
-    Log(LOG_DEBUG) << "ANT Commit System is started With No Forking enabled.";
-  }
+    if(args.HasArg("nofork", 'n'))
+    {
+	nofork = true;
+	Log(LOG_DEBUG) << "ANT Commit System is started With No Forking enabled.";
+    }
 
-  if(args.HasArg("readonly", 'r'))
-  {
-    readonly = true;
-    Log(LOG_DEBUG) << "ANT Commit System is started With read only databases enabled.";
-  }
+    if(args.HasArg("readonly", 'r'))
+    {
+	readonly = true;
+	Log(LOG_DEBUG) << "ANT Commit System is started With read only databases enabled.";
+    }
 
-  if(args.HasArg("memorydebug", 'm'))
-  {
-    memdebug = true;
-    Log(LOG_DEBUG) << "ANT Commit System is started With memory debug enabled.";
-  }
+    if(args.HasArg("memorydebug", 'm'))
+    {
+	memdebug = true;
+	Log(LOG_DEBUG) << "ANT Commit System is started With memory debug enabled.";
+    }
 
-  if(args.HasArg("help", 'h'))
-  {
-    Log(LOG_TERMINAL) << "ANT Internet Relay Chat Commit Bot system v" << VERSION;
-    Log(LOG_TERMINAL) << "Usage: " << dir << " [options]";
-    Log(LOG_TERMINAL) << "-h, --help";
-    Log(LOG_TERMINAL) << "-d, --developer";
-    Log(LOG_TERMINAL) << "-n, --nofork";
-    Log(LOG_TERMINAL) << "-p, --protocoldebug";
-    Log(LOG_TERMINAL) << "-c, --nocolor";
-    Log(LOG_TERMINAL) << "-m, --memorydebug";
-    Log(LOG_TERMINAL) << "-r, --readonly";
-    Log(LOG_TERMINAL) << "-v, --version";
-    Log(LOG_TERMINAL) << "See --version for full version information";
-    Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
-    exit(0);
-  }
+    if(args.HasArg("help", 'h'))
+    {
+	Log(LOG_TERMINAL) << "ANT Internet Relay Chat Commit Bot system v" << VERSION;
+	Log(LOG_TERMINAL) << "Usage: " << dir << " [options]";
+	Log(LOG_TERMINAL) << "-h, --help";
+	Log(LOG_TERMINAL) << "-d, --developer";
+	Log(LOG_TERMINAL) << "-n, --nofork";
+	Log(LOG_TERMINAL) << "-p, --protocoldebug";
+	Log(LOG_TERMINAL) << "-c, --nocolor";
+	Log(LOG_TERMINAL) << "-m, --memorydebug";
+	Log(LOG_TERMINAL) << "-r, --readonly";
+	Log(LOG_TERMINAL) << "-v, --version";
+	Log(LOG_TERMINAL) << "See --version for full version information";
+	Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
+	exit(0);
+    }
 
-  if(args.HasArg("version", 'v'))
-  {
-    Log(LOG_TERMINAL) << "Arbitrary Navn Tool IRC Commit System C++ Bot Version " << VERSION_FULL;
-    Log(LOG_TERMINAL) << "This bot was programmed from scratch by Justasic and Lordofsraam.";
-    Log(LOG_TERMINAL) << "";
-    Log(LOG_TERMINAL) << "IRC: irc.Azuru.net #Computers";
-    Log(LOG_TERMINAL) << "WWW: http://www.Azuru.net";
-    Log(LOG_TERMINAL) << "Email: Development@Azuru.net";
-    Log(LOG_TERMINAL) << "Git: arbitrary-navn-tool.googlecode.com";
-    Log(LOG_TERMINAL) << "";
-    Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
-    Log(LOG_TERMINAL) << "Type " << dir << " --help for help on how to use ANT, or read the readme.";
-    exit(0);
-  }
+    if(args.HasArg("version", 'v'))
+    {
+	Log(LOG_TERMINAL) << "Arbitrary Navn Tool IRC Commit System C++ Bot Version " << VERSION_FULL;
+	Log(LOG_TERMINAL) << "This bot was programmed from scratch by Justasic and Lordofsraam.";
+	Log(LOG_TERMINAL) << "";
+	Log(LOG_TERMINAL) << "IRC: irc.Azuru.net #Computers";
+	Log(LOG_TERMINAL) << "WWW: http://www.Azuru.net";
+	Log(LOG_TERMINAL) << "Email: Development@Azuru.net";
+	Log(LOG_TERMINAL) << "Git: arbitrary-navn-tool.googlecode.com";
+	Log(LOG_TERMINAL) << "";
+	Log(LOG_TERMINAL) << "This bot does have Epic Powers.";
+	Log(LOG_TERMINAL) << "Type " << dir << " --help for help on how to use ANT, or read the readme.";
+	exit(0);
+    }
 
-  if(args.HasArg("protocoldebug", 'p'))
-  {
-    protocoldebug = true;
-    Log(LOG_RAWIO) << "ANT Commit System is started in Protocol Debug mode.";
-  }
+    if(args.HasArg("protocoldebug", 'p'))
+    {
+	protocoldebug = true;
+	Log(LOG_RAWIO) << "ANT Commit System is started in Protocol Debug mode.";
+    }
 
-  if(args.HasArg("nocolor", 'c'))
-  {
-    nocolor = true;
-    Log() << "ANT Commit System is started in No Colors mode.";
-  }
+    if(args.HasArg("nocolor", 'c'))
+    {
+	nocolor = true;
+	Log() << "ANT Commit System is started in No Colors mode.";
+    }
 
-  // Set terminal colors to whatever is in the config
-  if(!nocolor)
-    Log(LOG_TERMINAL) << Config->LogColor;
+    // Set terminal colors to whatever is in the config
+    if(!nocolor)
+	Log(LOG_TERMINAL) << Config->LogColor;
 
-  ModuleHandler::SanitizeRuntime();
-  LoadModules(); //load modules
-  WritePID(); //Write the pid file
-  FOREACH_MOD(I_OnStart, OnStart(argc, argv)); //announce we are starting the bot
-  Fork(); //Fork to background
-  SocketEngine::Init(); //Initialize the socket engine
+    ModuleHandler::SanitizeRuntime();
+    LoadModules(); //load modules
+    WritePID(); //Write the pid file
+    FOREACH_MOD(I_OnStart, OnStart(argc, argv)); //announce we are starting the bot
+    Fork(); //Fork to background
+    SocketEngine::Init(); //Initialize the socket engine
 }
 
 // Clean up our pointers so we don't exit with memory leaks..
 void GarbageCollect()
 {
-  // Set the segfault location incase we fuck up somewhere
-  SET_SEGV_LOCATION();
-  // Announce the shutdown
-  FOREACH_MOD(I_OnShutdown, OnShutdown());
-  // Save the databases
-  SaveDatabases();
-  // Announce garbage cleanup
-  FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
-  // Read/Write the last bit, close any leftover sockets
-  if(Config)
-    SocketEngine::Process();
-  // Unload all modules
-  ModuleHandler::UnloadAll();
+    // Set the segfault location incase we fuck up somewhere
+    SET_SEGV_LOCATION();
+    // Announce the shutdown
+    FOREACH_MOD(I_OnShutdown, OnShutdown());
+    // Save the databases
+    SaveDatabases();
+    // Announce garbage cleanup
+    FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
+    // Read/Write the last bit, close any leftover sockets
+    if(Config)
+	SocketEngine::Process();
+    // Unload all modules
+    ModuleHandler::UnloadAll();
 
-  // Clean up any network pointers and clear the map
-  for(Flux::insensitive_map<Network*>::iterator it = Networks.begin(), it_end = Networks.end(); it != it_end;)
-  {
-    Network *n = it->second;
-    ++it;
-    n->Disconnect("Shutting down.");
+    // Clean up any network pointers and clear the map
+    for(Flux::insensitive_map<Network*>::iterator it = Networks.begin(), it_end = Networks.end(); it != it_end;)
+    {
+	Network *n = it->second;
+	++it;
+	n->Disconnect("Shutting down.");
 
-    // Clean up any channel pointers for the network and clear the map
-    if(!n->ChanMap.empty())
-      for(Flux::insensitive_map<Channel*>::iterator cit = n->ChanMap.begin(),
-	cit_end = n->ChanMap.end(); cit != cit_end; ++cit)
-      {
-	Channel *c = cit->second;
-	++cit;
-	DeleteZero(c);
-      }
+	// Clean up any channel pointers for the network and clear the map
+	if(!n->ChanMap.empty())
+	    for(Flux::insensitive_map<Channel*>::iterator cit = n->ChanMap.begin(), cit_end = n->ChanMap.end(); cit != cit_end; ++cit)
+	    {
+		Channel *c = cit->second;
+		++cit;
+		DeleteZero(c);
+	    }
 
-    // Clean up any user pointers for the network and clear the map
-    if(!n->UserNickList.empty())
-      for(Flux::insensitive_map<User*>::iterator uit = n->UserNickList.begin(),
-	uit_end = n->UserNickList.end(); uit != uit_end;)
-      {
-	User *u = uit->second;
-	++uit;
-	DeleteZero(u);
-      }
+	// Clean up any user pointers for the network and clear the map
+	if(!n->UserNickList.empty())
+	    for(Flux::insensitive_map<User*>::iterator uit = n->UserNickList.begin(), uit_end = n->UserNickList.end(); uit != uit_end;)
+	    {
+		User *u = uit->second;
+		++uit;
+		DeleteZero(u);
+	    }
 
-      n->ChanMap.clear();
-      n->UserNickList.clear();
-      DeleteZero(n);
-  }
-  Networks.clear();
+	n->ChanMap.clear();
+	n->UserNickList.clear();
+	DeleteZero(n);
+    }
+    Networks.clear();
 
-  // Delete our global IRC protocol wrapper
-  if(GProto)
-    DeleteZero(GProto);
+    // Delete our global IRC protocol wrapper
+    if(GProto)
+	DeleteZero(GProto);
 
-  // Shutdown the socket engine and close any remaining sockets.
-  if(Config)
-    SocketEngine::Shutdown();
-  ModuleHandler::SanitizeRuntime();
+    // Shutdown the socket engine and close any remaining sockets.
+    if(Config)
+	SocketEngine::Shutdown();
+    ModuleHandler::SanitizeRuntime();
 
-  // Shutdown the timer manager and clear the vector of it's memory space
-  // NOTE: this does not delete timers that are still active, that will
-  // be handled below by deleting lost pointers
-  TimerManager::Shutdown();
+    // Shutdown the timer manager and clear the vector of it's memory space
+    // NOTE: this does not delete timers that are still active, that will
+    // be handled below by deleting lost pointers
+    TimerManager::Shutdown();
 
-  // oh noes! lost pointers!
-  for(std::vector<Base*>::iterator it = BaseReferences.begin(), it_end = BaseReferences.end(); it != it_end; )
-  {
-    Base *b = *it;
-    ++it;
-    Log(LOG_MEMORY) << "Deleting lost pointer: @" << b;
-    DeleteZero(b);
-  }
-  BaseReferences.clear();
-  // Vectors don't always clear, so clear them here.
-  std::vector<Base*>().swap(BaseReferences);
+    // oh noes! lost pointers!
+    for(std::vector<Base*>::iterator it = BaseReferences.begin(), it_end = BaseReferences.end(); it != it_end; )
+    {
+	Base *b = *it;
+	++it;
+	Log(LOG_MEMORY) << "Deleting lost pointer: @" << b;
+	DeleteZero(b);
+    }
+    BaseReferences.clear();
+    // Vectors don't always clear, so clear them here.
+    std::vector<Base*>().swap(BaseReferences);
 }
 
 

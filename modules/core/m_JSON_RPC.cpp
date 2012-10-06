@@ -62,11 +62,11 @@ public:
 // Client socket class used to accept data from the JSON client
 class JSONClient : public ClientSocket, public BufferedSocket, public Timer
 {
-    bool in_header, is_httpreq;
+    bool in_header, is_httpreq, processpost, has_google_hmac;
     Flux::vector httpheader, httpcontent;
 public:
     JSONClient(JSONListenSocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()), ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), Timer(Config->jsonrpctimeout),
-    in_header(true), is_httpreq(false)
+    in_header(true), is_httpreq(false), processpost(false), has_google_hmac(false)
     {
 	Log(LOG_RAWIO) << "[JSON-RPC] Created and accepted client from " << this->clientaddr.addr();
     }
@@ -76,7 +76,6 @@ public:
     {
 // 	Flux::string message = SanitizeXML(m);
 	Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
-
 	// According to the HTTP protocol, content and header are deliminated by
 	// a newline which the socket engine interprets as a blank/empty line.
 	// In my opinion this is the worst deliminator in the world and whoever
@@ -85,8 +84,23 @@ public:
 	{
 	    in_header = false;
 
+	    if(processpost)
+	    {
+// 		this->HTTPReply(202, "Accepted", true, "text/plain", "Message accepted into queue");
+// 		this->ProcessWrite();
+	    }
+
+	    if(has_google_hmac)
+	    {
+		this->Write("Authenticated");
+		return true;
+	    }
+
 	    if(is_httpreq)
-		this->HTTPReply(200, "OK", "text/html", HTTPREQUEST);
+	    {
+// 		this->HTTPReply(200, "OK", "text/html", HTTPREQUEST);
+// 		return false;
+	    }
 	}
 
 	// the method line
@@ -96,8 +110,9 @@ public:
 	    if(line.size() < 3)
 	    {
 		// Oh noes! Someone sent bad data!
-		this->HTTPReply(400, "Bad Request", "", "");
+// 		this->HTTPReply(400, "Bad Request", "", "");
 		Log(LOG_DEBUG) << "Invalid or malformed syntax!";
+// 		return false;
 	    }
 
 	    if(line[0].equals_ci("GET"))
@@ -105,12 +120,15 @@ public:
 	    else if(line[0].equals_ci("POST"))
 	    {
 		// Process XML data for Commit, nothing to do here!
+		processpost = true;
+		return true;
 	    }
 	    else
 	    {
 		// invalid request, return 405!
-		this->HTTPReply(405, "Method Not Allowed", "", "");
+		this->HTTPReply(405, "Method Not Allowed", false, "", "");
 		Log(LOG_DEBUG) << "Invalid method request: " << line[0];
+// 		return false;
 	    }
 	}
 	// Other header info
@@ -120,8 +138,17 @@ public:
 
 	    Flux::vector line = ParamitizeString(message, ':');
 
-	    if(line.size() == 2 && line[0].equals_ci("Content-Type") && !line[1].search_ci("text/xml"))
-		this->HTTPReply(415, "Unsupported Media Type", "", "");
+// 	    if(line.size() == 2 && line[0].equals_ci("Content-Type") && !line[1].search_ci("text/xml"))
+// 	    {
+// 		this->HTTPReply(415, "Unsupported Media Type", "", "");
+// 		return false;
+// 	    }
+
+	    if(line.size() > 0 && line[0].equals_ci("Google-Code-Project-Hosting-Hook-HMAC"))
+	    {
+		// Skip google's stupid authentication crap since it's not needed
+		has_google_hmac = true;
+	    }
 
 	    if(line.size() > 1 && line[0].equals_ci("User-Agent"))
 		; // Eventually track user agents to see what everyone is using!
@@ -136,7 +163,8 @@ public:
 	    {
 		this->HandleMessage();
 		// ###: Is this a proper reply?
-		this->HTTPReply(200, "OK", "text/html", "Message accepted into queue.");
+// 		this->HTTPReply(200, "OK", "text/html", "Message accepted into queue.");
+// 		return false;
 	    }
 	}
 
@@ -145,13 +173,13 @@ public:
     }
 
     // very basic HTTP reply method.
-    void HTTPReply(int code, const Flux::string &statustype, const Flux::string &contenttype, const Flux::string &message)
+    void HTTPReply(int code, const Flux::string &statustype, bool keepalive, const Flux::string &contenttype, const Flux::string &message)
     {
 	// Basic header
 	this->Write("HTTP/1.1 %d %s", code, statustype.c_str());
-	this->Write("CONNECTION: CLOSE");
-	this->Write("DATE: "+do_strftime(time(NULL), true));
-	this->Write("SERVER: ANT Commit System version " + systemver);
+	this->Write("CONNECTION: %s", keepalive ? "Keep-Alive" : "Close");
+	this->Write("DATE: %s", do_strftime(time(NULL), true).c_str());
+	this->Write("SERVER: ANT Commit System version %s", systemver.c_str());
 
 	// Some codes do not require content.
 	if(!contenttype.empty() && !message.empty());
@@ -167,19 +195,29 @@ public:
 	if(!message.empty())
 	    this->Write(message);
 
-	this->SetStatus(SF_DEAD, true);
+	this->ProcessWrite();
+
+// 	this->SetStatus(SF_DEAD, true);
     }
 
     // Timeout if someone idles on the server for too long without submitting data.
     void Tick(time_t)
     {
 	Log(LOG_DEBUG) << "[JSON-RPC] Connection Timeout for " << this->clientaddr.addr() << ", closing connection.";
-	this->HTTPReply(408, "Request Timeout", "", "");
+	this->HTTPReply(408, "Request Timeout", false, "", "");
+	this->SetStatus(SF_DEAD, true);
     }
 
     void HandleMessage()
     {
 	// TODO: This.
+    }
+
+    bool ProcessWrite()
+    {
+	if(!this->WriteBuffer.empty())
+	    Log(LOG_TERMINAL) << "Process Write:\n" << this->WriteBuffer;
+	return BufferedSocket::ProcessWrite() && ClientSocket::ProcessWrite();
     }
 };
 

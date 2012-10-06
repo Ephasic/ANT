@@ -61,18 +61,18 @@ Module *LastRunModule; // For crashes
 // Collect our garbage
 void GarbageCall()
 {
-  Log(LOG_DEBUG) << "Running Garbage Collector.";
-  FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
+    Log(LOG_DEBUG) << "Running Garbage Collector.";
+    FOREACH_MOD(I_OnGarbageCleanup, OnGarbageCleanup());
 }
 
 // Save Database call
 void SaveDatabases()
 {
-  if(!readonly)
-  {
-    Log() << "Saving Databases.";
-    FOREACH_MOD(I_OnSaveDatabases, OnSaveDatabases());
-  }
+    if(!readonly)
+    {
+	Log() << "Saving Databases.";
+	FOREACH_MOD(I_OnSaveDatabases, OnSaveDatabases());
+    }
 }
 
 // Entry Point
@@ -98,7 +98,7 @@ int main (int argcx, char** argvx, char *envp[])
 	    //prevent loop bombs, we raise a segfault because the segfault handler will handle it better
 	    if(++loopcount >= 50)
 	    {
-		Log(LOG_CRITICAL) << "Infinite while loop detected, Segmentation Fault raised.";
+		Log(LOG_CRITICAL) << "Infinite loop detected, Segmentation Fault raised.";
 		LastBuf = "50 main loop calls in 3 secs";
 		raise(SIGSEGV);
 	    }

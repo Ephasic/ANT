@@ -56,6 +56,9 @@ static const Flux::string HTTPREQUEST =
 
 class xmlrpcclient;
 class xmlrpclistensocket;
+class DNSResolver;
+class xmlrpcmod;
+static Module *me;
 std::vector<xmlrpclistensocket*> listen_sockets;
 
 /*****************************************************************/
@@ -83,6 +86,21 @@ public:
     ClientSocket *OnAccept(int fd, const sockaddrs &addr);
 };
 
+class DNSResolver : public DNSRequest
+{
+    Flux::string ip;
+public:
+    DNSResolver(const Flux::string &addr) : DNSRequest(addr, DNS_QUERY_PTR, true, me), ip(addr) { }
+
+    void OnLookupComplete(const DNSQuery *record)
+    {
+// 	const ResourceRecord &ans_record = record->answers[0];
+	Log(LOG_RAWIO) << "[XML-RPC] User connecting from " << record->answers[0].rdata << " (" << ip << ")";
+    }
+};
+
+
+
 /*****************************************************************/
 /*********************** Client Socket ***************************/
 /*****************************************************************/
@@ -91,14 +109,16 @@ class xmlrpcclient : public ClientSocket, public BufferedSocket, public Timer
 {
     Flux::vector httpheader, httpcontent;
     bool in_header, is_httpreq;
+    size_t contentbytes;
 public:
     xmlrpcclient(xmlrpclistensocket *ls, int fd, const sockaddrs &addr) : Socket(fd, ls->IsIPv6()),
     ClientSocket(reinterpret_cast<ListenSocket*>(ls), addr), BufferedSocket(), Timer(Config->xmlrpctimeout),
-    in_header(true), is_httpreq(false) { }
+    in_header(true), is_httpreq(false), contentbytes(0) { }
 
     bool Read(const Flux::string &m)
     {
 	Flux::string message = SanitizeXML(m);
+	contentbytes += message.size();
         //Log(LOG_TERMINAL) << "Message: \"" << message << "\"";
 
 	// According to the HTTP protocol, content and header are deliminated by
@@ -110,7 +130,12 @@ public:
 	    in_header = false;
 
 	    if(is_httpreq)
+	    {
 		this->HTTPReply(200, "OK", "text/html", HTTPREQUEST);
+		return false;
+	    }
+
+	    return true;
 	}
 
 	// the method line
@@ -122,6 +147,7 @@ public:
 		// Oh noes! Someone sent bad data!
 		this->HTTPReply(400, "Bad Request", "", "");
 		Log(LOG_DEBUG) << "Invalid or malformed syntax!";
+		return false;
 	    }
 
 	    if(line[0].equals_ci("GET"))
@@ -135,6 +161,7 @@ public:
 		// invalid request, return 405!
 		this->HTTPReply(405, "Method Not Allowed", "", "");
 		Log(LOG_DEBUG) << "Invalid method request: " << line[0];
+		return false;
 	    }
 	}
 	// Other header info
@@ -145,7 +172,10 @@ public:
 	    Flux::vector line = ParamitizeString(message, ':');
 
 	    if(line.size() == 2 && line[0].equals_ci("Content-Type") && !line[1].search_ci("text/xml"))
+	    {
 		this->HTTPReply(415, "Unsupported Media Type", "", "");
+		return false;
+	    }
 
 	    if(line.size() > 1 && line[0].equals_ci("User-Agent"))
 		; // Eventually track user agents to see what everyone is using!
@@ -165,8 +195,24 @@ public:
 		"</params>\n"
 		"</methodResponse>\n";
 
-		this->HandleMessage();
-		this->HTTPReply(200, "OK", "text/xml", reply);
+
+// 		for(unsigned i = 0; i < httpcontent.size(); ++i)
+// 		{
+// 		    Log(LOG_TERMINAL) << "Content: " << httpcontent[i];
+// 		    contentbytes += httpcontent[i].size();
+// 		}
+
+		for(unsigned i = 0; i < httpheader.size(); ++i)
+		    if(httpheader[i].search_ci("Content-Length"))
+			Log(LOG_TERMINAL) << httpheader[i];
+
+		Log(LOG_TERMINAL) << "Content Bytes: " << contentbytes;
+
+		if(this->HandleMessage())
+		    this->HTTPReply(200, "OK", "text/xml", reply);
+		else
+		    this->HTTPReply(500, "Internal server error", "", "");
+		return false;
 	    }
 	}
 
@@ -197,7 +243,7 @@ public:
 	if(!message.empty())
 	    this->Write(message);
 
-	this->SetStatus(SF_DEAD, true);
+	this->ProcessWrite();
     }
 
     bool ProcessWrite()
@@ -207,7 +253,7 @@ public:
 	return BufferedSocket::ProcessWrite() && ClientSocket::ProcessWrite();
     }
 
-    void HandleMessage();
+    bool HandleMessage();
     void Tick(time_t)
     {
 	Log(LOG_DEBUG) << "[XML-RPC] Connection Timeout for " << this->clientaddr.addr() << ", closing connection.";
@@ -218,17 +264,19 @@ public:
 ClientSocket *xmlrpclistensocket::OnAccept(int fd, const sockaddrs &addr)
 {
     // TODO: Reverse DNS Resolve the IP address for logging?
+    DNSResolver *res = new DNSResolver(addr.addr());
+    res->Process();
     ClientSocket *c = new xmlrpcclient(this, fd, addr);
     return c;
 }
 
 /* This is down here so we don't make a huge mess in the middle of the file */
 // Parse our message then announce it as a commit using the OnCommit event.
-void xmlrpcclient::HandleMessage()
+bool xmlrpcclient::HandleMessage()
 {
 
     if(this->httpcontent.empty())
-	return;
+	return false;
 
     Log(LOG_TERMINAL) << "[XML-RPC] Message Handler Called!";
     Flux::string blah = CondenseVector(this->httpcontent).cc_str();
@@ -252,7 +300,7 @@ void xmlrpcclient::HandleMessage()
 	if(!main_node)
 	{
 	    Log(LOG_TERMINAL) << "Invalid XML data!";
-	    return;
+	    return false;
 	}
 
 	/* message.generator section */
@@ -280,6 +328,8 @@ void xmlrpcclient::HandleMessage()
 	    if(node->first_node("module", 0, true))
 		message.info["module"] = node->first_node("module", 0, true)->value();
 	}
+	else
+	    return false;
 
 	/* message.timestamp section */
 	if(main_node->first_node("timestamp", 0, true))
@@ -352,7 +402,9 @@ void xmlrpcclient::HandleMessage()
     catch (std::exception &ex)
     {
 	Log(LOG_TERMINAL) << "XML Exception Caught: " << ex.what();
+	return false;
     }
+    return true;
 }
 
 class RetryStart : public Timer
@@ -376,10 +428,11 @@ public:
 class xmlrpcmod : public Module
 {
 public:
-    xmlrpcmod(const Flux::string &Name):Module(Name, MOD_NORMAL)
+    xmlrpcmod(const Flux::string &Name) : Module(Name, MOD_NORMAL)
     {
 	this->SetAuthor("Justasic");
 	this->SetVersion(VERSION);
+	me = this;
 
 	// Try and make a socket.
 	new RetryStart();
