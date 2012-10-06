@@ -27,10 +27,10 @@ Flux::string FixBuffer(const Flux::string &buf)
 
 ReconnectTimer::ReconnectTimer(int wait, Network *net) : Timer(wait), n(net)
 {
-  if(!net)
-    return; // Just ignore, we might be exiting from a CoreException
+    if(!net)
+	return; // Just ignore, we might be exiting from a CoreException
 
-    n->RTimer = this;
+	n->RTimer = this;
 }
 
 void ReconnectTimer::Tick(time_t)
@@ -63,36 +63,36 @@ void ReconnectTimer::Tick(time_t)
 
 NetworkSocket::NetworkSocket(Network *tnet) : Socket(-1), ConnectionSocket(), BufferedSocket(), net(tnet), pings(0)
 {
-  if(!tnet)
-    throw CoreException("Network socket created with no network? lolwut?");
+    if(!tnet)
+	throw CoreException("Network socket created with no network? lolwut?");
 
-  this->net->CurHost++;
-  if(static_cast<unsigned int>(this->net->CurHost) >= this->net->hostnames.size())
-    this->net->CurHost = 1;
+    this->net->CurHost++;
+    if(static_cast<unsigned int>(this->net->CurHost) >= this->net->hostnames.size())
+	this->net->CurHost = 1;
 
-  this->net->SetConnectedHostname(this->net->hostnames[this->net->CurHost]);
+    this->net->SetConnectedHostname(this->net->hostnames[this->net->CurHost]);
 
-  Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to "
-  << tnet->hostname << ':' << tnet->port << '(' << tnet->GetConHost() << ')';
+    Log(LOG_TERMINAL) << "New Network Socket for " << tnet->name << " connecting to "
+    << tnet->hostname << ':' << tnet->port << '(' << tnet->GetConHost() << ')';
 
-  this->Connect(tnet->GetConHost(), tnet->port);
+    this->Connect(tnet->GetConHost(), tnet->port);
 }
 
 NetworkSocket::~NetworkSocket()
 {
-  this->Write("QUIT :Socket Closed\n");
-  this->ProcessWrite();
-  this->net->s = nullptr;
+    this->Write("QUIT :Socket Closed\n");
+    this->ProcessWrite();
+    this->net->s = nullptr;
 
-  Log() << "Closing Connection to " << net->name;
+    Log() << "Closing Connection to " << net->name;
 
-  if(!this->net->IsDisconnecting())
-  {
-    Log() << "Connection to " << net->name << " [" << net->GetConHost() << ':'
-    << net->port << "] Failed! Retrying in " << Config->RetryWait << " seconds.";
+    if(!this->net->IsDisconnecting())
+    {
+	Log() << "Connection to " << net->name << " [" << net->GetConHost() << ':'
+	<< net->port << "] Failed! Retrying in " << Config->RetryWait << " seconds.";
 
-    new ReconnectTimer(Config->RetryWait, this->net);
-  }
+	new ReconnectTimer(Config->RetryWait, this->net);
+    }
 }
 
 bool NetworkSocket::Read(const Flux::string &buf)
@@ -136,8 +136,8 @@ void NetworkSocket::OnConnect()
 
 void NetworkSocket::OnError(const Flux::string &buf)
 {
-  Log(LOG_TERMINAL) << "Unable to connect to " << this->net->name << " ("
-  << this->net->hostname << ':' << this->net->port << ')' << (!buf.empty()?(": " + buf):"");
+    Log(LOG_TERMINAL) << "Unable to connect to " << this->net->name << " ("
+    << this->net->hostname << ':' << this->net->port << ')' << (!buf.empty()?(": " + buf):"");
 }
 
 bool NetworkSocket::ProcessWrite()
