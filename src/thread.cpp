@@ -31,7 +31,7 @@ void Thread::Notify() {}
 void *EntryPoint(void *parameter)
 {
     Thread *thread = static_cast<Thread*>(parameter);
-    thread->ToRun();
+    thread->Execute();
     thread->SetExitState();
     pthread_exit(0);
 }
@@ -66,45 +66,45 @@ void Thread::Exit()
 
 Mutex::Mutex()
 {
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&this->mutex, NULL);
 }
 
 Mutex::~Mutex()
 {
-    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&this->mutex);
 }
 
-void Lock()
+void Mutex::Lock()
 {
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&this->mutex);
 }
 
-void Unlock()
+void Mutex::Unlock()
 {
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&this->mutex);
 }
 
-bool TryLock()
+bool Mutex::TryLock()
 {
     return pthread_mutex_trylock(&mutex) == 0;
 }
 
 Condition::Condition() : Mutex()
 {
-    pthread_cond_init(&cond);
+    pthread_cond_init(&this->cond, NULL);
 }
 
 Condition::~Condition()
 {
-    pthread_cond_destroy(&cond);
+    pthread_cond_destroy(&this->cond);
 }
 
 void Condition::Wakeup()
 {
-    pthread_cond_signal(&cond);
+    pthread_cond_signal(&this->cond);
 }
 
 void Condition::Wait()
 {
-    pthread_cond_wait(&cond, &mutex);
+    pthread_cond_wait(&this->cond, &this->mutex);
 }

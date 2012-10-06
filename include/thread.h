@@ -44,7 +44,7 @@ public:
     void Lock();
     void Unlock();
     bool TryLock();
-}
+};
 
 class Condition : public Mutex
 {
@@ -55,5 +55,5 @@ public:
     ~Condition();
     void Wakeup();
     void Wait();
-}
+};
 #endif

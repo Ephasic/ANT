@@ -115,7 +115,7 @@ public:
     exiting = true;
   }
 
-  void ToRun()
+  void Execute()
   {
     base_string buf;
     while(!exiting)
