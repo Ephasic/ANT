@@ -377,7 +377,7 @@ ADD_SUBDIRECTORY(modules)
 ADD_SUBDIRECTORY(web)
 ADD_SUBDIRECTORY(src)
 
-set(CONFIG_INSTALL bot.example.conf README)
+set(CONFIG_INSTALL bot.example.conf README.md)
 install(FILES ${CONFIG_INSTALL}
   DESTINATION bin
 )
