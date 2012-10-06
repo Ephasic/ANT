@@ -231,10 +231,10 @@ Flux::vector TextFile::DirectoryListing(const Flux::string &directory)
 
 bool TextFile::IsDirectory(const Flux::string &dirname)
 {
-  struct stat fileinfo;
-  if(stat(dirname.c_str(), &fileinfo) == 0)
-     return true;
-  return false;
+    struct stat fileinfo;
+    if(stat(dirname.c_str(), &fileinfo) == 0)
+	return true;
+    return false;
 }
 
 /** Write to disk
@@ -245,29 +245,33 @@ bool TextFile::IsDirectory(const Flux::string &dirname)
  */
 bool TextFile::WriteToDisk(const Flux::string &FileName)
 {
-  std::ofstream f(FileName.c_str());
-  if (f.is_open())
-  {
-    if (Contents != lines)
+    std::ofstream f(FileName.c_str());
+    if (f.is_open())
     {
-      for (unsigned i = 0; i < Contents.size(); i++)
-      {
-	f << Contents[i].strip() << "\n";
-      }
+	if (Contents != lines)
+	{
+	    for (unsigned i = 0; i < Contents.size(); i++)
+	    {
+		f << Contents[i].strip() << "\n";
+	    }
+	}
+	else
+	{
+	    for (unsigned i = 0; i < lines.size(); i++)
+	    {
+		f << lines[i].strip() << "\n";
+	    }
+	}
+
+	f.close();
+	this->lasterror = FILE_IO_OK;
+	return true;
     }
     else
     {
-      for (unsigned i = 0; i < lines.size(); i++)
-      {
-	f << lines[i].strip() << "\n";
-      }
+	this->lasterror = FILE_IO_NOEXIST;
+	return false;
     }
-
-    f.close();
-    this->lasterror = FILE_IO_OK;
-    return true;
-  }
-  else { this->lasterror = FILE_IO_NOEXIST; return false; }
 }
 /** Single Line Buffer
  * \brief Returns the whole text file in one Flux::string
@@ -282,14 +286,13 @@ Flux::string TextFile::SingleLine() { return SingleLineBuffer; }
  */
 Flux::string TextFile::Extension()
 {
-  if (filename.search('.'))
-  {
-    Flux::string ext = "";
-    for (unsigned i = filename.length()-1; filename[i] != '.' && i < filename.size(); i--)
+    if (filename.search('.'))
     {
-      ext += filename[i];
+	Flux::string ext = "";
+	for (unsigned i = filename.length()-1; filename[i] != '.' && i < filename.size(); i--)
+	    ext += filename[i];
+	return ext;
     }
-    return ext;
-  }
-  else { return ""; }
+    else
+	return "";
 }

@@ -24,44 +24,44 @@ EventsVector ModuleHandler::EventHandlers[I_END];
 
 Module::Module(const Flux::string &n, ModType m): author(""), version(""), loadtime(time(NULL)), Priority(PRIORITY_DONTCARE), permanent(false), handle(nullptr), name(n), filename(""), filepath("")
 {
-  SET_SEGV_LOCATION();
-  if(FindModule(this->name))
-    throw ModuleException("Module already exists!");
+    SET_SEGV_LOCATION();
+    if(FindModule(this->name))
+	throw ModuleException("Module already exists!");
 
-  Modules.push_back(this);
-  if(!nofork)
-    Log() << "Loaded Module " << n;
+    Modules.push_back(this);
+    if(!nofork)
+	Log() << "Loaded Module " << n;
 }
 
 Module::~Module()
 {
-  SET_SEGV_LOCATION();
-  Log(LOG_DEBUG) << "Unloading Module " << this->name;
-  ModuleHandler::DetachAll(this);
+    SET_SEGV_LOCATION();
+    Log(LOG_DEBUG) << "Unloading Module " << this->name;
+    ModuleHandler::DetachAll(this);
 
-  auto it = std::find(Modules.begin(), Modules.end(), this);
-  if(it != Modules.end())
-    Modules.erase(it);
-  else
-    Log() << "Could not find " << this->name << " in Module map!";
+    auto it = std::find(Modules.begin(), Modules.end(), this);
+    if(it != Modules.end())
+	Modules.erase(it);
+    else
+	Log() << "Could not find " << this->name << " in Module map!";
 }
 
 void Module::SetAuthor(const Flux::string &person)
 {
-  this->author = person;
+    this->author = person;
 }
 
 void Module::SetVersion(const Flux::string &ver)
 {
-  this->version = ver;
+    this->version = ver;
 }
 
 void Module::SetPriority(ModulePriority p)
 {
-  this->Priority = p;
+    this->Priority = p;
 }
 
 void Module::SetPermanent(bool state)
 {
-  this->permanent = state;
+    this->permanent = state;
 }

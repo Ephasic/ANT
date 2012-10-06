@@ -16,27 +16,27 @@
 class Log
 {
 protected:
-  std::fstream log;
+    std::fstream log;
 public:
-  LogType type;
-  Flux::string filename;
-  User *u;
-  Command *c;
-  std::stringstream buffer;
-  std::stringstream logstream;
-  static Flux::string TimeStamp();
-  Log(LogType type = LOG_NORMAL);
-  Log(LogType, User*);
-  Log(User*);
-  Log(User*, Command*);
-  Log(LogType, User*, Command*);
-  ~Log();
+    LogType type;
+    Flux::string filename;
+    User *u;
+    Command *c;
+    std::stringstream buffer;
+    std::stringstream logstream;
+    static Flux::string TimeStamp();
+    Log(LogType type = LOG_NORMAL);
+    Log(LogType, User*);
+    Log(User*);
+    Log(User*, Command*);
+    Log(LogType, User*, Command*);
+    ~Log();
 
-  template<typename T> Log &operator<<(T val)
-  {
-   this->buffer << val;
-   return *this;
-  }
+    template<typename T> Log &operator<<(T val)
+    {
+	this->buffer << val;
+	return *this;
+    }
 };
 
 #endif

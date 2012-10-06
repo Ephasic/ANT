@@ -110,45 +110,45 @@ Flux::string Flux::RandomString(size_t length)
 // modified to fit this project.
 Flux::string StripColors(const Flux::string &input)
 {
-  /* refactor this completely due to SQUIT bug since the old code would strip last char and replace with \0 --peavey */
-  Flux::string sentence = input;
-  int seq = 0;
-  Flux::string::iterator i,safei;
-  for (i = sentence.begin(); i != sentence.end();)
-  {
-    if ((*i == 3))
-      seq = 1;
-    else if (seq && (( ((*i >= '0') && (*i <= '9')) || (*i == ',') ) ))
+    /* refactor this completely due to SQUIT bug since the old code would strip last char and replace with \0 --peavey */
+    Flux::string sentence = input;
+    int seq = 0;
+    Flux::string::iterator i,safei;
+    for (i = sentence.begin(); i != sentence.end();)
     {
-      seq++;
-      if ( (seq <= 4) && (*i == ',') )
-	seq = 1;
-      else if (seq > 3)
-	seq = 0;
-    }
-    else
-      seq = 0;
+	if ((*i == 3))
+	    seq = 1;
+	else if (seq && (( ((*i >= '0') && (*i <= '9')) || (*i == ',') ) ))
+	{
+	    seq++;
+	    if ( (seq <= 4) && (*i == ',') )
+		seq = 1;
+	    else if (seq > 3)
+		seq = 0;
+	}
+	else
+	    seq = 0;
 
-    if (seq || ((*i == 2) || (*i == 15) || (*i == 22) || (*i == 21) || (*i == 31)))
-    {
-      if (i != sentence.begin())
-      {
-	safei = i;
-	--i;
-	sentence.erase(safei);
-	++i;
-      }
-      else
-      {
-	sentence.erase(i);
-	i = sentence.begin();
-      }
+	if (seq || ((*i == 2) || (*i == 15) || (*i == 22) || (*i == 21) || (*i == 31)))
+	{
+	    if (i != sentence.begin())
+	    {
+		safei = i;
+		--i;
+		sentence.erase(safei);
+		++i;
+	    }
+	    else
+	    {
+		sentence.erase(i);
+		i = sentence.begin();
+	    }
+	}
+	else
+	    ++i;
     }
-    else
-      ++i;
-  }
 
-  return sentence;
+    return sentence;
 }
 
 Flux::string Flux::Sanitize(const Flux::string &string)
@@ -180,17 +180,17 @@ Flux::string Flux::Sanitize(const Flux::string &string)
 
 Flux::string printfify(const char *fmt, ...)
 {
-  if(fmt)
-  {
-    va_list args;
-    char buf[BUFSIZE];
-    va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    va_end(args);
-    return buf;
-  }
-  else
-    return fmt;
+    if(fmt)
+    {
+	va_list args;
+	char buf[BUFSIZE];
+	va_start(args, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, args);
+	va_end(args);
+	return buf;
+    }
+    else
+	return fmt;
 }
 
 /**
@@ -201,14 +201,14 @@ Flux::string printfify(const char *fmt, ...)
  */
 std::vector<Flux::string> ParamitizeString(const Flux::string &src, char delim)
 {
- sepstream tok(src, delim);
- Flux::string token;
- std::vector<Flux::string> ret;
+    sepstream tok(src, delim);
+    Flux::string token;
+    std::vector<Flux::string> ret;
 
- while(tok.GetToken(token))
-   ret.push_back(token);
+    while(tok.GetToken(token))
+	ret.push_back(token);
 
- return ret;
+    return ret;
 }
 /** Check if a file exists
  * \fn bool InTerm()
@@ -217,7 +217,7 @@ std::vector<Flux::string> ParamitizeString(const Flux::string &src, char delim)
  */
 bool InTerm()
 {
-  return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr)));
+    return isatty(fileno(stdout) && isatty(fileno(stdin)) && isatty(fileno(stderr)));
 }
 
 /**
@@ -229,49 +229,51 @@ bool InTerm()
  */
 Flux::string duration(const time_t &t)
 {
-  /* We first calculate everything */
-  time_t days = (t / 86400);
-  time_t hours = (t / 3600) % 24;
-  time_t minutes = (t / 60) % 60;
-  time_t seconds = (t) % 60;
+    /* We first calculate everything */
+    time_t days = (t / 86400);
+    time_t hours = (t / 3600) % 24;
+    time_t minutes = (t / 60) % 60;
+    time_t seconds = (t) % 60;
 
-  if (!days && !hours && !minutes)
-    return value_cast<Flux::string>(seconds) + " " + (seconds != 1 ? "seconds" : "second");
-  else
-  {
-    bool need_comma = false;
-    Flux::string buffer;
-    if (days)
+    if (!days && !hours && !minutes)
+	return value_cast<Flux::string>(seconds) + " " + (seconds != 1 ? "seconds" : "second");
+    else
     {
-      buffer = value_cast<Flux::string>(days) + " " + (days != 1 ? "days" : "day");
-      need_comma = true;
+	bool need_comma = false;
+	Flux::string buffer;
+	if (days)
+	{
+	    buffer = value_cast<Flux::string>(days) + " " + (days != 1 ? "days" : "day");
+	    need_comma = true;
+	}
+
+	if (hours)
+	{
+	    buffer += need_comma ? ", " : "";
+	    buffer += value_cast<Flux::string>(hours) + " " + (hours != 1 ? "hours" : "hour");
+	    need_comma = true;
+	}
+
+	if (minutes)
+	{
+	    buffer += need_comma ? ", " : "";
+	    buffer += value_cast<Flux::string>(minutes) + " " + (minutes != 1 ? "minutes" : "minute");
+	}
+	return buffer;
     }
-    if (hours)
-    {
-      buffer += need_comma ? ", " : "";
-      buffer += value_cast<Flux::string>(hours) + " " + (hours != 1 ? "hours" : "hour");
-      need_comma = true;
-    }
-    if (minutes)
-    {
-      buffer += need_comma ? ", " : "";
-      buffer += value_cast<Flux::string>(minutes) + " " + (minutes != 1 ? "minutes" : "minute");
-    }
-    return buffer;
-  }
 }
 
 Flux::string do_strftime(const time_t &t, bool short_output)
 {
-  tm tm = *localtime(&t);
-  char buf[BUFSIZE];
-  strftime(buf, sizeof(buf), "%b %d %H:%M:%S %Y %Z", &tm);
-  if (short_output)
-    return buf;
-  if (t < time(NULL))
-    return Flux::string(buf) + " " + printfify("(%s ago)", duration(time(NULL) - t).c_str());
-  else
-    return Flux::string(buf) + " " + printfify("(%s from now)", duration(t - time(NULL)).c_str());
+    tm tm = *localtime(&t);
+    char buf[BUFSIZE];
+    strftime(buf, sizeof(buf), "%b %d %H:%M:%S %Y %Z", &tm);
+    if (short_output)
+	return buf;
+    if (t < time(NULL))
+	return Flux::string(buf) + " " + printfify("(%s ago)", duration(time(NULL) - t).c_str());
+    else
+	return Flux::string(buf) + " " + printfify("(%s from now)", duration(t - time(NULL)).c_str());
 }
 
 

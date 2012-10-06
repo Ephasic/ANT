@@ -90,29 +90,29 @@ bool Network::Disconnect()
 
 bool Network::Disconnect(const char *fmt, ...)
 {
-  va_list args;
-  char buffer[BUFSIZE] = "";
-  if(fmt)
-  {
-    va_start(args, fmt);
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    this->Disconnect(Flux::string(buffer));
-    va_end(args);
-  }
-  return true;
+    va_list args;
+    char buffer[BUFSIZE] = "";
+    if(fmt)
+    {
+	va_start(args, fmt);
+	vsnprintf(buffer, sizeof(buffer), fmt, args);
+	this->Disconnect(Flux::string(buffer));
+	va_end(args);
+    }
+    return true;
 }
 
 bool Network::Disconnect(const Flux::string &buf)
 {
-  if(!buf.empty() && this->s && this->b)
-    this->b->ircproto->quit(buf);
-  this->Disconnect();
-  return true;
+    if(!buf.empty() && this->s && this->b)
+	this->b->ircproto->quit(buf);
+    this->Disconnect();
+    return true;
 }
 
 bool Network::IsSynced() const
 {
-  return this->issynced && this->s && this->s->GetStatus(SF_CONNECTED);
+    return this->issynced && this->s && this->s->GetStatus(SF_CONNECTED);
 }
 
 void Network::Sync()
@@ -139,46 +139,46 @@ void Network::Sync()
 
 bool Network::Connect()
 {
-  this->disconnecting = false;
-  // FIXME: ANT doesn't load the channels on a reconnect.
-  EventResult e;
-  FOREACH_RESULT(I_OnPreConnect, OnPreConnect(this), e);
-  if(e != EVENT_CONTINUE)
-    return false;
+    this->disconnecting = false;
+    // ###: Does ANT load channels it was in?
+    EventResult e;
+    FOREACH_RESULT(I_OnPreConnect, OnPreConnect(this), e);
+    if(e != EVENT_CONTINUE)
+	return false;
 
-  if(!this->s)
-    this->s = new NetworkSocket(this);
-  return true;
+    if(!this->s)
+	this->s = new NetworkSocket(this);
+    return true;
 }
 
 User *Network::FindUser(const Flux::string &fnick)
 {
-  auto it = this->UserNickList.find(fnick);
-  if(it != this->UserNickList.end())
-    return it->second;
-  return nullptr;
+    auto it = this->UserNickList.find(fnick);
+    if(it != this->UserNickList.end())
+	return it->second;
+    return nullptr;
 }
 
 Channel *Network::FindChannel(const Flux::string &channel)
 {
-  auto it = this->ChanMap.find(channel);
-  if(it != this->ChanMap.end())
-    return it->second;
-  return NULL;
+    auto it = this->ChanMap.find(channel);
+    if(it != this->ChanMap.end())
+	return it->second;
+    return NULL;
 }
 
 Network *FindNetwork(const Flux::string &name)
 {
-  auto it = Networks.find(name);
-  if(it != Networks.end())
-    return it->second;
-  return nullptr;
+    auto it = Networks.find(name);
+    if(it != Networks.end())
+	return it->second;
+    return nullptr;
 }
 
 Network *FindNetworkByHost(const Flux::string &name)
 {
-  auto it = NetworkHosts.find(name);
-  if(it != NetworkHosts.end())
-    return it->second;
-  return nullptr;
+    auto it = NetworkHosts.find(name);
+    if(it != NetworkHosts.end())
+	return it->second;
+    return nullptr;
 }

@@ -27,14 +27,14 @@ extern std::vector<tqueue*> QueuedQueues;
 
 class tqueue : public Timer
 {
-  // Function to call.
-  void (*function)();
+    // Function to call.
+    void (*function)();
 
-  // Timer to call the function
-  void Tick(time_t);
+    // Timer to call the function
+    void Tick(time_t);
 public:
-  tqueue(void (*func)(), long time_to_tick, time_t now = time(NULL), bool repeating = false);
-  virtual ~tqueue();
+    tqueue(void (*func)(), long time_to_tick, time_t now = time(NULL), bool repeating = false);
+    virtual ~tqueue();
 };
 
 #endif

@@ -22,27 +22,27 @@ typedef std::map<Channel*, User*> CList;
 class User : public Base
 {
 public:
-  User(Network*, const Flux::string&, const Flux::string&, const Flux::string&, const Flux::string &realname = "", const Flux::string &server ="");
-  virtual ~User();
+    User(Network*, const Flux::string&, const Flux::string&, const Flux::string&, const Flux::string &realname = "", const Flux::string &server ="");
+    virtual ~User();
 
-  CList ChannelList;
-  Flux::string nick;
-  Flux::string host;
-  Flux::string realname;
-  Flux::string ident;
-  Flux::string fullhost;
-  Flux::string server;
-  Network *n;
+    CList ChannelList;
+    Flux::string nick;
+    Flux::string host;
+    Flux::string realname;
+    Flux::string ident;
+    Flux::string fullhost;
+    Flux::string server;
+    Network *n;
 
-  // Functions
-  void AddChan(Channel*);
-  void DelChan(Channel*);
-  Channel *findchannel(const Flux::string&);
-  virtual void SetNewNick(const Flux::string&);
-  void SendWho();
-  virtual void SendMessage(const Flux::string&);
-  virtual void SendMessage(const char*, ...);
-  void SendPrivmsg(const Flux::string&);
-  void SendPrivmsg(const char*, ...);
+    // Functions
+    void AddChan(Channel*);
+    void DelChan(Channel*);
+    Channel *findchannel(const Flux::string&);
+    virtual void SetNewNick(const Flux::string&);
+    void SendWho();
+    virtual void SendMessage(const Flux::string&);
+    virtual void SendMessage(const char*, ...);
+    void SendPrivmsg(const Flux::string&);
+    void SendPrivmsg(const char*, ...);
 };
 #endif

@@ -51,14 +51,14 @@ Flux::string NoTermColor(const Flux::string &ret)
  */
 static Flux::string GetLogDate(time_t t = time(NULL))
 {
-  char timestamp[32];
+    char timestamp[32];
 
-  time(&t);
-  struct tm *tm = localtime(&t);
+    time(&t);
+    struct tm *tm = localtime(&t);
 
-  strftime(timestamp, sizeof(timestamp), "%Y%m%d", tm);
+    strftime(timestamp, sizeof(timestamp), "%Y%m%d", tm);
 
-  return timestamp;
+    return timestamp;
 }
 
 /**
@@ -70,7 +70,7 @@ static Flux::string GetLogDate(time_t t = time(NULL))
  */
 static inline Flux::string CreateLogName(const Flux::string &file, time_t t = time(NULL))
 {
-  return "logs/" + file + "." + GetLogDate(t) + "-" + value_cast<Flux::string>(t);
+    return "logs/" + file + "." + GetLogDate(t) + "-" + value_cast<Flux::string>(t);
 }
 
 /**
@@ -157,108 +157,108 @@ Log::Log(LogType t, User *user, Command *command): type(t), u(user), c(command)
 
 Log::~Log()
 {
-  Flux::string LogColor;
-  if(Config)
-  {
-    LogColor = Config->LogColor;
-    this->filename = CreateLogName(Config->LogFile, starttime);
-  }
-  else
-  {
-    LogColor = "\033[0m";
-    this->filename = "";
-  }
-
-  Flux::string message = Flux::Sanitize(this->buffer.str()), raw = this->buffer.str();
-
-  if(this->u && !this->c)
-    message = this->u->nick + " " + message;
-  if(this->u && this->c)
-    message = this->u->nick + " on " + this->u->n->name + " used " + this->c->name + " " + message;
-
-  switch(type)
-  {
-    case LOG_SILENT:
-      // Silent logging is handled outside of this.
-    case LOG_NORMAL:
-      logstream << TimeStamp() << " " << (nocolor?NoTermColor(message):message);
-      break;
-    case LOG_THREAD:
-      if(protocoldebug)
-	logstream << TimeStamp() << " [THREAD] " << message;
-      break;
-    case LOG_DEBUG:
-      if(dev || protocoldebug)
-	logstream << TimeStamp() << " " << message;
-      break;
-    case LOG_DNS:
-      if(protocoldebug)
-	logstream << TimeStamp() << " \033[34;0m[DNSEngine]" << LogColor << " " << message;
-      break;
-    case LOG_RAWIO:
-      if(protocoldebug)
-	logstream << TimeStamp() << " " << message;
-      break;
-    case LOG_CRITICAL:
-      logstream << "\033[22;31m" << TimeStamp() << " [CRITICAL] " << message << LogColor;
-      break;
-    case LOG_WARN:
-      logstream << TimeStamp() << " \033[22;33m[WARNING]" << LogColor << " " << message;
-      break;
-    case LOG_MEMORY:
-      if(memdebug)
-	std::cout << TimeStamp() << " [MEMORY] " << message << std::endl;
-      return; // ignore everything else, it doesn't matter
-    case LOG_TERMINAL:
-      if(InTerm())
-	// We allow colors here because it's supposed to be considered 'raw'
-	std::cout << raw << std::endl;
-      return;
-    default:
-      Log(LOG_CRITICAL) << "Wtf log case is this?";
-      Log(LOG_TERMINAL) << "\033[22;33m[UNDEFINED]" << LogColor << " " << message;
-  }
-
-  EventResult result;
-  FOREACH_RESULT(I_OnLog, OnLog(this), result);
-  if(result != EVENT_CONTINUE)
-    return;
-
-  if((type != LOG_SILENT || type != LOG_CRITICAL) && InTerm())
-    std::cout << (nocolor?NoTermColor(logstream.str()):logstream.str()) << std::endl;
-
-  if(type == LOG_CRITICAL && InTerm()) // Log to stderr instead of stdout
-    std::cerr << (nocolor?NoTermColor(logstream.str()):logstream.str()) << std::endl;
-
-  if(this->filename.empty())
-  {
-//     std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!" << LogColor << std::endl;
-    return; // Exit if there's no file to log to
-  }
-
-  try
-  {
-    CheckLogDelete(this);
-    log.open(this->filename.c_str(), std::fstream::out | std::fstream::app);
-
-    if(!log.is_open())
+    Flux::string LogColor;
+    if(Config)
     {
-      if(!Config)
-	throw LogException("Cannot read log file from config! (is there a bot.conf?)");
-      else
-	throw LogException(Config->LogFile.empty()?"Cannot open Log File.":
-	Flux::string("Failed to open Log File "+this->filename+": "+strerror(errno)).c_str());
+	LogColor = Config->LogColor;
+	this->filename = CreateLogName(Config->LogFile, starttime);
+    }
+    else
+    {
+	LogColor = "\033[0m";
+	this->filename = "";
     }
 
-    // Because we're writing to a file, we remove any color codes
-    log << NoTermColor(logstream.str()) << std::endl;
+    Flux::string message = Flux::Sanitize(this->buffer.str()), raw = this->buffer.str();
 
-    if(log.is_open())
-      log.close();
-  }
-  catch (LogException &e)
-  {
-    if(InTerm())
-      std::cerr << "Log Exception Caught: " << e.GetReason() << std::endl;
-  }
+    if(this->u && !this->c)
+	message = this->u->nick + " " + message;
+    if(this->u && this->c)
+	message = this->u->nick + " on " + this->u->n->name + " used " + this->c->name + " " + message;
+
+    switch(type)
+    {
+	case LOG_SILENT:
+	    // Silent logging is handled outside of this.
+	case LOG_NORMAL:
+	    logstream << TimeStamp() << " " << (nocolor?NoTermColor(message):message);
+	    break;
+	case LOG_THREAD:
+	    if(protocoldebug)
+		logstream << TimeStamp() << " [THREAD] " << message;
+	    break;
+	case LOG_DEBUG:
+	    if(dev || protocoldebug)
+		logstream << TimeStamp() << " " << message;
+	    break;
+	case LOG_DNS:
+	    if(protocoldebug)
+		logstream << TimeStamp() << " \033[34;0m[DNSEngine]" << LogColor << " " << message;
+	    break;
+	case LOG_RAWIO:
+	    if(protocoldebug)
+		logstream << TimeStamp() << " " << message;
+	    break;
+	case LOG_CRITICAL:
+	    logstream << "\033[22;31m" << TimeStamp() << " [CRITICAL] " << message << LogColor;
+	    break;
+	case LOG_WARN:
+	    logstream << TimeStamp() << " \033[22;33m[WARNING]" << LogColor << " " << message;
+	    break;
+	case LOG_MEMORY:
+	    if(memdebug)
+		std::cout << TimeStamp() << " [MEMORY] " << message << std::endl;
+	    return; // ignore everything else, it doesn't matter
+	case LOG_TERMINAL:
+	    if(InTerm())
+		// We allow colors here because it's supposed to be considered 'raw'
+		std::cout << raw << std::endl;
+	    return;
+	default:
+	Log(LOG_CRITICAL) << "Wtf log case is this?";
+	Log(LOG_TERMINAL) << "\033[22;33m[UNDEFINED]" << LogColor << " " << message;
+    }
+
+    EventResult result;
+    FOREACH_RESULT(I_OnLog, OnLog(this), result);
+    if(result != EVENT_CONTINUE)
+	return;
+
+    if((type != LOG_SILENT || type != LOG_CRITICAL) && InTerm())
+	std::cout << (nocolor?NoTermColor(logstream.str()):logstream.str()) << std::endl;
+
+    if(type == LOG_CRITICAL && InTerm()) // Log to stderr instead of stdout
+	std::cerr << (nocolor?NoTermColor(logstream.str()):logstream.str()) << std::endl;
+
+    if(this->filename.empty())
+    {
+    //     std::cerr << "\033[22;31m" << TimeStamp() << " [CRITICAL] Cannot find log file specified!" << LogColor << std::endl;
+	return; // Exit if there's no file to log to
+    }
+
+    try
+    {
+	CheckLogDelete(this);
+	log.open(this->filename.c_str(), std::fstream::out | std::fstream::app);
+
+	if(!log.is_open())
+	{
+	    if(!Config)
+		throw LogException("Cannot read log file from config! (is there a bot.conf?)");
+	    else
+		throw LogException(Config->LogFile.empty()?"Cannot open Log File.":
+		Flux::string("Failed to open Log File "+this->filename+": "+strerror(errno)).c_str());
+	}
+
+	// Because we're writing to a file, we remove any color codes
+	log << NoTermColor(logstream.str()) << std::endl;
+
+	if(log.is_open())
+	    log.close();
+    }
+    catch (LogException &e)
+    {
+	if(InTerm())
+	    std::cerr << "Log Exception Caught: " << e.GetReason() << std::endl;
+    }
 }

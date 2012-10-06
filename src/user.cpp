@@ -15,98 +15,98 @@ uint32_t usercnt = 0, maxusercnt = 0;
 
 User::User(Network *net, const Flux::string &snick, const Flux::string &sident, const Flux::string &shost, const Flux::string &srealname, const Flux::string &sserver) : nick(snick), host(shost), realname(srealname), ident(sident), fullhost(snick+"!"+sident+"@"+shost), server(sserver), n(net)
 {
-  /* check to see if a empty string was passed into the constructor */
-  if(snick.empty() || sident.empty() || shost.empty())
-    throw CoreException("Bad args sent to User constructor");
-  if(!net)
-    throw CoreException("User created with no network??");
+    /* check to see if a empty string was passed into the constructor */
+    if(snick.empty() || sident.empty() || shost.empty())
+	throw CoreException("Bad args sent to User constructor");
+    if(!net)
+	throw CoreException("User created with no network??");
 
 
-  this->n->UserNickList[snick] = this;
+    this->n->UserNickList[snick] = this;
 
-  Log(LOG_RAWIO) << "New user! " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
+    Log(LOG_RAWIO) << "New user! " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
 
-  ++usercnt;
-  if(usercnt > maxusercnt)
-  {
-      maxusercnt = usercnt;
-      Log(LOG_TERMINAL) << "New maximum user count: " << maxusercnt;
-  }
+    ++usercnt;
+    if(usercnt > maxusercnt)
+    {
+	maxusercnt = usercnt;
+	Log(LOG_TERMINAL) << "New maximum user count: " << maxusercnt;
+    }
 }
 
 User::~User()
 {
-  Log() << "Deleting user " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
-  this->n->UserNickList.erase(this->nick);
+    Log() << "Deleting user " << this->nick << '!' << this->ident << '@' << this->host << (this->realname.empty()?"":" :"+this->realname);
+    this->n->UserNickList.erase(this->nick);
 }
 
 void User::SendWho()
 {
-  this->n->b->ircproto->who(this->nick);
+    this->n->b->ircproto->who(this->nick);
 }
 
 void User::SendMessage(const char *fmt, ...)
 {
-  char buffer[BUFSIZE] = "";
-  va_list args;
-  va_start(args, fmt);
-  vsnprintf(buffer, sizeof(buffer), fmt, args);
-  this->SendMessage(Flux::string(buffer));
-  va_end(args);
+    char buffer[BUFSIZE] = "";
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    this->SendMessage(Flux::string(buffer));
+    va_end(args);
 }
 
 void User::SendPrivmsg(const char *fmt, ...)
 {
- char buffer[BUFSIZE] = "";
-  va_list args;
-  va_start(args, fmt);
-  vsnprintf(buffer, sizeof(buffer), fmt, args);
-  this->SendPrivmsg(Flux::string(buffer));
-  va_end(args);
+    char buffer[BUFSIZE] = "";
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    this->SendPrivmsg(Flux::string(buffer));
+    va_end(args);
 }
 
 void User::SetNewNick(const Flux::string &newnick)
 {
-  if(newnick.empty())
-    throw CoreException("User::SetNewNick() was called with empty arguement");
+    if(newnick.empty())
+	throw CoreException("User::SetNewNick() was called with empty arguement");
 
-  Log(LOG_TERMINAL) << "Setting new nickname: " << this->nick << " -> " << newnick;
-  this->n->UserNickList.erase(this->nick);
-  this->nick = newnick;
-  this->n->UserNickList[this->nick] = this;
+    Log(LOG_TERMINAL) << "Setting new nickname: " << this->nick << " -> " << newnick;
+    this->n->UserNickList.erase(this->nick);
+    this->nick = newnick;
+    this->n->UserNickList[this->nick] = this;
 }
 
 void User::AddChan(Channel *c)
 {
-  if(c)
-    ChannelList[c] = this;
+    if(c)
+	ChannelList[c] = this;
 }
 
 void User::DelChan(Channel *c)
 {
-  CList::iterator it = ChannelList.find(c);
-  if(it != ChannelList.end())
-    ChannelList.erase(it);
+    CList::iterator it = ChannelList.find(c);
+    if(it != ChannelList.end())
+	ChannelList.erase(it);
 }
 
 Channel *User::findchannel(const Flux::string &name)
 {
-  auto it1 = this->n->ChanMap.find(name);
-  Channel *c = it1->second;
-  if(!c)
+    auto it1 = this->n->ChanMap.find(name);
+    Channel *c = it1->second;
+    if(!c)
+	return nullptr;
+    CList::iterator it = ChannelList.find(c);
+    if(it != ChannelList.end())
+	return it->first;
     return nullptr;
-  CList::iterator it = ChannelList.find(c);
-  if(it != ChannelList.end())
-    return it->first;
-  return nullptr;
 }
 
 void User::SendMessage(const Flux::string &message)
 {
-  this->n->b->ircproto->notice(this->nick, message);
+    this->n->b->ircproto->notice(this->nick, message);
 }
 
 void User::SendPrivmsg(const Flux::string &message)
 {
-  this->n->b->ircproto->privmsg(this->nick, message);
+    this->n->b->ircproto->privmsg(this->nick, message);
 }
