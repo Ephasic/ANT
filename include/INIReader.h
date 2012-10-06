@@ -65,7 +65,6 @@ public:
   Flux::string NicknamePrefix;
   Flux::string Realname;
   Flux::string Ident;
-  Flux::string Channel;
   Flux::string LogChannel;
   Flux::string PidFile;
   Flux::string UserPass;

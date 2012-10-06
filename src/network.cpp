@@ -122,14 +122,6 @@ void Network::Sync()
     if(this->isupport.IRCdVersion.search_ci("ircd-seven") && this->isupport.UserModes.search('Q'))
 	this->b->SetMode("+Q"); //for freenode to stop those redirects
 
-    sepstream cs(Config->Channel, ',');
-    Flux::string tok;
-    while(cs.GetToken(tok))
-    {
-	tok.trim();
-	new Channel(this, tok);
-    }
-
     // Join pending channels
     while(!this->JoinQueue.empty())
     {
